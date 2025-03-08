@@ -2401,7 +2401,7 @@
             
             // Add timestamp parameter to prevent caching
             const timestamp = new Date().getTime();
-            radarImage.src = `${PROXY_URL.replace('/flood-data', '')}/proxy/radar?t=${timestamp}`;
+            radarImage.src = `https://www.bom.gov.au/radar/IDR282.gif?t=${timestamp}`;
             
             // Update timestamp
             radarTimestamp.textContent = `Last updated: ${new Date().toLocaleTimeString('en-AU')}`;
