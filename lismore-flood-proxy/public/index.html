@@ -1970,7 +1970,7 @@
             };
             img.src = 'https://webcams.transport.nsw.gov.au/livetraffic-webcams/cameras/bruxner_highway_lismore.jpeg?' + new Date().getTime();
             
-            // Check radar image
+            // Inside checkDataSources function, update these parts:
             const radarImg = new Image();
             radarImg.onload = function() {
                 radarStatusValue.textContent = 'Online';
@@ -1980,9 +1980,8 @@
                 radarStatusValue.textContent = 'Offline';
                 radarStatusValue.className = 'status-value offline';
             };
-            radarImg.src = 'http://www.bom.gov.au/radar/IDR282.gif?' + new Date().getTime();
+            radarImg.src = `${PROXY_URL.replace('/flood-data', '')}/proxy/radar?${new Date().getTime()}`;
             
-            // Check cyclone map
             const cycloneImg = new Image();
             cycloneImg.onload = function() {
                 cycloneStatusValue.textContent = 'Online';
@@ -1992,7 +1991,7 @@
                 cycloneStatusValue.textContent = 'Offline';
                 cycloneStatusValue.className = 'status-value offline';
             };
-            cycloneImg.src = 'http://www.bom.gov.au/fwo/IDQ65001.png?' + new Date().getTime();
+            cycloneImg.src = `${PROXY_URL.replace('/flood-data', '')}/proxy/cyclone?${new Date().getTime()}`;
         }
 
         // Update the refresh interval for flood data
@@ -2402,7 +2401,7 @@
             
             // Add timestamp parameter to prevent caching
             const timestamp = new Date().getTime();
-            radarImage.src = `http://www.bom.gov.au/radar/IDR282.gif?t=${timestamp}`;
+            radarImage.src = `${PROXY_URL.replace('/flood-data', '')}/proxy/radar?t=${timestamp}`;
             
             // Update timestamp
             radarTimestamp.textContent = `Last updated: ${new Date().toLocaleTimeString('en-AU')}`;
@@ -2435,7 +2434,7 @@
             
             // Add timestamp parameter to prevent caching
             const timestamp = new Date().getTime();
-            cycloneImage.src = `http://www.bom.gov.au/fwo/IDQ65001.png?t=${timestamp}`;
+            cycloneImage.src = `${PROXY_URL.replace('/flood-data', '')}/proxy/cyclone?t=${timestamp}`;
             
             // Update timestamp
             cycloneTimestamp.textContent = `Last updated: ${new Date().toLocaleTimeString('en-AU')}`;
