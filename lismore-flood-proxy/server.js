@@ -34,11 +34,11 @@ app.get('/flood-data', async (req, res) => {
     
     console.log('Attempting to fetch BOM data from multiple possible URLs...');
 
-    // Add to server.js
+    // Proxy for radar images
     app.get('/proxy/radar', async (req, res) => {
       try {
         const timestamp = req.query.t || new Date().getTime();
-        const response = await axios.get(`http://www.bom.gov.au/radar/IDR282.gif?t=${timestamp}`, {
+        const response = await axios.get(`https://www.bom.gov.au/radar/IDR282.gif?t=${timestamp}`, {
           responseType: 'arraybuffer'
         });
         res.set('Content-Type', 'image/gif');
@@ -46,6 +46,21 @@ app.get('/flood-data', async (req, res) => {
       } catch (error) {
         console.error('Error proxying radar image:', error);
         res.status(500).send('Error fetching radar image');
+      }
+    });
+    
+    // Proxy for cyclone map
+    app.get('/proxy/cyclone', async (req, res) => {
+      try {
+        const timestamp = req.query.t || new Date().getTime();
+        const response = await axios.get(`https://www.bom.gov.au/fwo/IDQ65001.png?t=${timestamp}`, {
+          responseType: 'arraybuffer'
+        });
+        res.set('Content-Type', 'image/png');
+        res.send(response.data);
+      } catch (error) {
+        console.error('Error proxying cyclone image:', error);
+        res.status(500).send('Error fetching cyclone image');
       }
     });
     
