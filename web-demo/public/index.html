@@ -1,0 +1,2837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lismore Flood Emergency Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #1e88e5;
+            --primary-dark: #1565c0;
+            --secondary-color: #f8f9fa;
+            --danger-color: #e53935;
+            --warning-color: #ffa000;
+            --success-color: #43a047;
+            --info-color: #039be5;
+            --dark-color: #212121;
+            --light-color: #f8f9fa;
+            --gray-100: #f8f9fa;
+            --gray-200: #e9ecef;
+            --gray-300: #dee2e6;
+            --gray-400: #ced4da;
+            --gray-500: #adb5bd;
+            --gray-600: #6c757d;
+            --gray-700: #495057;
+            --gray-800: #343a40;
+            --gray-900: #212529;
+            --border-radius: 8px;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background-color: var(--gray-100);
+            color: var(--gray-800);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-md);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .header-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-title h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .header-info {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.875rem;
+        }
+
+        .clock-container {
+            background-color: rgba(0, 0, 0, 0.2);
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--border-radius);
+            display: inline-flex;
+            align-items: center;
+            font-weight: 500;
+        }
+
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 1rem auto;
+            padding: 0 1rem;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (min-width: 992px) {
+            .dashboard-container {
+                grid-template-columns: 3fr 1fr;
+            }
+        }
+
+        .webcam-container {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .webcam-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .webcam-header h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--gray-800);
+        }
+
+        .webcam-image-container {
+            position: relative;
+            width: 100%;
+            height: 0;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            background-color: var(--gray-200);
+        }
+
+        .webcam-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: var(--border-radius);
+        }
+
+        .webcam-error {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+        }
+
+        .webcam-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 0.75rem;
+            font-size: 0.875rem;
+            color: var(--gray-600);
+        }
+
+        .panel {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .panel-header h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--gray-800);
+        }
+
+        .panel-content {
+            padding: 1rem;
+        }
+
+        .panel-alert {
+            background-color: #fef2f2;
+            border: 1px solid #fee2e2;
+            border-radius: var(--border-radius);
+            padding: 0.75rem 1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #991b1b;
+        }
+
+        .panel-alert svg {
+            flex-shrink: 0;
+        }
+
+        .refresh-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: background-color 0.2s, transform 0.1s;
+            white-space: nowrap;
+        }
+
+        .button:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .button:active {
+            transform: translateY(1px);
+        }
+
+        .button.secondary {
+            background-color: var(--gray-500);
+        }
+
+        .button.secondary:hover {
+            background-color: var(--gray-600);
+        }
+
+        select.button {
+            appearance: none;
+            padding-right: 2rem;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 0.5rem center;
+            background-size: 1rem;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--gray-200);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+
+        th, td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        th {
+            background-color: var(--gray-100);
+            font-weight: 600;
+            color: var(--gray-700);
+            position: sticky;
+            top: 0;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .table-footer {
+            padding: 0.75rem 1rem;
+            color: var(--gray-600);
+            font-size: 0.875rem;
+            background-color: var(--gray-100);
+            border-top: 1px solid var(--gray-200);
+        }
+
+        /* Tabs styling */
+        .tabs-container {
+            border-bottom: 1px solid var(--gray-200);
+        }
+        
+        .tabs {
+            display: flex;
+            overflow-x: auto;
+            scrollbar-width: none; /* For Firefox */
+            -ms-overflow-style: none; /* For Internet Explorer and Edge */
+        }
+        
+        .tabs::-webkit-scrollbar {
+            display: none; /* For Chrome, Safari, and Opera */
+        }
+        
+        .tab-button {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: var(--gray-700);
+            font-weight: 500;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+        
+        .tab-button:hover {
+            color: var(--primary-color);
+            background-color: var(--gray-100);
+        }
+        
+        .tab-button.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+        
+        .tab-content-container {
+            padding: 0;
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 0;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .tab-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1rem 0.5rem;
+        }
+        
+        .tab-header h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .tab-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 1rem 1rem;
+            font-size: 0.875rem;
+            color: var(--gray-600);
+        }
+        
+        .tab-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .tab-link:hover {
+            text-decoration: underline;
+        }
+        
+        /* Cyclone Map Container Styling */
+        .cyclone-container {
+            position: relative;
+            width: 100%;
+            height: 0;
+            padding-bottom: 55%; /* 4:3 aspect ratio */
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            background-color: var(--gray-200);
+        }
+        
+        .cyclone-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: var(--border-radius);
+            background-color: var(--gray-100);
+        }
+        
+        .cyclone-error {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            text-align: center;
+        }
+
+        /* Outage info styling */
+        .outage-info-container {
+            padding: 1rem;
+        }
+        
+        .outage-card {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            background-color: var(--gray-100);
+            border-radius: var(--border-radius);
+            padding: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .outage-card-icon {
+            flex-shrink: 0;
+            color: var(--primary-color);
+        }
+        
+        .outage-card-content h3 {
+            margin: 0 0 0.75rem;
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+        
+        .outage-card-content p {
+            margin: 0 0 0.5rem;
+            color: var(--gray-700);
+        }
+        
+        .outage-alternatives h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin: 0 0 1rem;
+        }
+        
+        .outage-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .outage-list li {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background-color: var(--gray-100);
+            border-radius: var(--border-radius);
+            margin-bottom: 0.5rem;
+        }
+        
+        .outage-list li svg {
+            color: var(--primary-color);
+            flex-shrink: 0;
+        }
+        
+        /* Map containers styling */
+        .maps-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        @media (min-width: 992px) {
+            .maps-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        .radar-container, .outage-map-container {
+            position: relative;
+            width: 100%;
+            height: 0;
+            padding-bottom: 55%; /* 4:3 aspect ratio */
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            background-color: var(--gray-200);
+        }
+        
+        .radar-image, #outage-map {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: var(--border-radius);
+            background-color: var(--gray-100);
+        }
+        
+        .radar-error, .outage-map-error {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            text-align: center;
+        }
+        
+        .radar-footer, .outage-map-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 0.75rem;
+            font-size: 0.875rem;
+            color: var(--gray-600);
+        }
+        
+        .radar-link, .outage-map-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .radar-link:hover, .outage-map-link:hover {
+            text-decoration: underline;
+        }
+        
+        /* River system header styling */
+        .river-system-header {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 600;
+        }
+        
+        .river-system-header td {
+            padding: 0.5rem 1rem;
+            font-size: 0.95rem;
+        }
+
+        /* Status styles */
+        .rising {
+            color: var(--danger-color);
+            font-weight: 600;
+        }
+
+        .falling {
+            color: var(--success-color);
+            font-weight: 600;
+        }
+
+        .steady {
+            color: var(--info-color);
+            font-weight: 600;
+        }
+
+        /* Flood category styling */
+        .minor-flood {
+            background-color: rgba(255, 193, 7, 0.1);
+        }
+
+        .moderate-flood {
+            background-color: rgba(255, 140, 0, 0.1);
+        }
+
+        .major-flood {
+            background-color: rgba(220, 53, 69, 0.1);
+        }
+
+        /* Emergency section styling */
+        .emergency-contacts {
+            background-color: #fef2f2;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+        }
+
+        .emergency-header {
+            background-color: var(--danger-color);
+            color: white;
+            padding: 0.75rem 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .emergency-content {
+            padding: 1rem;
+        }
+
+        .emergency-number {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin: 0.25rem 0 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .emergency-number svg {
+            flex-shrink: 0;
+        }
+
+        .evacuation-centers {
+            margin-top: 1rem;
+        }
+
+        .center-list {
+            list-style-type: none;
+            margin-top: 0.5rem;
+        }
+
+        .center-list li {
+            padding: 0.75rem;
+            border-radius: var(--border-radius);
+            background-color: var(--gray-100);
+            margin-bottom: 0.5rem;
+        }
+
+        .center-list strong {
+            display: block;
+            margin-bottom: 0.25rem;
+            color: var(--gray-800);
+        }
+
+        /* Stats panel styling */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .stat-item {
+            background-color: var(--gray-100);
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gray-900);
+        }
+
+        .stat-item.critical .stat-value {
+            color: var(--danger-color);
+        }
+
+        .stat-footer {
+            font-size: 0.75rem;
+            margin-top: 0.5rem;
+        }
+
+        /* Status panel */
+        .status-panel {
+            padding: 1rem;
+        }
+
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .status-item:last-child {
+            border-bottom: none;
+        }
+
+        .status-label {
+            font-weight: 500;
+            color: var(--gray-700);
+        }
+
+        .status-value {
+            padding: 0.25rem 0.5rem;
+            border-radius: var(--border-radius);
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .status-value.online {
+            background-color: rgba(67, 160, 71, 0.1);
+            color: var(--success-color);
+        }
+
+        .status-value.offline {
+            background-color: rgba(229, 57, 53, 0.1);
+            color: var(--danger-color);
+        }
+
+        .status-value.unknown {
+            background-color: rgba(255, 160, 0, 0.1);
+            color: var(--warning-color);
+        }
+
+        .status-actions {
+            margin-top: 1rem;
+            text-align: right;
+        }
+
+        /* Loading overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            flex-direction: column;
+            backdrop-filter: blur(4px);
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Notification styles */
+        .notification {
+            position: fixed;
+            bottom: 1rem;
+            right: 1rem;
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            color: white;
+            max-width: 350px;
+            box-shadow: var(--shadow-lg);
+            z-index: 999;
+            transition: all 0.3s ease;
+            transform: translateY(100px);
+            opacity: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .notification.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .notification.success {
+            background-color: var(--success-color);
+        }
+
+        .notification.error {
+            background-color: var(--danger-color);
+        }
+
+        .notification.info {
+            background-color: var(--info-color);
+        }
+
+        .notification-icon {
+            flex-shrink: 0;
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-close {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+            padding: 0.25rem;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .notification-close:hover {
+            opacity: 1;
+        }
+
+        /* Data source attribution */
+        .data-attribution {
+            text-align: center;
+            padding: 1.5rem;
+            color: var(--gray-600);
+            font-size: 0.875rem;
+            border-top: 1px solid var(--gray-200);
+            background-color: white;
+        }
+
+        .data-attribution a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .data-attribution a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .header-title h1 {
+                font-size: 1.25rem;
+            }
+
+            .stats-container {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .panel-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.75rem;
+            }
+
+            .refresh-controls {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .filter-buttons {
+                flex-wrap: wrap;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .header-info {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+        }
+
+        /* Welcome Modal Styles */
+        .welcome-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            z-index: 2000;
+            overflow-y: auto;
+            backdrop-filter: blur(4px);
+        }
+        
+        .welcome-content {
+            max-width: 800px;
+            margin: 2rem auto;
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            animation: welcome-fade-in 0.5s ease-out;
+        }
+        
+        @keyframes welcome-fade-in {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .welcome-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .welcome-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .welcome-close {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--border-radius);
+            transition: background-color 0.2s;
+        }
+        
+        .welcome-close:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Initial welcome screen */
+        .welcome-initial {
+            display: block;
+        }
+        
+        .welcome-initial-body {
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .welcome-icon {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .welcome-icon svg {
+            color: var(--primary-color);
+        }
+        
+        .welcome-initial-body h3 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--gray-800);
+        }
+        
+        .welcome-initial-body p {
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+            color: var(--gray-700);
+        }
+        
+        .welcome-initial-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-top: 2rem;
+            max-width: 300px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        /* Tutorial container */
+        .tutorial-container {
+            display: none;
+        }
+        
+        .welcome-body {
+            padding: 1.5rem;
+        }
+        
+        .welcome-steps {
+            margin-bottom: 1.5rem;
+        }
+        
+        .welcome-step {
+            display: none;
+            animation: step-fade 0.3s ease-out;
+        }
+        
+        @keyframes step-fade {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .welcome-step.active {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+        
+        .welcome-step-number {
+            flex-shrink: 0;
+            width: 2.5rem;
+            height: 2.5rem;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 1.25rem;
+        }
+        
+        .welcome-step-content {
+            flex: 1;
+        }
+        
+        .welcome-step-content h3 {
+            margin-top: 0;
+            margin-bottom: 0.75rem;
+            font-size: 1.25rem;
+            color: var(--gray-800);
+        }
+        
+        .welcome-step-content p {
+            margin-bottom: 0.5rem;
+            color: var(--gray-700);
+        }
+        
+        .welcome-step-content ul {
+            margin: 0.75rem 0;
+            padding-left: 1.5rem;
+        }
+        
+        .welcome-step-content li {
+            margin-bottom: 0.5rem;
+        }
+        
+        /* Feature grid for first step */
+        .step-feature-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .step-feature {
+            background-color: var(--gray-100);
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .step-feature svg {
+            color: var(--primary-color);
+            flex-shrink: 0;
+        }
+        
+        .step-feature span {
+            font-weight: 500;
+        }
+        
+        /* Step instruction */
+        .step-instruction {
+            margin-top: 1.5rem;
+            background-color: var(--gray-100);
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .step-instruction svg {
+            color: var(--primary-color);
+            flex-shrink: 0;
+        }
+        
+        /* Emergency numbers */
+        .emergency-numbers {
+            margin: 1rem 0;
+        }
+        
+        .emergency-number {
+            padding: 0.75rem;
+            background-color: var(--gray-100);
+            border-radius: var(--border-radius);
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        /* Step completion message */
+        .step-message {
+            margin-top: 1.5rem;
+            background-color: var(--gray-100);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            text-align: center;
+        }
+        
+        .step-message svg {
+            color: var(--success-color);
+            margin-bottom: 1rem;
+        }
+        
+        .step-message p {
+            font-weight: 500;
+        }
+        
+        /* Flood categories */
+        .flood-categories {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+        
+        .flood-level {
+            display: block;
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+        }
+        
+        .flood-level.minor {
+            background-color: rgba(255, 193, 7, 0.2);
+            color: #856404;
+        }
+        
+        .flood-level.moderate {
+            background-color: rgba(255, 140, 0, 0.2);
+            color: #7d4900;
+        }
+        
+        .flood-level.major {
+            background-color: rgba(220, 53, 69, 0.2);
+            color: #721c24;
+        }
+        
+        .welcome-navigation {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 1.5rem;
+        }
+        
+        .welcome-nav-button {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: var(--gray-200);
+            color: var(--gray-800);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .welcome-nav-button:hover:not(:disabled) {
+            background-color: var(--gray-300);
+        }
+        
+        .welcome-nav-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .welcome-step-indicator {
+            font-weight: 500;
+            color: var(--gray-700);
+        }
+        
+        .welcome-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .welcome-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+        
+        .welcome-checkbox input {
+            cursor: pointer;
+            width: 1rem;
+            height: 1rem;
+        }
+        
+        .checkbox-text {
+            color: var(--gray-700);
+            font-size: 0.9rem;
+        }
+        
+        .welcome-button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-size: 1rem;
+        }
+        
+        .welcome-button:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .welcome-button.secondary {
+            background-color: var(--gray-200);
+            color: var(--gray-800);
+        }
+        
+        .welcome-button.secondary:hover {
+            background-color: var(--gray-300);
+        }
+        
+        /* Show Tutorial Button */
+        .show-tutorial-button {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            box-shadow: var(--shadow-md);
+            z-index: 90;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+        
+        .show-tutorial-button:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .welcome-content {
+                margin: 1rem;
+                max-width: calc(100% - 2rem);
+            }
+            
+            .welcome-header h2 {
+                font-size: 1.25rem;
+            }
+            
+            .welcome-step.active {
+                flex-direction: column;
+            }
+            
+            .welcome-step-number {
+                margin-bottom: 0.5rem;
+            }
+            
+            .welcome-footer {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .welcome-button {
+                width: 100%;
+            }
+            
+            .step-feature-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="spinner"></div>
+        <p>Loading flood data...</p>
+    </div>
+
+    <!-- Notification Component -->
+    <div id="notification" class="notification">
+        <span class="notification-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="10" cy="10" r="8"></circle>
+                <line x1="10" y1="6" x2="10" y2="10"></line>
+                <line x1="10" y1="14" x2="10.01" y2="14"></line>
+            </svg>
+        </span>
+        <div id="notification-message" class="notification-content"></div>
+        <button class="notification-close" onclick="document.getElementById('notification').classList.remove('show')">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Header -->
+    <header>
+        <div class="header-content">
+            <div class="header-title">
+                <h1>Lismore Flood Emergency Dashboard</h1>
+            </div>
+            <div class="header-info">
+                <div id="clock" class="clock-container">Loading time...</div>
+                <div>Last updated: <span id="last-update-time">Never</span></div>
+            </div>
+        </div>
+    </header>
+
+    <div class="dashboard-container">
+        <main>
+            <!-- Tabbed content section -->
+            <div class="panel">
+                <div class="tabs-container">
+                    <div class="tabs">
+                        <button id="tab-webcam" class="tab-button active">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M23 7l-7 5 7 5V7z"></path>
+                                <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+                            </svg>
+                            Traffic Camera
+                        </button>
+                        <button id="tab-radar" class="tab-button">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <circle cx="12" cy="12" r="6"></circle>
+                                <circle cx="12" cy="12" r="2"></circle>
+                            </svg>
+                            Rainfall Radar
+                        </button>
+                        <button id="tab-cyclone" class="tab-button">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 32 32" fill="currentColor" style="transform: scaleX(-1);">
+                                <path d="M16,21a5,5,0,1,1,5-5A5.0057,5.0057,0,0,1,16,21Zm0-8a3,3,0,1,0,3,3A3.0033,3.0033,0,0,0,16,13Z"></path>
+                                <path d="M22.6521,4.1821l-2.177,2.5142L19.0713,8.3174,20.7864,9.605A7.9361,7.9361,0,0,1,23.9963,16l.0008.0576.0017.0415c.018.4317.2412,10.1113-14.6538,11.7222l2.18-2.5176,1.4039-1.6211L11.2139,22.395A7.9361,7.9361,0,0,1,8.0037,16l-.0008-.0576-.0017-.0415C7.9832,15.47,7.7605,5.8071,22.6521,4.1821M24.9978,2c-.0164,0-.0327,0-.0493.001C5.2532,2.9146,6.0037,16,6.0037,16a9.975,9.975,0,0,0,4.0095,7.9946L6.2368,28.3555A1.0044,1.0044,0,0,0,7.0022,30c.0164,0,.0327,0,.0493-.001C26.7468,29.0854,25.9963,16,25.9963,16a9.9756,9.9756,0,0,0-4.0092-7.9946l3.7761-4.3609A1.0044,1.0044,0,0,0,24.9978,2Z"></path>
+                            </svg>
+                            Cyclone Map
+                        </button>
+                        <button id="tab-outage" class="tab-button">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M18 20V10"></path>
+                                <path d="M12 20V4"></path>
+                                <path d="M6 20v-6"></path>
+                            </svg>
+                            Power Outages
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Tab content -->
+                <div class="tab-content-container">
+                    <!-- Webcam Tab -->
+                    <div id="content-webcam" class="tab-content active">
+                        <div class="tab-header">
+                            <h2>Bruxner Highway Lismore - Live Traffic Camera</h2>
+                            <div>
+                                <button id="refresh-webcam" class="button">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M21 2v6h-6"></path>
+                                        <path d="M3 12a9 9 0 0 1 15-6.7l3-3"></path>
+                                        <path d="M3 22v-6h6"></path>
+                                        <path d="M21 12a9 9 0 0 1-15 6.7l-3 3"></path>
+                                    </svg>
+                                    Refresh
+                                </button>
+                            </div>
+                        </div>
+                        <div class="webcam-image-container">
+                            <img id="webcam" src="https://webcams.transport.nsw.gov.au/livetraffic-webcams/cameras/bruxner_highway_lismore.jpeg" alt="Bruxner Highway Lismore Traffic Camera" class="webcam-image">
+                            <div id="webcam-error" class="webcam-error">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                </svg>
+                                Unable to load webcam image
+                            </div>
+                        </div>
+                        <div class="tab-footer">
+                            <span>Image auto-refreshes every second</span>
+                            <span id="webcam-timestamp">Loading...</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Radar Tab -->
+                    <div id="content-radar" class="tab-content">
+                        <div class="tab-header">
+                            <h2>Grafton Rainfall Radar</h2>
+                            <div>
+                                <button id="refresh-radar" class="button">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M21 2v6h-6"></path>
+                                        <path d="M3 12a9 9 0 0 1 15-6.7l3-3"></path>
+                                        <path d="M3 22v-6h6"></path>
+                                        <path d="M21 12a9 9 0 0 1-15 6.7l-3 3"></path>
+                                    </svg>
+                                    Refresh
+                                </button>
+                            </div>
+                        </div>
+                        <div class="radar-container">
+                            <img id="radar-image" src="http://www.bom.gov.au/radar/IDR282.gif?000" alt="Grafton Rainfall Radar" class="radar-image">
+                            <div id="radar-error" class="radar-error">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                </svg>
+                                Unable to load radar image
+                            </div>
+                        </div>
+                        <div class="tab-footer">
+                            <a href="http://www.bom.gov.au/products/IDR282.loop.shtml" target="_blank" rel="noopener noreferrer" class="tab-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                    <polyline points="15 3 21 3 21 9"></polyline>
+                                    <line x1="10" y1="14" x2="21" y2="3"></line>
+                                </svg>
+                                View animated radar
+                            </a>
+                            <span id="radar-timestamp">Loading...</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Cyclone Container-->
+                    <div id="content-cyclone" class="tab-content">
+                        <div class="tab-header">
+                            <h2>Tropical Cyclone Forecast Track Map</h2>
+                            <div>
+                                <button id="refresh-cyclone" class="button">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M21 2v6h-6"></path>
+                                        <path d="M3 12a9 9 0 0 1 15-6.7l3-3"></path>
+                                        <path d="M3 22v-6h6"></path>
+                                        <path d="M21 12a9 9 0 0 1-15 6.7l-3 3"></path>
+                                    </svg>
+                                    Refresh
+                                </button>
+                            </div>
+                        </div>
+                        <div class="cyclone-container">
+                            <img id="cyclone-image" src="http://www.bom.gov.au/fwo/IDQ65001.png" alt="Tropical Cyclone Forecast Track Map" class="cyclone-image">
+                            <div id="cyclone-error" class="cyclone-error">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                </svg>
+                                Unable to load cyclone map
+                            </div>
+                        </div>
+                        <div class="tab-footer">
+                            <a href="http://www.bom.gov.au/cyclone/" target="_blank" rel="noopener noreferrer" class="tab-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                    <polyline points="15 3 21 3 21 9"></polyline>
+                                    <line x1="10" y1="14" x2="21" y2="3"></line>
+                                </svg>
+                                View detailed cyclone information
+                            </a>
+                            <span id="cyclone-timestamp">Loading...</span>
+                        </div>
+                    </div>
+
+                    <!-- Outage Map Tab -->
+                    <div id="content-outage" class="tab-content">
+                        <div class="tab-header">
+                            <h2>Essential Energy Power Outages</h2>
+                            <div>
+                                <a href="https://www.essentialenergy.com.au/outages-and-faults/power-outages" target="_blank" rel="noopener noreferrer" class="button">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                        <polyline points="15 3 21 3 21 9"></polyline>
+                                        <line x1="10" y1="14" x2="21" y2="3"></line>
+                                    </svg>
+                                    Open Map
+                                </a>
+                            </div>
+                        </div>
+                        <div class="outage-info-container">
+                            <div class="outage-card">
+                                <div class="outage-card-icon">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+                                    </svg>
+                                </div>
+                                <div class="outage-card-content">
+                                    <h3>Unable to Display Power Outage Map</h3>
+                                    <p>The Essential Energy website prevents embedding their outage map in other websites.</p>
+                                    <p>Please click the "Open Map" button above to view the current power outages in a new tab.</p>
+                                </div>
+                            </div>
+                            <div class="outage-alternatives">
+                                <h3>Power Outage Information</h3>
+                                <ul class="outage-list">
+                                    <li>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <polyline points="12 6 12 12 16 14"></polyline>
+                                        </svg>
+                                        <span>Call <strong>13 20 80</strong> for power outage updates</span>
+                                    </li>
+                                    <li>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                                        </svg>
+                                        <span>Report outages: <strong>13 20 80</strong></span>
+                                    </li>
+                                    <li>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                        </svg>
+                                        <span>Life-threatening emergencies: <strong>000</strong></span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="tab-footer">
+                            <a href="https://www.essentialenergy.com.au/outages-and-faults/power-outages" target="_blank" rel="noopener noreferrer" class="tab-link">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                    <polyline points="15 3 21 3 21 9"></polyline>
+                                    <line x1="10" y1="14" x2="21" y2="3"></line>
+                                </svg>
+                                View power outage map
+                            </a>
+                            <span>Essential Energy: 13 20 80</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Flood Data Section -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h2>Wilsons River Flood Data</h2>
+                    <div class="refresh-controls">
+                        <select id="refresh-interval" class="button secondary">
+                            <option value="300000">Refresh: 5 min</option>
+                            <option value="60000">Refresh: 1 min</option>
+                            <option value="600000">Refresh: 10 min</option>
+                            <option value="1800000">Refresh: 30 min</option>
+                        </select>
+                        <button id="refresh-now" class="button">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 2v6h-6"></path>
+                                <path d="M3 12a9 9 0 0 1 15-6.7l3-3"></path>
+                                <path d="M3 22v-6h6"></path>
+                                <path d="M21 12a9 9 0 0 1-15 6.7l-3 3"></path>
+                            </svg>
+                            Refresh Now
+                        </button>
+                    </div>
+                </div>
+                <div class="panel-content">
+                    <div class="panel-alert">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                            <line x1="12" y1="9" x2="12" y2="13"></line>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                        </svg>
+                        <span>EMERGENCY USE: This dashboard fetches LIVE data from the Bureau of Meteorology. Always follow directions from emergency services during flood events.</span>
+                    </div>
+                    
+                    <div class="filter-buttons">
+                        <button id="show-all" class="button secondary">All Locations</button>
+                        <button id="show-critical" class="button">Key Monitoring Stations</button>
+                    </div>
+                    
+                    <div class="table-container">
+                        <table id="flood-data">
+                            <thead>
+                                <tr>
+                                    <th>Location</th>
+                                    <th>Time</th>
+                                    <th>Water Level (m)</th>
+                                    <th>Status</th>
+                                    <th>Flood Category</th>
+                                </tr>
+                            </thead>
+                            <tbody id="flood-data-body">
+                                <tr>
+                                    <td colspan="5" style="text-align: center;">Loading data...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="table-footer">
+                        Data auto-refreshes based on selected interval
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Sources & Status -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h2>Data Sources & Status</h2>
+                </div>
+                <div class="status-panel">
+                    <div id="proxy-status" class="status-item">
+                        <span class="status-label">Proxy Server:</span>
+                        <span class="status-value" id="proxy-status-value">Checking...</span>
+                    </div>
+                    <div id="bom-status" class="status-item">
+                        <span class="status-label">BOM Data:</span>
+                        <span class="status-value" id="bom-status-value">Checking...</span>
+                    </div>
+                    <div id="webcam-status" class="status-item">
+                        <span class="status-label">Traffic Camera:</span>
+                        <span class="status-value" id="webcam-status-value">Checking...</span>
+                    </div>
+                    <div class="status-actions">
+                        <button id="check-status" class="button">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 2v6h-6"></path>
+                                <path d="M3 12a9 9 0 0 1 15-6.7l3-3"></path>
+                                <path d="M3 22v-6h6"></path>
+                                <path d="M21 12a9 9 0 0 1-15 6.7l-3 3"></path>
+                            </svg>
+                            Check Status
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <aside>
+            <!-- Flood Statistics -->
+            <div class="panel">
+                <div class="panel-header">
+                    <h2>Flood Statistics</h2>
+                </div>
+                <div class="panel-content">
+                    <div class="stats-container" id="stats-container">
+                        <div class="stat-item">
+                            <div class="stat-label">Wilsons R at Lismore (mAHD)</div>
+                            <div id="lismore-level" class="stat-value">-</div>
+                            <div id="lismore-status" class="stat-footer">Loading...</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Highest Reading</div>
+                            <div id="highest-reading" class="stat-value">-</div>
+                            <div id="highest-location" class="stat-footer">Loading...</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Rising Locations</div>
+                            <div id="rising-count" class="stat-value">-</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Falling Locations</div>
+                            <div id="falling-count" class="stat-value">-</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Emergency Contacts -->
+            <div class="emergency-contacts">
+                <div class="emergency-header">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M15.05 5A5 5 0 0 1 19 8.95M15.05 1A9 9 0 0 1 23 8.94m-1 7.98v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                    </svg>
+                    Emergency Contacts
+                </div>
+                <div class="emergency-content">
+                    <h3>SES Emergency</h3>
+                    <div class="emergency-number">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                        </svg>
+                        132 500
+                    </div>
+                    
+                    <h3>Life Threatening Emergencies</h3>
+                    <div class="emergency-number">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M15.05 5A5 5 0 0 1 19 8.95M15.05 1A9 9 0 0 1 23 8.94m-1 7.98v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                        </svg>
+                        000
+                    </div>
+                    
+                    <div class="evacuation-centers">
+                        <h3>Evacuation Centers</h3>
+                        <ul class="center-list">
+                            <li>
+                                <strong>Southern Cross University</strong>
+                                Military Rd, East Lismore
+                            </li>
+                            <li>
+                                <strong>Lismore City Hall</strong>
+                                1 Bounty St, Lismore
+                            </li>
+                            <li>
+                                <strong>Goonellabah Sports & Aquatic Centre</strong>
+                                50 Oliver Ave, Goonellabah
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <footer class="data-attribution">
+        <p>Data sourced from <a href="http://www.bom.gov.au" target="_blank" rel="noopener noreferrer">Bureau of Meteorology</a> and <a href="https://www.transport.nsw.gov.au" target="_blank" rel="noopener noreferrer">Transport for NSW</a>.</p>
+        <p>This dashboard is for emergency use during flood events in the Lismore area.</p>
+    </footer>
+
+    <script>
+        // DOM elements
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const notification = document.getElementById('notification');
+        const notificationMessage = document.getElementById('notification-message');
+        const webcamImage = document.getElementById('webcam');
+        const webcamError = document.getElementById('webcam-error');
+        const webcamTimestamp = document.getElementById('webcam-timestamp');
+        const floodDataBody = document.getElementById('flood-data-body');
+        const lastUpdateTime = document.getElementById('last-update-time');
+        const refreshIntervalSelect = document.getElementById('refresh-interval');
+        const refreshNowButton = document.getElementById('refresh-now');
+        const showAllButton = document.getElementById('show-all');
+        const showCriticalButton = document.getElementById('show-critical');
+        const clockElement = document.getElementById('clock');
+        const checkStatusButton = document.getElementById('check-status');
+        
+        // Stats elements
+        const lismoreLevel = document.getElementById('lismore-level');
+        const lismoreStatus = document.getElementById('lismore-status');
+        const highestReading = document.getElementById('highest-reading');
+        const highestLocation = document.getElementById('highest-location');
+        const risingCount = document.getElementById('rising-count');
+        const fallingCount = document.getElementById('falling-count');
+        
+        // Status elements
+        const proxyStatusValue = document.getElementById('proxy-status-value');
+        const bomStatusValue = document.getElementById('bom-status-value');
+        const webcamStatusValue = document.getElementById('webcam-status-value');
+
+        // Constants
+        const MINOR_FLOOD_LEVEL = 4.20;
+        const MODERATE_FLOOD_LEVEL = 7.20;
+        const MAJOR_FLOOD_LEVEL = 9.70;
+        const WEBCAM_REFRESH_INTERVAL = 1000; // 1 second
+        const DEFAULT_REFRESH_INTERVAL = 300000; // 5 minutes
+        const CRITICAL_THRESHOLD = 3.00; // Threshold for "critical" locations
+        
+        // Proxy server URL - update this with your actual proxy server address
+        const PROXY_URL = 'http://localhost:3000/flood-data';
+        
+        // BOM direct URL (for reference only - we'll use the proxy)
+        const BOM_URL = 'http://www.bom.gov.au/nsw/flood/northern.shtml';
+
+        // Variables
+        let floodData = [];
+        let refreshTimer = null;
+        let webcamRefreshTimer = null;
+        let showingCriticalOnly = false;
+        let lastFetchTime = null;
+
+        // Initialize
+        initializeDashboard();
+
+        // Main initialization function
+        function initializeDashboard() {
+            // Start the clock
+            updateClock();
+            setInterval(updateClock, 1000);
+            
+            // Add to your initializeDashboard function (anywhere before setupTabs)
+            document.getElementById('refresh-cyclone').addEventListener('click', refreshCycloneMap);
+
+            // Set up tab navigation
+            setupTabs();
+            
+            // Set up webcam refresh
+            refreshWebcam();
+            webcamRefreshTimer = setInterval(refreshWebcam, WEBCAM_REFRESH_INTERVAL);
+            document.getElementById('refresh-webcam').addEventListener('click', refreshWebcam);
+            
+            // Set up radar refresh
+            refreshRadar();
+            setInterval(refreshRadar, 1000); // Refresh radar every 1 seconds
+            document.getElementById('refresh-radar').addEventListener('click', refreshRadar);
+            
+            // Add this to your DOMContentLoaded or initialization function
+            refreshCycloneMap(); // Initial load
+            setInterval(refreshCycloneMap, 1000); // Refresh cyclone map every second
+
+            // Set up flood data refresh
+            refreshIntervalSelect.value = DEFAULT_REFRESH_INTERVAL;
+            refreshIntervalSelect.addEventListener('change', updateRefreshInterval);
+            
+            // Set up buttons
+            refreshNowButton.addEventListener('click', fetchFloodData);
+            showAllButton.addEventListener('click', () => {
+                showingCriticalOnly = false;
+                showAllButton.classList.remove('secondary');
+                showCriticalButton.classList.add('secondary');
+                renderFloodData();
+            });
+            
+            showCriticalButton.addEventListener('click', () => {
+                showingCriticalOnly = true;
+                showCriticalButton.classList.remove('secondary');
+                showAllButton.classList.add('secondary');
+                renderFloodData();
+            });
+            
+            // Set critical view by default
+            showingCriticalOnly = true;
+            
+            // Check data sources status
+            checkDataSources();
+            checkStatusButton.addEventListener('click', checkDataSources);
+            
+            // Load cached data if available
+            loadCachedData();
+            
+            // Fetch fresh data
+            fetchFloodData();
+            
+            // Start the refresh timer
+            updateRefreshInterval();
+        }
+        
+        // Set up tab navigation
+        function setupTabs() {
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // Remove active class from all buttons and contents
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    
+                    // Add active class to clicked button
+                    button.classList.add('active');
+                    
+                    // Get the corresponding content ID and make it active
+                    const contentId = button.id.replace('tab-', 'content-');
+                    document.getElementById(contentId).classList.add('active');
+                });
+            });
+        }
+        
+        // Update the clock
+        function updateClock() {
+            const now = new Date();
+            const options = { 
+                weekday: 'short',
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric',
+                hour: '2-digit', 
+                minute: '2-digit',
+                second: '2-digit'
+            };
+            clockElement.textContent = now.toLocaleTimeString('en-AU', options);
+        }
+
+        // Refresh the webcam image
+        function refreshWebcam() {
+            // Add timestamp parameter to prevent caching
+            const timestamp = new Date().getTime();
+            webcamImage.src = `https://webcams.transport.nsw.gov.au/livetraffic-webcams/cameras/bruxner_highway_lismore.jpeg?t=${timestamp}`;
+            webcamTimestamp.textContent = new Date().toLocaleTimeString('en-AU');
+        }
+
+        // Check data source statuses
+        function checkDataSources() {
+            // Reset status indicators
+            proxyStatusValue.textContent = 'Checking...';
+            proxyStatusValue.className = 'status-value';
+            bomStatusValue.textContent = 'Checking...';
+            bomStatusValue.className = 'status-value';
+            webcamStatusValue.textContent = 'Checking...';
+            webcamStatusValue.className = 'status-value';
+            
+            // Add new status indicator for radar
+            const radarStatusValue = document.getElementById('radar-status-value') || 
+                                    createStatusElement('radar-status', 'Radar Image');
+            
+            // Add status indicator for cyclone map
+            const cycloneStatusValue = document.getElementById('cyclone-status-value') || 
+                                      createStatusElement('cyclone-status', 'Cyclone Map');
+            
+            // Check proxy server
+            fetch(PROXY_URL, { method: 'HEAD' })
+                .then(response => {
+                    if (response.ok) {
+                        proxyStatusValue.textContent = 'Online';
+                        proxyStatusValue.className = 'status-value online';
+                    } else {
+                        proxyStatusValue.textContent = 'Error: ' + response.status;
+                        proxyStatusValue.className = 'status-value offline';
+                    }
+                })
+                .catch(error => {
+                    proxyStatusValue.textContent = 'Offline';
+                    proxyStatusValue.className = 'status-value offline';
+                    console.error('Proxy server check failed:', error);
+                });
+            
+            // Check BOM data
+            fetch(PROXY_URL)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.data && data.data.length > 0) {
+                        bomStatusValue.textContent = 'Updated: ' + new Date(data.timestamp).toLocaleTimeString('en-AU');
+                        bomStatusValue.className = 'status-value online';
+                    } else {
+                        bomStatusValue.textContent = 'No Data Available';
+                        bomStatusValue.className = 'status-value offline';
+                    }
+                })
+                .catch(error => {
+                    bomStatusValue.textContent = 'Connection Error';
+                    bomStatusValue.className = 'status-value offline';
+                    console.error('BOM data check failed:', error);
+                });
+            
+            // Check webcam
+            const img = new Image();
+            img.onload = function() {
+                webcamStatusValue.textContent = 'Online';
+                webcamStatusValue.className = 'status-value online';
+            };
+            img.onerror = function() {
+                webcamStatusValue.textContent = 'Offline';
+                webcamStatusValue.className = 'status-value offline';
+            };
+            img.src = 'https://webcams.transport.nsw.gov.au/livetraffic-webcams/cameras/bruxner_highway_lismore.jpeg?' + new Date().getTime();
+            
+            // Check radar image
+            const radarImg = new Image();
+            radarImg.onload = function() {
+                radarStatusValue.textContent = 'Online';
+                radarStatusValue.className = 'status-value online';
+            };
+            radarImg.onerror = function() {
+                radarStatusValue.textContent = 'Offline';
+                radarStatusValue.className = 'status-value offline';
+            };
+            radarImg.src = 'http://www.bom.gov.au/radar/IDR282.gif?' + new Date().getTime();
+            
+            // Check cyclone map
+            const cycloneImg = new Image();
+            cycloneImg.onload = function() {
+                cycloneStatusValue.textContent = 'Online';
+                cycloneStatusValue.className = 'status-value online';
+            };
+            cycloneImg.onerror = function() {
+                cycloneStatusValue.textContent = 'Offline';
+                cycloneStatusValue.className = 'status-value offline';
+            };
+            cycloneImg.src = 'http://www.bom.gov.au/fwo/IDQ65001.png?' + new Date().getTime();
+        }
+
+        // Update the refresh interval for flood data
+        function updateRefreshInterval() {
+            const interval = parseInt(refreshIntervalSelect.value);
+            
+            // Clear existing timer
+            if (refreshTimer) {
+                clearInterval(refreshTimer);
+            }
+            
+            // Set up new timer
+            refreshTimer = setInterval(fetchFloodData, interval);
+            
+            // Show notification
+            const minutes = interval / 60000;
+            showNotification(`Data will refresh every ${minutes} ${minutes === 1 ? 'minute' : 'minutes'}`, 'info');
+        }
+
+        // Fetch flood data using the proxy server
+        async function fetchFloodData() {
+            showLoading(true);
+            
+            try {
+                // Fetch data from our proxy server
+                const response = await fetch(PROXY_URL);
+                
+                if (!response.ok) {
+                    throw new Error(`Proxy server error: ${response.status}`);
+                }
+                
+                const jsonData = await response.json();
+                
+                if (jsonData.success && jsonData.data && jsonData.data.length > 0) {
+                    floodData = jsonData.data;
+                    
+                    // Update last fetch time
+                    lastFetchTime = new Date();
+                    lastUpdateTime.textContent = lastFetchTime.toLocaleTimeString('en-AU') + ' (live data)';
+                    
+                    // Show success notification
+                    showNotification('Live flood data updated successfully', 'success');
+                } else {
+                    throw new Error('No flood data returned from proxy');
+                }
+                
+                // Cache the data
+                cacheFloodData();
+                
+                // Render the data
+                renderFloodData();
+                
+                // Update statistics
+                updateStatistics();
+                
+            } catch (error) {
+                console.error('Error fetching flood data:', error);
+                
+                // Show error notification
+                showNotification('Error fetching live data. Using cached data if available.', 'error');
+                
+                // If we have cached data, use it
+                if (floodData.length === 0) {
+                    const loaded = loadCachedData();
+                    if (!loaded) {
+                        // If no cached data, show a critical error
+                        showNotification('CRITICAL: No flood data available. Please contact emergency services.', 'error');
+                    }
+                }
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Render the flood data in the table
+        function renderFloodData() {
+            if (!floodData || floodData.length === 0) {
+                floodDataBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No data available</td></tr>';
+                return;
+            }
+            
+            // Remove duplicate entries by location
+            const uniqueLocations = {};
+            floodData.forEach(item => {
+                // Only keep the most recent data for each location
+                if (!uniqueLocations[item.location] || 
+                    new Date(item.time) > new Date(uniqueLocations[item.location].time)) {
+                    uniqueLocations[item.location] = item;
+                }
+            });
+            
+            // Convert back to array
+            const uniqueData = Object.values(uniqueLocations);
+            
+            // Filter data if showing critical only - use specific location list
+            const criticalLocations = [
+                'Wilsons R at Woodlawn (mAHD)',
+                'Browns Ck Pump Station',
+                'Lismore (Dawson Street)',
+                'Wilsons R at Lismore (mAHD)',
+                'Leycester Ck at Tuncester (mAHD)',
+                'Leycester Ck at South Lismore'
+            ];
+            
+            const dataToShow = showingCriticalOnly 
+                ? uniqueData.filter(item => criticalLocations.includes(item.location))
+                : uniqueData;
+            
+            // Group data by river system
+            const groupedData = {};
+            
+            dataToShow.forEach(item => {
+                let riverSystem = 'Other';
+                
+                if (item.location.includes('Wilsons')) {
+                    riverSystem = 'Wilsons River';
+                } else if (item.location.includes('Richmond')) {
+                    riverSystem = 'Richmond River';
+                } else if (item.location.includes('Tweed')) {
+                    riverSystem = 'Tweed River';
+                } else if (item.location.includes('Brunswick')) {
+                    riverSystem = 'Brunswick River';
+                } else if (item.location.includes('Clarence')) {
+                    riverSystem = 'Clarence River';
+                } else if (item.location.includes('Evans')) {
+                    riverSystem = 'Evans River';
+                } else if (item.location.includes('Leycester')) {
+                    riverSystem = 'Wilsons River Tributaries';
+                } else if (item.location.includes('Terania') || 
+                          item.location.includes('Coopers') || 
+                          item.location.includes('Goolmangar') ||
+                          item.location.includes('Mulgum') ||
+                          item.location.includes('Back Ck')) {
+                    riverSystem = 'Wilsons River Tributaries';
+                } else if (item.location.includes('Lismore') ||
+                          item.location.includes('Browns Ck')) {
+                    riverSystem = 'Wilsons River';
+                }
+                
+                if (!groupedData[riverSystem]) {
+                    groupedData[riverSystem] = [];
+                }
+                
+                groupedData[riverSystem].push(item);
+            });
+            
+            // Sort river systems alphabetically, but with Wilsons River and Wilsons River Tributaries first
+            const sortedRiverSystems = Object.keys(groupedData).sort((a, b) => {
+                if (a.includes('Wilsons') && !b.includes('Wilsons')) return -1;
+                if (!a.includes('Wilsons') && b.includes('Wilsons')) return 1;
+                return a.localeCompare(b);
+            });
+            
+            let html = '';
+            
+            // Render table with section headers for each river system
+            sortedRiverSystems.forEach(riverSystem => {
+                // Add section header
+                html += `
+                    <tr class="river-system-header">
+                        <td colspan="5">${riverSystem}</td>
+                    </tr>
+                `;
+                
+                // Add data rows for this river system
+                groupedData[riverSystem].forEach(item => {
+                    // Determine row class based on flood category
+                    let rowClass = '';
+                    if (item.floodCategory === 'Minor') {
+                        rowClass = 'minor-flood';
+                    } else if (item.floodCategory === 'Moderate') {
+                        rowClass = 'moderate-flood';
+                    } else if (item.floodCategory === 'Major') {
+                        rowClass = 'major-flood';
+                    }
+                    
+                    // Determine status class
+                    let statusClass = '';
+                    if (item.status === 'rising') {
+                        statusClass = 'rising';
+                    } else if (item.status === 'falling') {
+                        statusClass = 'falling';
+                    } else if (item.status === 'steady') {
+                        statusClass = 'steady';
+                    }
+                    
+                    html += `
+                        <tr class="${rowClass}">
+                            <td>${item.location}</td>
+                            <td>${item.time}</td>
+                            <td>${item.waterLevel !== null ? item.waterLevel.toFixed(2) + 'm' : 'N/A'}</td>
+                            <td class="${statusClass}">${item.status}</td>
+                            <td>${item.floodCategory}</td>
+                        </tr>
+                    `;
+                });
+            });
+            
+            if (html === '') {
+                html = '<tr><td colspan="5" style="text-align: center;">No locations found</td></tr>';
+            }
+            
+            floodDataBody.innerHTML = html;
+        }
+
+        // Update statistics panel
+        function updateStatistics() {
+            if (!floodData || floodData.length === 0) return;
+            
+            // Find Lismore data - specifically "Wilsons R at Lismore (mAHD)" as first choice
+            const lismoreData = floodData.find(item => 
+                item.location === 'Wilsons R at Lismore (mAHD)') ||
+                floodData.find(item => 
+                item.location.toLowerCase().includes('lismore'));
+            
+            // Update Lismore level and status
+            if (lismoreData) {
+                lismoreLevel.textContent = lismoreData.waterLevel !== null 
+                    ? lismoreData.waterLevel.toFixed(2) + 'm' 
+                    : 'N/A';
+                
+                lismoreStatus.textContent = capitalizeFirstLetter(lismoreData.status);
+                
+                // Add status class
+                lismoreStatus.className = 'stat-footer';
+                if (lismoreData.status === 'rising') {
+                    lismoreStatus.classList.add('rising');
+                } else if (lismoreData.status === 'falling') {
+                    lismoreStatus.classList.add('falling');
+                } else if (lismoreData.status === 'steady') {
+                    lismoreStatus.classList.add('steady');
+                }
+            }
+            
+            // Define critical locations for highest reading calculation
+            const criticalLocations = [
+                'Wilsons R at Woodlawn (mAHD)',
+                'Browns Ck Pump Station',
+                'Lismore (Dawson Street)',
+                'Wilsons R at Lismore (mAHD)',
+                'Leycester Ck at Tuncester (mAHD)',
+                'Leycester Ck at South Lismore'
+            ];
+            
+            // Find highest reading only from critical locations
+            let highest = null;
+            floodData
+                .filter(item => criticalLocations.includes(item.location))
+                .forEach(item => {
+                    if (item.waterLevel !== null && (highest === null || item.waterLevel > highest.waterLevel)) {
+                        highest = item;
+                    }
+                });
+            
+            // Update highest reading
+            if (highest) {
+                highestReading.textContent = highest.waterLevel.toFixed(2) + 'm';
+                highestLocation.textContent = highest.location;
+            }
+            
+            // Count rising and falling locations
+            const rising = floodData.filter(item => item.status === 'rising').length;
+            const falling = floodData.filter(item => item.status === 'falling').length;
+            
+            risingCount.textContent = rising;
+            fallingCount.textContent = falling;
+            
+            // Highlight rising count if there are many rising locations
+            if (rising > 0 && rising > falling) {
+                risingCount.parentElement.classList.add('critical');
+            } else {
+                risingCount.parentElement.classList.remove('critical');
+            }
+        }
+
+        // Cache flood data in localStorage
+        function cacheFloodData() {
+            try {
+                const cacheData = {
+                    timestamp: new Date().getTime(),
+                    data: floodData
+                };
+                
+                localStorage.setItem('lismoreFloodData', JSON.stringify(cacheData));
+            } catch (error) {
+                console.error('Error caching flood data:', error);
+            }
+        }
+
+        // Load cached data from localStorage
+        function loadCachedData() {
+            try {
+                const cachedData = localStorage.getItem('lismoreFloodData');
+                
+                if (cachedData) {
+                    const parsed = JSON.parse(cachedData);
+                    
+                    if (parsed && parsed.data && parsed.data.length > 0) {
+                        floodData = parsed.data;
+                        
+                        // Update last fetch time
+                        lastFetchTime = new Date(parsed.timestamp);
+                        lastUpdateTime.textContent = lastFetchTime.toLocaleTimeString('en-AU') + ' (cached)';
+                        
+                        // Render the data
+                        renderFloodData();
+                        
+                        // Update statistics
+                        updateStatistics();
+                        
+                        return true;
+                    }
+                }
+                
+                return false;
+            } catch (error) {
+                console.error('Error loading cached data:', error);
+                return false;
+            }
+        }
+        
+        // Helper function to create status elements
+        function createStatusElement(id, label) {
+            const statusPanel = document.querySelector('.status-panel');
+            
+            // Create new status item
+            const statusItem = document.createElement('div');
+            statusItem.id = id;
+            statusItem.className = 'status-item';
+            
+            // Create label
+            const statusLabel = document.createElement('span');
+            statusLabel.className = 'status-label';
+            statusLabel.textContent = label + ':';
+            
+            // Create value
+            const statusValue = document.createElement('span');
+            statusValue.id = id + '-value';
+            statusValue.className = 'status-value';
+            statusValue.textContent = 'Checking...';
+            
+            // Add to status item
+            statusItem.appendChild(statusLabel);
+            statusItem.appendChild(statusValue);
+            
+            // Add before the status actions
+            const statusActions = document.querySelector('.status-actions');
+            statusPanel.insertBefore(statusItem, statusActions);
+            
+            return statusValue;
+        }
+
+        // Show loading overlay
+        function showLoading(show) {
+            if (show) {
+                loadingOverlay.style.display = 'flex';
+            } else {
+                loadingOverlay.style.display = 'none';
+            }
+        }
+
+        // Show notification
+        function showNotification(message, type) {
+            notificationMessage.textContent = message;
+            
+            notification.className = 'notification';
+            notification.classList.add(type);
+            notification.classList.add('show');
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 5000);
+        }
+
+        // Helper function to capitalize first letter
+        function capitalizeFirstLetter(string) {
+            return string.charAt(0).toUpperCase() + string.slice(1);
+        }
+
+        // Handle page visibility changes to conserve resources
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                // Page is hidden, pause the webcam refresh to save resources
+                clearInterval(webcamRefreshTimer);
+            } else {
+                // Page is visible again, resume webcam refresh
+                refreshWebcam();
+                webcamRefreshTimer = setInterval(refreshWebcam, WEBCAM_REFRESH_INTERVAL);
+            }
+        });
+
+        // Handle errors on webcam load
+        webcamImage.addEventListener('error', function() {
+            webcamError.style.display = 'block';
+        });
+
+        webcamImage.addEventListener('load', function() {
+            webcamError.style.display = 'none';
+        });
+        
+        // Refresh radar image
+        function refreshRadar() {
+            const radarImage = document.getElementById('radar-image');
+            const radarError = document.getElementById('radar-error');
+            const radarTimestamp = document.getElementById('radar-timestamp');
+            
+            // Add timestamp parameter to prevent caching
+            const timestamp = new Date().getTime();
+            radarImage.src = `http://www.bom.gov.au/radar/IDR282.gif?t=${timestamp}`;
+            
+            // Update timestamp
+            radarTimestamp.textContent = `Last updated: ${new Date().toLocaleTimeString('en-AU')}`;
+            
+            // Handle errors
+            radarImage.onerror = function() {
+                radarError.style.display = 'block';
+            };
+            
+            radarImage.onload = function() {
+                radarError.style.display = 'none';
+            };
+        }
+        
+        // No longer need refreshOutageMap since we're not loading the iframe
+        
+        // Check data source statuses
+
+        // Handle errors globally
+        window.addEventListener('error', function(event) {
+            console.error('Global error:', event.error);
+            showNotification('An error occurred. Please refresh the page if issues persist.', 'error');
+        });
+
+        // Refresh the cyclone map
+        function refreshCycloneMap() {
+            const cycloneImage = document.getElementById('cyclone-image');
+            const cycloneError = document.getElementById('cyclone-error');
+            const cycloneTimestamp = document.getElementById('cyclone-timestamp');
+            
+            // Add timestamp parameter to prevent caching
+            const timestamp = new Date().getTime();
+            cycloneImage.src = `http://www.bom.gov.au/fwo/IDQ65001.png?t=${timestamp}`;
+            
+            // Update timestamp
+            cycloneTimestamp.textContent = `Last updated: ${new Date().toLocaleTimeString('en-AU')}`;
+            
+            // Handle errors
+            cycloneImage.onerror = function() {
+                cycloneError.style.display = 'block';
+            };
+            
+            cycloneImage.onload = function() {
+                cycloneError.style.display = 'none';
+            };
+        }
+
+    // Welcome Tutorial Script
+    document.addEventListener('DOMContentLoaded', function() {
+        // DOM elements
+        const welcomeModal = document.getElementById('welcome-modal');
+        const welcomeInitial = document.getElementById('welcome-initial');
+        const tutorialContainer = document.getElementById('tutorial-container');
+        const beginTutorialButton = document.getElementById('begin-tutorial');
+        const skipTutorialButton = document.getElementById('skip-tutorial');
+        const welcomeClose = document.getElementById('welcome-close');
+        const prevStepButton = document.getElementById('prev-step');
+        const nextStepButton = document.getElementById('next-step');
+        const getStartedButton = document.getElementById('get-started');
+        const dontShowAgainCheckbox = document.getElementById('dont-show-again');
+        const showTutorialButton = document.getElementById('show-tutorial');
+        const welcomeAudio = document.getElementById('welcome-audio');
+        const currentStepEl = document.getElementById('current-step');
+        const totalStepsEl = document.getElementById('total-steps');
+        
+        // Constants
+        const WELCOME_SHOWN_KEY = 'lismoreFloodDashboardWelcomeShown';
+        const TOTAL_STEPS = document.querySelectorAll('.welcome-step').length;
+        
+        // Set total steps in the UI
+        totalStepsEl.textContent = TOTAL_STEPS;
+        
+        // Initialize current step
+        let currentStep = 1;
+        
+        // Check if welcome has been shown before
+        function shouldShowWelcome() {
+            return localStorage.getItem(WELCOME_SHOWN_KEY) !== 'true';
+        }
+        
+        // Mark welcome as shown
+        function markWelcomeAsShown() {
+            localStorage.setItem(WELCOME_SHOWN_KEY, 'true');
+        }
+        
+        // Show welcome modal
+        function showWelcome() {
+            welcomeModal.style.display = 'block';
+            document.body.style.overflow = 'hidden'; // Prevent scrolling
+            
+            // Show initial welcome screen
+            welcomeInitial.style.display = 'block';
+            tutorialContainer.style.display = 'none';
+        }
+        
+        // Start the tutorial (after clicking Begin Tutorial)
+        function startTutorial() {
+            // Play welcome chime
+            try {
+                welcomeAudio.play().catch(error => {
+                    console.log('Audio play error (normal if no interaction):', error);
+                });
+            } catch (error) {
+                console.error('Error playing welcome chime:', error);
+            }
+            
+            // Hide initial welcome, show tutorial
+            welcomeInitial.style.display = 'none';
+            tutorialContainer.style.display = 'block';
+            
+            // Reset to first step
+            resetTutorial();
+        }
+        
+        // Hide welcome modal
+        function hideWelcome() {
+            welcomeModal.style.display = 'none';
+            document.body.style.overflow = ''; // Restore scrolling
+            
+            // Pause audio if playing
+            welcomeAudio.pause();
+            welcomeAudio.currentTime = 0;
+            
+            // Mark as shown if checkbox is checked
+            if (dontShowAgainCheckbox.checked) {
+                markWelcomeAsShown();
+            }
+        }
+        
+        // Reset tutorial to first step
+        function resetTutorial() {
+            currentStep = 1;
+            updateStepDisplay();
+        }
+        
+        // Show a specific step
+        function showStep(stepNumber) {
+            // Hide all steps
+            document.querySelectorAll('.welcome-step').forEach(step => {
+                step.classList.remove('active');
+            });
+            
+            // Show the current step
+            const stepToShow = document.querySelector(`.welcome-step[data-step="${stepNumber}"]`);
+            if (stepToShow) {
+                stepToShow.classList.add('active');
+            }
+            
+            // Update current step indicator
+            currentStepEl.textContent = stepNumber;
+            
+            // Update button states
+            prevStepButton.disabled = stepNumber === 1;
+            
+            if (stepNumber === TOTAL_STEPS) {
+                nextStepButton.style.display = 'none';
+                getStartedButton.style.display = 'block';
+            } else {
+                nextStepButton.style.display = 'block';
+                getStartedButton.style.display = 'none';
+            }
+        }
+        
+        // Go to previous step
+        function prevStep() {
+            if (currentStep > 1) {
+                currentStep--;
+                showStep(currentStep);
+            }
+        }
+        
+        // Go to next step
+        function nextStep() {
+            if (currentStep < TOTAL_STEPS) {
+                currentStep++;
+                showStep(currentStep);
+            }
+        }
+        
+        // Update step display
+        function updateStepDisplay() {
+            showStep(currentStep);
+        }
+        
+        // Event listeners
+        beginTutorialButton.addEventListener('click', function() {
+            startTutorial();
+            // Play welcome sound when user starts the tutorial
+            try {
+                welcomeAudio.play();
+            } catch (error) {
+                console.error('Error playing welcome audio:', error);
+            }
+        });
+        
+        skipTutorialButton.addEventListener('click', function() {
+            hideWelcome();
+            // Consider this as having seen the tutorial
+            markWelcomeAsShown();
+        });
+        
+        welcomeClose.addEventListener('click', hideWelcome);
+        prevStepButton.addEventListener('click', prevStep);
+        nextStepButton.addEventListener('click', nextStep);
+        getStartedButton.addEventListener('click', function() {
+            hideWelcome();
+            
+            // Mark as shown if checkbox is checked
+            if (dontShowAgainCheckbox.checked) {
+                markWelcomeAsShown();
+            }
+        });
+        
+        showTutorialButton.addEventListener('click', showWelcome);
+        
+        // Show welcome on first visit - MUST BE AFTER all functions are defined
+        if (shouldShowWelcome()) {
+            // Slight delay to ensure all DOM elements are ready
+            setTimeout(showWelcome, 500);
+        }
+    });
+    </script>
+
+    <!-- Welcome Modal Overlay -->
+    <div id="welcome-modal" class="welcome-modal">
+        <div class="welcome-content">
+            <!-- Initial Welcome Screen -->
+            <div id="welcome-initial" class="welcome-initial">
+                <div class="welcome-header">
+                    <h2>Lismore Flood Emergency Dashboard</h2>
+                </div>
+                <div class="welcome-initial-body">
+                    <div class="welcome-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 16.36v-1.36a6 6 0 0 0-6-6v0a6 6 0 0 0-6 6v1.36"></path>
+                            <path d="M12 13.43V22"></path>
+                            <path d="M8 22h8"></path>
+                            <circle cx="12" cy="5" r="1"></circle>
+                            <path d="M15.51 9a4 4 0 0 0-7.02 0"></path>
+                        </svg>
+                    </div>
+                    <h3>Welcome to the Emergency Dashboard</h3>
+                    <p>This dashboard provides real-time information during flood events in Lismore.</p>
+                    <p>Would you like to learn how to use this dashboard?</p>
+                    
+                    <div class="welcome-initial-buttons">
+                        <button id="begin-tutorial" class="welcome-button">
+                            Begin Tutorial
+                        </button>
+                        <button id="skip-tutorial" class="welcome-button secondary">
+                            Skip Tutorial
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tutorial Steps -->
+            <div id="tutorial-container" class="tutorial-container" style="display: none;">
+                <div class="welcome-header">
+                    <h2>Dashboard Tutorial</h2>
+                    <button id="welcome-close" class="welcome-close">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+                <div class="welcome-body">
+                    <div class="welcome-steps">
+                        <div class="welcome-step active" data-step="1">
+                            <div class="welcome-step-number">1</div>
+                            <div class="welcome-step-content">
+                                <h3>Dashboard Overview</h3>
+                                <p>This dashboard provides real-time information during flood events in Lismore.</p>
+                                <p>It fetches LIVE data from the Bureau of Meteorology and other official sources.</p>
+                                <div class="step-feature-grid">
+                                    <div class="step-feature">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M23 7l-7 5 7 5V7z"></path>
+                                            <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+                                        </svg>
+                                        <span>Live Traffic Camera</span>
+                                    </div>
+                                    <div class="step-feature">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M12 2v20"></path>
+                                            <path d="M2 12h20"></path>
+                                            <path d="M20 12a8 8 0 0 1-8 8"></path>
+                                            <path d="M4 12a8 8 0 0 1 8-8"></path>
+                                        </svg>
+                                        <span>Rainfall Radar</span>
+                                    </div>
+                                    <div class="step-feature">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M2 9h20"></path>
+                                            <path d="M2 15h20"></path>
+                                            <path d="M12 4v16"></path>
+                                        </svg>
+                                        <span>River Height Data</span>
+                                    </div>
+                                    <div class="step-feature">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M15.05 5A5 5 0 0 1 19 8.95M15.05 1A9 9 0 0 1 23 8.94m-1 7.98v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                                        </svg>
+                                        <span>Emergency Contacts</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="welcome-step" data-step="2">
+                            <div class="welcome-step-number">2</div>
+                            <div class="welcome-step-content">
+                                <h3>Live Webcam & Weather</h3>
+                                <p>Access live traffic camera footage, rainfall radar, and power outage information.</p>
+                                <p>Switch between different views using the tab buttons.</p>
+                                <div class="step-instruction">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <polyline points="12 6 12 12 16 14"></polyline>
+                                    </svg>
+                                    <span>The images auto-refresh regularly to show the latest conditions</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="welcome-step" data-step="3">
+                            <div class="welcome-step-number">3</div>
+                            <div class="welcome-step-content">
+                                <h3>River Height Data</h3>
+                                <p>Monitor water levels at various locations with color-coded flood categories:</p>
+                                <div class="flood-categories">
+                                    <div class="flood-level minor">Minor Flooding</div>
+                                    <div class="flood-level moderate">Moderate Flooding</div>
+                                    <div class="flood-level major">Major Flooding</div>
+                                </div>
+                                <div class="step-instruction">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                    </svg>
+                                    <span>Use the "Key Monitoring Stations" button to focus on critical locations</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="welcome-step" data-step="4">
+                            <div class="welcome-step-number">4</div>
+                            <div class="welcome-step-content">
+                                <h3>Emergency Contacts</h3>
+                                <p>Important contact information and evacuation centers are displayed in the right panel.</p>
+                                <div class="emergency-numbers">
+                                    <div class="emergency-number">
+                                        <strong>SES Assistance:</strong>
+                                        <span>132 500</span>
+                                    </div>
+                                    <div class="emergency-number">
+                                        <strong>Life Threatening Emergencies:</strong>
+                                        <span>000</span>
+                                    </div>
+                                </div>
+                                <div class="step-instruction">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                                        <line x1="12" y1="9" x2="12" y2="13"></line>
+                                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                                    </svg>
+                                    <span>Emergency evacuation center locations are also listed</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="welcome-step" data-step="5">
+                            <div class="welcome-step-number">5</div>
+                            <div class="welcome-step-content">
+                                <h3>Ready to Go</h3>
+                                <p>You're now ready to use the Lismore Flood Emergency Dashboard.</p>
+                                <p>This dashboard is designed for emergency use during flood events. Remember to follow directions from emergency services at all times.</p>
+                                <div class="step-message">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                    </svg>
+                                    <p>You can access this tutorial again by clicking the "Show Tutorial" button in the bottom right corner of the screen.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="welcome-navigation">
+                        <button id="prev-step" class="welcome-nav-button" disabled>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="19" y1="12" x2="5" y2="12"></line>
+                                <polyline points="12 19 5 12 12 5"></polyline>
+                            </svg>
+                            Previous
+                        </button>
+                        <div class="welcome-step-indicator">
+                            <span id="current-step">1</span>/<span id="total-steps">5</span>
+                        </div>
+                        <button id="next-step" class="welcome-nav-button">
+                            Next
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                <polyline points="12 5 19 12 12 19"></polyline>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="welcome-footer">
+                    <label class="welcome-checkbox">
+                        <input type="checkbox" id="dont-show-again">
+                        <span class="checkbox-text">Don't show this again</span>
+                    </label>
+                    <button id="get-started" class="welcome-button">Get Started</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Welcome Tutorial Button -->
+    <button id="show-tutorial" class="show-tutorial-button">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+        </svg>
+        Show Tutorial
+    </button>
+    
+    <!-- Audio element for welcome message -->
+    <audio id="welcome-audio" preload="none">
+        <source src="/resources/welcome.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+</body>
+</html>
