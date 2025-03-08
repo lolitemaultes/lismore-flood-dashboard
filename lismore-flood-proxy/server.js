@@ -39,13 +39,24 @@ app.get('/flood-data', async (req, res) => {
       try {
         const timestamp = req.query.t || new Date().getTime();
         const response = await axios.get(`https://www.bom.gov.au/radar/IDR282.gif?t=${timestamp}`, {
-          responseType: 'arraybuffer'
+          responseType: 'arraybuffer',
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Referer': 'https://www.bom.gov.au/',
+            'Origin': 'https://www.bom.gov.au'
+          },
+          timeout: 10000
         });
+        
         res.set('Content-Type', 'image/gif');
+        res.set('Cache-Control', 'public, max-age=60'); // Cache for 60 seconds
         res.send(response.data);
       } catch (error) {
-        console.error('Error proxying radar image:', error);
-        res.status(500).send('Error fetching radar image');
+        console.error('Error proxying radar image:', error.message);
+        // Return a fallback image or error response
+        res.status(500).send('Error fetching radar image: ' + error.message);
       }
     });
     
@@ -54,13 +65,24 @@ app.get('/flood-data', async (req, res) => {
       try {
         const timestamp = req.query.t || new Date().getTime();
         const response = await axios.get(`https://www.bom.gov.au/fwo/IDQ65001.png?t=${timestamp}`, {
-          responseType: 'arraybuffer'
+          responseType: 'arraybuffer',
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Referer': 'https://www.bom.gov.au/',
+            'Origin': 'https://www.bom.gov.au'
+          },
+          timeout: 10000
         });
+        
         res.set('Content-Type', 'image/png');
+        res.set('Cache-Control', 'public, max-age=60'); // Cache for 60 seconds
         res.send(response.data);
       } catch (error) {
-        console.error('Error proxying cyclone image:', error);
-        res.status(500).send('Error fetching cyclone image');
+        console.error('Error proxying cyclone image:', error.message);
+        // Return a fallback image or error response
+        res.status(500).send('Error fetching cyclone image: ' + error.message);
       }
     });
     
