@@ -33,6 +33,26 @@ app.get('/flood-data', async (req, res) => {
     let successUrl = null;
     
     console.log('Attempting to fetch BOM data from multiple possible URLs...');
+
+    // Add this to your server.js
+    app.get('/proxy-radar', async (req, res) => {
+      try {
+        const response = await axios.get('http://www.bom.gov.au/radar/IDR282.gif', {
+          responseType: 'arraybuffer',
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+            'Referer': 'https://www.bom.gov.au/'
+          }
+        });
+        
+        res.set('Content-Type', 'image/gif');
+        res.set('Cache-Control', 'public, max-age=300'); // Cache for 5 minutes
+        res.send(response.data);
+      } catch (error) {
+        console.error('Error fetching radar image:', error);
+        res.status(500).send('Unable to fetch radar image');
+      }
+    });
     
     // Try each URL until one works
     for (const url of urls) {
