@@ -27,12 +27,14 @@ The dashboard consists of two primary components:
 2. **Backend (server.js)**: Node.js proxy server to fetch and parse flood data from BOM
 
 ```
-📁 lismore-flood-dashboard/
+📁 lismore-flood-proxy/
 │
-├── 📄 index.html         # Main dashboard interface
 ├── 📄 server.js          # Proxy server to fetch & parse BOM data
 ├── 📄 package.json       # Node.js dependencies
-└── 📁 public/            # Static assets (images, etc.)
+└── 📁 public/            
+    ├── 📄 index.html     # Main dashboard interface
+    └── 📁 resources/     # Static assets for the dashboard
+        └── 📄 welcome.mp3  # Welcome sound effect for the tutorial
 ```
 
 ## 🔧 Installation & Setup
