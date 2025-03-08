@@ -7,8 +7,13 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Enable CORS for all routes
-app.use(cors());
+// More detailed CORS configuration
+app.use(cors({
+  origin: '*', // Allow all origins for now
+  methods: ['GET'], // Only allow GET requests
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  maxAge: 86400 // Cache preflight response for 24 hours
+}));
 
 // Serve static files from the public directory
 app.use(express.static(path.join(__dirname, 'public')));
