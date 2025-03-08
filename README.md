@@ -47,17 +47,17 @@ The dashboard consists of two primary components:
 1. Clone the repository:
    ```bash
    git clone https://github.com/lolitemaultes/lismore-flood-dashboard.git
-   cd lismore-flood-dashboard
+   cd lismore-flood-dashboard/lismore-flood-proxy
    ```
 
 2. Install dependencies:
    ```bash
-   npm install
+   npm install express axios cheerio cors
    ```
 
 3. Start the server:
    ```bash
-   npm start
+   node server.js
    ```
 
 4. Open the dashboard in your browser:
