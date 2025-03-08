@@ -846,6 +846,428 @@
                 gap: 0.5rem;
             }
         }
+
+        /* Welcome Modal Styles */
+        .welcome-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            z-index: 2000;
+            overflow-y: auto;
+            backdrop-filter: blur(4px);
+        }
+        
+        .welcome-content {
+            max-width: 800px;
+            margin: 2rem auto;
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            animation: welcome-fade-in 0.5s ease-out;
+        }
+        
+        @keyframes welcome-fade-in {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .welcome-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .welcome-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .welcome-close {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--border-radius);
+            transition: background-color 0.2s;
+        }
+        
+        .welcome-close:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Initial welcome screen */
+        .welcome-initial {
+            display: block;
+        }
+        
+        .welcome-initial-body {
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .welcome-icon {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .welcome-icon svg {
+            color: var(--primary-color);
+        }
+        
+        .welcome-initial-body h3 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--gray-800);
+        }
+        
+        .welcome-initial-body p {
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+            color: var(--gray-700);
+        }
+        
+        .welcome-initial-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-top: 2rem;
+            max-width: 300px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        /* Tutorial container */
+        .tutorial-container {
+            display: none;
+        }
+        
+        .welcome-body {
+            padding: 1.5rem;
+        }
+        
+        .welcome-steps {
+            margin-bottom: 1.5rem;
+        }
+        
+        .welcome-step {
+            display: none;
+            animation: step-fade 0.3s ease-out;
+        }
+        
+        @keyframes step-fade {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .welcome-step.active {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+        
+        .welcome-step-number {
+            flex-shrink: 0;
+            width: 2.5rem;
+            height: 2.5rem;
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 1.25rem;
+        }
+        
+        .welcome-step-content {
+            flex: 1;
+        }
+        
+        .welcome-step-content h3 {
+            margin-top: 0;
+            margin-bottom: 0.75rem;
+            font-size: 1.25rem;
+            color: var(--gray-800);
+        }
+        
+        .welcome-step-content p {
+            margin-bottom: 0.5rem;
+            color: var(--gray-700);
+        }
+        
+        .welcome-step-content ul {
+            margin: 0.75rem 0;
+            padding-left: 1.5rem;
+        }
+        
+        .welcome-step-content li {
+            margin-bottom: 0.5rem;
+        }
+        
+        /* Feature grid for first step */
+        .step-feature-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .step-feature {
+            background-color: var(--gray-100);
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .step-feature svg {
+            color: var(--primary-color);
+            flex-shrink: 0;
+        }
+        
+        .step-feature span {
+            font-weight: 500;
+        }
+        
+        /* Step instruction */
+        .step-instruction {
+            margin-top: 1.5rem;
+            background-color: var(--gray-100);
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .step-instruction svg {
+            color: var(--primary-color);
+            flex-shrink: 0;
+        }
+        
+        /* Emergency numbers */
+        .emergency-numbers {
+            margin: 1rem 0;
+        }
+        
+        .emergency-number {
+            padding: 0.75rem;
+            background-color: var(--gray-100);
+            border-radius: var(--border-radius);
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        /* Step completion message */
+        .step-message {
+            margin-top: 1.5rem;
+            background-color: var(--gray-100);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            text-align: center;
+        }
+        
+        .step-message svg {
+            color: var(--success-color);
+            margin-bottom: 1rem;
+        }
+        
+        .step-message p {
+            font-weight: 500;
+        }
+        
+        /* Flood categories */
+        .flood-categories {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+        
+        .flood-level {
+            display: block;
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+        }
+        
+        .flood-level.minor {
+            background-color: rgba(255, 193, 7, 0.2);
+            color: #856404;
+        }
+        
+        .flood-level.moderate {
+            background-color: rgba(255, 140, 0, 0.2);
+            color: #7d4900;
+        }
+        
+        .flood-level.major {
+            background-color: rgba(220, 53, 69, 0.2);
+            color: #721c24;
+        }
+        
+        .welcome-navigation {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 1.5rem;
+        }
+        
+        .welcome-nav-button {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: var(--gray-200);
+            color: var(--gray-800);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .welcome-nav-button:hover:not(:disabled) {
+            background-color: var(--gray-300);
+        }
+        
+        .welcome-nav-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .welcome-step-indicator {
+            font-weight: 500;
+            color: var(--gray-700);
+        }
+        
+        .welcome-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .welcome-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+        
+        .welcome-checkbox input {
+            cursor: pointer;
+            width: 1rem;
+            height: 1rem;
+        }
+        
+        .checkbox-text {
+            color: var(--gray-700);
+            font-size: 0.9rem;
+        }
+        
+        .welcome-button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-size: 1rem;
+        }
+        
+        .welcome-button:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .welcome-button.secondary {
+            background-color: var(--gray-200);
+            color: var(--gray-800);
+        }
+        
+        .welcome-button.secondary:hover {
+            background-color: var(--gray-300);
+        }
+        
+        /* Show Tutorial Button */
+        .show-tutorial-button {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            box-shadow: var(--shadow-md);
+            z-index: 90;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+        
+        .show-tutorial-button:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .welcome-content {
+                margin: 1rem;
+                max-width: calc(100% - 2rem);
+            }
+            
+            .welcome-header h2 {
+                font-size: 1.25rem;
+            }
+            
+            .welcome-step.active {
+                flex-direction: column;
+            }
+            
+            .welcome-step-number {
+                margin-bottom: 0.5rem;
+            }
+            
+            .welcome-footer {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .welcome-button {
+                width: 100%;
+            }
+            
+            .step-feature-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -1898,6 +2320,389 @@
             console.error('Global error:', event.error);
             showNotification('An error occurred. Please refresh the page if issues persist.', 'error');
         });
+
+    // Welcome Tutorial Script
+    document.addEventListener('DOMContentLoaded', function() {
+        // DOM elements
+        const welcomeModal = document.getElementById('welcome-modal');
+        const welcomeInitial = document.getElementById('welcome-initial');
+        const tutorialContainer = document.getElementById('tutorial-container');
+        const beginTutorialButton = document.getElementById('begin-tutorial');
+        const skipTutorialButton = document.getElementById('skip-tutorial');
+        const welcomeClose = document.getElementById('welcome-close');
+        const prevStepButton = document.getElementById('prev-step');
+        const nextStepButton = document.getElementById('next-step');
+        const getStartedButton = document.getElementById('get-started');
+        const dontShowAgainCheckbox = document.getElementById('dont-show-again');
+        const showTutorialButton = document.getElementById('show-tutorial');
+        const welcomeAudio = document.getElementById('welcome-audio');
+        const currentStepEl = document.getElementById('current-step');
+        const totalStepsEl = document.getElementById('total-steps');
+        
+        // Constants
+        const WELCOME_SHOWN_KEY = 'lismoreFloodDashboardWelcomeShown';
+        const TOTAL_STEPS = document.querySelectorAll('.welcome-step').length;
+        
+        // Set total steps in the UI
+        totalStepsEl.textContent = TOTAL_STEPS;
+        
+        // Initialize current step
+        let currentStep = 1;
+        
+        // Check if welcome has been shown before
+        function shouldShowWelcome() {
+            return localStorage.getItem(WELCOME_SHOWN_KEY) !== 'true';
+        }
+        
+        // Mark welcome as shown
+        function markWelcomeAsShown() {
+            localStorage.setItem(WELCOME_SHOWN_KEY, 'true');
+        }
+        
+        // Show welcome modal
+        function showWelcome() {
+            welcomeModal.style.display = 'block';
+            document.body.style.overflow = 'hidden'; // Prevent scrolling
+            
+            // Show initial welcome screen
+            welcomeInitial.style.display = 'block';
+            tutorialContainer.style.display = 'none';
+        }
+        
+        // Start the tutorial (after clicking Begin Tutorial)
+        function startTutorial() {
+            // Play welcome chime
+            try {
+                welcomeAudio.play().catch(error => {
+                    console.log('Audio play error (normal if no interaction):', error);
+                });
+            } catch (error) {
+                console.error('Error playing welcome chime:', error);
+            }
+            
+            // Hide initial welcome, show tutorial
+            welcomeInitial.style.display = 'none';
+            tutorialContainer.style.display = 'block';
+            
+            // Reset to first step
+            resetTutorial();
+        }
+        
+        // Hide welcome modal
+        function hideWelcome() {
+            welcomeModal.style.display = 'none';
+            document.body.style.overflow = ''; // Restore scrolling
+            
+            // Pause audio if playing
+            welcomeAudio.pause();
+            welcomeAudio.currentTime = 0;
+            
+            // Mark as shown if checkbox is checked
+            if (dontShowAgainCheckbox.checked) {
+                markWelcomeAsShown();
+            }
+        }
+        
+        // Reset tutorial to first step
+        function resetTutorial() {
+            currentStep = 1;
+            updateStepDisplay();
+        }
+        
+        // Show a specific step
+        function showStep(stepNumber) {
+            // Hide all steps
+            document.querySelectorAll('.welcome-step').forEach(step => {
+                step.classList.remove('active');
+            });
+            
+            // Show the current step
+            const stepToShow = document.querySelector(`.welcome-step[data-step="${stepNumber}"]`);
+            if (stepToShow) {
+                stepToShow.classList.add('active');
+            }
+            
+            // Update current step indicator
+            currentStepEl.textContent = stepNumber;
+            
+            // Update button states
+            prevStepButton.disabled = stepNumber === 1;
+            
+            if (stepNumber === TOTAL_STEPS) {
+                nextStepButton.style.display = 'none';
+                getStartedButton.style.display = 'block';
+            } else {
+                nextStepButton.style.display = 'block';
+                getStartedButton.style.display = 'none';
+            }
+        }
+        
+        // Go to previous step
+        function prevStep() {
+            if (currentStep > 1) {
+                currentStep--;
+                showStep(currentStep);
+            }
+        }
+        
+        // Go to next step
+        function nextStep() {
+            if (currentStep < TOTAL_STEPS) {
+                currentStep++;
+                showStep(currentStep);
+            }
+        }
+        
+        // Update step display
+        function updateStepDisplay() {
+            showStep(currentStep);
+        }
+        
+        // Event listeners
+        beginTutorialButton.addEventListener('click', function() {
+            startTutorial();
+            // Play welcome sound when user starts the tutorial
+            try {
+                welcomeAudio.play();
+            } catch (error) {
+                console.error('Error playing welcome audio:', error);
+            }
+        });
+        
+        skipTutorialButton.addEventListener('click', function() {
+            hideWelcome();
+            // Consider this as having seen the tutorial
+            markWelcomeAsShown();
+        });
+        
+        welcomeClose.addEventListener('click', hideWelcome);
+        prevStepButton.addEventListener('click', prevStep);
+        nextStepButton.addEventListener('click', nextStep);
+        getStartedButton.addEventListener('click', function() {
+            hideWelcome();
+            
+            // Mark as shown if checkbox is checked
+            if (dontShowAgainCheckbox.checked) {
+                markWelcomeAsShown();
+            }
+        });
+        
+        showTutorialButton.addEventListener('click', showWelcome);
+        
+        // Show welcome on first visit - MUST BE AFTER all functions are defined
+        if (shouldShowWelcome()) {
+            // Slight delay to ensure all DOM elements are ready
+            setTimeout(showWelcome, 500);
+        }
+    });
     </script>
+
+    <!-- Welcome Modal Overlay -->
+    <div id="welcome-modal" class="welcome-modal">
+        <div class="welcome-content">
+            <!-- Initial Welcome Screen -->
+            <div id="welcome-initial" class="welcome-initial">
+                <div class="welcome-header">
+                    <h2>Lismore Flood Emergency Dashboard</h2>
+                </div>
+                <div class="welcome-initial-body">
+                    <div class="welcome-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 16.36v-1.36a6 6 0 0 0-6-6v0a6 6 0 0 0-6 6v1.36"></path>
+                            <path d="M12 13.43V22"></path>
+                            <path d="M8 22h8"></path>
+                            <circle cx="12" cy="5" r="1"></circle>
+                            <path d="M15.51 9a4 4 0 0 0-7.02 0"></path>
+                        </svg>
+                    </div>
+                    <h3>Welcome to the Emergency Dashboard</h3>
+                    <p>This dashboard provides real-time information during flood events in Lismore.</p>
+                    <p>Would you like to learn how to use this dashboard?</p>
+                    
+                    <div class="welcome-initial-buttons">
+                        <button id="begin-tutorial" class="welcome-button">
+                            Begin Tutorial
+                        </button>
+                        <button id="skip-tutorial" class="welcome-button secondary">
+                            Skip Tutorial
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tutorial Steps -->
+            <div id="tutorial-container" class="tutorial-container" style="display: none;">
+                <div class="welcome-header">
+                    <h2>Dashboard Tutorial</h2>
+                    <button id="welcome-close" class="welcome-close">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+                <div class="welcome-body">
+                    <div class="welcome-steps">
+                        <div class="welcome-step active" data-step="1">
+                            <div class="welcome-step-number">1</div>
+                            <div class="welcome-step-content">
+                                <h3>Dashboard Overview</h3>
+                                <p>This dashboard provides real-time information during flood events in Lismore.</p>
+                                <p>It fetches LIVE data from the Bureau of Meteorology and other official sources.</p>
+                                <div class="step-feature-grid">
+                                    <div class="step-feature">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M23 7l-7 5 7 5V7z"></path>
+                                            <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+                                        </svg>
+                                        <span>Live Traffic Camera</span>
+                                    </div>
+                                    <div class="step-feature">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M12 2v20"></path>
+                                            <path d="M2 12h20"></path>
+                                            <path d="M20 12a8 8 0 0 1-8 8"></path>
+                                            <path d="M4 12a8 8 0 0 1 8-8"></path>
+                                        </svg>
+                                        <span>Rainfall Radar</span>
+                                    </div>
+                                    <div class="step-feature">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M2 9h20"></path>
+                                            <path d="M2 15h20"></path>
+                                            <path d="M12 4v16"></path>
+                                        </svg>
+                                        <span>River Height Data</span>
+                                    </div>
+                                    <div class="step-feature">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M15.05 5A5 5 0 0 1 19 8.95M15.05 1A9 9 0 0 1 23 8.94m-1 7.98v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                                        </svg>
+                                        <span>Emergency Contacts</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="welcome-step" data-step="2">
+                            <div class="welcome-step-number">2</div>
+                            <div class="welcome-step-content">
+                                <h3>Live Webcam & Weather</h3>
+                                <p>Access live traffic camera footage, rainfall radar, and power outage information.</p>
+                                <p>Switch between different views using the tab buttons.</p>
+                                <div class="step-instruction">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <polyline points="12 6 12 12 16 14"></polyline>
+                                    </svg>
+                                    <span>The images auto-refresh regularly to show the latest conditions</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="welcome-step" data-step="3">
+                            <div class="welcome-step-number">3</div>
+                            <div class="welcome-step-content">
+                                <h3>River Height Data</h3>
+                                <p>Monitor water levels at various locations with color-coded flood categories:</p>
+                                <div class="flood-categories">
+                                    <div class="flood-level minor">Minor Flooding</div>
+                                    <div class="flood-level moderate">Moderate Flooding</div>
+                                    <div class="flood-level major">Major Flooding</div>
+                                </div>
+                                <div class="step-instruction">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                    </svg>
+                                    <span>Use the "Key Monitoring Stations" button to focus on critical locations</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="welcome-step" data-step="4">
+                            <div class="welcome-step-number">4</div>
+                            <div class="welcome-step-content">
+                                <h3>Emergency Contacts</h3>
+                                <p>Important contact information and evacuation centers are displayed in the right panel.</p>
+                                <div class="emergency-numbers">
+                                    <div class="emergency-number">
+                                        <strong>SES Assistance:</strong>
+                                        <span>132 500</span>
+                                    </div>
+                                    <div class="emergency-number">
+                                        <strong>Life Threatening Emergencies:</strong>
+                                        <span>000</span>
+                                    </div>
+                                </div>
+                                <div class="step-instruction">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                                        <line x1="12" y1="9" x2="12" y2="13"></line>
+                                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                                    </svg>
+                                    <span>Emergency evacuation center locations are also listed</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="welcome-step" data-step="5">
+                            <div class="welcome-step-number">5</div>
+                            <div class="welcome-step-content">
+                                <h3>Ready to Go</h3>
+                                <p>You're now ready to use the Lismore Flood Emergency Dashboard.</p>
+                                <p>This dashboard is designed for emergency use during flood events. Remember to follow directions from emergency services at all times.</p>
+                                <div class="step-message">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                                    </svg>
+                                    <p>You can access this tutorial again by clicking the "Show Tutorial" button in the bottom right corner of the screen.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="welcome-navigation">
+                        <button id="prev-step" class="welcome-nav-button" disabled>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="19" y1="12" x2="5" y2="12"></line>
+                                <polyline points="12 19 5 12 12 5"></polyline>
+                            </svg>
+                            Previous
+                        </button>
+                        <div class="welcome-step-indicator">
+                            <span id="current-step">1</span>/<span id="total-steps">5</span>
+                        </div>
+                        <button id="next-step" class="welcome-nav-button">
+                            Next
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                                <polyline points="12 5 19 12 12 19"></polyline>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="welcome-footer">
+                    <label class="welcome-checkbox">
+                        <input type="checkbox" id="dont-show-again">
+                        <span class="checkbox-text">Don't show this again</span>
+                    </label>
+                    <button id="get-started" class="welcome-button">Get Started</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Welcome Tutorial Button -->
+    <button id="show-tutorial" class="show-tutorial-button">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+        </svg>
+        Show Tutorial
+    </button>
+    
+    <!-- Audio element for welcome message -->
+    <audio id="welcome-audio" preload="none">
+        <source src="/resources/welcome.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
 </body>
 </html>
