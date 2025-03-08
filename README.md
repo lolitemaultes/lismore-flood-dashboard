@@ -5,7 +5,8 @@
 
 A real-time emergency dashboard to monitor flood conditions in the Lismore, NSW area. This dashboard aggregates critical information from multiple sources to assist emergency management and the public during flood events.
 
-![Dashboard Preview](dashboard-preview.png)
+![Lismore Flood Dashboard](https://github.com/user-attachments/assets/406417d6-c64b-4671-b318-690e95b34e34)
+
 
 ## 🚨 Features
 
