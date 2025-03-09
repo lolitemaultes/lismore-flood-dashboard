@@ -20,6 +20,10 @@ A real-time emergency dashboard to monitor flood conditions in the Lismore, NSW 
 - **Responsive Design**: Works on desktop and mobile devices
 - **Offline Capability**: Caches data for use during network outages
 
+## 👀 Upcoming Features
+- **Real-Time Flood Impact Map**: This map displays the addresses currently affected by floods in Lismore, using up-to-date floor height council data
+- **Useful Resource Panel**: Provides links to other websites to help monitor weather activity
+
 ## ⚙️ Technical Architecture
 
 The dashboard consists of two primary components:
