@@ -1,6 +1,6 @@
 # 🌊 Lismore Flood Emergency Dashboard
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue)
+![Version](https://img.shields.io/badge/version-2.0.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 [![Live Demo](https://img.shields.io/badge/View%20Live-Demo-brightgreen)](https://lismore-flood-dashboard.onrender.com)
 
@@ -11,6 +11,7 @@ A real-time emergency dashboard to monitor flood conditions in the Lismore, NSW 
 
 ## 🚨 Features
 
+- **Real-Time Flood Impact Map**: This map displays street addresses and areas within Lismore that are currently affected by floods in Lismore, using floor height council data
 - **Live River Level Monitoring**: Real-time data from Bureau of Meteorology (BOM) gauges
 - **Traffic Webcam Integration**: Live view of road conditions at Bruxner Highway
 - **Rainfall Radar**: Current precipitation patterns from BOM Grafton radar
@@ -19,10 +20,10 @@ A real-time emergency dashboard to monitor flood conditions in the Lismore, NSW 
 - **Flood Statistics**: At-a-glance metrics for key monitoring stations
 - **Responsive Design**: Works on desktop and mobile devices
 - **Offline Capability**: Caches data for use during network outages
+- **Useful Resource Panel**: Provides links to other websites to help monitor weather activity
 
 ## 👀 Upcoming Features
-- **Real-Time Flood Impact Map**: This map displays street addresses and areas within Lismore that are currently affected by floods in Lismore, using floor height council data
-- **Useful Resource Panel**: Provides links to other websites to help monitor weather activity
+- **Wilson River Plot Data**: Displays the current plot data for Wilsons R at Lismore (mAHD)
 
 ## ⚙️ Technical Architecture
 
