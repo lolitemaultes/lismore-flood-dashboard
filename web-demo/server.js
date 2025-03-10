@@ -38,7 +38,7 @@ app.get('/flood-data', async (req, res) => {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
             'Accept': 'text/html,application/xhtml+xml,application/xml',
             'Accept-Language': 'en-US,en;q=0.9',
-            'Referer': 'http://www.bom.gov.au/',
+            'Referer': 'https://www.bom.gov.au/',
             'Cache-Control': 'no-cache'
           },
           timeout: 10000,
@@ -231,6 +231,224 @@ app.get('/status', (req, res) => {
     status: 'online',
     timestamp: new Date().toISOString()
   });
+});
+
+// Updated river-data endpoint with exact name matching
+app.get('/river-data', async (req, res) => {
+  try {
+    // Get location parameter from the query string
+    const location = req.query.location;
+    
+    if (!location) {
+      return res.status(400).json({
+        success: false,
+        message: 'Location parameter is required'
+      });
+    }
+    
+    console.log(`Fetching river height history for: "${location}"`);
+    
+    const floodWarningUrl = 'http://www.bom.gov.au/cgi-bin/wrap_fwo.pl?IDN60140.html';
+    
+    try {
+      console.log(`Fetching main flood warning page: ${floodWarningUrl}`);
+      const response = await axios.get(floodWarningUrl, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml',
+          'Accept-Language': 'en-US,en;q=0.9',
+          'Cache-Control': 'no-cache'
+        }
+      });
+      
+      if (response.status !== 200) {
+        throw new Error(`Failed to fetch flood data page: ${response.status}`);
+      }
+      
+      // Load the HTML content
+      const $ = cheerio.load(response.data);
+      
+      // EXACT MATCHING: Use the exact location name to find the row
+      console.log(`Searching for exact location match: "${location}"`);
+      
+      let tableUrl = null;
+      let exactLocationMatch = false;
+      
+      // Step 1: Look for exact location match in table rows
+      $('tr').each((i, row) => {
+        const cells = $(row).find('td');
+        if (cells.length > 0) {
+          const locationCell = $(cells[0]);
+          const locationText = locationCell.text().trim();
+          
+          // Check if this is our exact location
+          if (locationText === location || 
+              // Handle slight variations like parentheses or small formatting differences
+              locationText.replace(/\s+/g, ' ') === location.replace(/\s+/g, ' ')) {
+            
+            console.log(`Found exact location match: "${locationText}"`);
+            exactLocationMatch = true;
+            
+            // Look for Table link in this row
+            $(row).find('a').each((j, link) => {
+              const linkText = $(link).text().trim();
+              if (linkText === 'Table') {
+                tableUrl = $(link).attr('href');
+                if (!tableUrl.startsWith('http')) {
+                  tableUrl = 'http://www.bom.gov.au' + tableUrl;
+                }
+                console.log(`Found Table link: ${tableUrl}`);
+                return false; // Break the inner loop
+              }
+            });
+            
+            if (tableUrl) return false; // Break the outer loop if we found the URL
+          }
+        }
+      });
+      
+      // If we couldn't find an exact match, log this for debugging
+      if (!exactLocationMatch) {
+        console.log(`Warning: Could not find exact match for location: "${location}"`);
+        console.log('Listing all locations in the page for debugging:');
+        
+        // List all location cells for debugging
+        $('tr').each((i, row) => {
+          const cells = $(row).find('td');
+          if (cells.length > 0) {
+            const locationText = $(cells[0]).text().trim();
+            if (locationText) {
+              console.log(`- "${locationText}"`);
+            }
+          }
+        });
+      }
+      
+      // If we still can't find the URL after all these attempts
+      if (!tableUrl) {
+        console.log('No table URL found after exact matching attempt');
+        
+        return res.status(404).json({
+          success: false,
+          message: 'Could not find table URL for the exact location: ' + location,
+          suggestion: 'Location name may be different in BOM data'
+        });
+      }
+      
+      console.log(`Fetching table data from: ${tableUrl}`);
+      
+      // Now fetch the actual table data
+      const tableResponse = await axios.get(tableUrl, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml',
+          'Accept-Language': 'en-US,en;q=0.9',
+          'Cache-Control': 'no-cache'
+        }
+      });
+      
+      if (tableResponse.status !== 200) {
+        throw new Error(`Failed to fetch table data: ${tableResponse.status}`);
+      }
+      
+      // Parse the table data
+      const tableHtml = cheerio.load(tableResponse.data);
+      let riverData = [];
+      
+      // First try: Look for a pre tag which often contains the data
+      const preContent = tableHtml('pre').text();
+      if (preContent && preContent.trim().length > 0) {
+        console.log('Found pre-formatted data');
+        
+        // Split by lines and parse each line
+        const lines = preContent.split('\n');
+        
+        for (const line of lines) {
+          // Match patterns like: 10/03/2025 12:44 7.77
+          const match = line.match(/(\d{2}\/\d{2}\/\d{4}\s+\d{2}:\d{2})\s+(\d+\.\d+)/);
+          if (match) {
+            const timeStr = match[1];
+            const heightStr = match[2];
+            
+            const height = parseFloat(heightStr);
+            if (!isNaN(height)) {
+              riverData.push({
+                time: timeStr,
+                height: height
+              });
+            }
+          }
+        }
+      }
+      
+      // If pre tag approach didn't work, try tables
+      if (riverData.length === 0) {
+        console.log('No data found in pre tag, checking tables');
+        
+        // Try various table selectors
+        const tableSelectors = ['table.tabledata', 'table'];
+        
+        for (const selector of tableSelectors) {
+          tableHtml(selector).each((i, table) => {
+            tableHtml(table).find('tr').each((j, row) => {
+              const cells = tableHtml(row).find('td');
+              if (cells.length >= 2) {
+                const timeStr = tableHtml(cells[0]).text().trim();
+                const heightStr = tableHtml(cells[1]).text().trim();
+                
+                // Check if this looks like a time and height
+                if (timeStr.match(/\d{2}\/\d{2}\/\d{4}/) || timeStr.match(/\d{2}:\d{2}/)) {
+                  const height = parseFloat(heightStr);
+                  if (!isNaN(height)) {
+                    riverData.push({
+                      time: timeStr,
+                      height: height
+                    });
+                  }
+                }
+              }
+            });
+          });
+          
+          if (riverData.length > 0) break; // Stop if we found data
+        }
+      }
+      
+      if (riverData.length === 0) {
+        console.log('No river data found in the response.');
+        return res.status(404).json({
+          success: false,
+          message: 'No river data found in table response',
+          tableUrlUsed: tableUrl
+        });
+      }
+      
+      console.log(`Successfully extracted ${riverData.length} data points for "${location}"`);
+      
+      return res.json({
+        success: true,
+        location: location, // Return the EXACT location name that was requested
+        data: riverData,
+        tableUrl: tableUrl // Include the URL for debugging
+      });
+      
+    } catch (error) {
+      console.error('Error fetching river height data:', error);
+      return res.status(500).json({
+        success: false,
+        message: error.message,
+        details: error.stack
+      });
+    }
+    
+  } catch (error) {
+    console.error('Error in river-data endpoint:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Error processing river height data',
+      error: error.toString()
+    });
+  }
 });
 
 // Start the server
