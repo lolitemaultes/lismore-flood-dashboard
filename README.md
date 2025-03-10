@@ -25,8 +25,9 @@ A real-time emergency dashboard to monitor flood conditions in the Lismore, NSW 
 - **Useful Resource Panel**: Provides links to other websites to help monitor weather activity
 
 ## 👀 Upcoming Features
-- **Animated Rain Radar**: Shows animated radar imagery for the Grafton area
+- **Animated Rain Radar**: This feature will replace the radar tab with animated radar imagery for the Grafton area
 - **Flood Map Water Level Simulation**: This feature will add a simulated water rise element to the Flood Map
+- **Localised Rise & Fall Prediction**: This feature will ensure the rising and falling of flood levels are accurate, based on previous flood data
 
 ## 🔧 To-Be-Fixed
 - **SVG Coloring**: Specfically the flood map icon
