@@ -31,6 +31,7 @@ A real-time emergency dashboard to monitor flood conditions in the Lismore, NSW 
 
 ## 🔧 To-Be-Fixed
 - **Minor Restyling**: Restyling to few elements on the dashboard
+- **Flood Classification Update**: Realistic flood classification for Major, Moderate and Minor flooding
 
 ## ⚙️ Technical Architecture
 
