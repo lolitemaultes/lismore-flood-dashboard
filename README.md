@@ -41,8 +41,7 @@ The dashboard consists of two primary components:
 ├── 📄 package.json       # Node.js dependencies
 └── 📁 public/            
     ├── 📄 index.html     # Main dashboard interface
-    └── 📁 resources/     # Static assets for the dashboard
-        └── 📄 welcome.mp3  # Welcome sound effect for the tutorial
+    └── 📁 resources/     # Static assets for the dashboard and user information
 ```
 
 ## 🔧 Installation & Setup
