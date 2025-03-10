@@ -12,18 +12,20 @@ A real-time emergency dashboard to monitor flood conditions in the Lismore, NSW 
 ## 🚨 Features
 
 - **Real-Time Flood Impact Map**: This map displays street addresses and areas within Lismore that are currently affected by floods in Lismore, using floor height council data
+- **Interactive Flood Height Plot Data**: Provides 4 days of water level height data in an interactive graph
 - **Live River Level Monitoring**: Real-time data from Bureau of Meteorology (BOM) gauges
 - **Traffic Webcam Integration**: Live view of road conditions at Bruxner Highway
 - **Rainfall Radar**: Current precipitation patterns from BOM Grafton radar
 - **Power Outage Information**: Essential Energy outage data with emergency contact information
 - **Emergency Contacts**: Quick access to SES, emergency services, and evacuation centers
+- **Console Command Listing**: List of console commands shown for testing purposes
 - **Flood Statistics**: At-a-glance metrics for key monitoring stations
 - **Responsive Design**: Works on desktop and mobile devices
 - **Offline Capability**: Caches data for use during network outages
 - **Useful Resource Panel**: Provides links to other websites to help monitor weather activity
 
 ## 👀 Upcoming Features
-- **Wilson River Plot Data**: Displays the current plot data for Wilsons R at Lismore (mAHD)
+- **Animated Rain Radar**: Shows animated predicted and historic radar imagery for the Grafton area
 
 ## ⚙️ Technical Architecture
 
