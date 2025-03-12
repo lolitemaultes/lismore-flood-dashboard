@@ -15,7 +15,7 @@ app.use(cors());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Create a resources directory if it doesn't exist for radar resources
-const RESOURCES_DIR = path.join(__dirname, 'resources/Rain Radar');
+const RESOURCES_DIR = path.join(__dirname, 'radar-resources');
 if (!fs.existsSync(RESOURCES_DIR)) {
     fs.mkdirSync(RESOURCES_DIR, { recursive: true });
 }
@@ -176,7 +176,7 @@ app.get('/map-proxy/:filename', async (req, res) => {
 });
 
 // Updated legend route to serve the local file
-app.get('/resources/legend.png', (req, res) => {
+app.get('/public/resources/Rain Radar/Legend.png', (req, res) => {
   try {
     const resourceFile = path.join(RESOURCES_DIR, 'legend.png');
     
