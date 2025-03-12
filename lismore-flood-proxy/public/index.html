@@ -513,60 +513,351 @@
             }
         }
         
-        /* Improved Radar and Cyclone Container Styling */
-        .radar-container, .cyclone-container, .outage-map-container {
+        /* Radar container and display styling */
+        .radar-container {
             position: relative;
             width: 100%;
-            padding: 1rem;
+            max-width: 512px;
+            height: 400px;
+            margin: 0 auto;
             text-align: center;
-            background-color: var(--gray-50);
-            border-radius: var(--border-radius);
-            margin: 0.5rem 0;
+            background-color: #99ccff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
         }
         
-        .radar-image, .cyclone-image, #outage-map {
-            max-width: 100%;
-            height: auto;
-            border-radius: calc(var(--border-radius) - 2px);
-            border: 1px solid var(--gray-300);
+        .radar-display {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 20px;
+            width: 100%;
+        }
+        
+        /* Updated legend styling - bigger and centered */
+        .legend-container {
+            width: 100%;
+            text-align: center;
+            margin: 15px auto;
+        }
+        
+        .legend-image {
+            width: 350px; /* Increased from 250px to 350px */
+            border-radius: 8px;
             box-shadow: var(--shadow-sm);
-            background-color: white;
             display: inline-block;
         }
         
-        .radar-error, .outage-map-error {
-            display: none;
+        @media screen and (max-width: 768px) {
+            .legend-image {
+                width: 300px; /* Still bigger on mobile but slightly smaller */
+            }
+        }
+        
+        /* Image and layer styling */
+        .radar-image, .map-layer {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 0.75rem 1rem;
-            border-radius: var(--border-radius);
-            font-weight: 500;
-            text-align: center;
+            top: -50px;
+            left: 0;
+            width: 100%;
+            height: calc(100% + 50px);
+            object-fit: cover;
         }
         
-        .radar-footer, .outage-map-footer {
+        /* Improved control buttons styling */
+        .control-buttons {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 0.75rem;
-            font-size: 0.875rem;
-            color: var(--gray-600);
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 15px;
         }
         
-        .radar-link, .outage-map-link {
-            color: var(--primary-color);
-            text-decoration: none;
-            display: inline-flex;
+        /* Media player style buttons */
+        .control-buttons button {
+            width: 48px;
+            height: 48px;
+            padding: 0;
+            background-color: #f0f2f5;
+            color: #333;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
             align-items: center;
-            gap: 0.25rem;
+            justify-content: center;
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
-        .radar-link:hover, .outage-map-link:hover {
-            text-decoration: underline;
+        .control-buttons button:hover {
+            background-color: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .control-buttons button:active {
+            transform: translateY(0);
+        }
+        
+        .control-buttons button:disabled {
+            background-color: #f0f0f0;
+            color: #aaa;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+        
+        /* Make both play and pause buttons larger */
+        #btn-play, #btn-pause {
+            width: 56px;
+            height: 56px;
+            font-size: 20px;
+        }
+        
+        /* First and last buttons styling */
+        #btn-first, #btn-last {
+            font-size: 14px;
+        }
+        
+        /* Speed controls */
+        .speed-controls {
+            margin: 15px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .speed-slider {
+            flex-grow: 1;
+            max-width: 180px;
+            height: 8px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: #e0e0e0;
+            outline: none;
+            border-radius: 4px;
+        }
+        
+        .speed-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+        }
+        
+        .speed-slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+            border: none;
+        }
+        
+        /* Media player style buttons */
+        .control-buttons button {
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            background-color: #e0e0e0;
+            color: #333;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .control-buttons button:hover {
+            background-color: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .control-buttons button:active {
+            transform: translateY(0);
+        }
+        
+        .control-buttons button:disabled {
+            background-color: #f0f0f0;
+            color: #aaa;
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+        
+        /* Speed controls */
+        .speed-controls {
+            margin: 15px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .speed-slider {
+            flex-grow: 1;
+            max-width: 180px;
+            height: 8px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: #e0e0e0;
+            outline: none;
+            border-radius: 4px;
+        }
+        
+        .speed-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+        }
+        
+        .speed-slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+            border: none;
+        }
+        
+        /* Information displays */
+        #timestamp {
+            font-weight: 600;
+            text-align: center;
+            margin: 15px 0 5px 0;
+            font-size: 1.1em;
+        }
+        
+        .frame-counter {
+            font-size: 0.85em;
+            color: var(--text-light);
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        
+        /* Progress bar */
+        .progress-container {
+            width: 100%;
+            max-width: 400px;
+            background-color: #e0e0e0;
+            height: 5px;
+            margin: 10px auto;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background-color: var(--primary-color);
+            width: 0%;
+            transition: width 0.2s;
+        }
+        
+        /* Loading indicator */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.8);
+            font-weight: bold;
+            z-index: 20;
+            border-radius: 8px;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: var(--primary-color);
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Layer controls */
+        .layer-controls {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 15px 0;
+            padding: 0 20px;
+        }
+        
+        .layer-toggle {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .layer-toggle input[type="checkbox"] {
+            margin-right: 5px;
+            cursor: pointer;
+        }
+        
+        /* Error display */
+        .error {
+            color: #cc0000;
+            font-weight: bold;
+            text-align: center;
+            padding: 15px;
+            margin: 10px 20px;
+            background-color: #ffeeee;
+            border-radius: 5px;
+            border-left: 4px solid #cc0000;
+        }
+        
+        /* Last update info */
+        .last-update {
+            text-align: center;
+            font-size: 0.85em;
+            color: var(--text-light);
+            margin-bottom: 10px;
+        }
+        
+        /* Responsive adjustments */
+        @media screen and (max-width: 768px) {
+            .radar-display {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .legend-container {
+                margin: 10px auto;
+            }
+            
+            .control-buttons {
+                flex-wrap: wrap;
+            }
         }
         
         /* River system header styling */
@@ -1368,10 +1659,9 @@
                             <div>
                                 <button id="refresh-webcam" class="button">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M21 2v6h-6"></path>
-                                        <path d="M3 12a9 9 0 0 1 15-6.7l3-3"></path>
-                                        <path d="M3 22v-6h6"></path>
-                                        <path d="M21 12a9 9 0 0 1-15 6.7l-3 3"></path>
+                                        <path d="M23 4v6h-6"></path>
+                                        <path d="M1 20v-6h6"></path>
+                                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
                                     </svg>
                                     Refresh
                                 </button>
@@ -1394,43 +1684,130 @@
                         </div>
                     </div>
                     
-                    <!-- Radar Tab -->
+                    <!-- Radar Tab with SVG Icons -->
                     <div id="content-radar" class="tab-content">
                         <div class="tab-header">
-                            <h2>Grafton Rainfall Radar</h2>
+                            <h2>Grafton 256km Radar</h2>
                             <div>
-                                <button id="refresh-radar" class="button">
+                                <button id="refresh-btn" class="button">
+                                    <!-- Refresh icon -->
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M21 2v6h-6"></path>
-                                        <path d="M3 12a9 9 0 0 1 15-6.7l3-3"></path>
-                                        <path d="M3 22v-6h6"></path>
-                                        <path d="M21 12a9 9 0 0 1-15 6.7l-3 3"></path>
+                                        <path d="M23 4v6h-6"></path>
+                                        <path d="M1 20v-6h6"></path>
+                                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
                                     </svg>
                                     Refresh
                                 </button>
                             </div>
                         </div>
-                        <div class="radar-container">
-                            <img id="radar-image" src="http://www.bom.gov.au/radar/IDR282.gif?000" alt="Grafton Rainfall Radar" class="radar-image">
-                            <div id="radar-error" class="radar-error">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <circle cx="12" cy="12" r="10"></circle>
-                                    <line x1="12" y1="8" x2="12" y2="12"></line>
-                                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                                </svg>
-                                Unable to load radar image
+                        
+                        <div id="error" class="error" style="display: none;"></div>
+                        
+                        <div class="radar-wrapper">
+                            <div class="radar-display">
+                                <div class="radar-container">
+                                    <!-- Map layers - ORDER IS IMPORTANT -->
+                                    <img id="background-layer" class="map-layer" src="" alt="Background Map" style="z-index: 1;">
+                                    <img id="topography-layer" class="map-layer" src="" alt="Topography" style="z-index: 2;">
+                                    <img id="range-layer" class="map-layer" src="" alt="Range Rings" style="z-index: 3;">
+                                    <img id="radar-image" class="radar-image" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Radar Image" style="z-index: 4;">
+                                    <img id="locations-layer" class="map-layer" src="" alt="Locations" style="z-index: 5;">
+                                    
+                                    <div id="loading" class="loading">
+                                        <div class="spinner"></div>
+                                        Loading radar images...
+                                    </div>
+                                </div>
                             </div>
+                            
+                            <!-- Using local legend image with increased size -->
+                            <div class="legend-container">
+                                <img src="/radar-resources/legend.png" alt="Radar Legend" class="legend-image">
+                            </div>
+                            
+                            <div id="timestamp">No data loaded</div>
+                            <div id="frame-counter" class="frame-counter"></div>
+                            
+                            <div class="progress-container">
+                                <div id="progress-bar" class="progress-bar"></div>
+                            </div>
+                            
+                            <!-- Improved animation controls with SVG icons -->
+                            <div class="controls">
+                                <div class="control-buttons">
+                                    <button id="btn-first" disabled title="First frame">
+                                        <!-- First frame icon -->
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M18.41 16.59L13.82 12l4.59-4.59L17 6l-6 6 6 6zM6 6h2v12H6z"></path>
+                                        </svg>
+                                    </button>
+                                    <button id="btn-prev" disabled title="Previous frame">
+                                        <!-- Previous icon -->
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"></path>
+                                        </svg>
+                                    </button>
+                                    <button id="btn-play" disabled title="Play">
+                                        <!-- Play icon -->
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M8 5v14l11-7z"></path>
+                                        </svg>
+                                    </button>
+                                    <button id="btn-pause" disabled title="Pause">
+                                        <!-- Pause icon -->
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path>
+                                        </svg>
+                                    </button>
+                                    <button id="btn-next" disabled title="Next frame">
+                                        <!-- Next icon -->
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path>
+                                        </svg>
+                                    </button>
+                                    <button id="btn-last" disabled title="Last frame">
+                                        <!-- Last frame icon -->
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M5.59 7.41L10.18 12l-4.59 4.59L7 18l6-6-6-6zM16 6h2v12h-2z"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                                
+                                <div class="speed-controls">
+                                    <label for="speed">Speed:</label>
+                                    <input type="range" id="speed" class="speed-slider" min="1" max="10" value="5">
+                                    <span id="speed-value">500ms</span>
+                                </div>
+                            </div>
+                            
+                            <div class="layer-controls">
+                                <label class="layer-toggle">
+                                    <input type="checkbox" id="topography-toggle" checked>
+                                    Topography
+                                </label>
+                                <label class="layer-toggle">
+                                    <input type="checkbox" id="locations-toggle" checked>
+                                    Locations
+                                </label>
+                                <label class="layer-toggle">
+                                    <input type="checkbox" id="range-toggle" checked>
+                                    Range Rings
+                                </label>
+                            </div>
+                            
+                            <div id="last-update" class="last-update"></div>
                         </div>
+                        
                         <div class="tab-footer">
+                            <span>Data source: Bureau of Meteorology, Australia</span>
                             <a href="http://www.bom.gov.au/products/IDR282.loop.shtml" target="_blank" rel="noopener noreferrer" class="tab-link">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
                                     <polyline points="15 3 21 3 21 9"></polyline>
                                     <line x1="10" y1="14" x2="21" y2="3"></line>
                                 </svg>
-                                View animated radar
+                                View BOM original
                             </a>
-                            <span id="radar-timestamp">Loading...</span>
                         </div>
                     </div>
                     
@@ -1441,10 +1818,9 @@
                             <div>
                                 <button id="refresh-cyclone" class="button">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M21 2v6h-6"></path>
-                                        <path d="M3 12a9 9 0 0 1 15-6.7l3-3"></path>
-                                        <path d="M3 22v-6h6"></path>
-                                        <path d="M21 12a9 9 0 0 1-15 6.7l-3 3"></path>
+                                        <path d="M23 4v6h-6"></path>
+                                        <path d="M1 20v-6h6"></path>
+                                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
                                     </svg>
                                     Refresh
                                 </button>
@@ -1481,10 +1857,9 @@
                             <div>
                                 <button id="refresh-floodmap" class="button">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M21 2v6h-6"></path>
-                                        <path d="M3 12a9 9 0 0 1 15-6.7l3-3"></path>
-                                        <path d="M3 22v-6h6"></path>
-                                        <path d="M21 12a9 9 0 0 1-15 6.7l-3 3"></path>
+                                        <path d="M23 4v6h-6"></path>
+                                        <path d="M1 20v-6h6"></path>
+                                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
                                     </svg>
                                     Refresh
                                 </button>
@@ -20572,7 +20947,6 @@
         "Longitude": "153.2894639"
     }
 ];
-
         // DOM elements
         const loadingOverlay = document.getElementById('loading-overlay');
         const notification = document.getElementById('notification');
@@ -20646,10 +21020,11 @@
             webcamRefreshTimer = setInterval(refreshWebcam, WEBCAM_REFRESH_INTERVAL);
             document.getElementById('refresh-webcam').addEventListener('click', refreshWebcam);
             
-            // Set up radar refresh
-            refreshRadar();
-            setInterval(refreshRadar, 1000); // Refresh radar every 1 seconds
-            document.getElementById('refresh-radar').addEventListener('click', refreshRadar);
+            // Add a safety check
+            const refreshRadarBtn = document.getElementById('refresh-radar') || document.getElementById('refresh-btn');
+            if (refreshRadarBtn) {
+                refreshRadarBtn.addEventListener('click', refreshRadar);
+            }
             
             // Add this to your DOMContentLoaded or initialization function
             refreshCycloneMap(); // Initial load
@@ -20893,17 +21268,554 @@
             };
             img.src = 'https://webcams.transport.nsw.gov.au/livetraffic-webcams/cameras/bruxner_highway_lismore.jpeg?' + new Date().getTime();
             
-            // Check radar image
-            const radarImg = new Image();
-            radarImg.onload = function() {
-                radarStatusValue.textContent = 'Online';
-                radarStatusValue.className = 'status-value online';
-            };
-            radarImg.onerror = function() {
-                radarStatusValue.textContent = 'Offline';
-                radarStatusValue.className = 'status-value offline';
-            };
-            radarImg.src = 'http://www.bom.gov.au/radar/IDR282.gif?' + new Date().getTime();
+            // Radar interactive functionality
+            function initializeRadar() {
+                // DOM elements
+                const radarImage = document.getElementById('radar-image');
+                const backgroundLayer = document.getElementById('background-layer');
+                const topographyLayer = document.getElementById('topography-layer');
+                const locationsLayer = document.getElementById('locations-layer');
+                const rangeLayer = document.getElementById('range-layer');
+                const loading = document.getElementById('loading');
+                const timestamp = document.getElementById('timestamp');
+                const frameCounter = document.getElementById('frame-counter');
+                const progressBar = document.getElementById('progress-bar');
+                const btnFirst = document.getElementById('btn-first');
+                const btnLast = document.getElementById('btn-last');
+                const btnPlay = document.getElementById('btn-play');
+                const btnPause = document.getElementById('btn-pause');
+                const btnPrev = document.getElementById('btn-prev');
+                const btnNext = document.getElementById('btn-next');
+                const refreshBtn = document.getElementById('refresh-btn');
+                const speedSlider = document.getElementById('speed');
+                const speedValue = document.getElementById('speed-value');
+                const errorElement = document.getElementById('error');
+                const lastUpdate = document.getElementById('last-update');
+                
+                // Layer toggle checkboxes - with null checks
+                const topographyToggle = document.getElementById('topography-toggle');
+                const locationsToggle = document.getElementById('locations-toggle');
+                const rangeToggle = document.getElementById('range-toggle');
+            
+                // Variables
+                const RADAR_ID = 'IDR282'; // Grafton 256km radar
+                let radarImages = [];
+                let currentFrame = 0;
+                let isPlaying = false;
+                let animationInterval;
+                let animationDelay = 500; // milliseconds
+                let mapLayersLoaded = false;
+                let preloadedImages = new Map(); // To store preloaded images
+                
+                // Function to format date in locale format
+                function formatDate(dateString) {
+                    try {
+                        const date = new Date(dateString);
+                        return date.toLocaleString(undefined, {
+                            weekday: 'short',
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            timeZoneName: 'short'
+                        });
+                    } catch (e) {
+                        console.error("Error formatting date:", e);
+                        return dateString || "Unknown date";
+                    }
+                }
+            
+                // Function to preload an image and return a promise
+                function preloadImage(url) {
+                    // Check if already cached
+                    if (preloadedImages.has(url)) {
+                        return Promise.resolve(url);
+                    }
+                    
+                    return new Promise((resolve, reject) => {
+                        const img = new Image();
+                        img.onload = () => {
+                            preloadedImages.set(url, img);
+                            resolve(url);
+                        };
+                        img.onerror = () => reject(new Error(`Failed to load image: ${url}`));
+                        img.src = url;
+                    });
+                }
+            
+                // Function to load map layers
+                async function loadMapLayers() {
+                    if (!radarImage) {
+                        console.error("Radar container elements not found. Aborting map layer loading.");
+                        return;
+                    }
+                    
+                    showLoading(true);
+                    
+                    try {
+                        console.log('Loading map layers...');
+                        
+                        // Set default background color while waiting
+                        const container = document.querySelector('.radar-container');
+                        if (container) {
+                            container.style.backgroundColor = '#99ccff';
+                        }
+                        
+                        // Create the URLs
+                        const bgUrl = `/map-proxy/${RADAR_ID}.background.png`;
+                        const topoUrl = `/map-proxy/${RADAR_ID}.topography.png`;
+                        const locUrl = `/map-proxy/${RADAR_ID}.locations.png`;
+                        const rangeUrl = `/map-proxy/${RADAR_ID}.range.png`;
+                        
+                        console.log('Background URL:', bgUrl);
+                        
+                        // Safe image loading with null checks
+                        const safeLoadImage = async (url, element, name) => {
+                            if (!element) {
+                                console.error(`${name} element not found.`);
+                                return false;
+                            }
+                            
+                            try {
+                                await preloadImage(url);
+                                element.src = url;
+                                console.log(`${name} loaded successfully`);
+                                return true;
+                            } catch (err) {
+                                console.error(`Failed to preload ${name}:`, err);
+                                return false;
+                            }
+                        };
+                        
+                        // Preload the images with proper error handling
+                        const results = await Promise.allSettled([
+                            safeLoadImage(bgUrl, backgroundLayer, 'Background'),
+                            safeLoadImage(topoUrl, topographyLayer, 'Topography'),
+                            safeLoadImage(locUrl, locationsLayer, 'Locations'),
+                            safeLoadImage(rangeUrl, rangeLayer, 'Range')
+                        ]);
+                        
+                        // Check if at least the background loaded
+                        const backgroundLoaded = results[0].status === 'fulfilled' && results[0].value;
+                        
+                        if (backgroundLoaded) {
+                            mapLayersLoaded = true;
+                            console.log('All map layers loaded successfully');
+                        } else {
+                            showError('Failed to load essential map layers. Using simplified display.');
+                        }
+                        
+                    } catch (error) {
+                        console.error('Error loading map layers:', error);
+                        showError('Failed to load map layers. Using simplified display.');
+                    } finally {
+                        showLoading(false);
+                    }
+                }
+            
+                // Function to fetch radar data
+                async function fetchRadarData() {
+                    try {
+                        showLoading(true);
+                        hideError();
+                        
+                        const response = await fetch(`/api/radar/${RADAR_ID}`);
+                        if (!response.ok) {
+                            throw new Error(`Failed to fetch radar data: ${response.statusText}`);
+                        }
+                        
+                        const data = await response.json();
+                        
+                        if (!data.images || data.images.length === 0) {
+                            throw new Error('No radar images available');
+                        }
+                        
+                        // Store the radar images and reset to first frame
+                        radarImages = data.images;
+                        currentFrame = 0;
+                        
+                        // Set last update time
+                        if (lastUpdate) {
+                            lastUpdate.textContent = `Last updated: ${formatDate(data.lastUpdated)}`;
+                        }
+                        
+                        // Preload all radar images in the background
+                        preloadAllImages();
+                        
+                        // Update the displayed image
+                        updateRadarImage(0);
+                        enableControls(true);
+                        
+                        console.log(`Loaded ${radarImages.length} radar images`);
+                    } catch (error) {
+                        console.error('Error loading radar data:', error);
+                        showError(error.message);
+                        enableControls(false);
+                    } finally {
+                        showLoading(false);
+                    }
+                }
+                
+                // Preload all radar images for smoother playback
+                async function preloadAllImages() {
+                    if (!radarImages || radarImages.length === 0) return;
+                    
+                    console.log('Preloading all radar images for smooth playback...');
+                    
+                    // Create an array of promises to preload all images with error handling
+                    const preloadPromises = radarImages.map(image => 
+                        preloadImage(image.url)
+                            .catch(err => {
+                                console.warn(`Failed to preload: ${image.url}`, err);
+                                return null; // Continue with other images if one fails
+                            })
+                    );
+                    
+                    // Wait for all images to be preloaded
+                    try {
+                        await Promise.all(preloadPromises);
+                        console.log('All radar images preloaded');
+                    } catch (err) {
+                        console.error('Error during image preloading:', err);
+                    }
+                }
+            
+                // Function to update the radar image
+                function updateRadarImage(frameIndex) {
+                    if (!radarImages || radarImages.length === 0 || !radarImage) return;
+                    
+                    if (frameIndex >= 0 && frameIndex < radarImages.length) {
+                        currentFrame = frameIndex;
+                        
+                        if (radarImages[frameIndex] && radarImages[frameIndex].url) {
+                            // Update the image
+                            radarImage.src = radarImages[frameIndex].url;
+                            
+                            // Update the timestamp
+                            if (timestamp) {
+                                timestamp.textContent = formatDate(radarImages[frameIndex].timestamp);
+                            }
+                            
+                            // Update the frame counter
+                            if (frameCounter) {
+                                frameCounter.textContent = `Frame ${currentFrame + 1} of ${radarImages.length}`;
+                            }
+                            
+                            // Update progress bar
+                            if (progressBar) {
+                                const progress = ((currentFrame + 1) / radarImages.length) * 100;
+                                progressBar.style.width = `${progress}%`;
+                            }
+                        } else {
+                            console.error(`Invalid image data at index ${frameIndex}`);
+                        }
+                    }
+                }
+            
+                // Animation control functions with improved smoothness
+                function playAnimation() {
+                    if (!radarImages || radarImages.length === 0) return;
+                    
+                    isPlaying = true;
+                    if (btnPlay) btnPlay.disabled = true;
+                    if (btnPause) btnPause.disabled = false;
+                    
+                    // Clear any existing interval
+                    clearInterval(animationInterval);
+                    
+                    // Define the animation frame function
+                    const nextFrame = () => {
+                        currentFrame = (currentFrame + 1) % radarImages.length;
+                        updateRadarImage(currentFrame);
+                        
+                        // Schedule the next frame
+                        animationInterval = setTimeout(nextFrame, animationDelay);
+                    };
+                    
+                    // Start the animation loop
+                    animationInterval = setTimeout(nextFrame, animationDelay);
+                }
+            
+                function pauseAnimation() {
+                    isPlaying = false;
+                    if (btnPlay) btnPlay.disabled = false;
+                    if (btnPause) btnPause.disabled = true;
+                    
+                    clearTimeout(animationInterval);
+                }
+            
+                function prevFrame() {
+                    if (!radarImages || radarImages.length === 0) return;
+                    
+                    pauseAnimation();
+                    currentFrame = (currentFrame - 1 + radarImages.length) % radarImages.length;
+                    updateRadarImage(currentFrame);
+                }
+            
+                function nextFrame() {
+                    if (!radarImages || radarImages.length === 0) return;
+                    
+                    pauseAnimation();
+                    currentFrame = (currentFrame + 1) % radarImages.length;
+                    updateRadarImage(currentFrame);
+                }
+                
+                function firstFrame() {
+                    if (!radarImages || radarImages.length === 0) return;
+                    
+                    pauseAnimation();
+                    currentFrame = 0;
+                    updateRadarImage(currentFrame);
+                }
+                
+                function lastFrame() {
+                    if (!radarImages || radarImages.length === 0) return;
+                    
+                    pauseAnimation();
+                    currentFrame = radarImages.length - 1;
+                    updateRadarImage(currentFrame);
+                }
+            
+                // Utility functions
+                function showLoading(show) {
+                    if (loading) {
+                        loading.style.display = show ? 'flex' : 'none';
+                    }
+                }
+            
+                function showError(message) {
+                    if (errorElement) {
+                        errorElement.textContent = message;
+                        errorElement.style.display = 'block';
+                    }
+                }
+            
+                function hideError() {
+                    if (errorElement) {
+                        errorElement.style.display = 'none';
+                    }
+                }
+            
+                function enableControls(enable) {
+                    // Safely enable/disable controls with null checks
+                    const safeDisable = (button, isDisabled) => {
+                        if (button) button.disabled = isDisabled;
+                    };
+                    
+                    safeDisable(btnPlay, !enable || isPlaying);
+                    safeDisable(btnPause, !enable || !isPlaying);
+                    safeDisable(btnPrev, !enable);
+                    safeDisable(btnNext, !enable);
+                    safeDisable(btnFirst, !enable);
+                    safeDisable(btnLast, !enable);
+                    
+                    if (speedSlider) speedSlider.disabled = !enable;
+                }
+            
+                // Layer toggle functions
+                function updateLayerVisibility() {
+                    // Use safe checks before updating visibility
+                    if (topographyLayer && topographyToggle) {
+                        topographyLayer.style.display = topographyToggle.checked ? 'block' : 'none';
+                    }
+                    
+                    if (locationsLayer && locationsToggle) {
+                        locationsLayer.style.display = locationsToggle.checked ? 'block' : 'none';
+                    }
+                    
+                    if (rangeLayer && rangeToggle) {
+                        rangeLayer.style.display = rangeToggle.checked ? 'block' : 'none';
+                    }
+                }
+                
+                // Refresh function
+                function refreshData() {
+                    // Clear current data
+                    radarImages = [];
+                    currentFrame = 0;
+                    pauseAnimation();
+                    enableControls(false);
+                    preloadedImages.clear();
+                    
+                    // Reset UI elements
+                    if (timestamp) timestamp.textContent = 'Refreshing data...';
+                    if (frameCounter) frameCounter.textContent = '';
+                    if (progressBar) progressBar.style.width = '0%';
+                    
+                    // Fetch fresh data
+                    fetchRadarData();
+                }
+            
+                // Set up event listeners (with null checks)
+                function setupEventListeners() {
+                    if (btnPlay) btnPlay.addEventListener('click', playAnimation);
+                    if (btnPause) btnPause.addEventListener('click', pauseAnimation);
+                    if (btnPrev) btnPrev.addEventListener('click', prevFrame);
+                    if (btnNext) btnNext.addEventListener('click', nextFrame);
+                    if (btnFirst) btnFirst.addEventListener('click', firstFrame);
+                    if (btnLast) btnLast.addEventListener('click', lastFrame);
+                    if (refreshBtn) refreshBtn.addEventListener('click', refreshData);
+                    
+                    // Keyboard shortcuts - only when radar tab is active
+                    document.addEventListener('keydown', function(e) {
+                        const radarTab = document.getElementById('content-radar');
+                        if (!radarTab || !radarTab.classList.contains('active')) return;
+                        
+                        if (!radarImages || radarImages.length === 0) return;
+                        
+                        switch(e.key) {
+                            case ' ': // Space bar
+                                if (isPlaying) {
+                                    pauseAnimation();
+                                } else {
+                                    playAnimation();
+                                }
+                                break;
+                            case 'ArrowLeft':
+                                prevFrame();
+                                break;
+                            case 'ArrowRight':
+                                nextFrame();
+                                break;
+                            case 'Home':
+                                firstFrame();
+                                break;
+                            case 'End':
+                                lastFrame();
+                                break;
+                        }
+                    });
+                    
+                    // Speed slider handling
+                    if (speedSlider) {
+                        speedSlider.addEventListener('input', function() {
+                            const speed = parseInt(this.value);
+                            animationDelay = 1100 - (speed * 100); // 100ms to 1000ms range
+                            
+                            if (speedValue) {
+                                speedValue.textContent = `${animationDelay}ms`;
+                            }
+                            
+                            if (isPlaying) {
+                                pauseAnimation();
+                                playAnimation();
+                            }
+                        });
+                    }
+                    
+                    // Layer toggle listeners
+                    if (topographyToggle) {
+                        topographyToggle.addEventListener('change', updateLayerVisibility);
+                    }
+                    
+                    if (locationsToggle) {
+                        locationsToggle.addEventListener('change', updateLayerVisibility);
+                    }
+                    
+                    if (rangeToggle) {
+                        rangeToggle.addEventListener('change', updateLayerVisibility);
+                    }
+                    
+                    // Handle image load errors properly
+                    if (radarImage) {
+                        radarImage.addEventListener('error', function(e) {
+                            // Only show error for real images, not the empty placeholder
+                            if (this.src && this.src !== 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7') {
+                                console.error(`Failed to load radar image: ${this.src}`);
+                                showError('Failed to load radar image. Using cached version if available.');
+                            }
+                        });
+                    }
+                }
+            
+                // Initialize the radar
+                function initialize() {
+                    // Check if elements exist before initializing
+                    if (!radarImage) {
+                        console.error("Radar elements not found. Cannot initialize radar.");
+                        return;
+                    }
+                    
+                    // Set up event listeners
+                    setupEventListeners();
+                    
+                    // Load the map layers first
+                    loadMapLayers().then(() => {
+                        // Then fetch the radar data
+                        fetchRadarData();
+                        
+                        // Set initial layer visibility
+                        updateLayerVisibility();
+                    }).catch(err => {
+                        console.error("Error initializing radar:", err);
+                        showError("Failed to initialize radar. Try refreshing the page.");
+                    });
+                }
+                
+                // Handle tab changes to ensure proper initialization
+                function handleTabChange() {
+                    // Get all tab buttons
+                    const tabButtons = document.querySelectorAll('.tab-button');
+                    
+                    if (!tabButtons || tabButtons.length === 0) {
+                        // No tabs, just initialize directly
+                        initialize();
+                        return;
+                    }
+                    
+                    // Add event listeners to all tab buttons
+                    tabButtons.forEach(button => {
+                        if (button) {
+                            button.addEventListener('click', function() {
+                                // Check if this is the radar tab and we haven't loaded the layers yet
+                                if (this.id === 'tab-radar' && !mapLayersLoaded) {
+                                    // Initialize when the radar tab is selected for the first time
+                                    initialize();
+                                }
+                            });
+                        }
+                    });
+                    
+                    // Check if the radar tab is active by default
+                    const radarTab = document.getElementById('tab-radar');
+                    const radarContent = document.getElementById('content-radar');
+                    
+                    if (radarTab && radarContent && radarContent.classList.contains('active')) {
+                        // If radar tab is active on page load, initialize immediately
+                        initialize();
+                    }
+                }
+                
+                // Call the initialization setup
+                handleTabChange();
+                
+                // Set up auto-refresh
+                if (document.getElementById('content-radar')) {
+                    // Auto-refresh every 5 minutes if the tab is active
+                    setInterval(() => {
+                        const radarContent = document.getElementById('content-radar');
+                        if (radarContent && radarContent.classList.contains('active')) {
+                            refreshData();
+                        }
+                    }, 5 * 60 * 1000);
+                }
+            }
+            
+            // Make sure to initialize the radar when the page loads
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', () => {
+                    // Check if we're on a page with the radar tab
+                    if (document.getElementById('content-radar')) {
+                        initializeRadar();
+                    }
+                });
+            } else {
+                // Document already loaded
+                if (document.getElementById('content-radar')) {
+                    initializeRadar();
+                }
+            }
             
             // Check cyclone map
             const cycloneImg = new Image();
@@ -21130,24 +22042,15 @@
                         statusClass = 'steady';
                     }
                     
+                    // When creating each row
                     html += `
-                        <tr class="${rowClass}" style="cursor: pointer;" title="Click to view height history">
-                            <td>
-                                ${item.location}
-                                <span class="view-history-icon">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <polyline points="22 12 18 8 14 12"></polyline>
-                                        <polyline points="2 12 6 16 10 12"></polyline>
-                                        <path d="M2 20h20"></path>
-                                        <path d="M2 4h20"></path>
-                                    </svg>
-                                </span>
-                            </td>
-                            <td>${item.time}</td>
-                            <td>${item.waterLevel !== null ? item.waterLevel.toFixed(2) + 'm' : 'N/A'}</td>
-                            <td class="${statusClass}">${item.status}</td>
-                            <td>${item.floodCategory}</td>
-                        </tr>
+                      <tr class="${rowClass}" style="cursor: pointer;" title="Click to view height history">
+                        <td>${item.location}</td>
+                        <td>${item.time}</td>
+                        <td>${item.waterLevel !== null ? item.waterLevel.toFixed(2) + 'm' : 'N/A'}</td>
+                        <td class="${statusClass}">${item.status}</td>
+                        <td>${item.floodCategory === 'N/A' ? '-' : item.floodCategory}</td>
+                      </tr>
                     `;
                 });
             });
@@ -21583,29 +22486,77 @@
             webcamError.style.display = 'none';
         });
         
-        // Refresh radar image
-        function refreshRadar() {
-            const radarImage = document.getElementById('radar-image');
-            const radarError = document.getElementById('radar-error');
-            const radarTimestamp = document.getElementById('radar-timestamp');
+            // Refresh radar image (compatible with both old and new implementations)
+            function refreshRadar() {
+                // Check if we're using the new interactive radar
+                if (window.initializeRadar) {
+                    // New radar is handled by its own code
+                    const refreshBtn = document.getElementById('refresh-btn');
+                    if (refreshBtn) {
+                        // Trigger a click on the refresh button
+                        refreshBtn.click();
+                    }
+                    return;
+                }
             
-            // Add timestamp parameter to prevent caching
-            const timestamp = new Date().getTime();
-            radarImage.src = `http://www.bom.gov.au/radar/IDR282.gif?t=${timestamp}`;
-            
-            // Update timestamp
-            radarTimestamp.textContent = `Last updated: ${new Date().toLocaleTimeString('en-AU')}`;
-            
-            // Handle errors
-            radarImage.onerror = function() {
-                radarError.style.display = 'block';
-            };
-            
-            radarImage.onload = function() {
-                radarError.style.display = 'none';
-            };
-        }
+                // Legacy radar code for backward compatibility
+                const radarImage = document.getElementById('radar-image');
+                const radarError = document.getElementById('radar-error');
+                const radarTimestamp = document.getElementById('radar-timestamp');
+                
+                // Only proceed if elements exist
+                if (radarImage) {
+                    // Add timestamp parameter to prevent caching
+                    const timestamp = new Date().getTime();
+                    radarImage.src = `http://www.bom.gov.au/radar/IDR282.gif?t=${timestamp}`;
+                    
+                    // Update timestamp if element exists
+                    if (radarTimestamp) {
+                        radarTimestamp.textContent = `Last updated: ${new Date().toLocaleTimeString('en-AU')}`;
+                    }
+                    
+                    // Handle errors if element exists
+                    if (radarError) {
+                        radarImage.onerror = function() {
+                            radarError.style.display = 'block';
+                        };
+                        
+                        // Safer version with null check
+                        radarImg.onload = function() {
+                            if (document.getElementById('radar-error')) {
+                                document.getElementById('radar-error').style.display = 'none';
+                            }
+                        };
+                    }
+                }
+            }
         
+        function checkRadarStatus() {
+            // Get all possible radar-related elements
+            const radarImg = document.getElementById('radar-image');
+            const radarError = document.getElementById('radar-error');
+            const radarStatusValue = document.getElementById('radar-status-value');
+            
+            // Create a new image element for testing
+            const radarTestImg = new Image();
+            
+            // Set up success/failure handlers with null safety
+            radarTestImg.onload = function() {
+                if (radarStatusValue) radarStatusValue.textContent = 'Online';
+                if (radarStatusValue) radarStatusValue.className = 'status-value online';
+                if (radarError) radarError.style.display = 'none';
+            };
+            
+            radarTestImg.onerror = function() {
+                if (radarStatusValue) radarStatusValue.textContent = 'Offline';
+                if (radarStatusValue) radarStatusValue.className = 'status-value offline';
+                if (radarError) radarError.style.display = 'block';
+            };
+            
+            // Add timestamp to prevent caching
+            radarTestImg.src = `http://www.bom.gov.au/radar/IDR282.gif?t=${new Date().getTime()}`;
+        }
+
         // Refresh the cyclone map
         function refreshCycloneMap() {
             const cycloneImage = document.getElementById('cyclone-image');
@@ -21763,25 +22714,127 @@
             cycloneImg.src = `http://www.bom.gov.au/fwo/IDQ65001.png?t=${new Date().getTime()}`;
         }
         
-        // Function to check if radar data is available
-        function checkRadarAvailability() {
-            const radarImg = new Image();
+        // Fix for the error in radar image onload handler
+        // Add this function to your JavaScript file
+        
+        function fixRadarStatusCheck() {
+            // Get the original function reference so we can restore it after fixing
+            const originalCheckRadarAvailability = window.checkRadarAvailability || function(){};
             
-            radarImg.onload = function() {
-                // If image loads successfully, mark tab as available
-                markTabAvailable('tab-radar');
-                document.getElementById('radar-error').style.display = 'none';
+            // Create a safer version
+            window.checkRadarAvailability = function() {
+                // The radar status checking happens in many places, so fix them all
+                const safelySetStyle = (element, property, value) => {
+                    if (element && element.style) {
+                        element.style[property] = value;
+                    }
+                };
+                
+                // Find all possible radar error elements
+                const radarErrorElements = [
+                    document.getElementById('radar-error'),
+                    document.querySelector('.radar-error')
+                ];
+                
+                // Create a test image
+                const radarImg = new Image();
+                
+                // Set up safe onload handler
+                radarImg.onload = function() {
+                    // Safely hide all possible error elements
+                    radarErrorElements.forEach(el => safelySetStyle(el, 'display', 'none'));
+                    
+                    // Set status if available
+                    const statusElement = document.getElementById('radar-status-value');
+                    if (statusElement) {
+                        statusElement.textContent = 'Online';
+                        statusElement.className = 'status-value online';
+                    }
+                    
+                    // Call original function if it exists and is a function
+                    if (typeof originalCheckRadarAvailability === 'function') {
+                        try {
+                            // Capture any errors and prevent them from stopping execution
+                            originalCheckRadarAvailability();
+                        } catch (e) {
+                            console.error('Error in original radar status check:', e);
+                        }
+                    }
+                };
+                
+                // Set up safe onerror handler
+                radarImg.onerror = function() {
+                    // Safely show all possible error elements
+                    radarErrorElements.forEach(el => safelySetStyle(el, 'display', 'block'));
+                    
+                    // Set status if available
+                    const statusElement = document.getElementById('radar-status-value');
+                    if (statusElement) {
+                        statusElement.textContent = 'Offline';
+                        statusElement.className = 'status-value offline';
+                    }
+                };
+                
+                // Add timestamp to prevent caching
+                radarImg.src = `http://www.bom.gov.au/radar/IDR282.gif?t=${new Date().getTime()}`;
             };
             
-            radarImg.onerror = function() {
-                // If image fails to load, mark tab as unavailable
-                markTabUnavailable('tab-radar', 'Latest radar could not be fetched.');
-                document.getElementById('radar-error').style.display = 'block';
-                document.getElementById('radar-error').textContent = 'Unable to load radar image';
+            // Fix existing radar refresh function if it exists
+            const originalRefreshRadar = window.refreshRadar || function(){};
+            
+            window.refreshRadar = function() {
+                // Get all possible radar elements
+                const radarImage = document.getElementById('radar-image');
+                const radarError = document.getElementById('radar-error');
+                const radarTimestamp = document.getElementById('radar-timestamp');
+                
+                // Only proceed if elements exist
+                if (radarImage) {
+                    // Add timestamp parameter to prevent caching
+                    const timestamp = new Date().getTime();
+                    radarImage.src = `http://www.bom.gov.au/radar/IDR282.gif?t=${timestamp}`;
+                    
+                    // Update timestamp if element exists
+                    if (radarTimestamp) {
+                        radarTimestamp.textContent = `Last updated: ${new Date().toLocaleTimeString('en-AU')}`;
+                    }
+                    
+                    // Handle errors if element exists - using safelySetStyle
+                    if (radarError) {
+                        radarImage.onerror = function() {
+                            if (radarError && radarError.style) {
+                                radarError.style.display = 'block';
+                            }
+                        };
+                        
+                        radarImage.onload = function() {
+                            if (radarError && radarError.style) {
+                                radarError.style.display = 'none';
+                            }
+                        };
+                    }
+                }
+                
+                // Try to also trigger refresh for the new interactive radar
+                const refreshBtn = document.getElementById('refresh-btn');
+                if (refreshBtn) {
+                    try {
+                        refreshBtn.click();
+                    } catch (e) {
+                        console.error('Error clicking refresh button:', e);
+                    }
+                }
             };
             
-            // Add timestamp to prevent caching
-            radarImg.src = `http://www.bom.gov.au/radar/IDR282.gif?t=${new Date().getTime()}`;
+            console.log('Radar functions fixed for compatibility');
+        }
+        
+        // Call this function after the page loads
+        document.addEventListener('DOMContentLoaded', fixRadarStatusCheck);
+        
+        // Also call it now in case the page is already loaded
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+            fixRadarStatusCheck();
         }
         
         // Add CSS for unavailable tabs
@@ -21828,7 +22881,7 @@
             
             // Check availability of cyclone and radar data
             checkCycloneAvailability();
-            checkRadarAvailability();
+            checkRadarStatus();
             
             // Set up periodic checks
             setInterval(checkCycloneAvailability, 60000); // Check every minute
@@ -22492,7 +23545,7 @@
           }
         }
         
-        // Function to render the river height chart with ultra-smooth lines and data reduction
+        // Update the river height chart rendering function to include 0 on y-axis
         function renderRiverHeightChart(heightData, location) {
           // Check if we need to reduce data points (if there are too many)
           let processedData = heightData;
@@ -22585,7 +23638,13 @@
                   }
                 },
                 y: {
-                  beginAtZero: false,
+                  beginAtZero: true,      // Start y-axis at 0
+                  suggestedMin: 0,        // Suggest minimum of 0
+                  suggestedMax: function() {
+                    // Find max value and add 20% padding
+                    const maxHeight = Math.max(...heights);
+                    return maxHeight * 1.2;
+                  }(),
                   grid: {
                     color: 'rgba(0, 0, 0, 0.03)', // Light grid
                   },
