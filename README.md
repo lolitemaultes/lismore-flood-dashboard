@@ -13,9 +13,9 @@ A real-time emergency dashboard to monitor flood conditions in the Lismore, NSW 
 
 - **Real-Time Flood Impact Map**: This map displays street addresses and areas within Lismore that are currently affected by floods in Lismore, using floor height council data
 - **Interactive Flood Height Plot Data**: Provides 4 days of water level height data in an interactive graph
-- **Live River Level Monitoring**: Real-time data from Bureau of Meteorology (BOM) gauges
+- **Live River Level Monitoring**: Real-time data from Bureau of Meteorology (BoM) gauges
 - **Traffic Webcam Integration**: Live view of road conditions at Bruxner Highway
-- **Rainfall Radar**: Current precipitation patterns from BOM Grafton radar
+- **Interactive Rainfall Radar**: Animated precipitation patterns from BoM Grafton radar
 - **Power Outage Information**: Essential Energy outage data with emergency contact information
 - **Emergency Contacts**: Quick access to SES, emergency services, and evacuation centers
 - **Console Command Listing**: List of console commands shown for testing purposes
@@ -25,25 +25,20 @@ A real-time emergency dashboard to monitor flood conditions in the Lismore, NSW 
 - **Useful Resource Panel**: Provides links to other websites to help monitor weather activity
 
 ## 👀 Upcoming Features
-- **Animated Rain Radar**: This feature will replace the radar tab with animated radar imagery for the Grafton area
 - **Flood Map Water Level Simulation**: This feature will add a simulated water rise element to the Flood Map
 - **Localised Rise & Fall Prediction**: This feature will ensure the rising and falling of flood levels are accurate, based on previous flood data
-
-## 🔧 To-Be-Fixed
-- **Minor Restyling**: Restyling to few elements on the dashboard
-- **Flood Classification Update**: Realistic flood classification for Major, Moderate and Minor flooding
 
 ## ⚙️ Technical Architecture
 
 The dashboard consists of two primary components:
 
 1. **Frontend (index.html)**: Browser-based dashboard with responsive UI
-2. **Backend (server.js)**: Node.js proxy server to fetch and parse flood data from BOM
+2. **Backend (server.js)**: Node.js proxy server to fetch and parse flood data from BoM
 
 ```
 📁 lismore-flood-proxy/
 │
-├── 📄 server.js          # Proxy server to fetch & parse BOM data
+├── 📄 server.js          # Proxy server to fetch & parse BoM data
 ├── 📄 package.json       # Node.js dependencies
 └── 📁 public/            
     ├── 📄 index.html     # Main dashboard interface
@@ -84,7 +79,7 @@ The dashboard consists of two primary components:
 
 The server exposes the following API endpoints:
 
-- **GET /flood-data**: Returns parsed flood data from the BOM website
+- **GET /flood-data**: Returns parsed flood data from the BoM website
   ```json
   {
     "success": true,
@@ -107,7 +102,7 @@ The server exposes the following API endpoints:
 
 ## 📊 Flood Categories
 
-The dashboard uses the following standard BOM flood categories:
+The dashboard uses the following standard BoM flood categories:
 
 | Category | Threshold (meters) | Impact                                      |
 |----------|-------------------|---------------------------------------------|
