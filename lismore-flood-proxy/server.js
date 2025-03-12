@@ -3,6 +3,7 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -12,6 +13,296 @@ app.use(cors());
 
 // Serve static files from the public directory
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Create a resources directory if it doesn't exist for radar resources
+const RESOURCES_DIR = path.join(__dirname, 'radar-resources');
+if (!fs.existsSync(RESOURCES_DIR)) {
+    fs.mkdirSync(RESOURCES_DIR, { recursive: true });
+}
+
+// Browser-like headers to avoid being blocked
+const BROWSER_HEADERS = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+    'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+    'Accept-Language': 'en-US,en;q=0.9',
+    'Referer': 'https://www.bom.gov.au/products/IDR282.loop.shtml'
+};
+
+// Download the legend image at server startup
+async function downloadLegendOnStartup() {
+  const imageUrl = 'http://www.bom.gov.au/products/radar_transparencies/IDR.legend.0.png';
+  const resourceFile = path.join(RESOURCES_DIR, 'legend.png');
+  
+  // Check if legend already exists
+  if (fs.existsSync(resourceFile)) {
+    console.log('Legend file already exists, skipping download');
+    return;
+  }
+  
+  try {
+    console.log(`Downloading legend image: ${imageUrl}`);
+    
+    const response = await axios.get(imageUrl, {
+      responseType: 'arraybuffer',
+      headers: BROWSER_HEADERS,
+      validateStatus: null
+    });
+    
+    if (response.status !== 200) {
+      throw new Error(`Failed to fetch legend ${imageUrl}: ${response.status}`);
+    }
+    
+    // Store in resources directory
+    fs.writeFileSync(resourceFile, response.data);
+    console.log('Legend image saved successfully');
+  } catch (error) {
+    console.error('Error downloading legend image:', error.message);
+    
+    // Create a simple fallback legend if download fails
+    try {
+      createFallbackLegend(resourceFile);
+    } catch (err) {
+      console.error('Failed to create fallback legend:', err);
+    }
+  }
+}
+
+// Create a simple fallback legend if the download fails
+function createFallbackLegend(filePath) {
+  // This is a very simple fallback - you could create a better one with canvas
+  const legendHtml = `
+    <svg width="400" height="80" xmlns="http://www.w3.org/2000/svg">
+      <rect width="100%" height="100%" fill="white"/>
+      <text x="10" y="20" font-family="Arial" font-size="14">Radar Legend</text>
+      <!-- Light to heavy rain gradient -->
+      <linearGradient id="rainGradient" x1="0%" y1="0%" x2="100%" y1="0%" y2="0%">
+        <stop offset="0%" stop-color="#C4E4FC"/>
+        <stop offset="25%" stop-color="#77B5ED"/>
+        <stop offset="50%" stop-color="#2F80C3"/>
+        <stop offset="75%" stop-color="#FFE800"/>
+        <stop offset="100%" stop-color="#FF0000"/>
+      </linearGradient>
+      <rect x="10" y="30" width="380" height="30" fill="url(#rainGradient)"/>
+      <text x="10" y="75" font-family="Arial" font-size="12">Light</text>
+      <text x="360" y="75" font-family="Arial" font-size="12">Heavy</text>
+    </svg>
+  `;
+  
+  // Convert SVG to PNG using a library or save as SVG
+  fs.writeFileSync(filePath, Buffer.from(legendHtml));
+  console.log('Created fallback legend');
+}
+
+// Download legend at startup
+downloadLegendOnStartup();
+
+// ====================== RADAR PROXY ROUTES ======================
+
+// Proxy for BOM radar images
+app.get('/radar-proxy/*', async (req, res) => {
+    try {
+        // Get the part after /radar-proxy/
+        const pathMatch = req.url.match(/\/radar-proxy(\/.+)/);
+        
+        if (!pathMatch || !pathMatch[1]) {
+            return res.status(400).send('Invalid path format');
+        }
+        
+        const imagePath = pathMatch[1];
+        const imageUrl = `http://www.bom.gov.au${imagePath}`;
+        
+        // Always fetch fresh data without caching
+        console.log(`Fetching radar: ${imageUrl}`);
+
+        const response = await axios.get(imageUrl, {
+            responseType: 'arraybuffer',
+            headers: BROWSER_HEADERS,
+            validateStatus: null
+        });
+        
+        if (response.status !== 200) {
+            console.error(`Error fetching radar ${imageUrl}: ${response.status}`);
+            return res.status(response.status).send(`Error fetching radar image: ${response.status}`);
+        }
+
+        // Store in resources directory but don't check for cache
+        const resourceFile = path.join(RESOURCES_DIR, `radar_${encodeURIComponent(imagePath)}.png`);
+        fs.writeFileSync(resourceFile, response.data);
+        
+        res.set('Content-Type', 'image/png');
+        res.send(response.data);
+    } catch (error) {
+        console.error('Error fetching radar image:', error.message);
+        res.status(500).send('Error fetching radar image');
+    }
+});
+
+// Proxy for map background layers with CORRECTED path
+app.get('/map-proxy/:filename', async (req, res) => {
+    try {
+        const filename = req.params.filename;
+        
+        // Make sure the filename is in the expected format to prevent attacks
+        if (!filename.match(/^IDR[0-9]{3}\.[a-z]+\.png$/)) {
+            return res.status(400).send('Invalid filename format');
+        }
+        
+        // CORRECTED URL path for transparencies
+        const imageUrl = `http://www.bom.gov.au/products/radar_transparencies/${filename}`;
+        
+        console.log(`Fetching map layer: ${imageUrl}`);
+
+        const response = await axios.get(imageUrl, {
+            responseType: 'arraybuffer',
+            headers: BROWSER_HEADERS,
+            validateStatus: null
+        });
+        
+        if (response.status !== 200) {
+            console.error(`Error fetching ${imageUrl}: ${response.status}`);
+            return res.status(response.status).send(`Error fetching map layer: ${response.status}`);
+        }
+
+        // Store in resources directory
+        const resourceFile = path.join(RESOURCES_DIR, filename);
+        fs.writeFileSync(resourceFile, response.data);
+        
+        res.set('Content-Type', 'image/png');
+        res.send(response.data);
+    } catch (error) {
+        console.error('Error fetching map layer:', error.message);
+        res.status(500).send('Error fetching map layer');
+    }
+});
+
+// Updated legend route to serve the local file
+app.get('/resources/legend.png', (req, res) => {
+  try {
+    const resourceFile = path.join(RESOURCES_DIR, 'legend.png');
+    
+    if (fs.existsSync(resourceFile)) {
+      // Set appropriate content type and send the file
+      res.set('Content-Type', 'image/png');
+      res.sendFile(resourceFile);
+    } else {
+      // If the file doesn't exist for some reason, try to download it
+      console.log('Legend file not found, attempting to download');
+      downloadLegendOnStartup().then(() => {
+        if (fs.existsSync(resourceFile)) {
+          res.set('Content-Type', 'image/png');
+          res.sendFile(resourceFile);
+        } else {
+          res.status(404).send('Legend not available');
+        }
+      }).catch(err => {
+        res.status(500).send('Error fetching legend');
+      });
+    }
+  } catch (error) {
+    console.error('Error serving legend image:', error.message);
+    res.status(500).send('Error serving legend image');
+  }
+});
+
+// Get the actual image filenames from the BOM loop page
+app.get('/api/radar/:radarId', async (req, res) => {
+    try {
+        const radarId = req.params.radarId;
+        // Make sure the radar ID is in the expected format
+        if (!radarId.match(/^IDR[0-9]{3}$/)) {
+            return res.status(400).json({ error: 'Invalid radar ID format' });
+        }
+
+        // Fetch the radar loop page to extract the image filenames
+        const loopUrl = `http://www.bom.gov.au/products/${radarId}.loop.shtml`;
+        console.log(`Fetching radar page: ${loopUrl}`);
+        
+        const response = await axios.get(loopUrl, { 
+            headers: BROWSER_HEADERS,
+            validateStatus: null
+        });
+        
+        if (response.status !== 200) {
+            console.error(`Error fetching radar page: ${response.status}`);
+            return res.status(response.status).json({ 
+                error: `Failed to fetch radar page: ${response.status}`
+            });
+        }
+        
+        const html = response.data;
+        
+        // Extract the JavaScript array of image filenames
+        const regex = /theImageNames\s*=\s*new Array\(\);([\s\S]*?)nImages\s*=\s*([0-9]+);/;
+        const match = html.match(regex);
+        
+        if (!match) {
+            return res.status(404).json({ error: 'Could not find radar image data on the page' });
+        }
+        
+        const imageArrayJs = match[1];
+        const nImages = parseInt(match[2], 10);
+        
+        // Parse the JavaScript array of image filenames
+        const imageFileRegex = /theImageNames\[([0-9]+)\]\s*=\s*"([^"]+)";/g;
+        const images = [];
+        let fileMatch;
+        
+        while ((fileMatch = imageFileRegex.exec(imageArrayJs)) !== null) {
+            const index = parseInt(fileMatch[1], 10);
+            const imagePath = fileMatch[2];
+            
+            // Extract the timestamp from the filename
+            const timestampMatch = imagePath.match(/\.(\d{12})\.png$/);
+            let timestamp = new Date();
+            
+            if (timestampMatch) {
+                const timestampStr = timestampMatch[1];
+                // Parse YYYYMMDDHHNN format
+                const year = timestampStr.substring(0, 4);
+                const month = parseInt(timestampStr.substring(4, 6)) - 1; // JS months are 0-based
+                const day = timestampStr.substring(6, 8);
+                const hour = timestampStr.substring(8, 10);
+                const minute = timestampStr.substring(10, 12);
+                
+                timestamp = new Date(Date.UTC(year, month, day, hour, minute));
+            }
+            
+            images[index] = {
+                url: `/radar-proxy${imagePath}`,
+                originalUrl: `http://www.bom.gov.au${imagePath}`,
+                timestamp: timestamp.toISOString()
+            };
+        }
+        
+        // Get radar name and range from the page title
+        const $ = cheerio.load(html);
+        const pageTitle = $('title').text();
+        const radarName = pageTitle.split('Radar')[0].trim();
+        
+        // Filter out any undefined elements in the array
+        const filteredImages = images.filter(img => img);
+        
+        // Extract Km range from the JavaScript
+        const kmMatch = html.match(/Km\s*=\s*([0-9]+);/);
+        const range = kmMatch ? `${kmMatch[1]}km` : '256km';
+        
+        res.json({
+            id: radarId,
+            name: radarName || radarId,
+            range: range,
+            images: filteredImages,
+            lastUpdated: new Date().toISOString()
+        });
+    } catch (error) {
+        console.error('Error fetching radar data:', error);
+        res.status(500).json({ 
+            error: 'Failed to fetch radar data', 
+            details: error.message 
+        });
+    }
+});
+
+// ====================== FLOOD DATA ROUTES ======================
 
 // API route for flood data
 app.get('/flood-data', async (req, res) => {
@@ -115,13 +406,13 @@ app.get('/flood-data', async (req, res) => {
               if (statusText.includes('rising')) status = 'rising';
               else if (statusText.includes('falling')) status = 'falling';
               
-              // Add to data array
+              // When creating riverData objects:
               riverData.push({
                 location,
                 time,
                 waterLevel,
                 status,
-                floodCategory: determineFloodCategory(waterLevel)
+                floodCategory: determineFloodCategory(waterLevel, location)
               });
             }
             
@@ -215,13 +506,45 @@ app.get('/flood-data', async (req, res) => {
   }
 });
 
-// Determine flood category based on water level
-function determineFloodCategory(level) {
+// Define which locations have official BoM flood classifications
+const officialClassificationLocations = [
+  "Wilsons R at Eltham",
+  "Wilsons R at Lismore (mAHD)",
+  "Leycester Ck at Rock Valley",
+  "Coopers Ck at Corndale",
+  // Add any other locations with official BoM classifications
+];
+
+// Define flood thresholds for specific locations
+const floodLevelThresholds = {
+  "Wilsons R at Eltham": { minor: 6.00, moderate: 8.20, major: 9.60 },
+  "Wilsons R at Lismore (mAHD)": { minor: 4.20, moderate: 7.20, major: 9.70 },
+  "Leycester Ck at Rock Valley": { minor: 6.00, moderate: 8.00, major: 9.00 },
+  "Coopers Ck at Corndale": { minor: 6.00, moderate: 7.50, major: 9.50 },
+};
+
+// Updated function to check if a location has official classifications first
+function determineFloodCategory(level, location) {
+  // First check if this location has official classifications
+  if (!officialClassificationLocations.includes(location)) {
+    return "N/A"; // No official classification
+  }
+  
   if (!level) return 'Unknown';
   
-  if (level >= 9.70) return 'Major';
-  if (level >= 7.20) return 'Moderate';
-  if (level >= 4.20) return 'Minor';
+  // Get thresholds for this location
+  const thresholds = floodLevelThresholds[location];
+  
+  // If we don't have specific thresholds for this official location,
+  // we should log this as an error but still return something
+  if (!thresholds) {
+    console.error(`Missing thresholds for official location: ${location}`);
+    return 'Unknown';
+  }
+  
+  if (level >= thresholds.major) return 'Major';
+  if (level >= thresholds.moderate) return 'Moderate';
+  if (level >= thresholds.minor) return 'Minor';
   return 'No flooding';
 }
 
@@ -453,7 +776,7 @@ app.get('/river-data', async (req, res) => {
 
 // Start the server
 app.listen(PORT, () => {
-  console.log(`Flood data proxy server running on port ${PORT}`);
+  console.log(`Flood dashboard server running on port ${PORT}`);
   console.log(`Dashboard available at http://localhost:${PORT}`);
   console.log(`API available at http://localhost:${PORT}/flood-data`);
   console.log(`Public directory path: ${path.join(__dirname, 'public')}`);
