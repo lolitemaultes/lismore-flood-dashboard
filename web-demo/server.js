@@ -15,7 +15,7 @@ app.use(cors());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Create a resources directory if it doesn't exist for radar resources
-const RESOURCES_DIR = path.join(__dirname, 'radar-resources');
+const RESOURCES_DIR = path.join(__dirname, 'resources/Rain Radar');
 if (!fs.existsSync(RESOURCES_DIR)) {
     fs.mkdirSync(RESOURCES_DIR, { recursive: true });
 }
