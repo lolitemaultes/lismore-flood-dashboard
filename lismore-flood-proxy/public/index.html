@@ -21304,6 +21304,7 @@
                 let isPlaying = false;
                 let animationInterval;
                 let animationDelay = 500; // milliseconds
+                let animationRequestId = null; // Add this variable declaration
                 let mapLayersLoaded = false;
                 let preloadedImages = new Map(); // To store preloaded images
                 
@@ -21457,28 +21458,37 @@
                     }
                 }
                 
-                // Preload all radar images for smoother playback
+                // Modify the preloadAllImages function to return a promise that resolves when all images are loaded
                 async function preloadAllImages() {
-                    if (!radarImages || radarImages.length === 0) return;
-                    
-                    console.log('Preloading all radar images for smooth playback...');
-                    
-                    // Create an array of promises to preload all images with error handling
-                    const preloadPromises = radarImages.map(image => 
-                        preloadImage(image.url)
-                            .catch(err => {
-                                console.warn(`Failed to preload: ${image.url}`, err);
-                                return null; // Continue with other images if one fails
-                            })
-                    );
-                    
-                    // Wait for all images to be preloaded
-                    try {
-                        await Promise.all(preloadPromises);
-                        console.log('All radar images preloaded');
-                    } catch (err) {
-                        console.error('Error during image preloading:', err);
-                    }
+                  if (!radarImages || radarImages.length === 0) return;
+                  
+                  console.log('Preloading all radar images for smooth playback...');
+                  
+                  // Create an array of promises to preload all images
+                  const preloadPromises = radarImages.map(image => 
+                    new Promise((resolve, reject) => {
+                      const img = new Image();
+                      img.onload = () => {
+                        preloadedImages.set(image.url, img);
+                        resolve(image.url);
+                      };
+                      img.onerror = () => {
+                        console.warn(`Failed to preload: ${image.url}`);
+                        resolve(null); // Resolve anyway so we don't block other images
+                      };
+                      img.src = image.url;
+                    })
+                  );
+                  
+                  // Wait for all images to be preloaded
+                  try {
+                    await Promise.all(preloadPromises);
+                    console.log('All radar images preloaded successfully');
+                    return true;
+                  } catch (err) {
+                    console.error('Error during image preloading:', err);
+                    return false;
+                  }
                 }
             
                 // Function to update the radar image
@@ -21513,36 +21523,48 @@
                     }
                 }
             
-                // Animation control functions with improved smoothness
                 function playAnimation() {
-                    if (!radarImages || radarImages.length === 0) return;
+                  if (!radarImages || radarImages.length === 0) return;
+                  
+                  isPlaying = true;
+                  if (btnPlay) btnPlay.disabled = true;
+                  if (btnPause) btnPause.disabled = false;
+                  
+                  // Clear any existing interval and animation frame
+                  clearTimeout(animationInterval);
+                  if (animationRequestId) {
+                    cancelAnimationFrame(animationRequestId);
+                  }
+                  
+                  // Define the animation frame function with better timing control
+                  const nextFrame = () => {
+                    // Calculate next frame index
+                    const nextIndex = (currentFrame + 1) % radarImages.length;
                     
-                    isPlaying = true;
-                    if (btnPlay) btnPlay.disabled = true;
-                    if (btnPause) btnPause.disabled = false;
+                    // Update the displayed image
+                    updateRadarImage(nextIndex);
                     
-                    // Clear any existing interval
-                    clearInterval(animationInterval);
-                    
-                    // Define the animation frame function
-                    const nextFrame = () => {
-                        currentFrame = (currentFrame + 1) % radarImages.length;
-                        updateRadarImage(currentFrame);
-                        
-                        // Schedule the next frame
-                        animationInterval = setTimeout(nextFrame, animationDelay);
-                    };
-                    
-                    // Start the animation loop
-                    animationInterval = setTimeout(nextFrame, animationDelay);
+                    // Schedule the next frame using setTimeout
+                    animationInterval = setTimeout(() => {
+                      // Use requestAnimationFrame for smoother animation
+                      animationRequestId = requestAnimationFrame(nextFrame);
+                    }, animationDelay);
+                  };
+                  
+                  // Start the animation loop
+                  nextFrame();
                 }
             
                 function pauseAnimation() {
-                    isPlaying = false;
-                    if (btnPlay) btnPlay.disabled = false;
-                    if (btnPause) btnPause.disabled = true;
-                    
-                    clearTimeout(animationInterval);
+                  isPlaying = false;
+                  if (btnPlay) btnPlay.disabled = false;
+                  if (btnPause) btnPause.disabled = true;
+                  
+                  clearTimeout(animationInterval);
+                  if (animationRequestId) {
+                    cancelAnimationFrame(animationRequestId);
+                    animationRequestId = null;
+                  }
                 }
             
                 function prevFrame() {
