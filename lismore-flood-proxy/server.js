@@ -15,9 +15,9 @@ app.use(cors());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Create a resources directory if it doesn't exist for radar resources
-const RESOURCES_DIR = path.join(__dirname, 'radar-resources');
+const RESOURCES_DIR = path.join(__dirname, '/public/resources/Rain Radar');
 if (!fs.existsSync(RESOURCES_DIR)) {
-    fs.mkdirSync(RESOURCES_DIR, { recursive: true });
+    fs.mkdirSync(_DIR, { recursive: true });
 }
 
 // Browser-like headers to avoid being blocked
@@ -31,7 +31,7 @@ const BROWSER_HEADERS = {
 // Download the legend image at server startup
 async function downloadLegendOnStartup() {
   const imageUrl = 'http://www.bom.gov.au/products/radar_transparencies/IDR.legend.0.png';
-  const resourceFile = path.join(RESOURCES_DIR, 'legend.png');
+  const resourceFile = path.join(_DIR, 'legend.png');
   
   // Check if legend already exists
   if (fs.existsSync(resourceFile)) {
@@ -52,7 +52,7 @@ async function downloadLegendOnStartup() {
       throw new Error(`Failed to fetch legend ${imageUrl}: ${response.status}`);
     }
     
-    // Store in resources directory
+    // Store in  directory
     fs.writeFileSync(resourceFile, response.data);
     console.log('Legend image saved successfully');
   } catch (error) {
