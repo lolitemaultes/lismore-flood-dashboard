@@ -2,7 +2,6 @@
 
 ![Version](https://img.shields.io/badge/version-2.0.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
-[![Live Demo](https://img.shields.io/badge/View%20Live-Demo-brightgreen)](https://lismore-flood-dashboard.onrender.com)
 
 A real-time emergency dashboard to monitor flood conditions in the Lismore, NSW area. This dashboard aggregates critical information from multiple sources to assist emergency management and the public during flood events.
 
