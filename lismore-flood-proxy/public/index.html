@@ -3330,6 +3330,7 @@
 
                         if (radarImages[frameIndex] && radarImages[frameIndex].url) {
                             // Update the image
+                            console.log(`>>> UPDATE RADAR IMAGE: frame ${frameIndex}, sessionID ${currentAnimationSessionId}, isPlaying=${isPlaying}, isRefreshing=${isRefreshing}`);
                             radarImage.src = radarImages[frameIndex].url;
 
                             // Update the timestamp
@@ -3380,35 +3381,39 @@
 
                   // Define the animation loop - SIMPLIFIED (no race conditions)
                   const advanceFrame = () => {
+                    console.log(`>>> advanceFrame CALLED: session ${mySessionId}, current=${currentAnimationSessionId}, isPlaying=${isPlaying}, isRefreshing=${isRefreshing}`);
+
                     // CRITICAL: Kill this loop if it's from an old session
                     if (mySessionId !== currentAnimationSessionId) {
-                        console.log(`advanceFrame: OLD SESSION ${mySessionId} (current is ${currentAnimationSessionId}), KILLING THIS LOOP`);
+                        console.log(`!!! advanceFrame: OLD SESSION ${mySessionId} (current is ${currentAnimationSessionId}), KILLING THIS LOOP !!!`);
                         return;
                     }
 
                     if (!isPlaying) {
-                        console.log(`advanceFrame session ${mySessionId}: isPlaying false, STOPPING`);
+                        console.log(`!!! advanceFrame session ${mySessionId}: isPlaying false, STOPPING !!!`);
                         return; // Safety check
                     }
                     if (isRefreshing) {
-                        console.log(`advanceFrame session ${mySessionId}: isRefreshing true, STOPPING`);
+                        console.log(`!!! advanceFrame session ${mySessionId}: isRefreshing true, STOPPING !!!`);
                         return; // CRITICAL: Stop animation during refresh
                     }
 
                     // CRITICAL: Check lockout period
                     const timeSinceRefresh = Date.now() - lastRefreshTime;
                     if (lastRefreshTime > 0 && timeSinceRefresh < ANIMATION_LOCKOUT_MS) {
-                        console.log(`advanceFrame session ${mySessionId}: In lockout period, STOPPING (${Math.ceil((ANIMATION_LOCKOUT_MS - timeSinceRefresh) / 1000)}s remaining)`);
+                        console.log(`!!! advanceFrame session ${mySessionId}: In lockout period, STOPPING (${Math.ceil((ANIMATION_LOCKOUT_MS - timeSinceRefresh) / 1000)}s remaining) !!!`);
                         return;
                     }
 
                     // ATOMIC: Update currentFrame first, THEN display
+                    console.log(`>>> advanceFrame session ${mySessionId}: ADVANCING from frame ${currentFrame} to ${(currentFrame + 1) % radarImages.length}`);
                     currentFrame = (currentFrame + 1) % radarImages.length;
                     updateRadarImage(currentFrame);
 
                     // Schedule next frame and TRACK the timeout ID
                     animationInterval = setTimeout(advanceFrame, animationDelay);
                     allTimeoutIds.add(animationInterval); // Track this timeout so we can kill it
+                    console.log(`>>> advanceFrame session ${mySessionId}: Scheduled next frame with timeout ID ${animationInterval}`);
                   };
 
                   // Start the animation loop
@@ -3635,6 +3640,12 @@
                     // Use animationDelay + buffer to catch any callbacks that were scheduled with current delay
                     const safetyDelay = Math.max(animationDelay * 2, 1000); // At least 1 second, or 2x animation delay
                     setTimeout(() => {
+                        console.log('===== SAFETY DELAY COMPLETE - FINAL CLEANUP =====');
+
+                        // CRITICAL: Bump session ID ONE MORE TIME to kill any zombie loops
+                        currentAnimationSessionId++;
+                        console.log(`>>> FINAL session bump to ID: ${currentAnimationSessionId}`);
+
                         // FORCE STOP - make absolutely sure animation is dead
                         isPlaying = false;
                         animationLock = false;
@@ -3655,7 +3666,7 @@
 
                         isRefreshing = false;
                         console.log(`===== REFRESH COMPLETE =====`);
-                        console.log(`ALL timers cleared, isPlaying FORCED to false`);
+                        console.log(`isRefreshing = false, isPlaying = false, animationLock = false`);
                         console.log(`ANIMATION LOCKED OUT for ${ANIMATION_LOCKOUT_MS / 1000} seconds from refresh start`);
                         console.log(`Lockout will end at: ${new Date(lastRefreshTime + ANIMATION_LOCKOUT_MS).toLocaleTimeString()}`);
 
@@ -3668,6 +3679,12 @@
                                     updateRadarImage(0);
                                 }
                             }, remainingLockout + 100); // Add 100ms buffer
+                        } else {
+                            // Lockout already expired, display now
+                            console.log('=== LOCKOUT ALREADY EXPIRED - Displaying first frame now ===');
+                            if (radarImages && radarImages.length > 0 && !isPlaying) {
+                                updateRadarImage(0);
+                            }
                         }
                     }, safetyDelay);
                 }
