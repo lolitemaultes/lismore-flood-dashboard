@@ -3122,6 +3122,7 @@
                 let animationLock = false; // Prevent concurrent animations
                 let isRefreshing = false; // Prevent animation during data refresh
                 let forceClearInterval = null; // Interval to forcefully clear radar during refresh
+                let allTimeoutIds = new Set(); // Track ALL setTimeout IDs to kill them all
                 
                 // Function to format date in locale format
                 function formatDate(dateString) {
@@ -3363,8 +3364,9 @@
                     currentFrame = (currentFrame + 1) % radarImages.length;
                     updateRadarImage(currentFrame);
 
-                    // Schedule next frame
+                    // Schedule next frame and TRACK the timeout ID
                     animationInterval = setTimeout(advanceFrame, animationDelay);
+                    allTimeoutIds.add(animationInterval); // Track this timeout so we can kill it
                   };
 
                   // Start the animation loop
@@ -3386,6 +3388,11 @@
                     cancelAnimationFrame(animationRequestId);
                     animationRequestId = null;
                   }
+
+                  // CRITICAL: Clear ALL tracked timeouts
+                  allTimeoutIds.forEach(id => clearTimeout(id));
+                  allTimeoutIds.clear();
+                  console.log('Cleared all animation timeouts');
                 }
             
                 function prevFrame() {
@@ -3519,17 +3526,21 @@
                     }, 50); // Reset every 50ms to KILL any frame changes
 
                     // NOW force stop animation
-                    pauseAnimation();
+                    pauseAnimation(); // This clears allTimeoutIds
                     animationLock = false;
                     isPlaying = false;
 
-                    // Clear ALL timers aggressively
+                    // Clear ALL timers aggressively - again!
+                    allTimeoutIds.forEach(id => clearTimeout(id));
+                    allTimeoutIds.clear();
                     if (animationInterval) {
                         clearTimeout(animationInterval);
                         animationInterval = null;
                     }
-                    // Double-clear to catch any pending
+                    // Triple-clear to catch any pending
                     setTimeout(() => {
+                        allTimeoutIds.forEach(id => clearTimeout(id));
+                        allTimeoutIds.clear();
                         if (animationInterval) {
                             clearTimeout(animationInterval);
                             animationInterval = null;
@@ -3573,13 +3584,26 @@
                     // Use animationDelay + buffer to catch any callbacks that were scheduled with current delay
                     const safetyDelay = Math.max(animationDelay * 2, 1000); // At least 1 second, or 2x animation delay
                     setTimeout(() => {
+                        // FORCE STOP - make absolutely sure animation is dead
+                        isPlaying = false;
+                        animationLock = false;
+
+                        // Clear ALL timeouts one more time
+                        allTimeoutIds.forEach(id => clearTimeout(id));
+                        allTimeoutIds.clear();
+                        if (animationInterval) {
+                            clearTimeout(animationInterval);
+                            animationInterval = null;
+                        }
+
                         // STOP the force clearing interval
                         if (forceClearInterval) {
                             clearInterval(forceClearInterval);
                             forceClearInterval = null;
                         }
+
                         isRefreshing = false;
-                        console.log('Refresh complete - force clearing stopped, animation capability re-enabled (but animation is STOPPED)');
+                        console.log('Refresh complete - ALL timers cleared, isPlaying FORCED to false, animation is DEAD');
                     }, safetyDelay);
                 }
             
