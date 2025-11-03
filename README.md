@@ -41,6 +41,7 @@ The dashboard consists of two primary components:
 ├── 📄 package.json       # Node.js dependencies
 └── 📁 public/            
     ├── 📄 index.html     # Main dashboard interface
+    ├── 📄 flood-data.json # Floor height data for map
     └── 📁 resources/     # Static assets for the dashboard and user information
 ```
 
