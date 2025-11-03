@@ -1036,33 +1036,83 @@ async function fetchRiverHeightData(location) {
     // If pre tag approach didn't work, try tables
     if (riverData.length === 0) {
       logVerbose('No data in pre tag, checking tables');
-      
-      // Try various table selectors
-      const tableSelectors = ['table.tabledata', 'table'];
-      
+
+      // Try various table selectors - prioritize the specific BOM table format
+      const tableSelectors = [
+        'table#tableStyle1',      // Specific BOM table format
+        'table.tableStyle1',       // Class-based variant
+        'table.tabledata',         // Legacy format
+        'table'                    // Generic fallback
+      ];
+
+      if (VERBOSE_LOGGING) {
+        // Log all tables found for debugging
+        console.log(`\nFound ${tableHtml('table').length} total tables on the page`);
+        tableHtml('table').each((i, table) => {
+          const tableId = tableHtml(table).attr('id') || 'no-id';
+          const tableClass = tableHtml(table).attr('class') || 'no-class';
+          const rowCount = tableHtml(table).find('tr').length;
+          console.log(`  Table ${i}: id="${tableId}" class="${tableClass}" rows=${rowCount}`);
+        });
+      }
+
       for (const selector of tableSelectors) {
-        tableHtml(selector).each((i, table) => {
+        const matchingTables = tableHtml(selector);
+        if (matchingTables.length > 0) {
+          logVerbose(`Trying selector: ${selector} (found ${matchingTables.length} tables)`);
+        }
+
+        matchingTables.each((i, table) => {
+          let headerFound = false;
+
           tableHtml(table).find('tr').each((j, row) => {
+            // Check if this is a header row
+            const headers = tableHtml(row).find('th');
+            if (headers.length >= 2) {
+              const header1 = tableHtml(headers[0]).text().trim().toLowerCase();
+              const header2 = tableHtml(headers[1]).text().trim().toLowerCase();
+
+              // Verify this is the correct header format
+              if ((header1.includes('date') || header1.includes('time')) &&
+                  (header2.includes('water') || header2.includes('level'))) {
+                headerFound = true;
+                logVerbose(`Found table header: "${tableHtml(headers[0]).text().trim()}" | "${tableHtml(headers[1]).text().trim()}"`);
+              }
+              return; // Skip header row
+            }
+
+            // Process data rows
             const cells = tableHtml(row).find('td');
             if (cells.length >= 2) {
               const timeStr = tableHtml(cells[0]).text().trim();
               const heightStr = tableHtml(cells[1]).text().trim();
-              
+
+              if (VERBOSE_LOGGING && riverData.length < 3) {
+                console.log(`  Row ${j}: time="${timeStr}" height="${heightStr}"`);
+              }
+
               // Check if this looks like a time and height
               if (timeStr.match(/\d{2}\/\d{2}\/\d{4}/) || timeStr.match(/\d{2}:\d{2}/)) {
                 const height = parseFloat(heightStr);
-                if (!isNaN(height)) {
+                if (!isNaN(height) && height > 0) {
                   riverData.push({
                     time: timeStr,
-                    height: height
+                    waterLevel: height  // Use consistent property name with rest of API
                   });
                 }
               }
             }
           });
+
+          if (VERBOSE_LOGGING && riverData.length > 0) {
+            console.log(`Extracted ${riverData.length} data points from this table`);
+          }
         });
-        
-        if (riverData.length > 0) break; // Stop if we found data
+
+        if (riverData.length > 0) {
+          logVerbose(`Successfully extracted data using selector: ${selector}`);
+          break; // Stop if we found data
+        }
       }
     }
     
