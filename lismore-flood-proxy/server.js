@@ -1154,20 +1154,16 @@ async function fetchRiverHeightData(location) {
 
     logInfo(`Extracted ${riverData.length} data points for ${location}`);
 
-    // CRITICAL: BOM tables are ordered oldest-first, but we need newest-first
-    // Reverse the array so the most recent data is at index 0
-    riverData.reverse();
-
     // Log sample data for debugging - show FIRST and LAST entries
     if (VERBOSE_LOGGING && riverData.length > 0) {
       console.log(`\n========================================`);
-      console.log(`DATA ORDER CHECK FOR: ${location}`);
+      console.log(`DATA ORDER FOR: ${location}`);
       console.log(`Total points: ${riverData.length}`);
-      console.log(`\nFIRST 3 data points (NEWEST - after reverse):`);
+      console.log(`\nFIRST 3 data points (OLDEST - left side of graph):`);
       riverData.slice(0, 3).forEach((point, idx) => {
         console.log(`  [${idx}] Time: ${point.time}, Height: ${point.height}`);
       });
-      console.log(`\nLAST 3 data points (OLDEST - after reverse):`);
+      console.log(`\nLAST 3 data points (NEWEST - right side of graph):`);
       riverData.slice(-3).forEach((point, idx) => {
         console.log(`  [${riverData.length - 3 + idx}] Time: ${point.time}, Height: ${point.height}`);
       });
