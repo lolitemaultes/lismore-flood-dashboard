@@ -3125,6 +3125,7 @@
                 let allTimeoutIds = new Set(); // Track ALL setTimeout IDs to kill them all
                 let lastRefreshTime = 0; // Timestamp of last refresh to prevent animation restart
                 const ANIMATION_LOCKOUT_MS = 5000; // Prevent animation for 5 seconds after refresh
+                let currentAnimationSessionId = 0; // Unique ID for each animation session to kill old loops
                 
                 // Function to format date in locale format
                 function formatDate(dateString) {
@@ -3372,10 +3373,34 @@
                   if (btnPlay) btnPlay.disabled = true;
                   if (btnPause) btnPause.disabled = false;
 
+                  // CRITICAL: Create NEW animation session to kill old loops
+                  currentAnimationSessionId++;
+                  const mySessionId = currentAnimationSessionId;
+                  console.log(`>>> Starting NEW animation session ID: ${mySessionId}`);
+
                   // Define the animation loop - SIMPLIFIED (no race conditions)
                   const advanceFrame = () => {
-                    if (!isPlaying) return; // Safety check
-                    if (isRefreshing) return; // CRITICAL: Stop animation during refresh
+                    // CRITICAL: Kill this loop if it's from an old session
+                    if (mySessionId !== currentAnimationSessionId) {
+                        console.log(`advanceFrame: OLD SESSION ${mySessionId} (current is ${currentAnimationSessionId}), KILLING THIS LOOP`);
+                        return;
+                    }
+
+                    if (!isPlaying) {
+                        console.log(`advanceFrame session ${mySessionId}: isPlaying false, STOPPING`);
+                        return; // Safety check
+                    }
+                    if (isRefreshing) {
+                        console.log(`advanceFrame session ${mySessionId}: isRefreshing true, STOPPING`);
+                        return; // CRITICAL: Stop animation during refresh
+                    }
+
+                    // CRITICAL: Check lockout period
+                    const timeSinceRefresh = Date.now() - lastRefreshTime;
+                    if (lastRefreshTime > 0 && timeSinceRefresh < ANIMATION_LOCKOUT_MS) {
+                        console.log(`advanceFrame session ${mySessionId}: In lockout period, STOPPING (${Math.ceil((ANIMATION_LOCKOUT_MS - timeSinceRefresh) / 1000)}s remaining)`);
+                        return;
+                    }
 
                     // ATOMIC: Update currentFrame first, THEN display
                     currentFrame = (currentFrame + 1) % radarImages.length;
@@ -3515,6 +3540,10 @@
                 // Refresh function with connectivity check
                 async function refreshData() {
                     console.log('===== REFRESH DATA STARTING =====');
+
+                    // CRITICAL: Invalidate current animation session to kill ALL running loops
+                    currentAnimationSessionId++;
+                    console.log(`>>> INVALIDATED animation session, new ID: ${currentAnimationSessionId}`);
 
                     // CRITICAL: IMMEDIATELY clear the data FIRST before anything else
                     // This kills any pending setTimeout callbacks - they'll hit updateRadarImage's length check
