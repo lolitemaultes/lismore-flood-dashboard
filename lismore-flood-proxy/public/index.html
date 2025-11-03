@@ -3885,13 +3885,29 @@
                 document.addEventListener('DOMContentLoaded', () => {
                     // Check if we're on a page with the radar tab
                     if (document.getElementById('content-radar')) {
-                        initializeRadar();
+                        // If radar already initialized, refresh data instead of re-initializing
+                        if (window.radarGlobalState && window.radarGlobalState.radarInitialized) {
+                            console.log('>>> Radar already initialized - calling refreshData() instead <<<');
+                            if (window.refreshData) {
+                                window.refreshData();
+                            }
+                        } else {
+                            initializeRadar();
+                        }
                     }
                 });
             } else {
                 // Document already loaded
                 if (document.getElementById('content-radar')) {
-                    initializeRadar();
+                    // If radar already initialized, refresh data instead of re-initializing
+                    if (window.radarGlobalState && window.radarGlobalState.radarInitialized) {
+                        console.log('>>> Radar already initialized - calling refreshData() instead <<<');
+                        if (window.refreshData) {
+                            window.refreshData();
+                        }
+                    } else {
+                        initializeRadar();
+                    }
                 }
             }
             
