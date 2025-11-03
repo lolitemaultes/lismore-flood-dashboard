@@ -3123,6 +3123,8 @@
                 let isRefreshing = false; // Prevent animation during data refresh
                 let forceClearInterval = null; // Interval to forcefully clear radar during refresh
                 let allTimeoutIds = new Set(); // Track ALL setTimeout IDs to kill them all
+                let lastRefreshTime = 0; // Timestamp of last refresh to prevent animation restart
+                const ANIMATION_LOCKOUT_MS = 5000; // Prevent animation for 5 seconds after refresh
                 
                 // Function to format date in locale format
                 function formatDate(dateString) {
@@ -3307,11 +3309,19 @@
             
                 // Function to update the radar image
                 function updateRadarImage(frameIndex) {
-                    // CRITICAL: Block ALL updates if refreshing or not playing
+                    // CRITICAL: Block ALL updates if refreshing
                     if (isRefreshing) {
                         console.log('updateRadarImage blocked: refreshing');
                         return;
                     }
+
+                    // CRITICAL: Block updates during lockout period after refresh
+                    const timeSinceRefresh = Date.now() - lastRefreshTime;
+                    if (lastRefreshTime > 0 && timeSinceRefresh < ANIMATION_LOCKOUT_MS) {
+                        console.log(`updateRadarImage blocked: lockout period (${Math.ceil((ANIMATION_LOCKOUT_MS - timeSinceRefresh) / 1000)}s remaining)`);
+                        return;
+                    }
+
                     if (!radarImages || radarImages.length === 0 || !radarImage) return;
 
                     if (frameIndex >= 0 && frameIndex < radarImages.length) {
@@ -3346,6 +3356,13 @@
                   if (!radarImages || radarImages.length === 0) return;
                   if (animationLock) return; // Prevent concurrent animations
                   if (isRefreshing) return; // Prevent animation during refresh
+
+                  // CRITICAL: Prevent animation for X seconds after refresh
+                  const timeSinceRefresh = Date.now() - lastRefreshTime;
+                  if (lastRefreshTime > 0 && timeSinceRefresh < ANIMATION_LOCKOUT_MS) {
+                      console.log(`Animation blocked - ${Math.ceil((ANIMATION_LOCKOUT_MS - timeSinceRefresh) / 1000)}s lockout remaining`);
+                      return;
+                  }
 
                   // CRITICAL: Stop any existing animation first
                   pauseAnimation();
@@ -3497,12 +3514,17 @@
 
                 // Refresh function with connectivity check
                 async function refreshData() {
+                    console.log('===== REFRESH DATA STARTING =====');
+
                     // CRITICAL: IMMEDIATELY clear the data FIRST before anything else
                     // This kills any pending setTimeout callbacks - they'll hit updateRadarImage's length check
                     const oldRadarImages = radarImages;
                     radarImages = [];
                     currentFrame = 0;
                     isRefreshing = true;
+
+                    // Mark refresh time to prevent animation restart
+                    lastRefreshTime = Date.now();
 
                     // BLANK IMAGE DATA URL
                     const BLANK_IMAGE = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
@@ -3603,7 +3625,21 @@
                         }
 
                         isRefreshing = false;
-                        console.log('Refresh complete - ALL timers cleared, isPlaying FORCED to false, animation is DEAD');
+                        console.log(`===== REFRESH COMPLETE =====`);
+                        console.log(`ALL timers cleared, isPlaying FORCED to false`);
+                        console.log(`ANIMATION LOCKED OUT for ${ANIMATION_LOCKOUT_MS / 1000} seconds from refresh start`);
+                        console.log(`Lockout will end at: ${new Date(lastRefreshTime + ANIMATION_LOCKOUT_MS).toLocaleTimeString()}`);
+
+                        // Schedule display of first frame AFTER lockout expires
+                        const remainingLockout = ANIMATION_LOCKOUT_MS - (Date.now() - lastRefreshTime);
+                        if (remainingLockout > 0) {
+                            setTimeout(() => {
+                                console.log('=== LOCKOUT EXPIRED - Displaying first frame ===');
+                                if (radarImages && radarImages.length > 0 && !isPlaying) {
+                                    updateRadarImage(0);
+                                }
+                            }, remainingLockout + 100); // Add 100ms buffer
+                        }
                     }, safetyDelay);
                 }
             
