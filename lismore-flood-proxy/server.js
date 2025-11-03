@@ -533,25 +533,32 @@ async function fetchBomFloodData() {
           if (cells.length >= 4) {
             // Extract data from the row
             const location = cells.eq(0).text().trim();
-            const time = cells.eq(1).text().trim();
 
-            // Parse water level
-            let waterLevelText = cells.eq(2).text().trim();
-            const waterLevelMatch = waterLevelText.match(/(\d+\.\d+)/);
-            const waterLevel = waterLevelMatch ? parseFloat(waterLevelMatch[1]) : null;
-
-            // Debug logging for water level extraction
-            if (VERBOSE_LOGGING && ALLOWED_LOCATIONS.includes(location)) {
-              console.log(`\nParsing: ${location}`);
-              console.log(`  Cell 0 (Location): "${cells.eq(0).text().trim()}"`);
-              console.log(`  Cell 1 (Time): "${cells.eq(1).text().trim()}"`);
-              console.log(`  Cell 2 (Water Level): "${cells.eq(2).text().trim()}"`);
-              console.log(`  Cell 3 (Status): "${cells.eq(3).text().trim()}"`);
-              console.log(`  Extracted water level: ${waterLevel}m`);
+            // Enhanced debug logging - show ALL cells for problem diagnosis
+            if (VERBOSE_LOGGING && location.includes('Wilsons') && location.includes('Lismore')) {
+              console.log(`\n========================================`);
+              console.log(`PARSING ROW FOR: ${location}`);
+              console.log(`Total cells in row: ${cells.length}`);
+              for (let i = 0; i < cells.length; i++) {
+                console.log(`  Cell ${i}: "${cells.eq(i).text().trim()}"`);
+              }
+              console.log(`========================================\n`);
             }
 
-            // Parse status
-            const statusText = cells.eq(3).text().trim().toLowerCase();
+            // BOM table format: [Location, Auto/Manual, Time, Water Level, Unit/AHD, Status, ...]
+            const time = cells.eq(2).text().trim(); // Cell 2 is the actual time
+
+            // Parse water level - Cell 3 contains the water level (can be negative for AHD)
+            let waterLevelText = cells.eq(3).text().trim();
+            let waterLevelMatch = waterLevelText.match(/(-?\d+\.\d+)/); // Allow negative numbers
+            let waterLevel = waterLevelMatch ? parseFloat(waterLevelMatch[1]) : null;
+
+            if (VERBOSE_LOGGING && location.includes('Wilsons') && location.includes('Lismore')) {
+              console.log(`Extracted: Time="${time}", WaterLevel=${waterLevel}m`);
+            }
+
+            // Parse status - typically in Cell 5
+            const statusText = cells.eq(5).text().trim().toLowerCase();
             let status = 'steady';
             if (statusText.includes('rising')) status = 'rising';
             else if (statusText.includes('falling')) status = 'falling';
@@ -591,34 +598,37 @@ async function fetchBomFloodData() {
         
         if (cells.length >= 4) {
           const location = cells.eq(0).text().trim();
-          
+
           // Only include rows related to Wilsons or Richmond River
-          if (location.toLowerCase().includes('wilson') || 
+          if (location.toLowerCase().includes('wilson') ||
               location.toLowerCase().includes('richmond') ||
               location.toLowerCase().includes('lismore')) {
-            
-            const time = cells.eq(1).text().trim();
 
-            // Parse water level
-            let waterLevelText = cells.eq(2).text().trim();
-            const waterLevelMatch = waterLevelText.match(/(\d+\.\d+)/);
-            const waterLevel = waterLevelMatch ? parseFloat(waterLevelMatch[1]) : null;
-
-            // Debug logging for water level extraction
-            if (VERBOSE_LOGGING && ALLOWED_LOCATIONS.includes(location)) {
-              console.log(`\n[Fallback] Parsing: ${location}`);
-              console.log(`  Cell 0 (Location): "${cells.eq(0).text().trim()}"`);
-              console.log(`  Cell 1 (Time): "${cells.eq(1).text().trim()}"`);
-              console.log(`  Cell 2 (Water Level): "${cells.eq(2).text().trim()}"`);
-              console.log(`  Cell 3 (Status): "${cells.eq(3).text().trim()}"`);
-              if (cells.length > 4) {
-                console.log(`  Cell 4: "${cells.eq(4).text().trim()}"`);
+            // Enhanced debug logging for fallback parsing
+            if (VERBOSE_LOGGING && location.includes('Wilsons') && location.includes('Lismore')) {
+              console.log(`\n========================================`);
+              console.log(`[FALLBACK] PARSING ROW FOR: ${location}`);
+              console.log(`Total cells in row: ${cells.length}`);
+              for (let i = 0; i < cells.length; i++) {
+                console.log(`  Cell ${i}: "${cells.eq(i).text().trim()}"`);
               }
-              console.log(`  Extracted water level: ${waterLevel}m`);
+              console.log(`========================================\n`);
             }
 
-            // Parse status
-            const statusText = cells.eq(3).text().trim().toLowerCase();
+            // BOM table format: [Location, Auto/Manual, Time, Water Level, Unit/AHD, Status, ...]
+            const time = cells.eq(2).text().trim(); // Cell 2 is the actual time
+
+            // Parse water level - Cell 3 contains the water level (can be negative for AHD)
+            let waterLevelText = cells.eq(3).text().trim();
+            let waterLevelMatch = waterLevelText.match(/(-?\d+\.\d+)/); // Allow negative numbers
+            let waterLevel = waterLevelMatch ? parseFloat(waterLevelMatch[1]) : null;
+
+            if (VERBOSE_LOGGING && location.includes('Wilsons') && location.includes('Lismore')) {
+              console.log(`[FALLBACK] Extracted: Time="${time}", WaterLevel=${waterLevel}m`);
+            }
+
+            // Parse status - typically in Cell 5
+            const statusText = cells.eq(5).text().trim().toLowerCase();
             let status = 'steady';
             if (statusText.includes('rising')) status = 'rising';
             else if (statusText.includes('falling')) status = 'falling';
@@ -648,12 +658,21 @@ async function fetchBomFloodData() {
 
   logInfo(`Fetched ${riverData.length} river height data points`);
 
-  // Debug: Log all location names to see what we're getting from BOM
+  // Debug: Log all location names and water levels to see what we're getting from BOM
   if (VERBOSE_LOGGING) {
-    console.log('\nActual location names from BOM:');
-    riverData.forEach(item => console.log(`  - "${item.location}"`));
-    console.log('\nAllowed locations:');
+    console.log('\n========================================');
+    console.log('ACTUAL LOCATION DATA FROM BOM:');
+    console.log('========================================');
+    riverData.forEach(item => {
+      console.log(`Location: "${item.location}"`);
+      console.log(`  Water Level: ${item.waterLevel}m`);
+      console.log(`  Time: ${item.time}`);
+      console.log(`  Status: ${item.status}`);
+      console.log('');
+    });
+    console.log('ALLOWED LOCATIONS:');
     ALLOWED_LOCATIONS.forEach(loc => console.log(`  - "${loc}"`));
+    console.log('========================================\n');
   }
 
   // Filter to only allowed locations
@@ -669,25 +688,30 @@ async function fetchBomFloodData() {
     });
   }
 
-  // Calculate trend-based status for each location
-  logInfo('Calculating trend-based status for each location...');
-  const dataWithTrends = await Promise.all(
-    filteredData.map(async (item) => {
-      const trendStatus = await calculateTrendStatus(item.location);
-      return {
-        ...item,
-        status: trendStatus  // Override with calculated trend
-      };
-    })
-  );
+  // Use BOM's status directly (no trend calculation override)
+  // BOM provides accurate rising/falling/steady status from their official data
+  logInfo('Using BOM status directly from summary table');
 
-  logInfo('Trend calculations complete');
+  // Log the final data being returned
+  if (VERBOSE_LOGGING) {
+    console.log('\n========================================');
+    console.log('FINAL DATA BEING RETURNED TO FRONTEND:');
+    console.log('========================================');
+    filteredData.forEach(item => {
+      console.log(`Location: "${item.location}"`);
+      console.log(`  Water Level: ${item.waterLevel}m`);
+      console.log(`  Time: ${item.time}`);
+      console.log(`  Status: ${item.status} (from BOM)`);
+      console.log('');
+    });
+    console.log('========================================\n');
+  }
 
-  // Return the filtered data with calculated trends
+  // Return the filtered data with BOM's official status
   return {
     success: true,
     timestamp: new Date().toISOString(),
-    data: dataWithTrends,
+    data: filteredData,
     source: successUrl
   };
 }
@@ -743,8 +767,8 @@ async function calculateTrendStatus(location) {
     const numPoints = Math.min(10, historicalData.data.length);
     const recentPoints = historicalData.data.slice(0, numPoints);
 
-    // Extract water levels
-    const levels = recentPoints.map(point => point.waterLevel).filter(level => level !== null && !isNaN(level));
+    // Extract water levels (using 'height' property from fetchRiverHeightData)
+    const levels = recentPoints.map(point => point.height).filter(level => level !== null && !isNaN(level));
 
     if (levels.length < 3) {
       return 'steady';
@@ -895,7 +919,10 @@ app.get('/api/flood-properties', (req, res) => {
 
 // Extract the river height data fetching logic to a separate function
 async function fetchRiverHeightData(location) {
-  logVerbose(`Fetching river height history for: "${location}"`);
+  logInfo(`\n========================================`);
+  logInfo(`FETCHING RIVER HEIGHT DATA`);
+  logInfo(`Requested location: "${location}"`);
+  logInfo(`========================================`);
 
   const floodWarningUrl = 'http://www.bom.gov.au/cgi-bin/wrap_fwo.pl?IDN60140.html';
 
@@ -936,9 +963,9 @@ async function fetchRiverHeightData(location) {
             // Handle slight variations like parentheses or small formatting differences
             locationText.replace(/\s+/g, ' ') === location.replace(/\s+/g, ' ')) {
 
-          logVerbose(`Found location match: "${locationText}"`);
+          logInfo(`✓ Found location match: "${locationText}"`);
           exactLocationMatch = true;
-          
+
           // Look for Table link in this row
           $(row).find('a').each((j, link) => {
             const linkText = $(link).text().trim();
@@ -947,7 +974,7 @@ async function fetchRiverHeightData(location) {
               if (!tableUrl.startsWith('http')) {
                 tableUrl = 'http://www.bom.gov.au' + tableUrl;
               }
-              logVerbose(`Found table link for ${location}`);
+              logInfo(`✓ Found table URL: ${tableUrl}`);
               return false; // Break the inner loop
             }
           });
@@ -1036,33 +1063,96 @@ async function fetchRiverHeightData(location) {
     // If pre tag approach didn't work, try tables
     if (riverData.length === 0) {
       logVerbose('No data in pre tag, checking tables');
-      
-      // Try various table selectors
-      const tableSelectors = ['table.tabledata', 'table'];
-      
+
+      // Try various table selectors - prioritize the specific BOM table format
+      const tableSelectors = [
+        'table#tableStyle1',      // Specific BOM table format
+        'table.tableStyle1',       // Class-based variant
+        'table.tabledata',         // Legacy format
+        'table'                    // Generic fallback
+      ];
+
+      if (VERBOSE_LOGGING) {
+        // Log all tables found for debugging
+        console.log(`\nFound ${tableHtml('table').length} total tables on the page`);
+        tableHtml('table').each((i, table) => {
+          const tableId = tableHtml(table).attr('id') || 'no-id';
+          const tableClass = tableHtml(table).attr('class') || 'no-class';
+          const rowCount = tableHtml(table).find('tr').length;
+          console.log(`  Table ${i}: id="${tableId}" class="${tableClass}" rows=${rowCount}`);
+
+          // For the main table, show last 5 actual rows from HTML
+          if (tableId === 'tableStyle1') {
+            const allRows = tableHtml(table).find('tr');
+            console.log(`\n  Last 5 rows in HTML table:`);
+            allRows.slice(-5).each((idx, row) => {
+              const cells = tableHtml(row).find('td');
+              if (cells.length >= 2) {
+                console.log(`    Row: time="${tableHtml(cells[0]).text().trim()}" height="${tableHtml(cells[1]).text().trim()}"`);
+              }
+            });
+          }
+        });
+      }
+
       for (const selector of tableSelectors) {
-        tableHtml(selector).each((i, table) => {
+        const matchingTables = tableHtml(selector);
+        if (matchingTables.length > 0) {
+          logVerbose(`Trying selector: ${selector} (found ${matchingTables.length} tables)`);
+        }
+
+        matchingTables.each((i, table) => {
+          let headerFound = false;
+
           tableHtml(table).find('tr').each((j, row) => {
+            // Check if this is a header row
+            const headers = tableHtml(row).find('th');
+            if (headers.length >= 2) {
+              const header1 = tableHtml(headers[0]).text().trim().toLowerCase();
+              const header2 = tableHtml(headers[1]).text().trim().toLowerCase();
+
+              // Verify this is the correct header format
+              if ((header1.includes('date') || header1.includes('time')) &&
+                  (header2.includes('water') || header2.includes('level'))) {
+                headerFound = true;
+                logVerbose(`Found table header: "${tableHtml(headers[0]).text().trim()}" | "${tableHtml(headers[1]).text().trim()}"`);
+              }
+              return; // Skip header row
+            }
+
+            // Process data rows
             const cells = tableHtml(row).find('td');
             if (cells.length >= 2) {
               const timeStr = tableHtml(cells[0]).text().trim();
               const heightStr = tableHtml(cells[1]).text().trim();
-              
+
+              if (VERBOSE_LOGGING && riverData.length < 3) {
+                console.log(`  Row ${j}: time="${timeStr}" height="${heightStr}"`);
+              }
+
               // Check if this looks like a time and height
               if (timeStr.match(/\d{2}\/\d{2}\/\d{4}/) || timeStr.match(/\d{2}:\d{2}/)) {
                 const height = parseFloat(heightStr);
+                // Allow negative heights for AHD (Australian Height Datum) measurements
                 if (!isNaN(height)) {
                   riverData.push({
                     time: timeStr,
-                    height: height
+                    height: height  // Keep consistent with frontend expectations
                   });
                 }
               }
             }
           });
+
+          if (VERBOSE_LOGGING && riverData.length > 0) {
+            console.log(`Extracted ${riverData.length} data points from this table`);
+          }
         });
-        
-        if (riverData.length > 0) break; // Stop if we found data
+
+        if (riverData.length > 0) {
+          logVerbose(`Successfully extracted data using selector: ${selector}`);
+          break; // Stop if we found data
+        }
       }
     }
     
@@ -1076,6 +1166,22 @@ async function fetchRiverHeightData(location) {
     }
 
     logInfo(`Extracted ${riverData.length} data points for ${location}`);
+
+    // Log sample data for debugging - show FIRST and LAST entries
+    if (VERBOSE_LOGGING && riverData.length > 0) {
+      console.log(`\n========================================`);
+      console.log(`DATA ORDER FOR: ${location}`);
+      console.log(`Total points: ${riverData.length}`);
+      console.log(`\nFIRST 3 data points (OLDEST - left side of graph):`);
+      riverData.slice(0, 3).forEach((point, idx) => {
+        console.log(`  [${idx}] Time: ${point.time}, Height: ${point.height}`);
+      });
+      console.log(`\nLAST 3 data points (NEWEST - right side of graph):`);
+      riverData.slice(-3).forEach((point, idx) => {
+        console.log(`  [${riverData.length - 3 + idx}] Time: ${point.time}, Height: ${point.height}`);
+      });
+      console.log(`========================================\n`);
+    }
 
     return {
       success: true,

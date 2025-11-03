@@ -1564,6 +1564,372 @@
         .legend-label {
             font-size: 12px;
         }
+
+        /* ============================================
+           MOBILE STYLING - CLEAN, SLEEK, BEAUTIFUL
+           Modern app-like experience optimized for thin screens
+           ============================================ */
+
+        @media (max-width: 768px) {
+            /* SMOOTH TRANSITIONS */
+            * {
+                transition: background-color 0.2s ease, transform 0.2s ease;
+            }
+            /* BODY: Clean foundation */
+            body {
+                font-size: 16px;
+                line-height: 1.7;
+                background-color: #f5f7fa;
+            }
+
+            /* HEADER: Modern, elevated */
+            header {
+                padding: 1rem 1.25rem;
+                position: sticky;
+                top: 0;
+                z-index: 1000;
+                box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            }
+
+            .header-title h1 {
+                font-size: 1.25rem;
+                font-weight: 700;
+                letter-spacing: -0.5px;
+            }
+
+            .header-info {
+                font-size: 0.875rem;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+                margin-top: 0.5rem;
+            }
+
+            .clock-container {
+                font-size: 0.8125rem;
+                padding: 0.375rem 0.75rem;
+                border-radius: 6px;
+                font-weight: 500;
+            }
+
+            /* DASHBOARD: Modern card layout */
+            .dashboard-container {
+                display: block;
+                margin: 0;
+                padding: 1rem;
+                gap: 0;
+            }
+
+            /* PANELS: Beautiful elevated cards */
+            .panel,
+            .webcam-container {
+                border-radius: 16px;
+                margin-bottom: 1.25rem;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+                background: white;
+                overflow: hidden;
+            }
+
+            .panel-header,
+            .webcam-header {
+                padding: 1.25rem;
+                background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+                border-bottom: 1px solid var(--gray-100);
+            }
+
+            .panel-header h2,
+            .webcam-header h2 {
+                font-size: 1.25rem;
+                font-weight: 700;
+                color: var(--gray-900);
+                letter-spacing: -0.3px;
+            }
+
+            .panel-content {
+                padding: 1.25rem;
+            }
+
+            /* STATS: 2-column mobile grid */
+            .stats-container {
+                grid-template-columns: 1fr 1fr;
+                gap: 0.75rem;
+            }
+
+            .stat-item {
+                padding: 1rem;
+                border-radius: 8px;
+            }
+
+            .stat-label {
+                font-size: 0.8125rem;
+            }
+
+            .stat-value {
+                font-size: 1.5rem;
+                margin: 0.375rem 0;
+            }
+
+            .stat-footer {
+                font-size: 0.75rem;
+            }
+
+            /* TABLES: Horizontal scroll with bigger text */
+            .table-container {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                border-radius: 0;
+                border-left: none;
+                border-right: none;
+            }
+
+            table {
+                min-width: 650px;
+                font-size: 0.875rem;
+            }
+
+            th {
+                font-size: 0.8125rem;
+                padding: 0.75rem 0.625rem;
+                position: sticky;
+                top: 0;
+                background-color: var(--gray-100);
+            }
+
+            td {
+                padding: 0.875rem 0.625rem;
+            }
+
+            .table-footer {
+                padding: 0.75rem 1rem;
+                font-size: 0.8125rem;
+            }
+
+            /* TABS: Scrollable mobile tabs */
+            .tabs-container {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+                -ms-overflow-style: none;
+                border-radius: 0;
+            }
+
+            .tabs-container::-webkit-scrollbar {
+                display: none;
+            }
+
+            .tab {
+                padding: 0.875rem 1.25rem;
+                font-size: 0.9375rem;
+                min-width: fit-content;
+                white-space: nowrap;
+            }
+
+            /* BUTTONS: Larger touch targets */
+            .btn {
+                padding: 0.75rem 1.25rem;
+                font-size: 0.9375rem;
+                min-height: 44px;
+            }
+
+            /* RADAR: Mobile-optimized */
+            .radar-container {
+                height: 280px;
+                border-radius: 0;
+            }
+
+            .legend-image {
+                max-width: 90%;
+            }
+
+            .control-buttons button {
+                width: 44px;
+                height: 44px;
+                font-size: 1rem;
+            }
+
+            .radar-timeline {
+                padding: 0.75rem;
+            }
+
+            .timeline-labels {
+                font-size: 0.75rem;
+            }
+
+            /* MODALS: Full-screen mobile modals */
+            .modal {
+                padding: 0;
+            }
+
+            .modal-content {
+                width: 100%;
+                max-width: 100%;
+                height: 100vh;
+                margin: 0;
+                border-radius: 0;
+                max-height: 100vh;
+            }
+
+            .modal-header {
+                padding: 1rem;
+                border-bottom: 2px solid var(--gray-200);
+            }
+
+            .modal-header h2 {
+                font-size: 1.125rem;
+            }
+
+            .modal-close {
+                width: 44px;
+                height: 44px;
+                font-size: 1.5rem;
+            }
+
+            .modal-body {
+                padding: 1rem;
+                max-height: calc(100vh - 80px);
+                overflow-y: auto;
+            }
+
+            /* CHARTS: Taller for mobile */
+            #river-chart-container {
+                height: 280px;
+            }
+
+            /* MAPS: Mobile-friendly size */
+            #radar-map,
+            #flood-map {
+                height: 320px;
+                border-radius: 0;
+            }
+
+            /* FLOOD MAP LEGEND: Adjusted */
+            .flood-map-legend {
+                right: 8px;
+                bottom: 24px;
+                padding: 0.5rem;
+            }
+
+            /* NOTIFICATIONS: Full-width */
+            .notification {
+                width: 100%;
+                margin: 0;
+                border-radius: 0;
+                padding: 1rem;
+            }
+
+            /* STATUS PANEL: Vertical stack */
+            .status-panel {
+                padding: 1rem;
+                display: block;
+            }
+
+            .status-item {
+                padding: 0.75rem 0;
+                border-bottom: 1px solid var(--gray-200);
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .status-item:last-child {
+                border-bottom: none;
+            }
+
+            .status-label,
+            .status-value {
+                font-size: 0.9375rem;
+            }
+
+            /* WEBCAM: Full-width */
+            .webcam-image-container {
+                padding: 0.5rem;
+            }
+
+            .webcam-footer {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+                font-size: 0.8125rem;
+            }
+        }
+
+        /* PHONE-SPECIFIC (≤480px) - Even more mobile-optimized */
+        @media (max-width: 480px) {
+            body {
+                font-size: 14px;
+            }
+
+            .header-title h1 {
+                font-size: 1rem;
+            }
+
+            /* STATS: Single column on small phones */
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+
+            .stat-value {
+                font-size: 1.375rem;
+            }
+
+            /* TABLES: Smaller on phones */
+            table {
+                min-width: 600px;
+                font-size: 0.8125rem;
+            }
+
+            th, td {
+                padding: 0.625rem 0.5rem;
+            }
+
+            /* TABS: Smaller */
+            .tab {
+                padding: 0.75rem 1rem;
+                font-size: 0.875rem;
+            }
+
+            /* BUTTONS: Maintain touch targets */
+            .btn {
+                font-size: 0.875rem;
+            }
+
+            .control-buttons button {
+                width: 42px;
+                height: 42px;
+            }
+
+            /* RADAR: Smaller */
+            .radar-container {
+                height: 240px;
+            }
+
+            /* CHART: Smaller */
+            #river-chart-container {
+                height: 240px;
+            }
+
+            /* MAPS: Smaller */
+            #radar-map,
+            #flood-map {
+                height: 280px;
+            }
+        }
+
+        /* LANDSCAPE ORIENTATION: Optimized heights */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .modal-content {
+                height: 100vh;
+            }
+
+            .modal-body {
+                max-height: calc(100vh - 70px);
+            }
+
+            #river-chart-container,
+            .radar-container {
+                height: 200px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1709,9 +2075,8 @@
                                     <!-- Map layers - ORDER IS IMPORTANT -->
                                     <img id="background-layer" class="map-layer" src="" alt="Background Map" style="z-index: 1;">
                                     <img id="topography-layer" class="map-layer" src="" alt="Topography" style="z-index: 2;">
-                                    <img id="range-layer" class="map-layer" src="" alt="Range Rings" style="z-index: 3;">
-                                    <img id="radar-image" class="radar-image" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Radar Image" style="z-index: 4;">
-                                    <img id="locations-layer" class="map-layer" src="" alt="Locations" style="z-index: 5;">
+                                    <img id="radar-image" class="radar-image" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Radar Image" style="z-index: 3;">
+                                    <img id="locations-layer" class="map-layer" src="" alt="Locations" style="z-index: 4;">
                                     
                                     <div id="loading" class="loading">
                                         <div class="spinner"></div>
@@ -1788,10 +2153,6 @@
                                 <label class="layer-toggle">
                                     <input type="checkbox" id="locations-toggle" checked>
                                     Locations
-                                </label>
-                                <label class="layer-toggle">
-                                    <input type="checkbox" id="range-toggle" checked>
-                                    Range Rings
                                 </label>
                             </div>
                             
@@ -2721,14 +3082,38 @@
             };
             img.src = 'https://webcams.transport.nsw.gov.au/livetraffic-webcams/cameras/bruxner_highway_lismore.jpeg?' + new Date().getTime();
             
+            // CRITICAL: GLOBAL state variables to persist across re-initializations
+            // These MUST be outside initializeRadar() or they reset every time!
+            window.radarGlobalState = window.radarGlobalState || {
+                currentAnimationSessionId: 0,
+                lastRefreshTime: 0,
+                isRefreshing: false,
+                isPlaying: false,
+                animationLock: false,
+                allTimeoutIds: new Set(),
+                forceClearInterval: null,
+                animationInterval: null,
+                radarInitialized: false
+            };
+
             // Radar interactive functionality
             function initializeRadar() {
+                console.log('!!!!!! initializeRadar() CALLED !!!!!!');
+                console.trace('initializeRadar call stack:');
+
+                // PREVENT MULTIPLE INITIALIZATIONS
+                if (window.radarGlobalState.radarInitialized) {
+                    console.error('!!! RADAR ALREADY INITIALIZED - BLOCKING RE-INIT !!!');
+                    return;
+                }
+                window.radarGlobalState.radarInitialized = true;
+                console.log('>>> Radar initialization proceeding...');
+
                 // DOM elements
                 const radarImage = document.getElementById('radar-image');
                 const backgroundLayer = document.getElementById('background-layer');
                 const topographyLayer = document.getElementById('topography-layer');
                 const locationsLayer = document.getElementById('locations-layer');
-                const rangeLayer = document.getElementById('range-layer');
                 const loading = document.getElementById('loading');
                 const timestamp = document.getElementById('timestamp');
                 const frameCounter = document.getElementById('frame-counter');
@@ -2744,22 +3129,24 @@
                 const speedValue = document.getElementById('speed-value');
                 const errorElement = document.getElementById('error');
                 const lastUpdate = document.getElementById('last-update');
-                
+
                 // Layer toggle checkboxes - with null checks
                 const topographyToggle = document.getElementById('topography-toggle');
                 const locationsToggle = document.getElementById('locations-toggle');
-                const rangeToggle = document.getElementById('range-toggle');
-            
+
                 // Variables
                 const RADAR_ID = 'IDR282'; // Grafton 256km radar
                 let radarImages = [];
                 let currentFrame = 0;
-                let isPlaying = false;
-                let animationInterval;
                 let animationDelay = 500; // milliseconds
-                let animationRequestId = null; // Add this variable declaration
+                let animationRequestId = null;
                 let mapLayersLoaded = false;
                 let preloadedImages = new Map(); // To store preloaded images
+                const ANIMATION_LOCKOUT_MS = 0; // No lockout - users can play immediately after refresh
+
+                // CRITICAL: All state access goes directly to window.radarGlobalState
+                // No local shorthand to avoid any scoping/closure issues
+                console.log('>>> Using global state object:', window.radarGlobalState);
                 
                 // Function to format date in locale format
                 function formatDate(dateString) {
@@ -2820,17 +3207,16 @@
                         const bgUrl = `/map-proxy/${RADAR_ID}.background.png`;
                         const topoUrl = `/map-proxy/${RADAR_ID}.topography.png`;
                         const locUrl = `/map-proxy/${RADAR_ID}.locations.png`;
-                        const rangeUrl = `/map-proxy/${RADAR_ID}.range.png`;
-                        
+
                         console.log('Background URL:', bgUrl);
-                        
+
                         // Safe image loading with null checks
                         const safeLoadImage = async (url, element, name) => {
                             if (!element) {
                                 console.error(`${name} element not found.`);
                                 return false;
                             }
-                            
+
                             try {
                                 await preloadImage(url);
                                 element.src = url;
@@ -2841,13 +3227,12 @@
                                 return false;
                             }
                         };
-                        
+
                         // Preload the images with proper error handling
                         const results = await Promise.allSettled([
                             safeLoadImage(bgUrl, backgroundLayer, 'Background'),
                             safeLoadImage(topoUrl, topographyLayer, 'Topography'),
-                            safeLoadImage(locUrl, locationsLayer, 'Locations'),
-                            safeLoadImage(rangeUrl, rangeLayer, 'Range')
+                            safeLoadImage(locUrl, locationsLayer, 'Locations')
                         ]);
                         
                         // Check if at least the background loaded
@@ -2946,25 +3331,39 @@
             
                 // Function to update the radar image
                 function updateRadarImage(frameIndex) {
+                    // CRITICAL: Block ALL updates if refreshing
+                    if (window.radarGlobalState.isRefreshing) {
+                        console.log('updateRadarImage blocked: refreshing');
+                        return;
+                    }
+
+                    // CRITICAL: Block updates during lockout period after refresh
+                    const timeSinceRefresh = Date.now() - window.radarGlobalState.lastRefreshTime;
+                    if (window.radarGlobalState.lastRefreshTime > 0 && timeSinceRefresh < ANIMATION_LOCKOUT_MS) {
+                        console.log(`updateRadarImage blocked: lockout period (${Math.ceil((ANIMATION_LOCKOUT_MS - timeSinceRefresh) / 1000)}s remaining)`);
+                        return;
+                    }
+
                     if (!radarImages || radarImages.length === 0 || !radarImage) return;
-                    
+
                     if (frameIndex >= 0 && frameIndex < radarImages.length) {
                         currentFrame = frameIndex;
-                        
+
                         if (radarImages[frameIndex] && radarImages[frameIndex].url) {
                             // Update the image
+                            console.log(`>>> UPDATE RADAR IMAGE: frame ${frameIndex}, sessionID ${window.radarGlobalState.currentAnimationSessionId}, isPlaying=${window.radarGlobalState.isPlaying}, isRefreshing=${window.radarGlobalState.isRefreshing}`);
                             radarImage.src = radarImages[frameIndex].url;
-                            
+
                             // Update the timestamp
                             if (timestamp) {
                                 timestamp.textContent = formatDate(radarImages[frameIndex].timestamp);
                             }
-                            
+
                             // Update the frame counter
                             if (frameCounter) {
                                 frameCounter.textContent = `Frame ${currentFrame + 1} of ${radarImages.length}`;
                             }
-                            
+
                             // Update progress bar
                             if (progressBar) {
                                 const progress = ((currentFrame + 1) / radarImages.length) * 100;
@@ -2977,47 +3376,106 @@
                 }
             
                 function playAnimation() {
-                  if (!radarImages || radarImages.length === 0) return;
-                  
-                  isPlaying = true;
+                  console.log(`!!!!!!!!!!!!!!! playAnimation() CALLED !!!!!!!!!!!!!!!`);
+                  console.trace('playAnimation call stack:');
+
+                  if (!radarImages || radarImages.length === 0) {
+                      console.log('playAnimation BLOCKED: no radar images');
+                      return;
+                  }
+                  if (window.radarGlobalState.animationLock) {
+                      console.log('playAnimation BLOCKED: animationLock is true');
+                      return; // Prevent concurrent animations
+                  }
+                  if (window.radarGlobalState.isRefreshing) {
+                      console.log('playAnimation BLOCKED: isRefreshing is true');
+                      return; // Prevent animation during refresh
+                  }
+
+                  // CRITICAL: Prevent animation for X seconds after refresh
+                  const timeSinceRefresh = Date.now() - window.radarGlobalState.lastRefreshTime;
+                  if (window.radarGlobalState.lastRefreshTime > 0 && timeSinceRefresh < ANIMATION_LOCKOUT_MS) {
+                      console.log(`playAnimation BLOCKED: lockout - ${Math.ceil((ANIMATION_LOCKOUT_MS - timeSinceRefresh) / 1000)}s remaining`);
+                      return;
+                  }
+
+                  // CRITICAL: Stop any existing animation first
+                  console.log('playAnimation: Calling pauseAnimation() first');
+                  pauseAnimation();
+
+                  console.log('playAnimation: Setting isPlaying=true, animationLock=true');
+                  window.radarGlobalState.isPlaying = true;
+                  window.radarGlobalState.animationLock = true;
                   if (btnPlay) btnPlay.disabled = true;
                   if (btnPause) btnPause.disabled = false;
-                  
-                  // Clear any existing interval and animation frame
-                  clearTimeout(animationInterval);
-                  if (animationRequestId) {
-                    cancelAnimationFrame(animationRequestId);
-                  }
-                  
-                  // Define the animation frame function with better timing control
-                  const nextFrame = () => {
-                    // Calculate next frame index
-                    const nextIndex = (currentFrame + 1) % radarImages.length;
-                    
-                    // Update the displayed image
-                    updateRadarImage(nextIndex);
-                    
-                    // Schedule the next frame using setTimeout
-                    animationInterval = setTimeout(() => {
-                      // Use requestAnimationFrame for smoother animation
-                      animationRequestId = requestAnimationFrame(nextFrame);
-                    }, animationDelay);
+
+                  // CRITICAL: Create NEW animation session to kill old loops
+                  console.log(`playAnimation: currentAnimationSessionId BEFORE increment: ${window.radarGlobalState.currentAnimationSessionId}`);
+                  window.radarGlobalState.currentAnimationSessionId++;
+                  const mySessionId = window.radarGlobalState.currentAnimationSessionId;
+                  console.log(`>>> Starting NEW animation session ID: ${mySessionId}`);
+
+                  // Define the animation loop - SIMPLIFIED (no race conditions)
+                  const advanceFrame = () => {
+                    console.log(`>>> advanceFrame CALLED: session ${mySessionId}, current=${window.radarGlobalState.currentAnimationSessionId}, isPlaying=${window.radarGlobalState.isPlaying}, isRefreshing=${window.radarGlobalState.isRefreshing}`);
+
+                    // CRITICAL: Kill this loop if it's from an old session
+                    if (mySessionId !== window.radarGlobalState.currentAnimationSessionId) {
+                        console.log(`!!! advanceFrame: OLD SESSION ${mySessionId} (current is ${window.radarGlobalState.currentAnimationSessionId}), KILLING THIS LOOP !!!`);
+                        return;
+                    }
+
+                    if (!window.radarGlobalState.isPlaying) {
+                        console.log(`!!! advanceFrame session ${mySessionId}: isPlaying false, STOPPING !!!`);
+                        return; // Safety check
+                    }
+                    if (window.radarGlobalState.isRefreshing) {
+                        console.log(`!!! advanceFrame session ${mySessionId}: isRefreshing true, STOPPING !!!`);
+                        return; // CRITICAL: Stop animation during refresh
+                    }
+
+                    // CRITICAL: Check lockout period
+                    const timeSinceRefresh = Date.now() - window.radarGlobalState.lastRefreshTime;
+                    if (window.radarGlobalState.lastRefreshTime > 0 && timeSinceRefresh < ANIMATION_LOCKOUT_MS) {
+                        console.log(`!!! advanceFrame session ${mySessionId}: In lockout period, STOPPING (${Math.ceil((ANIMATION_LOCKOUT_MS - timeSinceRefresh) / 1000)}s remaining) !!!`);
+                        return;
+                    }
+
+                    // ATOMIC: Update currentFrame first, THEN display
+                    console.log(`>>> advanceFrame session ${mySessionId}: ADVANCING from frame ${currentFrame} to ${(currentFrame + 1) % radarImages.length}`);
+                    currentFrame = (currentFrame + 1) % radarImages.length;
+                    updateRadarImage(currentFrame);
+
+                    // Schedule next frame and TRACK the timeout ID
+                    window.radarGlobalState.animationInterval = setTimeout(advanceFrame, animationDelay);
+                    window.radarGlobalState.allTimeoutIds.add(window.radarGlobalState.animationInterval); // Track this timeout so we can kill it
+                    console.log(`>>> advanceFrame session ${mySessionId}: Scheduled next frame with timeout ID ${window.radarGlobalState.animationInterval}`);
                   };
-                  
+
                   // Start the animation loop
-                  nextFrame();
+                  advanceFrame();
                 }
             
                 function pauseAnimation() {
-                  isPlaying = false;
+                  window.radarGlobalState.isPlaying = false;
+                  window.radarGlobalState.animationLock = false; // Release animation lock
                   if (btnPlay) btnPlay.disabled = false;
                   if (btnPause) btnPause.disabled = true;
-                  
-                  clearTimeout(animationInterval);
+
+                  // Clear ALL pending timers/frames
+                  if (window.radarGlobalState.animationInterval) {
+                    clearTimeout(window.radarGlobalState.animationInterval);
+                    window.radarGlobalState.animationInterval = null;
+                  }
                   if (animationRequestId) {
                     cancelAnimationFrame(animationRequestId);
                     animationRequestId = null;
                   }
+
+                  // CRITICAL: Clear ALL tracked timeouts
+                  window.radarGlobalState.allTimeoutIds.forEach(id => clearTimeout(id));
+                  window.radarGlobalState.allTimeoutIds.clear();
+                  console.log('Cleared all animation timeouts');
                 }
             
                 function prevFrame() {
@@ -3077,14 +3535,14 @@
                     const safeDisable = (button, isDisabled) => {
                         if (button) button.disabled = isDisabled;
                     };
-                    
-                    safeDisable(btnPlay, !enable || isPlaying);
-                    safeDisable(btnPause, !enable || !isPlaying);
+
+                    safeDisable(btnPlay, !enable || window.radarGlobalState.isPlaying);
+                    safeDisable(btnPause, !enable || !window.radarGlobalState.isPlaying);
                     safeDisable(btnPrev, !enable);
                     safeDisable(btnNext, !enable);
                     safeDisable(btnFirst, !enable);
                     safeDisable(btnLast, !enable);
-                    
+
                     if (speedSlider) speedSlider.disabled = !enable;
                 }
             
@@ -3094,34 +3552,182 @@
                     if (topographyLayer && topographyToggle) {
                         topographyLayer.style.display = topographyToggle.checked ? 'block' : 'none';
                     }
-                    
+
                     if (locationsLayer && locationsToggle) {
                         locationsLayer.style.display = locationsToggle.checked ? 'block' : 'none';
                     }
-                    
-                    if (rangeLayer && rangeToggle) {
-                        rangeLayer.style.display = rangeToggle.checked ? 'block' : 'none';
-                    }
                 }
                 
-                // Refresh function
-                function refreshData() {
-                    // Clear current data
+                // Connectivity check function
+                async function checkBOMConnectivity() {
+                    try {
+                        const controller = new AbortController();
+                        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+
+                        const response = await fetch('http://www.bom.gov.au/', {
+                            method: 'HEAD',
+                            mode: 'no-cors', // Avoid CORS issues
+                            signal: controller.signal
+                        });
+
+                        clearTimeout(timeoutId);
+                        return true; // BOM is reachable
+                    } catch (error) {
+                        console.warn('BOM connectivity check failed:', error.message);
+                        return false; // BOM is unreachable (likely no internet)
+                    }
+                }
+
+                // Refresh function with connectivity check
+                async function refreshData() {
+                    console.log('===== REFRESH DATA STARTING =====');
+
+                    // CRITICAL: Invalidate current animation session to kill ALL running loops
+                    window.radarGlobalState.currentAnimationSessionId++;
+                    console.log(`>>> INVALIDATED animation session, new ID: ${window.radarGlobalState.currentAnimationSessionId}`);
+
+                    // CRITICAL: IMMEDIATELY clear the data FIRST before anything else
+                    // This kills any pending setTimeout callbacks - they'll hit updateRadarImage's length check
+                    const oldRadarImages = radarImages;
                     radarImages = [];
                     currentFrame = 0;
-                    pauseAnimation();
-                    enableControls(false);
-                    preloadedImages.clear();
-                    
-                    // Reset UI elements
-                    if (timestamp) timestamp.textContent = 'Refreshing data...';
+                    window.radarGlobalState.isRefreshing = true;
+
+                    // Mark refresh time to prevent animation restart
+                    window.radarGlobalState.lastRefreshTime = Date.now();
+
+                    // BLANK IMAGE DATA URL
+                    const BLANK_IMAGE = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+
+                    // IMMEDIATELY reset visual state so user sees it stopped
+                    if (radarImage) {
+                        radarImage.src = BLANK_IMAGE;
+                    }
+                    if (timestamp) timestamp.textContent = 'Stopping animation...';
                     if (frameCounter) frameCounter.textContent = '';
                     if (progressBar) progressBar.style.width = '0%';
-                    
+
+                    // CRITICAL: Start interval that FORCEFULLY keeps resetting radar to blank
+                    // This ensures NO frame changes can happen even if something bypasses our checks
+                    if (window.radarGlobalState.forceClearInterval) clearInterval(window.radarGlobalState.forceClearInterval);
+                    window.radarGlobalState.forceClearInterval = setInterval(() => {
+                        if (radarImage && window.radarGlobalState.isRefreshing) {
+                            radarImage.src = BLANK_IMAGE;
+                            console.log('Force clearing radar image');
+                        }
+                    }, 50); // Reset every 50ms to KILL any frame changes
+
+                    // NOW force stop animation
+                    pauseAnimation(); // This clears allTimeoutIds
+                    window.radarGlobalState.animationLock = false;
+                    window.radarGlobalState.isPlaying = false;
+
+                    // Clear ALL timers aggressively - again!
+                    window.radarGlobalState.allTimeoutIds.forEach(id => clearTimeout(id));
+                    window.radarGlobalState.allTimeoutIds.clear();
+                    if (window.radarGlobalState.animationInterval) {
+                        clearTimeout(window.radarGlobalState.animationInterval);
+                        window.radarGlobalState.animationInterval = null;
+                    }
+                    // Triple-clear to catch any pending
+                    setTimeout(() => {
+                        window.radarGlobalState.allTimeoutIds.forEach(id => clearTimeout(id));
+                        window.radarGlobalState.allTimeoutIds.clear();
+                        if (window.radarGlobalState.animationInterval) {
+                            clearTimeout(window.radarGlobalState.animationInterval);
+                            window.radarGlobalState.animationInterval = null;
+                        }
+                    }, 0);
+
+                    // Disable controls
+                    enableControls(false);
+
+                    // Check connectivity
+                    if (timestamp) timestamp.textContent = 'Checking connection...';
+
+                    const isConnected = await checkBOMConnectivity();
+
+                    if (!isConnected) {
+                        // No internet - restore old data and STOP force clearing
+                        if (window.radarGlobalState.forceClearInterval) {
+                            clearInterval(window.radarGlobalState.forceClearInterval);
+                            window.radarGlobalState.forceClearInterval = null;
+                        }
+                        radarImages = oldRadarImages;
+                        window.radarGlobalState.isRefreshing = false;
+                        showError('No internet connection. Keeping current data.');
+                        if (timestamp && radarImages.length > 0) {
+                            timestamp.textContent = formatDate(radarImages[currentFrame].timestamp) + ' (Offline)';
+                        }
+                        enableControls(true);
+                        return; // EXIT - don't clear cache
+                    }
+
+                    // Connected - clear cache
+                    preloadedImages.clear();
+
+                    // Update UI
+                    if (timestamp) timestamp.textContent = 'Refreshing data...';
+
                     // Fetch fresh data
-                    fetchRadarData();
+                    await fetchRadarData();
+
+                    // CRITICAL: Wait before re-enabling animation AND stopping force clear
+                    // Use animationDelay + buffer to catch any callbacks that were scheduled with current delay
+                    const safetyDelay = Math.max(animationDelay * 2, 1000); // At least 1 second, or 2x animation delay
+                    setTimeout(() => {
+                        console.log('===== SAFETY DELAY COMPLETE - FINAL CLEANUP =====');
+
+                        // CRITICAL: Bump session ID ONE MORE TIME to kill any zombie loops
+                        window.radarGlobalState.currentAnimationSessionId++;
+                        console.log(`>>> FINAL session bump to ID: ${window.radarGlobalState.currentAnimationSessionId}`);
+
+                        // FORCE STOP - make absolutely sure animation is dead
+                        window.radarGlobalState.isPlaying = false;
+                        window.radarGlobalState.animationLock = false;
+
+                        // Clear ALL timeouts one more time
+                        window.radarGlobalState.allTimeoutIds.forEach(id => clearTimeout(id));
+                        window.radarGlobalState.allTimeoutIds.clear();
+                        if (window.radarGlobalState.animationInterval) {
+                            clearTimeout(window.radarGlobalState.animationInterval);
+                            window.radarGlobalState.animationInterval = null;
+                        }
+
+                        // STOP the force clearing interval
+                        if (window.radarGlobalState.forceClearInterval) {
+                            clearInterval(window.radarGlobalState.forceClearInterval);
+                            window.radarGlobalState.forceClearInterval = null;
+                        }
+
+                        window.radarGlobalState.isRefreshing = false;
+                        console.log(`===== REFRESH COMPLETE =====`);
+                        console.log(`window.radarGlobalState.isRefreshing = false, window.radarGlobalState.isPlaying = false, window.radarGlobalState.animationLock = false`);
+                        console.log(`ANIMATION LOCKED OUT for ${ANIMATION_LOCKOUT_MS / 1000} seconds from refresh start`);
+                        console.log(`Lockout will end at: ${new Date(window.radarGlobalState.lastRefreshTime + ANIMATION_LOCKOUT_MS).toLocaleTimeString()}`);
+
+                        // Schedule display of first frame AFTER lockout expires
+                        const remainingLockout = ANIMATION_LOCKOUT_MS - (Date.now() - window.radarGlobalState.lastRefreshTime);
+                        if (remainingLockout > 0) {
+                            setTimeout(() => {
+                                console.log('=== LOCKOUT EXPIRED - Displaying first frame ===');
+                                if (radarImages && radarImages.length > 0 && !window.radarGlobalState.isPlaying) {
+                                    updateRadarImage(0);
+                                }
+                            }, remainingLockout + 100); // Add 100ms buffer
+                        } else {
+                            // Lockout already expired, display now
+                            console.log('=== LOCKOUT ALREADY EXPIRED - Displaying first frame now ===');
+                            if (radarImages && radarImages.length > 0 && !window.radarGlobalState.isPlaying) {
+                                updateRadarImage(0);
+                            }
+                        }
+                    }, safetyDelay);
                 }
-            
+
+                // CRITICAL: Make refreshData globally accessible for auto-refresh setInterval
+                window.refreshData = refreshData;
+
                 // Set up event listeners (with null checks)
                 function setupEventListeners() {
                     if (btnPlay) btnPlay.addEventListener('click', playAnimation);
@@ -3141,7 +3747,7 @@
                         
                         switch(e.key) {
                             case ' ': // Space bar
-                                if (isPlaying) {
+                                if (window.radarGlobalState.isPlaying) {
                                     pauseAnimation();
                                 } else {
                                     playAnimation();
@@ -3167,12 +3773,12 @@
                         speedSlider.addEventListener('input', function() {
                             const speed = parseInt(this.value);
                             animationDelay = 1100 - (speed * 100); // 100ms to 1000ms range
-                            
+
                             if (speedValue) {
                                 speedValue.textContent = `${animationDelay}ms`;
                             }
-                            
-                            if (isPlaying) {
+
+                            if (window.radarGlobalState.isPlaying) {
                                 pauseAnimation();
                                 playAnimation();
                             }
@@ -3187,11 +3793,7 @@
                     if (locationsToggle) {
                         locationsToggle.addEventListener('change', updateLayerVisibility);
                     }
-                    
-                    if (rangeToggle) {
-                        rangeToggle.addEventListener('change', updateLayerVisibility);
-                    }
-                    
+
                     // Handle image load errors properly
                     if (radarImage) {
                         radarImage.addEventListener('error', function(e) {
@@ -3271,6 +3873,7 @@
                     setInterval(() => {
                         const radarContent = document.getElementById('content-radar');
                         if (radarContent && radarContent.classList.contains('active')) {
+                            console.log('>>> AUTOMATIC 5-MINUTE REFRESH TRIGGERED <<<');
                             refreshData();
                         }
                     }, 5 * 60 * 1000);
@@ -3282,13 +3885,29 @@
                 document.addEventListener('DOMContentLoaded', () => {
                     // Check if we're on a page with the radar tab
                     if (document.getElementById('content-radar')) {
-                        initializeRadar();
+                        // If radar already initialized, refresh data instead of re-initializing
+                        if (window.radarGlobalState && window.radarGlobalState.radarInitialized) {
+                            console.log('>>> Radar already initialized - calling refreshData() instead <<<');
+                            if (window.refreshData) {
+                                window.refreshData();
+                            }
+                        } else {
+                            initializeRadar();
+                        }
                     }
                 });
             } else {
                 // Document already loaded
                 if (document.getElementById('content-radar')) {
-                    initializeRadar();
+                    // If radar already initialized, refresh data instead of re-initializing
+                    if (window.radarGlobalState && window.radarGlobalState.radarInitialized) {
+                        console.log('>>> Radar already initialized - calling refreshData() instead <<<');
+                        if (window.refreshData) {
+                            window.refreshData();
+                        }
+                    } else {
+                        initializeRadar();
+                    }
                 }
             }
             
