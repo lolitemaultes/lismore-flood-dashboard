@@ -3484,20 +3484,32 @@
 
                 // Refresh function with connectivity check
                 async function refreshData() {
-                    // CRITICAL: Set refreshing flag to completely prevent animation
+                    // CRITICAL: IMMEDIATELY clear the data FIRST before anything else
+                    // This kills any pending setTimeout callbacks - they'll hit updateRadarImage's length check
+                    const oldRadarImages = radarImages;
+                    radarImages = [];
+                    currentFrame = 0;
                     isRefreshing = true;
 
-                    // FORCE STOP animation completely
+                    // IMMEDIATELY reset visual state so user sees it stopped
+                    if (radarImage) {
+                        radarImage.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+                    }
+                    if (timestamp) timestamp.textContent = 'Stopping animation...';
+                    if (frameCounter) frameCounter.textContent = '';
+                    if (progressBar) progressBar.style.width = '0%';
+
+                    // NOW force stop animation
                     pauseAnimation();
                     animationLock = false;
                     isPlaying = false;
 
-                    // Clear ALL timers - multiple times to ensure they're cleared
+                    // Clear ALL timers aggressively
                     if (animationInterval) {
                         clearTimeout(animationInterval);
                         animationInterval = null;
                     }
-                    // Clear again after a tick to catch any pending timeouts
+                    // Double-clear to catch any pending
                     setTimeout(() => {
                         if (animationInterval) {
                             clearTimeout(animationInterval);
@@ -3505,41 +3517,36 @@
                         }
                     }, 0);
 
-                    // Check connectivity before clearing cache
+                    // Disable controls
+                    enableControls(false);
+
+                    // Check connectivity
                     if (timestamp) timestamp.textContent = 'Checking connection...';
 
                     const isConnected = await checkBOMConnectivity();
 
                     if (!isConnected) {
-                        // No internet - keep current data
-                        isRefreshing = false; // Re-enable animation capability
+                        // No internet - restore old data
+                        radarImages = oldRadarImages;
+                        isRefreshing = false;
                         showError('No internet connection. Keeping current data.');
                         if (timestamp && radarImages.length > 0) {
                             timestamp.textContent = formatDate(radarImages[currentFrame].timestamp) + ' (Offline)';
                         }
+                        enableControls(true);
                         return; // EXIT - don't clear cache
                     }
 
-                    // Connected - safe to clear cache and fetch new data
-                    radarImages = [];
-                    currentFrame = 0;
-                    enableControls(false);
-                    preloadedImages.clear(); // Clear cache
+                    // Connected - clear cache
+                    preloadedImages.clear();
 
-                    // Reset radar image visually
-                    if (radarImage) {
-                        radarImage.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
-                    }
-
-                    // Reset UI elements
+                    // Update UI
                     if (timestamp) timestamp.textContent = 'Refreshing data...';
-                    if (frameCounter) frameCounter.textContent = '';
-                    if (progressBar) progressBar.style.width = '0%';
 
                     // Fetch fresh data
                     await fetchRadarData();
 
-                    // Re-enable animation capability after data is loaded
+                    // Re-enable animation capability
                     isRefreshing = false;
                 }
             
