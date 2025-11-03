@@ -625,13 +625,100 @@ async function fetchBomFloodData() {
 
   logInfo(`Fetched ${riverData.length} river height data points`);
 
-  // Return the data
+  // Filter to only allowed locations
+  const filteredData = riverData.filter(item => ALLOWED_LOCATIONS.includes(item.location));
+
+  logInfo(`Filtered to ${filteredData.length} allowed locations`);
+
+  // Calculate trend-based status for each location
+  logInfo('Calculating trend-based status for each location...');
+  const dataWithTrends = await Promise.all(
+    filteredData.map(async (item) => {
+      const trendStatus = await calculateTrendStatus(item.location);
+      return {
+        ...item,
+        status: trendStatus  // Override with calculated trend
+      };
+    })
+  );
+
+  logInfo('Trend calculations complete');
+
+  // Return the filtered data with calculated trends
   return {
     success: true,
     timestamp: new Date().toISOString(),
-    data: riverData,
+    data: dataWithTrends,
     source: successUrl
   };
+}
+
+// Define which locations to include in the dashboard
+const ALLOWED_LOCATIONS = [
+  'Wilsons R at Lismore (mAHD)',
+  'Wilsons R at Eltham',
+  'Leycester Ck at Rock Valley',
+  'Coopers Ck at Corndale',
+  'Richmond R at Casino',
+  'Richmond R at Coraki',
+  'Wilsons R at Tuckurimba'
+];
+
+// Helper function to calculate trend-based status from historical data
+async function calculateTrendStatus(location) {
+  try {
+    logVerbose(`Calculating trend for: ${location}`);
+
+    // Fetch historical data for this location
+    const historicalData = await fetchRiverHeightData(location);
+
+    if (!historicalData.success || !historicalData.data || historicalData.data.length < 3) {
+      logVerbose(`Not enough data to calculate trend for ${location}`);
+      return 'steady'; // Default to steady if we don't have enough data
+    }
+
+    // Get the last 5-10 data points (or as many as available)
+    const numPoints = Math.min(10, historicalData.data.length);
+    const recentPoints = historicalData.data.slice(0, numPoints);
+
+    // Extract water levels
+    const levels = recentPoints.map(point => point.waterLevel).filter(level => level !== null && !isNaN(level));
+
+    if (levels.length < 3) {
+      return 'steady';
+    }
+
+    // Calculate the change between first and last point
+    const firstLevel = levels[levels.length - 1]; // Oldest
+    const lastLevel = levels[0]; // Most recent
+    const totalChange = lastLevel - firstLevel;
+
+    // Also calculate average change between consecutive points
+    let sumChanges = 0;
+    let changeCount = 0;
+    for (let i = 0; i < levels.length - 1; i++) {
+      const change = levels[i] - levels[i + 1];
+      sumChanges += change;
+      changeCount++;
+    }
+    const avgChange = sumChanges / changeCount;
+
+    // Determine status based on thresholds
+    // Use 0.02m (2cm) as the threshold for steady
+    const STEADY_THRESHOLD = 0.02;
+
+    if (Math.abs(avgChange) < STEADY_THRESHOLD && Math.abs(totalChange) < STEADY_THRESHOLD * 2) {
+      return 'steady';
+    } else if (avgChange > 0 || totalChange > 0) {
+      return 'rising';
+    } else {
+      return 'falling';
+    }
+
+  } catch (error) {
+    logError(`Error calculating trend for ${location}:`, error.message);
+    return 'steady'; // Default to steady on error
+  }
 }
 
 // Define which locations have official BoM flood classifications
