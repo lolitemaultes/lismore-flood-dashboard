@@ -688,40 +688,30 @@ async function fetchBomFloodData() {
     });
   }
 
-  // Calculate trend-based status for each location
-  logInfo('Calculating trend-based status for each location...');
-  const dataWithTrends = await Promise.all(
-    filteredData.map(async (item) => {
-      const trendStatus = await calculateTrendStatus(item.location);
-      return {
-        ...item,
-        status: trendStatus  // Override with calculated trend
-      };
-    })
-  );
-
-  logInfo('Trend calculations complete');
+  // Use BOM's status directly (no trend calculation override)
+  // BOM provides accurate rising/falling/steady status from their official data
+  logInfo('Using BOM status directly from summary table');
 
   // Log the final data being returned
   if (VERBOSE_LOGGING) {
     console.log('\n========================================');
     console.log('FINAL DATA BEING RETURNED TO FRONTEND:');
     console.log('========================================');
-    dataWithTrends.forEach(item => {
+    filteredData.forEach(item => {
       console.log(`Location: "${item.location}"`);
       console.log(`  Water Level: ${item.waterLevel}m`);
       console.log(`  Time: ${item.time}`);
-      console.log(`  Status: ${item.status} (calculated from trend)`);
+      console.log(`  Status: ${item.status} (from BOM)`);
       console.log('');
     });
     console.log('========================================\n');
   }
 
-  // Return the filtered data with calculated trends
+  // Return the filtered data with BOM's official status
   return {
     success: true,
     timestamp: new Date().toISOString(),
-    data: dataWithTrends,
+    data: filteredData,
     source: successUrl
   };
 }
