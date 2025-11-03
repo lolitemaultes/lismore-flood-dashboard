@@ -3724,7 +3724,10 @@
                         }
                     }, safetyDelay);
                 }
-            
+
+                // CRITICAL: Make refreshData globally accessible for auto-refresh setInterval
+                window.refreshData = refreshData;
+
                 // Set up event listeners (with null checks)
                 function setupEventListeners() {
                     if (btnPlay) btnPlay.addEventListener('click', playAnimation);
@@ -3870,6 +3873,7 @@
                     setInterval(() => {
                         const radarContent = document.getElementById('content-radar');
                         if (radarContent && radarContent.classList.contains('active')) {
+                            console.log('>>> AUTOMATIC 5-MINUTE REFRESH TRIGGERED <<<');
                             refreshData();
                         }
                     }, 5 * 60 * 1000);
