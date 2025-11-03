@@ -3535,14 +3535,14 @@
                     const safeDisable = (button, isDisabled) => {
                         if (button) button.disabled = isDisabled;
                     };
-                    
-                    safeDisable(btnPlay, !enable || isPlaying);
-                    safeDisable(btnPause, !enable || !isPlaying);
+
+                    safeDisable(btnPlay, !enable || $.isPlaying);
+                    safeDisable(btnPause, !enable || !$.isPlaying);
                     safeDisable(btnPrev, !enable);
                     safeDisable(btnNext, !enable);
                     safeDisable(btnFirst, !enable);
                     safeDisable(btnLast, !enable);
-                    
+
                     if (speedSlider) speedSlider.disabled = !enable;
                 }
             
@@ -3609,9 +3609,9 @@
 
                     // CRITICAL: Start interval that FORCEFULLY keeps resetting radar to blank
                     // This ensures NO frame changes can happen even if something bypasses our checks
-                    if ($.forceClearInterval) clearInterval(forceClearInterval);
+                    if ($.forceClearInterval) clearInterval($.forceClearInterval);
                     $.forceClearInterval = setInterval(() => {
-                        if (radarImage && isRefreshing) {
+                        if (radarImage && $.isRefreshing) {
                             radarImage.src = BLANK_IMAGE;
                             console.log('Force clearing radar image');
                         }
@@ -3704,21 +3704,21 @@
                         console.log(`===== REFRESH COMPLETE =====`);
                         console.log(`$.isRefreshing = false, $.isPlaying = false, $.animationLock = false`);
                         console.log(`ANIMATION LOCKED OUT for ${ANIMATION_LOCKOUT_MS / 1000} seconds from refresh start`);
-                        console.log(`Lockout will end at: ${new Date(lastRefreshTime + ANIMATION_LOCKOUT_MS).toLocaleTimeString()}`);
+                        console.log(`Lockout will end at: ${new Date($.lastRefreshTime + ANIMATION_LOCKOUT_MS).toLocaleTimeString()}`);
 
                         // Schedule display of first frame AFTER lockout expires
-                        const remainingLockout = ANIMATION_LOCKOUT_MS - (Date.now() - lastRefreshTime);
+                        const remainingLockout = ANIMATION_LOCKOUT_MS - (Date.now() - $.lastRefreshTime);
                         if (remainingLockout > 0) {
                             setTimeout(() => {
                                 console.log('=== LOCKOUT EXPIRED - Displaying first frame ===');
-                                if (radarImages && radarImages.length > 0 && !isPlaying) {
+                                if (radarImages && radarImages.length > 0 && !$.isPlaying) {
                                     updateRadarImage(0);
                                 }
                             }, remainingLockout + 100); // Add 100ms buffer
                         } else {
                             // Lockout already expired, display now
                             console.log('=== LOCKOUT ALREADY EXPIRED - Displaying first frame now ===');
-                            if (radarImages && radarImages.length > 0 && !isPlaying) {
+                            if (radarImages && radarImages.length > 0 && !$.isPlaying) {
                                 updateRadarImage(0);
                             }
                         }
