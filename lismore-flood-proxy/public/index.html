@@ -2765,7 +2765,6 @@
                     throw new Error('Failed to load flood data');
                 }
                 embeddedCSVData = await response.json();
-                console.log(`Loaded ${embeddedCSVData.length} flood data records from server`);
 
                 // Process flood data if map is already initialized
                 if (floodMapInitialized && embeddedCSVData && embeddedCSVData.length > 0) {
@@ -2889,7 +2888,6 @@
         
         // Add this to your initializeDashboard function or after the checkDataSources function is defined
         function setupStatusAutoRefresh() {
-            console.log('Setting up automatic status checks every minute');
             
             // Perform an initial check
             checkDataSources();
@@ -3098,16 +3096,12 @@
 
             // Radar interactive functionality
             function initializeRadar() {
-                console.log('!!!!!! initializeRadar() CALLED !!!!!!');
-                console.trace('initializeRadar call stack:');
-
                 // PREVENT MULTIPLE INITIALIZATIONS
                 if (window.radarGlobalState.radarInitialized) {
-                    console.error('!!! RADAR ALREADY INITIALIZED - BLOCKING RE-INIT !!!');
+                    console.warn('⚠️  Radar already initialized');
                     return;
                 }
                 window.radarGlobalState.radarInitialized = true;
-                console.log('>>> Radar initialization proceeding...');
 
                 // DOM elements
                 const radarImage = document.getElementById('radar-image');
@@ -3146,7 +3140,6 @@
 
                 // CRITICAL: All state access goes directly to window.radarGlobalState
                 // No local shorthand to avoid any scoping/closure issues
-                console.log('>>> Using global state object:', window.radarGlobalState);
                 
                 // Function to format date in locale format
                 function formatDate(dateString) {
@@ -3195,7 +3188,6 @@
                     showLoading(true);
                     
                     try {
-                        console.log('Loading map layers...');
                         
                         // Set default background color while waiting
                         const container = document.querySelector('.radar-container');
@@ -3208,7 +3200,6 @@
                         const topoUrl = `/map-proxy/${RADAR_ID}.topography.png`;
                         const locUrl = `/map-proxy/${RADAR_ID}.locations.png`;
 
-                        console.log('Background URL:', bgUrl);
 
                         // Safe image loading with null checks
                         const safeLoadImage = async (url, element, name) => {
@@ -3220,7 +3211,6 @@
                             try {
                                 await preloadImage(url);
                                 element.src = url;
-                                console.log(`${name} loaded successfully`);
                                 return true;
                             } catch (err) {
                                 console.error(`Failed to preload ${name}:`, err);
@@ -3240,7 +3230,6 @@
                         
                         if (backgroundLoaded) {
                             mapLayersLoaded = true;
-                            console.log('All map layers loaded successfully');
                         } else {
                             showError('Failed to load essential map layers. Using simplified display.');
                         }
@@ -3286,7 +3275,6 @@
                         updateRadarImage(0);
                         enableControls(true);
                         
-                        console.log(`Loaded ${radarImages.length} radar images`);
                     } catch (error) {
                         console.error('Error loading radar data:', error);
                         showError(error.message);
@@ -3300,7 +3288,6 @@
                 async function preloadAllImages() {
                   if (!radarImages || radarImages.length === 0) return;
                   
-                  console.log('Preloading all radar images for smooth playback...');
                   
                   // Create an array of promises to preload all images
                   const preloadPromises = radarImages.map(image => 
@@ -3311,7 +3298,6 @@
                         resolve(image.url);
                       };
                       img.onerror = () => {
-                        console.warn(`Failed to preload: ${image.url}`);
                         resolve(null); // Resolve anyway so we don't block other images
                       };
                       img.src = image.url;
@@ -3321,7 +3307,6 @@
                   // Wait for all images to be preloaded
                   try {
                     await Promise.all(preloadPromises);
-                    console.log('All radar images preloaded successfully');
                     return true;
                   } catch (err) {
                     console.error('Error during image preloading:', err);
@@ -3333,14 +3318,12 @@
                 function updateRadarImage(frameIndex) {
                     // CRITICAL: Block ALL updates if refreshing
                     if (window.radarGlobalState.isRefreshing) {
-                        console.log('updateRadarImage blocked: refreshing');
                         return;
                     }
 
                     // CRITICAL: Block updates during lockout period after refresh
                     const timeSinceRefresh = Date.now() - window.radarGlobalState.lastRefreshTime;
                     if (window.radarGlobalState.lastRefreshTime > 0 && timeSinceRefresh < ANIMATION_LOCKOUT_MS) {
-                        console.log(`updateRadarImage blocked: lockout period (${Math.ceil((ANIMATION_LOCKOUT_MS - timeSinceRefresh) / 1000)}s remaining)`);
                         return;
                     }
 
@@ -3351,7 +3334,6 @@
 
                         if (radarImages[frameIndex] && radarImages[frameIndex].url) {
                             // Update the image
-                            console.log(`>>> UPDATE RADAR IMAGE: frame ${frameIndex}, sessionID ${window.radarGlobalState.currentAnimationSessionId}, isPlaying=${window.radarGlobalState.isPlaying}, isRefreshing=${window.radarGlobalState.isRefreshing}`);
                             radarImage.src = radarImages[frameIndex].url;
 
                             // Update the timestamp
@@ -3376,80 +3358,53 @@
                 }
             
                 function playAnimation() {
-                  console.log(`!!!!!!!!!!!!!!! playAnimation() CALLED !!!!!!!!!!!!!!!`);
-                  console.trace('playAnimation call stack:');
+                  if (!radarImages || radarImages.length === 0) return;
+                  if (window.radarGlobalState.animationLock) return;
+                  if (window.radarGlobalState.isRefreshing) return;
 
-                  if (!radarImages || radarImages.length === 0) {
-                      console.log('playAnimation BLOCKED: no radar images');
-                      return;
-                  }
-                  if (window.radarGlobalState.animationLock) {
-                      console.log('playAnimation BLOCKED: animationLock is true');
-                      return; // Prevent concurrent animations
-                  }
-                  if (window.radarGlobalState.isRefreshing) {
-                      console.log('playAnimation BLOCKED: isRefreshing is true');
-                      return; // Prevent animation during refresh
-                  }
-
-                  // CRITICAL: Prevent animation for X seconds after refresh
                   const timeSinceRefresh = Date.now() - window.radarGlobalState.lastRefreshTime;
                   if (window.radarGlobalState.lastRefreshTime > 0 && timeSinceRefresh < ANIMATION_LOCKOUT_MS) {
-                      console.log(`playAnimation BLOCKED: lockout - ${Math.ceil((ANIMATION_LOCKOUT_MS - timeSinceRefresh) / 1000)}s remaining`);
                       return;
                   }
 
-                  // CRITICAL: Stop any existing animation first
-                  console.log('playAnimation: Calling pauseAnimation() first');
                   pauseAnimation();
 
-                  console.log('playAnimation: Setting isPlaying=true, animationLock=true');
                   window.radarGlobalState.isPlaying = true;
                   window.radarGlobalState.animationLock = true;
                   if (btnPlay) btnPlay.disabled = true;
                   if (btnPause) btnPause.disabled = false;
 
-                  // CRITICAL: Create NEW animation session to kill old loops
-                  console.log(`playAnimation: currentAnimationSessionId BEFORE increment: ${window.radarGlobalState.currentAnimationSessionId}`);
                   window.radarGlobalState.currentAnimationSessionId++;
                   const mySessionId = window.radarGlobalState.currentAnimationSessionId;
-                  console.log(`>>> Starting NEW animation session ID: ${mySessionId}`);
 
                   // Define the animation loop - SIMPLIFIED (no race conditions)
                   const advanceFrame = () => {
-                    console.log(`>>> advanceFrame CALLED: session ${mySessionId}, current=${window.radarGlobalState.currentAnimationSessionId}, isPlaying=${window.radarGlobalState.isPlaying}, isRefreshing=${window.radarGlobalState.isRefreshing}`);
 
                     // CRITICAL: Kill this loop if it's from an old session
                     if (mySessionId !== window.radarGlobalState.currentAnimationSessionId) {
-                        console.log(`!!! advanceFrame: OLD SESSION ${mySessionId} (current is ${window.radarGlobalState.currentAnimationSessionId}), KILLING THIS LOOP !!!`);
                         return;
                     }
 
                     if (!window.radarGlobalState.isPlaying) {
-                        console.log(`!!! advanceFrame session ${mySessionId}: isPlaying false, STOPPING !!!`);
                         return; // Safety check
                     }
                     if (window.radarGlobalState.isRefreshing) {
-                        console.log(`!!! advanceFrame session ${mySessionId}: isRefreshing true, STOPPING !!!`);
                         return; // CRITICAL: Stop animation during refresh
                     }
 
                     // CRITICAL: Check lockout period
                     const timeSinceRefresh = Date.now() - window.radarGlobalState.lastRefreshTime;
                     if (window.radarGlobalState.lastRefreshTime > 0 && timeSinceRefresh < ANIMATION_LOCKOUT_MS) {
-                        console.log(`!!! advanceFrame session ${mySessionId}: In lockout period, STOPPING (${Math.ceil((ANIMATION_LOCKOUT_MS - timeSinceRefresh) / 1000)}s remaining) !!!`);
                         return;
                     }
 
                     // ATOMIC: Update currentFrame first, THEN display
-                    console.log(`>>> advanceFrame session ${mySessionId}: ADVANCING from frame ${currentFrame} to ${(currentFrame + 1) % radarImages.length}`);
                     currentFrame = (currentFrame + 1) % radarImages.length;
                     updateRadarImage(currentFrame);
 
                     // Schedule next frame and TRACK the timeout ID
                     window.radarGlobalState.animationInterval = setTimeout(advanceFrame, animationDelay);
                     window.radarGlobalState.allTimeoutIds.add(window.radarGlobalState.animationInterval); // Track this timeout so we can kill it
-                    console.log(`>>> advanceFrame session ${mySessionId}: Scheduled next frame with timeout ID ${window.radarGlobalState.animationInterval}`);
                   };
 
                   // Start the animation loop
@@ -3475,7 +3430,6 @@
                   // CRITICAL: Clear ALL tracked timeouts
                   window.radarGlobalState.allTimeoutIds.forEach(id => clearTimeout(id));
                   window.radarGlobalState.allTimeoutIds.clear();
-                  console.log('Cleared all animation timeouts');
                 }
             
                 function prevFrame() {
@@ -3580,11 +3534,9 @@
 
                 // Refresh function with connectivity check
                 async function refreshData() {
-                    console.log('===== REFRESH DATA STARTING =====');
 
                     // CRITICAL: Invalidate current animation session to kill ALL running loops
                     window.radarGlobalState.currentAnimationSessionId++;
-                    console.log(`>>> INVALIDATED animation session, new ID: ${window.radarGlobalState.currentAnimationSessionId}`);
 
                     // CRITICAL: IMMEDIATELY clear the data FIRST before anything else
                     // This kills any pending setTimeout callbacks - they'll hit updateRadarImage's length check
@@ -3613,7 +3565,6 @@
                     window.radarGlobalState.forceClearInterval = setInterval(() => {
                         if (radarImage && window.radarGlobalState.isRefreshing) {
                             radarImage.src = BLANK_IMAGE;
-                            console.log('Force clearing radar image');
                         }
                     }, 50); // Reset every 50ms to KILL any frame changes
 
@@ -3676,11 +3627,9 @@
                     // Use animationDelay + buffer to catch any callbacks that were scheduled with current delay
                     const safetyDelay = Math.max(animationDelay * 2, 1000); // At least 1 second, or 2x animation delay
                     setTimeout(() => {
-                        console.log('===== SAFETY DELAY COMPLETE - FINAL CLEANUP =====');
 
                         // CRITICAL: Bump session ID ONE MORE TIME to kill any zombie loops
                         window.radarGlobalState.currentAnimationSessionId++;
-                        console.log(`>>> FINAL session bump to ID: ${window.radarGlobalState.currentAnimationSessionId}`);
 
                         // FORCE STOP - make absolutely sure animation is dead
                         window.radarGlobalState.isPlaying = false;
@@ -3701,23 +3650,17 @@
                         }
 
                         window.radarGlobalState.isRefreshing = false;
-                        console.log(`===== REFRESH COMPLETE =====`);
-                        console.log(`window.radarGlobalState.isRefreshing = false, window.radarGlobalState.isPlaying = false, window.radarGlobalState.animationLock = false`);
-                        console.log(`ANIMATION LOCKED OUT for ${ANIMATION_LOCKOUT_MS / 1000} seconds from refresh start`);
-                        console.log(`Lockout will end at: ${new Date(window.radarGlobalState.lastRefreshTime + ANIMATION_LOCKOUT_MS).toLocaleTimeString()}`);
 
                         // Schedule display of first frame AFTER lockout expires
                         const remainingLockout = ANIMATION_LOCKOUT_MS - (Date.now() - window.radarGlobalState.lastRefreshTime);
                         if (remainingLockout > 0) {
                             setTimeout(() => {
-                                console.log('=== LOCKOUT EXPIRED - Displaying first frame ===');
                                 if (radarImages && radarImages.length > 0 && !window.radarGlobalState.isPlaying) {
                                     updateRadarImage(0);
                                 }
                             }, remainingLockout + 100); // Add 100ms buffer
                         } else {
                             // Lockout already expired, display now
-                            console.log('=== LOCKOUT ALREADY EXPIRED - Displaying first frame now ===');
                             if (radarImages && radarImages.length > 0 && !window.radarGlobalState.isPlaying) {
                                 updateRadarImage(0);
                             }
@@ -3873,7 +3816,6 @@
                     setInterval(() => {
                         const radarContent = document.getElementById('content-radar');
                         if (radarContent && radarContent.classList.contains('active')) {
-                            console.log('>>> AUTOMATIC 5-MINUTE REFRESH TRIGGERED <<<');
                             refreshData();
                         }
                     }, 5 * 60 * 1000);
@@ -3887,7 +3829,6 @@
                     if (document.getElementById('content-radar')) {
                         // If radar already initialized, refresh data instead of re-initializing
                         if (window.radarGlobalState && window.radarGlobalState.radarInitialized) {
-                            console.log('>>> Radar already initialized - calling refreshData() instead <<<');
                             if (window.refreshData) {
                                 window.refreshData();
                             }
@@ -3901,7 +3842,6 @@
                 if (document.getElementById('content-radar')) {
                     // If radar already initialized, refresh data instead of re-initializing
                     if (window.radarGlobalState && window.radarGlobalState.radarInitialized) {
-                        console.log('>>> Radar already initialized - calling refreshData() instead <<<');
                         if (window.refreshData) {
                             window.refreshData();
                         }
@@ -4281,7 +4221,6 @@
                 // Insert warning above the stats panel
                 if (statsPanel && statsPanel.parentNode) {
                     statsPanel.parentNode.insertBefore(warningPanel, statsPanel);
-                    console.log('Warning panel added successfully');
                 } else {
                     console.error('Could not find stats panel to add warning');
                 }
@@ -4348,8 +4287,6 @@
                 console.clear();
             
                 // Title and subtitle with emojis and playful tone
-                console.log('%cLismore Flood Emergency Dashboard - Console Commands', styles.title);
-                console.log('%c🌊 Developer Console: Flood Management Simulation 👩‍💻', styles.subtitle);
                 
                 // Structured console output with categories
                 const categories = [
@@ -4426,8 +4363,8 @@
                 }
             }
             
-            // Call this function when the page loads
-            displayConsoleWelcome();
+            // Disabled verbose console welcome message
+            // displayConsoleWelcome();
 
         // Cache flood data in localStorage
         function cacheFloodData() {
@@ -5380,7 +5317,6 @@
         function initFloodMapWithLevee() {
             // Prevent double initialization
             if (floodMapInitialized) {
-                console.log('Flood map already initialized, skipping...');
                 return;
             }
 
@@ -5425,7 +5361,6 @@
             if (embeddedCSVData && embeddedCSVData.length > 0) {
                 processFloodData(embeddedCSVData);
             } else {
-                console.log('Waiting for flood data to load...');
                 // The data will be processed when loadFloodData completes
             }
             
@@ -5593,7 +5528,6 @@
             // Encode the location to be safe for URLs
             const encodedLocation = encodeURIComponent(cleanLocation);
             
-            console.log(`Requesting river height data for: "${cleanLocation}"`);
             
             // Request the data from our proxy server
             const response = await fetch(`${BASE_URL}/river-data?location=${encodedLocation}`);
@@ -5615,7 +5549,6 @@
             const data = await response.json();
             
             if (data.success && data.data && data.data.length > 0) {
-              console.log(`Successfully received ${data.data.length} data points for ${data.location || cleanLocation}`);
               
               // Process and render the chart
               renderRiverHeightChart(data.data, cleanLocation);
@@ -5635,7 +5568,6 @@
           if (heightData.length > 100) {
             // Apply data reduction to smoothen the chart without losing significant trends
             processedData = reduceDataPoints(heightData, 50);
-            console.log(`Reduced data points from ${heightData.length} to ${processedData.length} for smoother rendering`);
           }
           
           // Prepare data for Chart.js
