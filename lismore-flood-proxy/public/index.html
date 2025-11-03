@@ -3144,15 +3144,9 @@
                 let preloadedImages = new Map(); // To store preloaded images
                 const ANIMATION_LOCKOUT_MS = 5000; // Prevent animation for 5 seconds after refresh
 
-                // Use GLOBAL state variables
-                let currentAnimationSessionId = window.radarGlobalState.currentAnimationSessionId;
-                let lastRefreshTime = window.radarGlobalState.lastRefreshTime;
-                let isRefreshing = window.radarGlobalState.isRefreshing;
-                let isPlaying = window.radarGlobalState.isPlaying;
-                let animationLock = window.radarGlobalState.animationLock;
-                let allTimeoutIds = window.radarGlobalState.allTimeoutIds;
-                let forceClearInterval = window.radarGlobalState.forceClearInterval;
-                let animationInterval = window.radarGlobalState.animationInterval;
+                // CRITICAL: Shorthand reference to global state (all reads/writes go to global)
+                const $ = window.radarGlobalState;
+                console.log('>>> Using global state object:', $);
                 
                 // Function to format date in locale format
                 function formatDate(dateString) {
@@ -3389,18 +3383,18 @@
                       console.log('playAnimation BLOCKED: no radar images');
                       return;
                   }
-                  if (animationLock) {
+                  if ($.animationLock) {
                       console.log('playAnimation BLOCKED: animationLock is true');
                       return; // Prevent concurrent animations
                   }
-                  if (isRefreshing) {
+                  if ($.isRefreshing) {
                       console.log('playAnimation BLOCKED: isRefreshing is true');
                       return; // Prevent animation during refresh
                   }
 
                   // CRITICAL: Prevent animation for X seconds after refresh
-                  const timeSinceRefresh = Date.now() - lastRefreshTime;
-                  if (lastRefreshTime > 0 && timeSinceRefresh < ANIMATION_LOCKOUT_MS) {
+                  const timeSinceRefresh = Date.now() - $.lastRefreshTime;
+                  if ($.lastRefreshTime > 0 && timeSinceRefresh < ANIMATION_LOCKOUT_MS) {
                       console.log(`playAnimation BLOCKED: lockout - ${Math.ceil((ANIMATION_LOCKOUT_MS - timeSinceRefresh) / 1000)}s remaining`);
                       return;
                   }
@@ -3410,39 +3404,39 @@
                   pauseAnimation();
 
                   console.log('playAnimation: Setting isPlaying=true, animationLock=true');
-                  isPlaying = true;
-                  animationLock = true;
+                  $.isPlaying = true;
+                  $.animationLock = true;
                   if (btnPlay) btnPlay.disabled = true;
                   if (btnPause) btnPause.disabled = false;
 
                   // CRITICAL: Create NEW animation session to kill old loops
-                  console.log(`playAnimation: currentAnimationSessionId BEFORE increment: ${currentAnimationSessionId}`);
-                  currentAnimationSessionId++;
-                  const mySessionId = currentAnimationSessionId;
+                  console.log(`playAnimation: currentAnimationSessionId BEFORE increment: ${$.currentAnimationSessionId}`);
+                  $.currentAnimationSessionId++;
+                  const mySessionId = $.currentAnimationSessionId;
                   console.log(`>>> Starting NEW animation session ID: ${mySessionId}`);
 
                   // Define the animation loop - SIMPLIFIED (no race conditions)
                   const advanceFrame = () => {
-                    console.log(`>>> advanceFrame CALLED: session ${mySessionId}, current=${currentAnimationSessionId}, isPlaying=${isPlaying}, isRefreshing=${isRefreshing}`);
+                    console.log(`>>> advanceFrame CALLED: session ${mySessionId}, current=${$.currentAnimationSessionId}, isPlaying=${$.isPlaying}, isRefreshing=${$.isRefreshing}`);
 
                     // CRITICAL: Kill this loop if it's from an old session
-                    if (mySessionId !== currentAnimationSessionId) {
-                        console.log(`!!! advanceFrame: OLD SESSION ${mySessionId} (current is ${currentAnimationSessionId}), KILLING THIS LOOP !!!`);
+                    if (mySessionId !== $.currentAnimationSessionId) {
+                        console.log(`!!! advanceFrame: OLD SESSION ${mySessionId} (current is ${$.currentAnimationSessionId}), KILLING THIS LOOP !!!`);
                         return;
                     }
 
-                    if (!isPlaying) {
+                    if (!$.isPlaying) {
                         console.log(`!!! advanceFrame session ${mySessionId}: isPlaying false, STOPPING !!!`);
                         return; // Safety check
                     }
-                    if (isRefreshing) {
+                    if ($.isRefreshing) {
                         console.log(`!!! advanceFrame session ${mySessionId}: isRefreshing true, STOPPING !!!`);
                         return; // CRITICAL: Stop animation during refresh
                     }
 
                     // CRITICAL: Check lockout period
-                    const timeSinceRefresh = Date.now() - lastRefreshTime;
-                    if (lastRefreshTime > 0 && timeSinceRefresh < ANIMATION_LOCKOUT_MS) {
+                    const timeSinceRefresh = Date.now() - $.lastRefreshTime;
+                    if ($.lastRefreshTime > 0 && timeSinceRefresh < ANIMATION_LOCKOUT_MS) {
                         console.log(`!!! advanceFrame session ${mySessionId}: In lockout period, STOPPING (${Math.ceil((ANIMATION_LOCKOUT_MS - timeSinceRefresh) / 1000)}s remaining) !!!`);
                         return;
                     }
@@ -3453,9 +3447,9 @@
                     updateRadarImage(currentFrame);
 
                     // Schedule next frame and TRACK the timeout ID
-                    animationInterval = setTimeout(advanceFrame, animationDelay);
-                    allTimeoutIds.add(animationInterval); // Track this timeout so we can kill it
-                    console.log(`>>> advanceFrame session ${mySessionId}: Scheduled next frame with timeout ID ${animationInterval}`);
+                    $.animationInterval = setTimeout(advanceFrame, animationDelay);
+                    $.allTimeoutIds.add($.animationInterval); // Track this timeout so we can kill it
+                    console.log(`>>> advanceFrame session ${mySessionId}: Scheduled next frame with timeout ID ${$.animationInterval}`);
                   };
 
                   // Start the animation loop
@@ -3463,15 +3457,15 @@
                 }
             
                 function pauseAnimation() {
-                  isPlaying = false;
-                  animationLock = false; // Release animation lock
+                  $.isPlaying = false;
+                  $.animationLock = false; // Release animation lock
                   if (btnPlay) btnPlay.disabled = false;
                   if (btnPause) btnPause.disabled = true;
 
                   // Clear ALL pending timers/frames
-                  if (animationInterval) {
-                    clearTimeout(animationInterval);
-                    animationInterval = null;
+                  if ($.animationInterval) {
+                    clearTimeout($.animationInterval);
+                    $.animationInterval = null;
                   }
                   if (animationRequestId) {
                     cancelAnimationFrame(animationRequestId);
@@ -3479,8 +3473,8 @@
                   }
 
                   // CRITICAL: Clear ALL tracked timeouts
-                  allTimeoutIds.forEach(id => clearTimeout(id));
-                  allTimeoutIds.clear();
+                  $.allTimeoutIds.forEach(id => clearTimeout(id));
+                  $.allTimeoutIds.clear();
                   console.log('Cleared all animation timeouts');
                 }
             
