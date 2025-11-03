@@ -3355,26 +3355,41 @@
                 }
             
                 function playAnimation() {
-                  if (!radarImages || radarImages.length === 0) return;
-                  if (animationLock) return; // Prevent concurrent animations
-                  if (isRefreshing) return; // Prevent animation during refresh
+                  console.log(`!!!!!!!!!!!!!!! playAnimation() CALLED !!!!!!!!!!!!!!!`);
+                  console.trace('playAnimation call stack:');
+
+                  if (!radarImages || radarImages.length === 0) {
+                      console.log('playAnimation BLOCKED: no radar images');
+                      return;
+                  }
+                  if (animationLock) {
+                      console.log('playAnimation BLOCKED: animationLock is true');
+                      return; // Prevent concurrent animations
+                  }
+                  if (isRefreshing) {
+                      console.log('playAnimation BLOCKED: isRefreshing is true');
+                      return; // Prevent animation during refresh
+                  }
 
                   // CRITICAL: Prevent animation for X seconds after refresh
                   const timeSinceRefresh = Date.now() - lastRefreshTime;
                   if (lastRefreshTime > 0 && timeSinceRefresh < ANIMATION_LOCKOUT_MS) {
-                      console.log(`Animation blocked - ${Math.ceil((ANIMATION_LOCKOUT_MS - timeSinceRefresh) / 1000)}s lockout remaining`);
+                      console.log(`playAnimation BLOCKED: lockout - ${Math.ceil((ANIMATION_LOCKOUT_MS - timeSinceRefresh) / 1000)}s remaining`);
                       return;
                   }
 
                   // CRITICAL: Stop any existing animation first
+                  console.log('playAnimation: Calling pauseAnimation() first');
                   pauseAnimation();
 
+                  console.log('playAnimation: Setting isPlaying=true, animationLock=true');
                   isPlaying = true;
                   animationLock = true;
                   if (btnPlay) btnPlay.disabled = true;
                   if (btnPause) btnPause.disabled = false;
 
                   // CRITICAL: Create NEW animation session to kill old loops
+                  console.log(`playAnimation: currentAnimationSessionId BEFORE increment: ${currentAnimationSessionId}`);
                   currentAnimationSessionId++;
                   const mySessionId = currentAnimationSessionId;
                   console.log(`>>> Starting NEW animation session ID: ${mySessionId}`);
