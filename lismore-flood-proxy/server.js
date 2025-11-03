@@ -625,10 +625,26 @@ async function fetchBomFloodData() {
 
   logInfo(`Fetched ${riverData.length} river height data points`);
 
+  // Debug: Log all location names to see what we're getting from BOM
+  if (VERBOSE_LOGGING) {
+    console.log('\nActual location names from BOM:');
+    riverData.forEach(item => console.log(`  - "${item.location}"`));
+    console.log('\nAllowed locations:');
+    ALLOWED_LOCATIONS.forEach(loc => console.log(`  - "${loc}"`));
+  }
+
   // Filter to only allowed locations
   const filteredData = riverData.filter(item => ALLOWED_LOCATIONS.includes(item.location));
 
   logInfo(`Filtered to ${filteredData.length} allowed locations`);
+
+  // If no locations match, log a warning with the first few actual locations
+  if (filteredData.length === 0 && riverData.length > 0) {
+    logError('No locations matched filter! First 5 actual location names:');
+    riverData.slice(0, 5).forEach(item => {
+      console.error(`  - "${item.location}"`);
+    });
+  }
 
   // Calculate trend-based status for each location
   logInfo('Calculating trend-based status for each location...');
