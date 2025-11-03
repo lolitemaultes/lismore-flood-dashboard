@@ -648,12 +648,21 @@ async function fetchBomFloodData() {
 
   logInfo(`Fetched ${riverData.length} river height data points`);
 
-  // Debug: Log all location names to see what we're getting from BOM
+  // Debug: Log all location names and water levels to see what we're getting from BOM
   if (VERBOSE_LOGGING) {
-    console.log('\nActual location names from BOM:');
-    riverData.forEach(item => console.log(`  - "${item.location}"`));
-    console.log('\nAllowed locations:');
+    console.log('\n========================================');
+    console.log('ACTUAL LOCATION DATA FROM BOM:');
+    console.log('========================================');
+    riverData.forEach(item => {
+      console.log(`Location: "${item.location}"`);
+      console.log(`  Water Level: ${item.waterLevel}m`);
+      console.log(`  Time: ${item.time}`);
+      console.log(`  Status: ${item.status}`);
+      console.log('');
+    });
+    console.log('ALLOWED LOCATIONS:');
     ALLOWED_LOCATIONS.forEach(loc => console.log(`  - "${loc}"`));
+    console.log('========================================\n');
   }
 
   // Filter to only allowed locations
@@ -682,6 +691,21 @@ async function fetchBomFloodData() {
   );
 
   logInfo('Trend calculations complete');
+
+  // Log the final data being returned
+  if (VERBOSE_LOGGING) {
+    console.log('\n========================================');
+    console.log('FINAL DATA BEING RETURNED TO FRONTEND:');
+    console.log('========================================');
+    dataWithTrends.forEach(item => {
+      console.log(`Location: "${item.location}"`);
+      console.log(`  Water Level: ${item.waterLevel}m`);
+      console.log(`  Time: ${item.time}`);
+      console.log(`  Status: ${item.status} (calculated from trend)`);
+      console.log('');
+    });
+    console.log('========================================\n');
+  }
 
   // Return the filtered data with calculated trends
   return {
@@ -895,7 +919,10 @@ app.get('/api/flood-properties', (req, res) => {
 
 // Extract the river height data fetching logic to a separate function
 async function fetchRiverHeightData(location) {
-  logVerbose(`Fetching river height history for: "${location}"`);
+  logInfo(`\n========================================`);
+  logInfo(`FETCHING RIVER HEIGHT DATA`);
+  logInfo(`Requested location: "${location}"`);
+  logInfo(`========================================`);
 
   const floodWarningUrl = 'http://www.bom.gov.au/cgi-bin/wrap_fwo.pl?IDN60140.html';
 
@@ -936,9 +963,9 @@ async function fetchRiverHeightData(location) {
             // Handle slight variations like parentheses or small formatting differences
             locationText.replace(/\s+/g, ' ') === location.replace(/\s+/g, ' ')) {
 
-          logVerbose(`Found location match: "${locationText}"`);
+          logInfo(`✓ Found location match: "${locationText}"`);
           exactLocationMatch = true;
-          
+
           // Look for Table link in this row
           $(row).find('a').each((j, link) => {
             const linkText = $(link).text().trim();
@@ -947,7 +974,7 @@ async function fetchRiverHeightData(location) {
               if (!tableUrl.startsWith('http')) {
                 tableUrl = 'http://www.bom.gov.au' + tableUrl;
               }
-              logVerbose(`Found table link for ${location}`);
+              logInfo(`✓ Found table URL: ${tableUrl}`);
               return false; // Break the inner loop
             }
           });
