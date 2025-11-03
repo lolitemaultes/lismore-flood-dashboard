@@ -743,8 +743,8 @@ async function calculateTrendStatus(location) {
     const numPoints = Math.min(10, historicalData.data.length);
     const recentPoints = historicalData.data.slice(0, numPoints);
 
-    // Extract water levels
-    const levels = recentPoints.map(point => point.waterLevel).filter(level => level !== null && !isNaN(level));
+    // Extract water levels (using 'height' property from fetchRiverHeightData)
+    const levels = recentPoints.map(point => point.height).filter(level => level !== null && !isNaN(level));
 
     if (levels.length < 3) {
       return 'steady';
@@ -1097,7 +1097,7 @@ async function fetchRiverHeightData(location) {
                 if (!isNaN(height) && height > 0) {
                   riverData.push({
                     time: timeStr,
-                    waterLevel: height  // Use consistent property name with rest of API
+                    height: height  // Keep consistent with frontend expectations
                   });
                 }
               }
@@ -1126,6 +1126,14 @@ async function fetchRiverHeightData(location) {
     }
 
     logInfo(`Extracted ${riverData.length} data points for ${location}`);
+
+    // Log sample data for debugging
+    if (VERBOSE_LOGGING && riverData.length > 0) {
+      console.log(`Sample data (first 3 points):`);
+      riverData.slice(0, 3).forEach(point => {
+        console.log(`  Time: ${point.time}, Height: ${point.height}`);
+      });
+    }
 
     return {
       success: true,
