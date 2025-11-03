@@ -1133,7 +1133,8 @@ async function fetchRiverHeightData(location) {
               // Check if this looks like a time and height
               if (timeStr.match(/\d{2}\/\d{2}\/\d{4}/) || timeStr.match(/\d{2}:\d{2}/)) {
                 const height = parseFloat(heightStr);
-                if (!isNaN(height) && height > 0) {
+                // Allow negative heights for AHD (Australian Height Datum) measurements
+                if (!isNaN(height)) {
                   riverData.push({
                     time: timeStr,
                     height: height  // Keep consistent with frontend expectations
