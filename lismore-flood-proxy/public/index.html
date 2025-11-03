@@ -3142,7 +3142,7 @@
                 let animationRequestId = null;
                 let mapLayersLoaded = false;
                 let preloadedImages = new Map(); // To store preloaded images
-                const ANIMATION_LOCKOUT_MS = 5000; // Prevent animation for 5 seconds after refresh
+                const ANIMATION_LOCKOUT_MS = 0; // No lockout - users can play immediately after refresh
 
                 // CRITICAL: All state access goes directly to window.radarGlobalState
                 // No local shorthand to avoid any scoping/closure issues
