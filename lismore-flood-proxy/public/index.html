@@ -1566,159 +1566,220 @@
         }
 
         /* ============================================
-           MOBILE-SPECIFIC STYLING
-           (Desktop styles remain unchanged above)
+           MOBILE-RESPONSIVE STYLING
            ============================================ */
 
-        /* Tablets and smaller */
+        /* Tablets and smaller (≤768px) */
         @media (max-width: 768px) {
-            /* Header adjustments */
+            /* Global adjustments */
+            body {
+                font-size: 14px;
+            }
+
+            /* Header */
             header {
-                padding: 0.75rem;
+                padding: 0.75rem 0.5rem;
+            }
+
+            .header-content {
+                gap: 0.25rem;
             }
 
             .header-title h1 {
-                font-size: 1.25rem;
+                font-size: 1.1rem;
+                line-height: 1.3;
             }
 
             .header-info {
-                font-size: 0.75rem;
+                font-size: 0.7rem;
                 gap: 0.5rem;
+                flex-direction: column;
+                align-items: flex-start;
             }
 
             .clock-container {
-                padding: 0.25rem 0.5rem;
-                font-size: 0.75rem;
+                padding: 0.2rem 0.5rem;
+                font-size: 0.7rem;
             }
 
             /* Dashboard container */
             .dashboard-container {
                 margin: 0.5rem;
                 padding: 0;
+                gap: 1rem;
             }
 
-            /* Cards */
-            .card {
+            /* Panels and cards */
+            .panel {
+                margin-bottom: 1rem;
+            }
+
+            .panel-header {
+                padding: 0.75rem;
+            }
+
+            .panel-header h2,
+            .webcam-header h2 {
+                font-size: 1rem;
+            }
+
+            .panel-content {
+                padding: 0.75rem;
+            }
+
+            .webcam-container {
                 padding: 0.75rem;
                 margin-bottom: 0.75rem;
             }
 
-            .card-title {
-                font-size: 1rem;
-            }
-
-            /* Grid layouts - stack vertically */
-            .stats-grid,
-            .data-grid {
-                grid-template-columns: 1fr;
+            /* Stats container - 2 columns on tablet */
+            .stats-container {
+                grid-template-columns: repeat(2, 1fr);
                 gap: 0.75rem;
             }
 
-            /* Table adjustments */
-            table {
-                font-size: 0.75rem;
-            }
-
-            th, td {
-                padding: 0.5rem;
-            }
-
-            /* Make first column sticky on mobile for better readability */
-            th:first-child,
-            td:first-child {
-                position: sticky;
-                left: 0;
-                background-color: white;
-                z-index: 10;
-            }
-
-            th:first-child {
-                background-color: var(--gray-100);
-            }
-
-            /* Tabs */
-            .tab {
-                padding: 0.5rem 0.75rem;
-                font-size: 0.875rem;
-            }
-
-            /* Stat items */
-            .stat-value {
-                font-size: 1.5rem;
+            .stat-item {
+                padding: 0.75rem;
             }
 
             .stat-label {
                 font-size: 0.75rem;
             }
 
+            .stat-value {
+                font-size: 1.25rem;
+            }
+
+            .stat-footer {
+                font-size: 0.7rem;
+            }
+
+            /* Tables */
+            .table-container {
+                font-size: 0.75rem;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            table {
+                min-width: 600px;
+                font-size: 0.75rem;
+            }
+
+            th, td {
+                padding: 0.5rem 0.4rem;
+                white-space: nowrap;
+            }
+
+            th {
+                font-size: 0.7rem;
+            }
+
+            .table-footer {
+                padding: 0.5rem;
+                font-size: 0.75rem;
+            }
+
+            /* Tabs */
+            .tabs-container {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .tab {
+                padding: 0.5rem 0.75rem;
+                font-size: 0.8rem;
+                white-space: nowrap;
+            }
+
             /* Buttons */
             .btn {
                 padding: 0.5rem 0.75rem;
-                font-size: 0.875rem;
+                font-size: 0.8rem;
             }
 
-            /* Modal adjustments */
+            /* Radar container */
+            .radar-container {
+                height: 300px;
+                max-width: 100%;
+            }
+
+            .radar-display {
+                gap: 10px;
+            }
+
+            .legend-image {
+                width: 280px;
+            }
+
+            .control-buttons button {
+                width: 40px;
+                height: 40px;
+                font-size: 14px;
+            }
+
+            /* Radar timeline */
+            .radar-timeline {
+                padding: 10px;
+            }
+
+            .timeline-labels {
+                font-size: 0.65rem;
+            }
+
+            /* Modal */
             .modal-content {
                 width: 95%;
                 max-width: none;
-                margin: 1rem;
+                margin: 1rem auto;
+                padding: 1rem;
+            }
+
+            .modal-header {
                 padding: 1rem;
             }
 
             .modal-header h2 {
-                font-size: 1.125rem;
+                font-size: 1.1rem;
+            }
+
+            .modal-close {
+                width: 32px;
+                height: 32px;
+                font-size: 1.25rem;
             }
 
             .modal-body {
-                padding: 0.75rem 0;
+                padding: 0.75rem;
+                max-height: 60vh;
             }
 
-            /* Chart container */
+            /* Chart */
             #river-chart-container {
                 height: 250px;
             }
 
-            /* Map adjustments */
+            /* Maps */
             #radar-map,
             #flood-map {
                 height: 300px;
-            }
-
-            .map-controls {
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-
-            /* Radar controls */
-            .radar-timeline {
-                flex-direction: column;
-            }
-
-            .timeline-labels {
-                font-size: 0.7rem;
             }
 
             /* Flood map legend */
             .flood-map-legend {
                 right: 5px;
                 bottom: 20px;
-                padding: 6px;
-                font-size: 11px;
+                padding: 8px;
             }
 
             .legend-title {
-                font-size: 12px;
+                font-size: 11px;
                 margin-bottom: 4px;
-            }
-
-            .legend-item {
-                margin-bottom: 3px;
             }
 
             .legend-color {
                 width: 12px;
                 height: 12px;
-                margin-right: 6px;
             }
 
             .legend-label {
@@ -1727,87 +1788,169 @@
 
             /* Notifications */
             .notification {
-                width: calc(100% - 2rem);
-                margin: 1rem;
+                width: calc(100% - 1rem);
+                margin: 0.5rem;
                 padding: 0.75rem;
-                font-size: 0.875rem;
+                font-size: 0.8rem;
             }
 
-            /* Status panel */
+            /* Status panel - make vertical */
             .status-panel {
-                flex-direction: column;
                 padding: 0.75rem;
+                display: flex;
+                flex-direction: column;
             }
 
             .status-item {
-                padding-right: 0;
-                padding-bottom: 0.5rem;
-                margin-bottom: 0.5rem;
-                border-right: none;
-                border-bottom: 1px solid var(--gray-300);
-            }
-
-            .status-item:last-child {
-                border-bottom: none;
-                padding-bottom: 0;
-                margin-bottom: 0;
-            }
-        }
-
-        /* Mobile phones only */
-        @media (max-width: 480px) {
-            .header-title h1 {
-                font-size: 1.1rem;
-            }
-
-            .header-info {
+                padding: 0.5rem 0;
+                border-bottom: 1px solid var(--gray-200);
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 0.25rem;
             }
 
-            /* Even smaller text on tiny screens */
+            .status-item:last-child {
+                border-bottom: none;
+            }
+
+            .status-actions {
+                margin-top: 0.5rem;
+            }
+        }
+
+        /* Mobile phones (≤480px) */
+        @media (max-width: 480px) {
+            /* Even smaller text */
+            body {
+                font-size: 13px;
+            }
+
+            /* Header */
+            header {
+                padding: 0.5rem;
+            }
+
+            .header-title h1 {
+                font-size: 1rem;
+            }
+
+            .header-info {
+                font-size: 0.65rem;
+            }
+
+            /* Dashboard */
+            .dashboard-container {
+                margin: 0.25rem;
+                gap: 0.75rem;
+            }
+
+            /* Stats - single column on phone */
+            .stats-container {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+            }
+
+            .stat-item {
+                padding: 0.6rem;
+            }
+
+            .stat-value {
+                font-size: 1.1rem;
+            }
+
+            /* Tables - even more compact */
             table {
+                min-width: 550px;
                 font-size: 0.7rem;
             }
 
             th, td {
-                padding: 0.375rem;
+                padding: 0.4rem 0.3rem;
             }
 
-            /* Stack radar controls vertically */
-            .radar-controls {
-                flex-direction: column;
-                gap: 0.5rem;
+            /* Buttons smaller */
+            .btn {
+                padding: 0.4rem 0.6rem;
+                font-size: 0.75rem;
             }
 
-            /* Smaller stat values */
-            .stat-value {
-                font-size: 1.25rem;
+            .control-buttons button {
+                width: 36px;
+                height: 36px;
+                font-size: 13px;
             }
 
-            /* Modal full screen on small phones */
+            /* Radar */
+            .radar-container {
+                height: 250px;
+            }
+
+            .legend-image {
+                width: 240px;
+            }
+
+            /* Modal - full screen on phone */
             .modal-content {
                 width: 100%;
-                height: 100%;
+                height: 100vh;
+                max-height: 100vh;
                 margin: 0;
                 border-radius: 0;
-                max-height: 100vh;
+                padding: 0.75rem;
             }
 
             .modal-body {
-                max-height: calc(100vh - 140px);
+                max-height: calc(100vh - 120px);
+                padding: 0.5rem;
             }
 
-            /* Smaller chart on phones */
+            /* Chart smaller */
             #river-chart-container {
                 height: 200px;
             }
 
-            /* Maps smaller on phones */
+            /* Maps smaller */
             #radar-map,
             #flood-map {
                 height: 250px;
+            }
+
+            /* Tabs - smaller */
+            .tab {
+                padding: 0.4rem 0.6rem;
+                font-size: 0.75rem;
+            }
+
+            /* Webcam */
+            .webcam-container {
+                padding: 0.5rem;
+            }
+
+            .webcam-footer {
+                font-size: 0.7rem;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.25rem;
+            }
+        }
+
+        /* Landscape phone orientation (height < 500px) */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .modal-content {
+                max-height: 95vh;
+                overflow-y: auto;
+            }
+
+            .modal-body {
+                max-height: calc(95vh - 100px);
+            }
+
+            #river-chart-container {
+                height: 180px;
+            }
+
+            .radar-container {
+                height: 220px;
             }
         }
     </style>
