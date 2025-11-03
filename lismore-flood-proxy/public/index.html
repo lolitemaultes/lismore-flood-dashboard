@@ -2098,9 +2098,8 @@
                                     <!-- Map layers - ORDER IS IMPORTANT -->
                                     <img id="background-layer" class="map-layer" src="" alt="Background Map" style="z-index: 1;">
                                     <img id="topography-layer" class="map-layer" src="" alt="Topography" style="z-index: 2;">
-                                    <img id="range-layer" class="map-layer" src="" alt="Range Rings" style="z-index: 3;">
-                                    <img id="radar-image" class="radar-image" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Radar Image" style="z-index: 4;">
-                                    <img id="locations-layer" class="map-layer" src="" alt="Locations" style="z-index: 5;">
+                                    <img id="radar-image" class="radar-image" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Radar Image" style="z-index: 3;">
+                                    <img id="locations-layer" class="map-layer" src="" alt="Locations" style="z-index: 4;">
                                     
                                     <div id="loading" class="loading">
                                         <div class="spinner"></div>
@@ -2177,10 +2176,6 @@
                                 <label class="layer-toggle">
                                     <input type="checkbox" id="locations-toggle" checked>
                                     Locations
-                                </label>
-                                <label class="layer-toggle">
-                                    <input type="checkbox" id="range-toggle" checked>
-                                    Range Rings
                                 </label>
                             </div>
                             
@@ -3117,7 +3112,6 @@
                 const backgroundLayer = document.getElementById('background-layer');
                 const topographyLayer = document.getElementById('topography-layer');
                 const locationsLayer = document.getElementById('locations-layer');
-                const rangeLayer = document.getElementById('range-layer');
                 const loading = document.getElementById('loading');
                 const timestamp = document.getElementById('timestamp');
                 const frameCounter = document.getElementById('frame-counter');
@@ -3137,7 +3131,6 @@
                 // Layer toggle checkboxes - with null checks
                 const topographyToggle = document.getElementById('topography-toggle');
                 const locationsToggle = document.getElementById('locations-toggle');
-                const rangeToggle = document.getElementById('range-toggle');
             
                 // Variables
                 const RADAR_ID = 'IDR282'; // Grafton 256km radar
@@ -3209,17 +3202,16 @@
                         const bgUrl = `/map-proxy/${RADAR_ID}.background.png`;
                         const topoUrl = `/map-proxy/${RADAR_ID}.topography.png`;
                         const locUrl = `/map-proxy/${RADAR_ID}.locations.png`;
-                        const rangeUrl = `/map-proxy/${RADAR_ID}.range.png`;
-                        
+
                         console.log('Background URL:', bgUrl);
-                        
+
                         // Safe image loading with null checks
                         const safeLoadImage = async (url, element, name) => {
                             if (!element) {
                                 console.error(`${name} element not found.`);
                                 return false;
                             }
-                            
+
                             try {
                                 await preloadImage(url);
                                 element.src = url;
@@ -3230,13 +3222,12 @@
                                 return false;
                             }
                         };
-                        
+
                         // Preload the images with proper error handling
                         const results = await Promise.allSettled([
                             safeLoadImage(bgUrl, backgroundLayer, 'Background'),
                             safeLoadImage(topoUrl, topographyLayer, 'Topography'),
-                            safeLoadImage(locUrl, locationsLayer, 'Locations'),
-                            safeLoadImage(rangeUrl, rangeLayer, 'Range')
+                            safeLoadImage(locUrl, locationsLayer, 'Locations')
                         ]);
                         
                         // Check if at least the background loaded
@@ -3483,13 +3474,9 @@
                     if (topographyLayer && topographyToggle) {
                         topographyLayer.style.display = topographyToggle.checked ? 'block' : 'none';
                     }
-                    
+
                     if (locationsLayer && locationsToggle) {
                         locationsLayer.style.display = locationsToggle.checked ? 'block' : 'none';
-                    }
-                    
-                    if (rangeLayer && rangeToggle) {
-                        rangeLayer.style.display = rangeToggle.checked ? 'block' : 'none';
                     }
                 }
                 
@@ -3576,11 +3563,7 @@
                     if (locationsToggle) {
                         locationsToggle.addEventListener('change', updateLayerVisibility);
                     }
-                    
-                    if (rangeToggle) {
-                        rangeToggle.addEventListener('change', updateLayerVisibility);
-                    }
-                    
+
                     // Handle image load errors properly
                     if (radarImage) {
                         radarImage.addEventListener('error', function(e) {
