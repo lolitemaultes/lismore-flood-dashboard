@@ -3144,9 +3144,9 @@
                 let preloadedImages = new Map(); // To store preloaded images
                 const ANIMATION_LOCKOUT_MS = 5000; // Prevent animation for 5 seconds after refresh
 
-                // CRITICAL: Shorthand reference to global state (all reads/writes go to global)
-                const $ = window.radarGlobalState;
-                console.log('>>> Using global state object:', $);
+                // CRITICAL: All state access goes directly to window.radarGlobalState
+                // No local shorthand to avoid any scoping/closure issues
+                console.log('>>> Using global state object:', window.radarGlobalState);
                 
                 // Function to format date in locale format
                 function formatDate(dateString) {
@@ -3332,14 +3332,14 @@
                 // Function to update the radar image
                 function updateRadarImage(frameIndex) {
                     // CRITICAL: Block ALL updates if refreshing
-                    if ($.isRefreshing) {
+                    if (window.radarGlobalState.isRefreshing) {
                         console.log('updateRadarImage blocked: refreshing');
                         return;
                     }
 
                     // CRITICAL: Block updates during lockout period after refresh
-                    const timeSinceRefresh = Date.now() - $.lastRefreshTime;
-                    if ($.lastRefreshTime > 0 && timeSinceRefresh < ANIMATION_LOCKOUT_MS) {
+                    const timeSinceRefresh = Date.now() - window.radarGlobalState.lastRefreshTime;
+                    if (window.radarGlobalState.lastRefreshTime > 0 && timeSinceRefresh < ANIMATION_LOCKOUT_MS) {
                         console.log(`updateRadarImage blocked: lockout period (${Math.ceil((ANIMATION_LOCKOUT_MS - timeSinceRefresh) / 1000)}s remaining)`);
                         return;
                     }
@@ -3351,7 +3351,7 @@
 
                         if (radarImages[frameIndex] && radarImages[frameIndex].url) {
                             // Update the image
-                            console.log(`>>> UPDATE RADAR IMAGE: frame ${frameIndex}, sessionID ${$.currentAnimationSessionId}, isPlaying=${$.isPlaying}, isRefreshing=${$.isRefreshing}`);
+                            console.log(`>>> UPDATE RADAR IMAGE: frame ${frameIndex}, sessionID ${window.radarGlobalState.currentAnimationSessionId}, isPlaying=${window.radarGlobalState.isPlaying}, isRefreshing=${window.radarGlobalState.isRefreshing}`);
                             radarImage.src = radarImages[frameIndex].url;
 
                             // Update the timestamp
@@ -3383,18 +3383,18 @@
                       console.log('playAnimation BLOCKED: no radar images');
                       return;
                   }
-                  if ($.animationLock) {
+                  if (window.radarGlobalState.animationLock) {
                       console.log('playAnimation BLOCKED: animationLock is true');
                       return; // Prevent concurrent animations
                   }
-                  if ($.isRefreshing) {
+                  if (window.radarGlobalState.isRefreshing) {
                       console.log('playAnimation BLOCKED: isRefreshing is true');
                       return; // Prevent animation during refresh
                   }
 
                   // CRITICAL: Prevent animation for X seconds after refresh
-                  const timeSinceRefresh = Date.now() - $.lastRefreshTime;
-                  if ($.lastRefreshTime > 0 && timeSinceRefresh < ANIMATION_LOCKOUT_MS) {
+                  const timeSinceRefresh = Date.now() - window.radarGlobalState.lastRefreshTime;
+                  if (window.radarGlobalState.lastRefreshTime > 0 && timeSinceRefresh < ANIMATION_LOCKOUT_MS) {
                       console.log(`playAnimation BLOCKED: lockout - ${Math.ceil((ANIMATION_LOCKOUT_MS - timeSinceRefresh) / 1000)}s remaining`);
                       return;
                   }
@@ -3404,39 +3404,39 @@
                   pauseAnimation();
 
                   console.log('playAnimation: Setting isPlaying=true, animationLock=true');
-                  $.isPlaying = true;
-                  $.animationLock = true;
+                  window.radarGlobalState.isPlaying = true;
+                  window.radarGlobalState.animationLock = true;
                   if (btnPlay) btnPlay.disabled = true;
                   if (btnPause) btnPause.disabled = false;
 
                   // CRITICAL: Create NEW animation session to kill old loops
-                  console.log(`playAnimation: currentAnimationSessionId BEFORE increment: ${$.currentAnimationSessionId}`);
-                  $.$.currentAnimationSessionId++;
-                  const mySessionId = $.currentAnimationSessionId;
+                  console.log(`playAnimation: currentAnimationSessionId BEFORE increment: ${window.radarGlobalState.currentAnimationSessionId}`);
+                  $.window.radarGlobalState.currentAnimationSessionId++;
+                  const mySessionId = window.radarGlobalState.currentAnimationSessionId;
                   console.log(`>>> Starting NEW animation session ID: ${mySessionId}`);
 
                   // Define the animation loop - SIMPLIFIED (no race conditions)
                   const advanceFrame = () => {
-                    console.log(`>>> advanceFrame CALLED: session ${mySessionId}, current=${$.currentAnimationSessionId}, isPlaying=${$.isPlaying}, isRefreshing=${$.isRefreshing}`);
+                    console.log(`>>> advanceFrame CALLED: session ${mySessionId}, current=${window.radarGlobalState.currentAnimationSessionId}, isPlaying=${window.radarGlobalState.isPlaying}, isRefreshing=${window.radarGlobalState.isRefreshing}`);
 
                     // CRITICAL: Kill this loop if it's from an old session
-                    if (mySessionId !== $.currentAnimationSessionId) {
-                        console.log(`!!! advanceFrame: OLD SESSION ${mySessionId} (current is ${$.currentAnimationSessionId}), KILLING THIS LOOP !!!`);
+                    if (mySessionId !== window.radarGlobalState.currentAnimationSessionId) {
+                        console.log(`!!! advanceFrame: OLD SESSION ${mySessionId} (current is ${window.radarGlobalState.currentAnimationSessionId}), KILLING THIS LOOP !!!`);
                         return;
                     }
 
-                    if (!$.isPlaying) {
+                    if (!window.radarGlobalState.isPlaying) {
                         console.log(`!!! advanceFrame session ${mySessionId}: isPlaying false, STOPPING !!!`);
                         return; // Safety check
                     }
-                    if ($.isRefreshing) {
+                    if (window.radarGlobalState.isRefreshing) {
                         console.log(`!!! advanceFrame session ${mySessionId}: isRefreshing true, STOPPING !!!`);
                         return; // CRITICAL: Stop animation during refresh
                     }
 
                     // CRITICAL: Check lockout period
-                    const timeSinceRefresh = Date.now() - $.lastRefreshTime;
-                    if ($.lastRefreshTime > 0 && timeSinceRefresh < ANIMATION_LOCKOUT_MS) {
+                    const timeSinceRefresh = Date.now() - window.radarGlobalState.lastRefreshTime;
+                    if (window.radarGlobalState.lastRefreshTime > 0 && timeSinceRefresh < ANIMATION_LOCKOUT_MS) {
                         console.log(`!!! advanceFrame session ${mySessionId}: In lockout period, STOPPING (${Math.ceil((ANIMATION_LOCKOUT_MS - timeSinceRefresh) / 1000)}s remaining) !!!`);
                         return;
                     }
@@ -3447,9 +3447,9 @@
                     updateRadarImage(currentFrame);
 
                     // Schedule next frame and TRACK the timeout ID
-                    $.animationInterval = setTimeout(advanceFrame, animationDelay);
-                    $.allTimeoutIds.add($.animationInterval); // Track this timeout so we can kill it
-                    console.log(`>>> advanceFrame session ${mySessionId}: Scheduled next frame with timeout ID ${$.animationInterval}`);
+                    window.radarGlobalState.animationInterval = setTimeout(advanceFrame, animationDelay);
+                    window.radarGlobalState.allTimeoutIds.add(window.radarGlobalState.animationInterval); // Track this timeout so we can kill it
+                    console.log(`>>> advanceFrame session ${mySessionId}: Scheduled next frame with timeout ID ${window.radarGlobalState.animationInterval}`);
                   };
 
                   // Start the animation loop
@@ -3457,15 +3457,15 @@
                 }
             
                 function pauseAnimation() {
-                  $.$.isPlaying = false;
-                  $.$.animationLock = false; // Release animation lock
+                  $.window.radarGlobalState.isPlaying = false;
+                  $.window.radarGlobalState.animationLock = false; // Release animation lock
                   if (btnPlay) btnPlay.disabled = false;
                   if (btnPause) btnPause.disabled = true;
 
                   // Clear ALL pending timers/frames
-                  if ($.$.animationInterval) {
-                    clearTimeout($.animationInterval);
-                    $.$.animationInterval = null;
+                  if ($.window.radarGlobalState.animationInterval) {
+                    clearTimeout(window.radarGlobalState.animationInterval);
+                    $.window.radarGlobalState.animationInterval = null;
                   }
                   if (animationRequestId) {
                     cancelAnimationFrame(animationRequestId);
@@ -3473,8 +3473,8 @@
                   }
 
                   // CRITICAL: Clear ALL tracked timeouts
-                  $.$.allTimeoutIds.forEach(id => clearTimeout(id));
-                  $.$.allTimeoutIds.clear();
+                  $.window.radarGlobalState.allTimeoutIds.forEach(id => clearTimeout(id));
+                  $.window.radarGlobalState.allTimeoutIds.clear();
                   console.log('Cleared all animation timeouts');
                 }
             
@@ -3536,8 +3536,8 @@
                         if (button) button.disabled = isDisabled;
                     };
 
-                    safeDisable(btnPlay, !enable || $.isPlaying);
-                    safeDisable(btnPause, !enable || !$.isPlaying);
+                    safeDisable(btnPlay, !enable || window.radarGlobalState.isPlaying);
+                    safeDisable(btnPause, !enable || !window.radarGlobalState.isPlaying);
                     safeDisable(btnPrev, !enable);
                     safeDisable(btnNext, !enable);
                     safeDisable(btnFirst, !enable);
@@ -3583,7 +3583,7 @@
                     console.log('===== REFRESH DATA STARTING =====');
 
                     // CRITICAL: Invalidate current animation session to kill ALL running loops
-                    $.currentAnimationSessionId++;
+                    window.radarGlobalState.currentAnimationSessionId++;
                     console.log(`>>> INVALIDATED animation session, new ID: ${currentAnimationSessionId}`);
 
                     // CRITICAL: IMMEDIATELY clear the data FIRST before anything else
@@ -3591,10 +3591,10 @@
                     const oldRadarImages = radarImages;
                     radarImages = [];
                     currentFrame = 0;
-                    $.isRefreshing = true;
+                    window.radarGlobalState.isRefreshing = true;
 
                     // Mark refresh time to prevent animation restart
-                    $.lastRefreshTime = Date.now();
+                    window.radarGlobalState.lastRefreshTime = Date.now();
 
                     // BLANK IMAGE DATA URL
                     const BLANK_IMAGE = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
@@ -3609,9 +3609,9 @@
 
                     // CRITICAL: Start interval that FORCEFULLY keeps resetting radar to blank
                     // This ensures NO frame changes can happen even if something bypasses our checks
-                    if ($.forceClearInterval) clearInterval($.forceClearInterval);
-                    $.forceClearInterval = setInterval(() => {
-                        if (radarImage && $.isRefreshing) {
+                    if (window.radarGlobalState.forceClearInterval) clearInterval(window.radarGlobalState.forceClearInterval);
+                    window.radarGlobalState.forceClearInterval = setInterval(() => {
+                        if (radarImage && window.radarGlobalState.isRefreshing) {
                             radarImage.src = BLANK_IMAGE;
                             console.log('Force clearing radar image');
                         }
@@ -3619,23 +3619,23 @@
 
                     // NOW force stop animation
                     pauseAnimation(); // This clears allTimeoutIds
-                    $.animationLock = false;
-                    $.isPlaying = false;
+                    window.radarGlobalState.animationLock = false;
+                    window.radarGlobalState.isPlaying = false;
 
                     // Clear ALL timers aggressively - again!
-                    $.allTimeoutIds.forEach(id => clearTimeout(id));
-                    $.allTimeoutIds.clear();
-                    if ($.animationInterval) {
+                    window.radarGlobalState.allTimeoutIds.forEach(id => clearTimeout(id));
+                    window.radarGlobalState.allTimeoutIds.clear();
+                    if (window.radarGlobalState.animationInterval) {
                         clearTimeout(animationInterval);
-                        $.animationInterval = null;
+                        window.radarGlobalState.animationInterval = null;
                     }
                     // Triple-clear to catch any pending
                     setTimeout(() => {
-                        $.allTimeoutIds.forEach(id => clearTimeout(id));
-                        $.allTimeoutIds.clear();
-                        if ($.animationInterval) {
+                        window.radarGlobalState.allTimeoutIds.forEach(id => clearTimeout(id));
+                        window.radarGlobalState.allTimeoutIds.clear();
+                        if (window.radarGlobalState.animationInterval) {
                             clearTimeout(animationInterval);
-                            $.animationInterval = null;
+                            window.radarGlobalState.animationInterval = null;
                         }
                     }, 0);
 
@@ -3651,10 +3651,10 @@
                         // No internet - restore old data and STOP force clearing
                         if (forceClearInterval) {
                             clearInterval(forceClearInterval);
-                            $.forceClearInterval = null;
+                            window.radarGlobalState.forceClearInterval = null;
                         }
                         radarImages = oldRadarImages;
-                        $.isRefreshing = false;
+                        window.radarGlobalState.isRefreshing = false;
                         showError('No internet connection. Keeping current data.');
                         if (timestamp && radarImages.length > 0) {
                             timestamp.textContent = formatDate(radarImages[currentFrame].timestamp) + ' (Offline)';
@@ -3679,46 +3679,46 @@
                         console.log('===== SAFETY DELAY COMPLETE - FINAL CLEANUP =====');
 
                         // CRITICAL: Bump session ID ONE MORE TIME to kill any zombie loops
-                        $.currentAnimationSessionId++;
+                        window.radarGlobalState.currentAnimationSessionId++;
                         console.log(`>>> FINAL session bump to ID: ${currentAnimationSessionId}`);
 
                         // FORCE STOP - make absolutely sure animation is dead
-                        $.isPlaying = false;
-                        $.animationLock = false;
+                        window.radarGlobalState.isPlaying = false;
+                        window.radarGlobalState.animationLock = false;
 
                         // Clear ALL timeouts one more time
-                        $.allTimeoutIds.forEach(id => clearTimeout(id));
-                        $.allTimeoutIds.clear();
-                        if ($.animationInterval) {
+                        window.radarGlobalState.allTimeoutIds.forEach(id => clearTimeout(id));
+                        window.radarGlobalState.allTimeoutIds.clear();
+                        if (window.radarGlobalState.animationInterval) {
                             clearTimeout(animationInterval);
-                            $.animationInterval = null;
+                            window.radarGlobalState.animationInterval = null;
                         }
 
                         // STOP the force clearing interval
                         if (forceClearInterval) {
                             clearInterval(forceClearInterval);
-                            $.forceClearInterval = null;
+                            window.radarGlobalState.forceClearInterval = null;
                         }
 
-                        $.isRefreshing = false;
+                        window.radarGlobalState.isRefreshing = false;
                         console.log(`===== REFRESH COMPLETE =====`);
-                        console.log(`$.isRefreshing = false, $.isPlaying = false, $.animationLock = false`);
+                        console.log(`window.radarGlobalState.isRefreshing = false, window.radarGlobalState.isPlaying = false, window.radarGlobalState.animationLock = false`);
                         console.log(`ANIMATION LOCKED OUT for ${ANIMATION_LOCKOUT_MS / 1000} seconds from refresh start`);
-                        console.log(`Lockout will end at: ${new Date($.lastRefreshTime + ANIMATION_LOCKOUT_MS).toLocaleTimeString()}`);
+                        console.log(`Lockout will end at: ${new Date(window.radarGlobalState.lastRefreshTime + ANIMATION_LOCKOUT_MS).toLocaleTimeString()}`);
 
                         // Schedule display of first frame AFTER lockout expires
-                        const remainingLockout = ANIMATION_LOCKOUT_MS - (Date.now() - $.lastRefreshTime);
+                        const remainingLockout = ANIMATION_LOCKOUT_MS - (Date.now() - window.radarGlobalState.lastRefreshTime);
                         if (remainingLockout > 0) {
                             setTimeout(() => {
                                 console.log('=== LOCKOUT EXPIRED - Displaying first frame ===');
-                                if (radarImages && radarImages.length > 0 && !$.isPlaying) {
+                                if (radarImages && radarImages.length > 0 && !window.radarGlobalState.isPlaying) {
                                     updateRadarImage(0);
                                 }
                             }, remainingLockout + 100); // Add 100ms buffer
                         } else {
                             // Lockout already expired, display now
                             console.log('=== LOCKOUT ALREADY EXPIRED - Displaying first frame now ===');
-                            if (radarImages && radarImages.length > 0 && !$.isPlaying) {
+                            if (radarImages && radarImages.length > 0 && !window.radarGlobalState.isPlaying) {
                                 updateRadarImage(0);
                             }
                         }
