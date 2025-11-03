@@ -131,7 +131,6 @@
             color: var(--gray-800);
         }
 
-        /* Improved Webcam Image Container Styling */
         .webcam-image-container {
             position: relative;
             width: 100%;
@@ -308,7 +307,6 @@
             border-top: 1px solid var(--gray-200);
         }
 
-        /* Tabs styling */
         .tabs-container {
             border-bottom: 1px solid var(--gray-200);
         }
@@ -316,12 +314,12 @@
         .tabs {
             display: flex;
             overflow-x: auto;
-            scrollbar-width: none; /* For Firefox */
-            -ms-overflow-style: none; /* For Internet Explorer and Edge */
+            scrollbar-width: none;
+            -ms-overflow-style: none;
         }
         
         .tabs::-webkit-scrollbar {
-            display: none; /* For Chrome, Safari, and Opera */
+            display: none;
         }
         
         .tab-button {
@@ -405,12 +403,11 @@
             text-decoration: underline;
         }
         
-        /* Cyclone Map Container Styling */
         .cyclone-container {
             position: relative;
             width: 100%;
             height: 0;
-            padding-bottom: 55%; /* 4:3 aspect ratio */
+            padding-bottom: 55%;
             border-radius: var(--border-radius);
             overflow: hidden;
             background-color: var(--gray-200);
@@ -441,7 +438,6 @@
             text-align: center;
         }
 
-        /* Outage info styling */
         .outage-info-container {
             padding: 1rem;
         }
@@ -499,7 +495,6 @@
             flex-shrink: 0;
         }
         
-        /* Map containers styling */
         .maps-grid {
             display: grid;
             grid-template-columns: 1fr;
@@ -513,7 +508,6 @@
             }
         }
         
-        /* Radar container and display styling */
         .radar-container {
             position: relative;
             width: 100%;
@@ -536,7 +530,6 @@
             width: 100%;
         }
         
-        /* Updated legend styling - bigger and centered */
         .legend-container {
             width: 100%;
             text-align: center;
@@ -544,7 +537,7 @@
         }
         
         .legend-image {
-            width: 350px; /* Increased from 250px to 350px */
+            width: 350px;
             border-radius: 8px;
             box-shadow: var(--shadow-sm);
             display: inline-block;
@@ -552,11 +545,10 @@
         
         @media screen and (max-width: 768px) {
             .legend-image {
-                width: 300px; /* Still bigger on mobile but slightly smaller */
+                width: 300px;
             }
         }
         
-        /* Image and layer styling */
         .radar-image, .map-layer {
             position: absolute;
             top: -50px;
@@ -566,7 +558,6 @@
             object-fit: cover;
         }
         
-        /* Improved control buttons styling */
         .control-buttons {
             display: flex;
             justify-content: center;
@@ -574,7 +565,6 @@
             margin-bottom: 15px;
         }
         
-        /* Media player style buttons */
         .control-buttons button {
             width: 48px;
             height: 48px;
@@ -611,19 +601,16 @@
             transform: none;
         }
         
-        /* Make both play and pause buttons larger */
         #btn-play, #btn-pause {
             width: 56px;
             height: 56px;
             font-size: 20px;
         }
         
-        /* First and last buttons styling */
         #btn-first, #btn-last {
             font-size: 14px;
         }
         
-        /* Speed controls */
         .speed-controls {
             margin: 15px 0;
             display: flex;
@@ -662,7 +649,6 @@
             border: none;
         }
         
-        /* Media player style buttons */
         .control-buttons button {
             width: 40px;
             height: 40px;
@@ -699,7 +685,6 @@
             transform: none;
         }
         
-        /* Speed controls */
         .speed-controls {
             margin: 15px 0;
             display: flex;
@@ -738,7 +723,6 @@
             border: none;
         }
         
-        /* Information displays */
         #timestamp {
             font-weight: 600;
             text-align: center;
@@ -753,7 +737,6 @@
             margin-bottom: 10px;
         }
         
-        /* Progress bar */
         .progress-container {
             width: 100%;
             max-width: 400px;
@@ -771,7 +754,6 @@
             transition: width 0.2s;
         }
         
-        /* Loading indicator */
         .loading {
             display: flex;
             justify-content: center;
@@ -803,7 +785,6 @@
             100% { transform: rotate(360deg); }
         }
         
-        /* Layer controls */
         .layer-controls {
             display: flex;
             justify-content: center;
@@ -824,7 +805,6 @@
             cursor: pointer;
         }
         
-        /* Error display */
         .error {
             color: #cc0000;
             font-weight: bold;
@@ -836,7 +816,6 @@
             border-left: 4px solid #cc0000;
         }
         
-        /* Last update info */
         .last-update {
             text-align: center;
             font-size: 0.85em;
@@ -844,7 +823,6 @@
             margin-bottom: 10px;
         }
         
-        /* Responsive adjustments */
         @media screen and (max-width: 768px) {
             .radar-display {
                 flex-direction: column;
@@ -860,7 +838,6 @@
             }
         }
         
-        /* River system header styling */
         .river-system-header {
             background-color: var(--primary-color);
             color: white;
@@ -872,7 +849,6 @@
             font-size: 0.95rem;
         }
 
-        /* Status styles */
         .rising {
             color: var(--danger-color);
             font-weight: 600;
@@ -888,7 +864,6 @@
             font-weight: 600;
         }
 
-        /* Flood category styling */
         .minor-flood {
             background-color: rgba(255, 193, 7, 0.1);
         }
@@ -901,7 +876,6 @@
             background-color: rgba(220, 53, 69, 0.1);
         }
 
-        /* Emergency section styling */
         .emergency-contacts {
             background-color: #fef2f2;
             border-radius: var(--border-radius);
@@ -957,7 +931,6 @@
             color: var(--gray-800);
         }
 
-        /* Resources Section Styling */
         .resources-panel {
             background-color: #f0f7ff;
             border-radius: var(--border-radius);
@@ -1042,7 +1015,6 @@
             flex-shrink: 0;
         }
 
-        /* Stats panel styling */
         .stats-container {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
@@ -1077,7 +1049,6 @@
             margin-top: 0.5rem;
         }
 
-        /* Status panel */
         .status-panel {
             padding: 1rem;
         }
@@ -1125,7 +1096,6 @@
             text-align: right;
         }
 
-        /* Loading overlay */
         .loading-overlay {
             position: fixed;
             top: 0;
@@ -1156,7 +1126,6 @@
             100% { transform: rotate(360deg); }
         }
 
-        /* Notification styles */
         .notification {
             position: fixed;
             bottom: 1rem;
@@ -1217,7 +1186,6 @@
             opacity: 1;
         }
 
-        /* Data source attribution */
         .data-attribution {
             text-align: center;
             padding: 1.5rem;
@@ -1236,7 +1204,6 @@
             text-decoration: underline;
         }
 
-        /* River Height Chart Modal */
         .modal {
             display: none;
             position: fixed;
@@ -1344,7 +1311,6 @@
             color: var(--danger-color);
         }
 
-        /* Responsive adjustments */
         @media (max-width: 768px) {
             .header-title h1 {
                 font-size: 1.25rem;
@@ -1378,7 +1344,6 @@
             }
         }
 
-        /* Flood Map Tab Styles */
         #content-floodmap {
             height: 100%;
             display: flex;
@@ -1529,7 +1494,6 @@
             color: var(--success-color);
         }
 
-        /* Flood map legend */
         .flood-map-legend {
             position: absolute;
             right: 10px;
@@ -1565,24 +1529,16 @@
             font-size: 12px;
         }
 
-        /* ============================================
-           MOBILE STYLING - CLEAN, SLEEK, BEAUTIFUL
-           Modern app-like experience optimized for thin screens
-           ============================================ */
-
         @media (max-width: 768px) {
-            /* SMOOTH TRANSITIONS */
             * {
                 transition: background-color 0.2s ease, transform 0.2s ease;
             }
-            /* BODY: Clean foundation */
             body {
                 font-size: 16px;
                 line-height: 1.7;
                 background-color: #f5f7fa;
             }
 
-            /* HEADER: Modern, elevated */
             header {
                 padding: 1rem 1.25rem;
                 position: sticky;
@@ -1612,7 +1568,6 @@
                 font-weight: 500;
             }
 
-            /* DASHBOARD: Modern card layout */
             .dashboard-container {
                 display: block;
                 margin: 0;
@@ -1620,7 +1575,6 @@
                 gap: 0;
             }
 
-            /* PANELS: Beautiful elevated cards */
             .panel,
             .webcam-container {
                 border-radius: 16px;
@@ -1649,7 +1603,6 @@
                 padding: 1.25rem;
             }
 
-            /* STATS: 2-column mobile grid */
             .stats-container {
                 grid-template-columns: 1fr 1fr;
                 gap: 0.75rem;
@@ -1673,7 +1626,6 @@
                 font-size: 0.75rem;
             }
 
-            /* TABLES: Horizontal scroll with bigger text */
             .table-container {
                 overflow-x: auto;
                 -webkit-overflow-scrolling: touch;
@@ -1704,7 +1656,6 @@
                 font-size: 0.8125rem;
             }
 
-            /* TABS: Scrollable mobile tabs */
             .tabs-container {
                 overflow-x: auto;
                 -webkit-overflow-scrolling: touch;
@@ -1724,14 +1675,12 @@
                 white-space: nowrap;
             }
 
-            /* BUTTONS: Larger touch targets */
             .btn {
                 padding: 0.75rem 1.25rem;
                 font-size: 0.9375rem;
                 min-height: 44px;
             }
 
-            /* RADAR: Mobile-optimized */
             .radar-container {
                 height: 280px;
                 border-radius: 0;
@@ -1755,7 +1704,6 @@
                 font-size: 0.75rem;
             }
 
-            /* MODALS: Full-screen mobile modals */
             .modal {
                 padding: 0;
             }
@@ -1790,26 +1738,22 @@
                 overflow-y: auto;
             }
 
-            /* CHARTS: Taller for mobile */
             #river-chart-container {
                 height: 280px;
             }
 
-            /* MAPS: Mobile-friendly size */
             #radar-map,
             #flood-map {
                 height: 320px;
                 border-radius: 0;
             }
 
-            /* FLOOD MAP LEGEND: Adjusted */
             .flood-map-legend {
                 right: 8px;
                 bottom: 24px;
                 padding: 0.5rem;
             }
 
-            /* NOTIFICATIONS: Full-width */
             .notification {
                 width: 100%;
                 margin: 0;
@@ -1817,7 +1761,6 @@
                 padding: 1rem;
             }
 
-            /* STATUS PANEL: Vertical stack */
             .status-panel {
                 padding: 1rem;
                 display: block;
@@ -1840,7 +1783,6 @@
                 font-size: 0.9375rem;
             }
 
-            /* WEBCAM: Full-width */
             .webcam-image-container {
                 padding: 0.5rem;
             }
@@ -1853,7 +1795,6 @@
             }
         }
 
-        /* PHONE-SPECIFIC (≤480px) - Even more mobile-optimized */
         @media (max-width: 480px) {
             body {
                 font-size: 14px;
@@ -1863,7 +1804,6 @@
                 font-size: 1rem;
             }
 
-            /* STATS: Single column on small phones */
             .stats-container {
                 grid-template-columns: 1fr;
             }
@@ -1872,7 +1812,6 @@
                 font-size: 1.375rem;
             }
 
-            /* TABLES: Smaller on phones */
             table {
                 min-width: 600px;
                 font-size: 0.8125rem;
@@ -1882,13 +1821,11 @@
                 padding: 0.625rem 0.5rem;
             }
 
-            /* TABS: Smaller */
             .tab {
                 padding: 0.75rem 1rem;
                 font-size: 0.875rem;
             }
 
-            /* BUTTONS: Maintain touch targets */
             .btn {
                 font-size: 0.875rem;
             }
@@ -1898,24 +1835,20 @@
                 height: 42px;
             }
 
-            /* RADAR: Smaller */
             .radar-container {
                 height: 240px;
             }
 
-            /* CHART: Smaller */
             #river-chart-container {
                 height: 240px;
             }
 
-            /* MAPS: Smaller */
             #radar-map,
             #flood-map {
                 height: 280px;
             }
         }
 
-        /* LANDSCAPE ORIENTATION: Optimized heights */
         @media (max-height: 500px) and (orientation: landscape) {
             .modal-content {
                 height: 100vh;
@@ -1933,13 +1866,11 @@
     </style>
 </head>
 <body>
-    <!-- Loading Overlay -->
     <div id="loading-overlay" class="loading-overlay">
         <div class="spinner"></div>
         <p>Loading flood data...</p>
     </div>
 
-    <!-- Notification Component -->
     <div id="notification" class="notification">
         <span class="notification-icon">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1957,7 +1888,6 @@
         </button>
     </div>
 
-    <!-- Header -->
     <header>
         <div class="header-content">
             <div class="header-title">
@@ -1972,7 +1902,6 @@
 
     <div class="dashboard-container">
         <main>
-            <!-- Tabbed content section -->
             <div class="panel">
                 <div class="tabs-container">
                     <div class="tabs">
@@ -2016,9 +1945,7 @@
                     </div>
                 </div>
                 
-                <!-- Tab content -->
                 <div class="tab-content-container">
-                    <!-- Webcam Tab -->
                     <div id="content-webcam" class="tab-content active">
                         <div class="tab-header">
                             <h2>Bruxner Highway Lismore - Live Traffic Camera</h2>
@@ -2050,13 +1977,11 @@
                         </div>
                     </div>
                     
-                    <!-- Radar Tab with SVG Icons -->
                     <div id="content-radar" class="tab-content">
                         <div class="tab-header">
                             <h2>Grafton 256km Radar</h2>
                             <div>
                                 <button id="refresh-btn" class="button">
-                                    <!-- Refresh icon -->
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M23 4v6h-6"></path>
                                         <path d="M1 20v-6h6"></path>
@@ -2072,7 +1997,6 @@
                         <div class="radar-wrapper">
                             <div class="radar-display">
                                 <div class="radar-container">
-                                    <!-- Map layers - ORDER IS IMPORTANT -->
                                     <img id="background-layer" class="map-layer" src="" alt="Background Map" style="z-index: 1;">
                                     <img id="topography-layer" class="map-layer" src="" alt="Topography" style="z-index: 2;">
                                     <img id="radar-image" class="radar-image" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Radar Image" style="z-index: 3;">
@@ -2085,7 +2009,6 @@
                                 </div>
                             </div>
                             
-                            <!-- Using local legend image with increased size -->
                             <div class="legend-container">
                                 <img src="/resources/Rain Radar/legend.png" alt="Radar Legend" class="legend-image">
                             </div>
@@ -2097,41 +2020,34 @@
                                 <div id="progress-bar" class="progress-bar"></div>
                             </div>
                             
-                            <!-- Improved animation controls with SVG icons -->
                             <div class="controls">
                                 <div class="control-buttons">
                                     <button id="btn-first" disabled title="First frame">
-                                        <!-- First frame icon -->
                                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                                             <path d="M18.41 16.59L13.82 12l4.59-4.59L17 6l-6 6 6 6zM6 6h2v12H6z"></path>
                                         </svg>
                                     </button>
                                     <button id="btn-prev" disabled title="Previous frame">
-                                        <!-- Previous icon -->
                                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                                             <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"></path>
                                         </svg>
                                     </button>
                                     <button id="btn-play" disabled title="Play">
-                                        <!-- Play icon -->
                                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                                             <path d="M8 5v14l11-7z"></path>
                                         </svg>
                                     </button>
                                     <button id="btn-pause" disabled title="Pause">
-                                        <!-- Pause icon -->
                                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                                             <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path>
                                         </svg>
                                     </button>
                                     <button id="btn-next" disabled title="Next frame">
-                                        <!-- Next icon -->
                                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                                             <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path>
                                         </svg>
                                     </button>
                                     <button id="btn-last" disabled title="Last frame">
-                                        <!-- Last frame icon -->
                                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                                             <path d="M5.59 7.41L10.18 12l-4.59 4.59L7 18l6-6-6-6zM16 6h2v12h-2z"></path>
                                         </svg>
@@ -2172,7 +2088,6 @@
                         </div>
                     </div>
                     
-                    <!-- Cyclone Container-->
                     <div id="content-cyclone" class="tab-content">
                         <div class="tab-header">
                             <h2>Tropical Cyclone Forecast Track Map</h2>
@@ -2211,7 +2126,6 @@
                         </div>
                     </div>
 
-                    <!-- Flood Map Tab -->
                     <div id="content-floodmap" class="tab-content">
                         <div class="tab-header">
                             <h2>Lismore Flood Impact Map</h2>
@@ -2325,7 +2239,6 @@
                         </div>
                     </div>
 
-                    <!-- Outage Map Tab -->
                     <div id="content-outage" class="tab-content">
                         <div class="tab-header">
                             <h2>Essential Energy Power Outages</h2>
@@ -2395,7 +2308,6 @@
                 </div>
             </div>
 
-            <!-- Flood Data Section -->
             <div class="panel">
                 <div class="panel-header">
                     <h2>Wilsons River Flood Data</h2>
@@ -2451,7 +2363,6 @@
                 </div>
             </div>
 
-            <!-- Data Sources & Status -->
             <div class="panel">
                 <div class="panel-header">
                     <h2>Data Sources & Status</h2>
@@ -2485,7 +2396,6 @@
         </main>
 
         <aside>
-            <!-- Flood Statistics -->
             <div class="panel">
                 <div class="panel-header">
                     <h2>Flood Statistics</h2>
@@ -2514,7 +2424,6 @@
                 </div>
             </div>
 
-            <!-- Emergency Contacts -->
             <div class="emergency-contacts">
                 <div class="emergency-header">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -2559,7 +2468,6 @@
                 </div>
             </div>
 
-            <!-- Useful Resources -->
             <div class="resources-panel">
                 <div class="resources-header">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -2653,14 +2561,12 @@
         <p>This dashboard is for emergency use during flood events in the Lismore area.</p>
     </footer>
 
-    <!-- External scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.0/papaparse.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.heat/0.2.0/leaflet-heat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     
     <script>
-        // Define the levee wall coordinates
         const leveeCoordinates = [
             [153.2779234789894, -28.80564897533751], [153.2776284287106, -28.80583653192451],
             [153.2775473935466, -28.80578584679196], [153.2774086343345, -28.80589734283666],
@@ -2699,7 +2605,6 @@
             [153.2711906807951, -28.81358726843914]
         ];
         
-        // Define the area enclosed by the levee (used to check if properties are protected)
         const leveeAreaCoordinates = [
             [153.2779234789894, -28.80564897533751], [153.2776284287106, -28.80583653192451],
             [153.2775473935466, -28.80578584679196], [153.2774086343345, -28.80589734283666],
@@ -2743,21 +2648,16 @@
             [153.2779234789894, -28.80564897533751]
         ];
         
-        // Define the levee height and warning threshold
-        const LEVEE_HEIGHT = 10.6; // meters
-        const LEVEE_WARNING_THRESHOLD = 9.0; // meters - when to show warning color (orange)
+        const LEVEE_HEIGHT = 10.6;
+        const LEVEE_WARNING_THRESHOLD = 9.0;
         
-        // Variable to store levee line layer reference
         let leveeLine = null;
 
-        // API endpoints
         const BASE_URL = 'http://localhost:3000';
         const PROXY_URL = BASE_URL + '/flood-data';
 
-        // Load CSV data from server API
         let embeddedCSVData = [];
         
-        // Load the flood data on page load
         async function loadFloodData() {
             try {
                 const response = await fetch('/api/flood-properties');
@@ -2766,20 +2666,17 @@
                 }
                 embeddedCSVData = await response.json();
 
-                // Process flood data if map is already initialized
                 if (floodMapInitialized && embeddedCSVData && embeddedCSVData.length > 0) {
                     processFloodData(embeddedCSVData);
                 }
             } catch (error) {
                 console.error('Error loading flood data:', error);
-                embeddedCSVData = []; // Fallback to empty array
+                embeddedCSVData = [];
             }
         }
         
-        // Call this when page loads
         loadFloodData();
 
-        // DOM elements
         const loadingOverlay = document.getElementById('loading-overlay');
         const notification = document.getElementById('notification');
         const notificationMessage = document.getElementById('notification-message');
@@ -2793,7 +2690,6 @@
         const clockElement = document.getElementById('clock');
         const checkStatusButton = document.getElementById('check-status');
         
-        // Stats elements
         const lismoreLevel = document.getElementById('lismore-level');
         const lismoreStatus = document.getElementById('lismore-status');
         const highestReading = document.getElementById('highest-reading');
@@ -2801,23 +2697,19 @@
         const risingCount = document.getElementById('rising-count');
         const fallingCount = document.getElementById('falling-count');
         
-        // Status elements
         const proxyStatusValue = document.getElementById('proxy-status-value');
         const bomStatusValue = document.getElementById('bom-status-value');
         const webcamStatusValue = document.getElementById('webcam-status-value');
 
-        // Constants
         const MINOR_FLOOD_LEVEL = 4.20;
         const MODERATE_FLOOD_LEVEL = 7.20;
         const MAJOR_FLOOD_LEVEL = 9.70;
-        const WEBCAM_REFRESH_INTERVAL = 1000; // 1 second
-        const DEFAULT_REFRESH_INTERVAL = 300000; // 5 minutes
-        const CRITICAL_THRESHOLD = 3.00; // Threshold for "critical" locations
+        const WEBCAM_REFRESH_INTERVAL = 1000;
+        const DEFAULT_REFRESH_INTERVAL = 300000;
+        const CRITICAL_THRESHOLD = 3.00;
         
-        // BOM direct URL (for reference only - we'll use the proxy)
         const BOM_URL = 'http://www.bom.gov.au/nsw/flood/northern.shtml';
 
-        // Variables
         let floodData = [];
         let refreshTimer = null;
         let webcamRefreshTimer = null;
@@ -2829,79 +2721,57 @@
         let floodHeatmapLayer = null;
         let floodMapInitialized = false;
 
-        // Initialize
         initializeDashboard();
 
-        // Main initialization function
         function initializeDashboard() {
-            // Start the clock
             updateClock();
             setInterval(updateClock, 1000);
             
-            // Add to your initializeDashboard function (anywhere before setupTabs)
             document.getElementById('refresh-cyclone').addEventListener('click', refreshCycloneMap);
 
-            // Set up tab navigation
             setupTabs();
             
-            // Set up webcam refresh
             refreshWebcam();
             webcamRefreshTimer = setInterval(refreshWebcam, WEBCAM_REFRESH_INTERVAL);
             document.getElementById('refresh-webcam').addEventListener('click', refreshWebcam);
             
-            // Add a safety check
             const refreshRadarBtn = document.getElementById('refresh-radar') || document.getElementById('refresh-btn');
             if (refreshRadarBtn) {
                 refreshRadarBtn.addEventListener('click', refreshRadar);
             }
             
-            // Add this to your DOMContentLoaded or initialization function
-            refreshCycloneMap(); // Initial load
-            setInterval(refreshCycloneMap, 1000); // Refresh cyclone map every second
+            refreshCycloneMap();
+            setInterval(refreshCycloneMap, 1000);
 
-            // Set up flood data refresh
             refreshIntervalSelect.value = DEFAULT_REFRESH_INTERVAL;
             refreshIntervalSelect.addEventListener('change', updateRefreshInterval);
 
-            // Set up buttons
             refreshNowButton.addEventListener('click', fetchFloodData);
 
-            // Check data sources status
             checkDataSources();
             checkStatusButton.addEventListener('click', checkDataSources);
 
-            // Set up automatic status checks every minute
             setupStatusAutoRefresh();
             
-            // Load cached data if available
             loadCachedData();
             
-            // Fetch fresh data
             fetchFloodData();
             
-            // Start the refresh timer
             updateRefreshInterval();
             
-            // Initialize flood map
             initFloodMapWithLevee();
         }
         
-        // Add this to your initializeDashboard function or after the checkDataSources function is defined
         function setupStatusAutoRefresh() {
             
-            // Perform an initial check
             checkDataSources();
             
-            // Set up an interval to check status every minute (60000 ms)
             const statusCheckInterval = setInterval(checkDataSources, 60000);
             
-            // Store the interval ID in case we need to clear it later
             window.statusCheckIntervalId = statusCheckInterval;
             
-            // Add a timestamp indicator to show when the last auto-check occurred
             const statusPanel = document.querySelector('.status-panel');
             
-            // Create last checked indicator if it doesn't exist
             if (!document.getElementById('status-last-checked')) {
                 const lastCheckedElement = document.createElement('div');
                 lastCheckedElement.className = 'status-item';
@@ -2910,7 +2780,6 @@
                     <span id="status-last-checked" class="status-value">Just now</span>
                 `;
                 
-                // Insert before the action buttons
                 const statusActions = document.querySelector('.status-actions');
                 if (statusActions) {
                     statusPanel.insertBefore(lastCheckedElement, statusActions);
@@ -2919,7 +2788,6 @@
                 }
             }
             
-            // Update the timestamp on each check
             const updateLastCheckedTime = () => {
                 const lastCheckedElement = document.getElementById('status-last-checked');
                 if (lastCheckedElement) {
@@ -2927,44 +2795,34 @@
                 }
             };
             
-            // Hook into the checkDataSources function to update the timestamp
             const originalCheckDataSources = checkDataSources;
             window.checkDataSources = function() {
                 originalCheckDataSources();
                 updateLastCheckedTime();
             };
             
-            // Initialize the timestamp
             updateLastCheckedTime();
         }
         
-        // Call this function to set up automatic status checks
         setupStatusAutoRefresh();
 
-        // Modified setupTabs function to handle unavailable tabs
         function setupTabs() {
             const tabButtons = document.querySelectorAll('.tab-button');
             const tabContents = document.querySelectorAll('.tab-content');
             
             tabButtons.forEach(button => {
                 button.addEventListener('click', () => {
-                    // Check if this tab is marked as unavailable
                     if (button.classList.contains('tab-unavailable')) {
-                        // Show the unavailability message
                         const reason = button.getAttribute('data-unavailable-reason');
                         showUnavailableContentPopup(button.id, reason);
-                        return false; // Stop processing
+                        return false;
                     }
                     
-                    // Normal tab switching behavior for available tabs
-                    // Remove active class from all tabs and contents
                     tabButtons.forEach(btn => btn.classList.remove('active'));
                     tabContents.forEach(content => content.classList.remove('active'));
                     
-                    // Add active class to clicked button
                     button.classList.add('active');
                     
-                    // Get the corresponding content ID and make it active
                     const contentId = button.id.replace('tab-', 'content-');
                     const contentElement = document.getElementById(contentId);
                     
@@ -2974,9 +2832,7 @@
                         console.error(`Tab content element with ID "${contentId}" not found`);
                     }
                     
-                    // Special handling for the flood map tab
                     if (button.id === 'tab-floodmap') {
-                        // Trigger a resize event to make sure the map renders correctly
                         setTimeout(() => {
                             window.dispatchEvent(new Event('resize'));
                             if (floodMap) {
@@ -2988,7 +2844,6 @@
             });
         }
         
-        // Update the clock
         function updateClock() {
             const now = new Date();
             const options = { 
@@ -3003,17 +2858,13 @@
             clockElement.textContent = now.toLocaleTimeString('en-AU', options);
         }
 
-        // Refresh the webcam image
         function refreshWebcam() {
-            // Add timestamp parameter to prevent caching
             const timestamp = new Date().getTime();
             webcamImage.src = `https://webcams.transport.nsw.gov.au/livetraffic-webcams/cameras/bruxner_highway_lismore.jpeg?t=${timestamp}`;
             webcamTimestamp.textContent = new Date().toLocaleTimeString('en-AU');
         }
 
-        // Check data source statuses
         function checkDataSources() {
-            // Reset status indicators
             proxyStatusValue.textContent = 'Checking...';
             proxyStatusValue.className = 'status-value';
             bomStatusValue.textContent = 'Checking...';
@@ -3021,19 +2872,15 @@
             webcamStatusValue.textContent = 'Checking...';
             webcamStatusValue.className = 'status-value';
             
-            // Add new status indicator for radar
             const radarStatusValue = document.getElementById('radar-status-value') || 
                                     createStatusElement('radar-status', 'Radar Image');
             
-            // Add status indicator for cyclone map
             const cycloneStatusValue = document.getElementById('cyclone-status-value') || 
                                       createStatusElement('cyclone-status', 'Cyclone Map');
             
-            // Add status indicator for flood map
             const floodMapStatusValue = document.getElementById('floodmap-status-value') || 
                                       createStatusElement('floodmap-status', 'Flood Map');
             
-            // Check proxy server
             fetch(PROXY_URL, { method: 'HEAD' })
                 .then(response => {
                     if (response.ok) {
@@ -3050,7 +2897,6 @@
                     console.error('Proxy server check failed:', error);
                 });
             
-            // Check BOM data
             fetch(PROXY_URL)
                 .then(response => response.json())
                 .then(data => {
@@ -3068,7 +2914,6 @@
                     console.error('BOM data check failed:', error);
                 });
             
-            // Check webcam
             const img = new Image();
             img.onload = function() {
                 webcamStatusValue.textContent = 'Online';
@@ -3080,8 +2925,6 @@
             };
             img.src = 'https://webcams.transport.nsw.gov.au/livetraffic-webcams/cameras/bruxner_highway_lismore.jpeg?' + new Date().getTime();
             
-            // CRITICAL: GLOBAL state variables to persist across re-initializations
-            // These MUST be outside initializeRadar() or they reset every time!
             window.radarGlobalState = window.radarGlobalState || {
                 currentAnimationSessionId: 0,
                 lastRefreshTime: 0,
@@ -3094,16 +2937,13 @@
                 radarInitialized: false
             };
 
-            // Radar interactive functionality
             function initializeRadar() {
-                // PREVENT MULTIPLE INITIALIZATIONS
                 if (window.radarGlobalState.radarInitialized) {
-                    console.warn('⚠️  Radar already initialized');
+                    console.warn('Radar already initialized');
                     return;
                 }
                 window.radarGlobalState.radarInitialized = true;
 
-                // DOM elements
                 const radarImage = document.getElementById('radar-image');
                 const backgroundLayer = document.getElementById('background-layer');
                 const topographyLayer = document.getElementById('topography-layer');
@@ -3124,24 +2964,18 @@
                 const errorElement = document.getElementById('error');
                 const lastUpdate = document.getElementById('last-update');
 
-                // Layer toggle checkboxes - with null checks
                 const topographyToggle = document.getElementById('topography-toggle');
                 const locationsToggle = document.getElementById('locations-toggle');
 
-                // Variables
-                const RADAR_ID = 'IDR282'; // Grafton 256km radar
+                const RADAR_ID = 'IDR282';
                 let radarImages = [];
                 let currentFrame = 0;
-                let animationDelay = 500; // milliseconds
+                let animationDelay = 500;
                 let animationRequestId = null;
                 let mapLayersLoaded = false;
-                let preloadedImages = new Map(); // To store preloaded images
-                const ANIMATION_LOCKOUT_MS = 0; // No lockout - users can play immediately after refresh
-
-                // CRITICAL: All state access goes directly to window.radarGlobalState
-                // No local shorthand to avoid any scoping/closure issues
+                let preloadedImages = new Map();
+                const ANIMATION_LOCKOUT_MS = 0;
                 
-                // Function to format date in locale format
                 function formatDate(dateString) {
                     try {
                         const date = new Date(dateString);
@@ -3160,9 +2994,7 @@
                     }
                 }
             
-                // Function to preload an image and return a promise
                 function preloadImage(url) {
-                    // Check if already cached
                     if (preloadedImages.has(url)) {
                         return Promise.resolve(url);
                     }
@@ -3178,7 +3010,6 @@
                     });
                 }
             
-                // Function to load map layers
                 async function loadMapLayers() {
                     if (!radarImage) {
                         console.error("Radar container elements not found. Aborting map layer loading.");
@@ -3189,19 +3020,15 @@
                     
                     try {
                         
-                        // Set default background color while waiting
                         const container = document.querySelector('.radar-container');
                         if (container) {
                             container.style.backgroundColor = '#99ccff';
                         }
                         
-                        // Create the URLs
                         const bgUrl = `/map-proxy/${RADAR_ID}.background.png`;
                         const topoUrl = `/map-proxy/${RADAR_ID}.topography.png`;
                         const locUrl = `/map-proxy/${RADAR_ID}.locations.png`;
 
-
-                        // Safe image loading with null checks
                         const safeLoadImage = async (url, element, name) => {
                             if (!element) {
                                 console.error(`${name} element not found.`);
@@ -3218,14 +3045,12 @@
                             }
                         };
 
-                        // Preload the images with proper error handling
                         const results = await Promise.allSettled([
                             safeLoadImage(bgUrl, backgroundLayer, 'Background'),
                             safeLoadImage(topoUrl, topographyLayer, 'Topography'),
                             safeLoadImage(locUrl, locationsLayer, 'Locations')
                         ]);
                         
-                        // Check if at least the background loaded
                         const backgroundLoaded = results[0].status === 'fulfilled' && results[0].value;
                         
                         if (backgroundLoaded) {
@@ -3242,7 +3067,6 @@
                     }
                 }
             
-                // Function to fetch radar data
                 async function fetchRadarData() {
                     try {
                         showLoading(true);
@@ -3259,19 +3083,15 @@
                             throw new Error('No radar images available');
                         }
                         
-                        // Store the radar images and reset to first frame
                         radarImages = data.images;
                         currentFrame = 0;
                         
-                        // Set last update time
                         if (lastUpdate) {
                             lastUpdate.textContent = `Last updated: ${formatDate(data.lastUpdated)}`;
                         }
                         
-                        // Preload all radar images in the background
                         preloadAllImages();
                         
-                        // Update the displayed image
                         updateRadarImage(0);
                         enableControls(true);
                         
@@ -3284,12 +3104,9 @@
                     }
                 }
                 
-                // Modify the preloadAllImages function to return a promise that resolves when all images are loaded
                 async function preloadAllImages() {
                   if (!radarImages || radarImages.length === 0) return;
                   
-                  
-                  // Create an array of promises to preload all images
                   const preloadPromises = radarImages.map(image => 
                     new Promise((resolve, reject) => {
                       const img = new Image();
@@ -3298,13 +3115,12 @@
                         resolve(image.url);
                       };
                       img.onerror = () => {
-                        resolve(null); // Resolve anyway so we don't block other images
+                        resolve(null);
                       };
                       img.src = image.url;
                     })
                   );
                   
-                  // Wait for all images to be preloaded
                   try {
                     await Promise.all(preloadPromises);
                     return true;
@@ -3314,14 +3130,11 @@
                   }
                 }
             
-                // Function to update the radar image
                 function updateRadarImage(frameIndex) {
-                    // CRITICAL: Block ALL updates if refreshing
                     if (window.radarGlobalState.isRefreshing) {
                         return;
                     }
 
-                    // CRITICAL: Block updates during lockout period after refresh
                     const timeSinceRefresh = Date.now() - window.radarGlobalState.lastRefreshTime;
                     if (window.radarGlobalState.lastRefreshTime > 0 && timeSinceRefresh < ANIMATION_LOCKOUT_MS) {
                         return;
@@ -3333,20 +3146,16 @@
                         currentFrame = frameIndex;
 
                         if (radarImages[frameIndex] && radarImages[frameIndex].url) {
-                            // Update the image
                             radarImage.src = radarImages[frameIndex].url;
 
-                            // Update the timestamp
                             if (timestamp) {
                                 timestamp.textContent = formatDate(radarImages[frameIndex].timestamp);
                             }
 
-                            // Update the frame counter
                             if (frameCounter) {
                                 frameCounter.textContent = `Frame ${currentFrame + 1} of ${radarImages.length}`;
                             }
 
-                            // Update progress bar
                             if (progressBar) {
                                 const progress = ((currentFrame + 1) / radarImages.length) * 100;
                                 progressBar.style.width = `${progress}%`;
@@ -3377,47 +3186,40 @@
                   window.radarGlobalState.currentAnimationSessionId++;
                   const mySessionId = window.radarGlobalState.currentAnimationSessionId;
 
-                  // Define the animation loop - SIMPLIFIED (no race conditions)
                   const advanceFrame = () => {
 
-                    // CRITICAL: Kill this loop if it's from an old session
                     if (mySessionId !== window.radarGlobalState.currentAnimationSessionId) {
                         return;
                     }
 
                     if (!window.radarGlobalState.isPlaying) {
-                        return; // Safety check
+                        return;
                     }
                     if (window.radarGlobalState.isRefreshing) {
-                        return; // CRITICAL: Stop animation during refresh
+                        return;
                     }
 
-                    // CRITICAL: Check lockout period
                     const timeSinceRefresh = Date.now() - window.radarGlobalState.lastRefreshTime;
                     if (window.radarGlobalState.lastRefreshTime > 0 && timeSinceRefresh < ANIMATION_LOCKOUT_MS) {
                         return;
                     }
 
-                    // ATOMIC: Update currentFrame first, THEN display
                     currentFrame = (currentFrame + 1) % radarImages.length;
                     updateRadarImage(currentFrame);
 
-                    // Schedule next frame and TRACK the timeout ID
                     window.radarGlobalState.animationInterval = setTimeout(advanceFrame, animationDelay);
-                    window.radarGlobalState.allTimeoutIds.add(window.radarGlobalState.animationInterval); // Track this timeout so we can kill it
+                    window.radarGlobalState.allTimeoutIds.add(window.radarGlobalState.animationInterval);
                   };
 
-                  // Start the animation loop
                   advanceFrame();
                 }
             
                 function pauseAnimation() {
                   window.radarGlobalState.isPlaying = false;
-                  window.radarGlobalState.animationLock = false; // Release animation lock
+                  window.radarGlobalState.animationLock = false;
                   if (btnPlay) btnPlay.disabled = false;
                   if (btnPause) btnPause.disabled = true;
 
-                  // Clear ALL pending timers/frames
                   if (window.radarGlobalState.animationInterval) {
                     clearTimeout(window.radarGlobalState.animationInterval);
                     window.radarGlobalState.animationInterval = null;
@@ -3427,7 +3229,6 @@
                     animationRequestId = null;
                   }
 
-                  // CRITICAL: Clear ALL tracked timeouts
                   window.radarGlobalState.allTimeoutIds.forEach(id => clearTimeout(id));
                   window.radarGlobalState.allTimeoutIds.clear();
                 }
@@ -3464,7 +3265,6 @@
                     updateRadarImage(currentFrame);
                 }
             
-                // Utility functions
                 function showLoading(show) {
                     if (loading) {
                         loading.style.display = show ? 'flex' : 'none';
@@ -3485,7 +3285,6 @@
                 }
             
                 function enableControls(enable) {
-                    // Safely enable/disable controls with null checks
                     const safeDisable = (button, isDisabled) => {
                         if (button) button.disabled = isDisabled;
                     };
@@ -3500,9 +3299,7 @@
                     if (speedSlider) speedSlider.disabled = !enable;
                 }
             
-                // Layer toggle functions
                 function updateLayerVisibility() {
-                    // Use safe checks before updating visibility
                     if (topographyLayer && topographyToggle) {
                         topographyLayer.style.display = topographyToggle.checked ? 'block' : 'none';
                     }
@@ -3512,46 +3309,38 @@
                     }
                 }
                 
-                // Connectivity check function
                 async function checkBOMConnectivity() {
                     try {
                         const controller = new AbortController();
-                        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+                        const timeoutId = setTimeout(() => controller.abort(), 5000);
 
                         const response = await fetch('http://www.bom.gov.au/', {
                             method: 'HEAD',
-                            mode: 'no-cors', // Avoid CORS issues
+                            mode: 'no-cors',
                             signal: controller.signal
                         });
 
                         clearTimeout(timeoutId);
-                        return true; // BOM is reachable
+                        return true;
                     } catch (error) {
                         console.warn('BOM connectivity check failed:', error.message);
-                        return false; // BOM is unreachable (likely no internet)
+                        return false;
                     }
                 }
 
-                // Refresh function with connectivity check
                 async function refreshData() {
 
-                    // CRITICAL: Invalidate current animation session to kill ALL running loops
                     window.radarGlobalState.currentAnimationSessionId++;
 
-                    // CRITICAL: IMMEDIATELY clear the data FIRST before anything else
-                    // This kills any pending setTimeout callbacks - they'll hit updateRadarImage's length check
                     const oldRadarImages = radarImages;
                     radarImages = [];
                     currentFrame = 0;
                     window.radarGlobalState.isRefreshing = true;
 
-                    // Mark refresh time to prevent animation restart
                     window.radarGlobalState.lastRefreshTime = Date.now();
 
-                    // BLANK IMAGE DATA URL
                     const BLANK_IMAGE = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 
-                    // IMMEDIATELY reset visual state so user sees it stopped
                     if (radarImage) {
                         radarImage.src = BLANK_IMAGE;
                     }
@@ -3559,28 +3348,23 @@
                     if (frameCounter) frameCounter.textContent = '';
                     if (progressBar) progressBar.style.width = '0%';
 
-                    // CRITICAL: Start interval that FORCEFULLY keeps resetting radar to blank
-                    // This ensures NO frame changes can happen even if something bypasses our checks
                     if (window.radarGlobalState.forceClearInterval) clearInterval(window.radarGlobalState.forceClearInterval);
                     window.radarGlobalState.forceClearInterval = setInterval(() => {
                         if (radarImage && window.radarGlobalState.isRefreshing) {
                             radarImage.src = BLANK_IMAGE;
                         }
-                    }, 50); // Reset every 50ms to KILL any frame changes
+                    }, 50);
 
-                    // NOW force stop animation
-                    pauseAnimation(); // This clears allTimeoutIds
+                    pauseAnimation();
                     window.radarGlobalState.animationLock = false;
                     window.radarGlobalState.isPlaying = false;
 
-                    // Clear ALL timers aggressively - again!
                     window.radarGlobalState.allTimeoutIds.forEach(id => clearTimeout(id));
                     window.radarGlobalState.allTimeoutIds.clear();
                     if (window.radarGlobalState.animationInterval) {
                         clearTimeout(window.radarGlobalState.animationInterval);
                         window.radarGlobalState.animationInterval = null;
                     }
-                    // Triple-clear to catch any pending
                     setTimeout(() => {
                         window.radarGlobalState.allTimeoutIds.forEach(id => clearTimeout(id));
                         window.radarGlobalState.allTimeoutIds.clear();
@@ -3590,16 +3374,13 @@
                         }
                     }, 0);
 
-                    // Disable controls
                     enableControls(false);
 
-                    // Check connectivity
                     if (timestamp) timestamp.textContent = 'Checking connection...';
 
                     const isConnected = await checkBOMConnectivity();
 
                     if (!isConnected) {
-                        // No internet - restore old data and STOP force clearing
                         if (window.radarGlobalState.forceClearInterval) {
                             clearInterval(window.radarGlobalState.forceClearInterval);
                             window.radarGlobalState.forceClearInterval = null;
@@ -3611,31 +3392,23 @@
                             timestamp.textContent = formatDate(radarImages[currentFrame].timestamp) + ' (Offline)';
                         }
                         enableControls(true);
-                        return; // EXIT - don't clear cache
+                        return;
                     }
 
-                    // Connected - clear cache
                     preloadedImages.clear();
 
-                    // Update UI
                     if (timestamp) timestamp.textContent = 'Refreshing data...';
 
-                    // Fetch fresh data
                     await fetchRadarData();
 
-                    // CRITICAL: Wait before re-enabling animation AND stopping force clear
-                    // Use animationDelay + buffer to catch any callbacks that were scheduled with current delay
-                    const safetyDelay = Math.max(animationDelay * 2, 1000); // At least 1 second, or 2x animation delay
+                    const safetyDelay = Math.max(animationDelay * 2, 1000);
                     setTimeout(() => {
 
-                        // CRITICAL: Bump session ID ONE MORE TIME to kill any zombie loops
                         window.radarGlobalState.currentAnimationSessionId++;
 
-                        // FORCE STOP - make absolutely sure animation is dead
                         window.radarGlobalState.isPlaying = false;
                         window.radarGlobalState.animationLock = false;
 
-                        // Clear ALL timeouts one more time
                         window.radarGlobalState.allTimeoutIds.forEach(id => clearTimeout(id));
                         window.radarGlobalState.allTimeoutIds.clear();
                         if (window.radarGlobalState.animationInterval) {
@@ -3643,7 +3416,6 @@
                             window.radarGlobalState.animationInterval = null;
                         }
 
-                        // STOP the force clearing interval
                         if (window.radarGlobalState.forceClearInterval) {
                             clearInterval(window.radarGlobalState.forceClearInterval);
                             window.radarGlobalState.forceClearInterval = null;
@@ -3651,16 +3423,14 @@
 
                         window.radarGlobalState.isRefreshing = false;
 
-                        // Schedule display of first frame AFTER lockout expires
                         const remainingLockout = ANIMATION_LOCKOUT_MS - (Date.now() - window.radarGlobalState.lastRefreshTime);
                         if (remainingLockout > 0) {
                             setTimeout(() => {
                                 if (radarImages && radarImages.length > 0 && !window.radarGlobalState.isPlaying) {
                                     updateRadarImage(0);
                                 }
-                            }, remainingLockout + 100); // Add 100ms buffer
+                            }, remainingLockout + 100);
                         } else {
-                            // Lockout already expired, display now
                             if (radarImages && radarImages.length > 0 && !window.radarGlobalState.isPlaying) {
                                 updateRadarImage(0);
                             }
@@ -3668,10 +3438,8 @@
                     }, safetyDelay);
                 }
 
-                // CRITICAL: Make refreshData globally accessible for auto-refresh setInterval
                 window.refreshData = refreshData;
 
-                // Set up event listeners (with null checks)
                 function setupEventListeners() {
                     if (btnPlay) btnPlay.addEventListener('click', playAnimation);
                     if (btnPause) btnPause.addEventListener('click', pauseAnimation);
@@ -3681,7 +3449,6 @@
                     if (btnLast) btnLast.addEventListener('click', lastFrame);
                     if (refreshBtn) refreshBtn.addEventListener('click', refreshData);
                     
-                    // Keyboard shortcuts - only when radar tab is active
                     document.addEventListener('keydown', function(e) {
                         const radarTab = document.getElementById('content-radar');
                         if (!radarTab || !radarTab.classList.contains('active')) return;
@@ -3689,7 +3456,7 @@
                         if (!radarImages || radarImages.length === 0) return;
                         
                         switch(e.key) {
-                            case ' ': // Space bar
+                            case ' ':
                                 if (window.radarGlobalState.isPlaying) {
                                     pauseAnimation();
                                 } else {
@@ -3711,11 +3478,10 @@
                         }
                     });
                     
-                    // Speed slider handling
                     if (speedSlider) {
                         speedSlider.addEventListener('input', function() {
                             const speed = parseInt(this.value);
-                            animationDelay = 1100 - (speed * 100); // 100ms to 1000ms range
+                            animationDelay = 1100 - (speed * 100);
 
                             if (speedValue) {
                                 speedValue.textContent = `${animationDelay}ms`;
@@ -3728,7 +3494,6 @@
                         });
                     }
                     
-                    // Layer toggle listeners
                     if (topographyToggle) {
                         topographyToggle.addEventListener('change', updateLayerVisibility);
                     }
@@ -3737,10 +3502,8 @@
                         locationsToggle.addEventListener('change', updateLayerVisibility);
                     }
 
-                    // Handle image load errors properly
                     if (radarImage) {
                         radarImage.addEventListener('error', function(e) {
-                            // Only show error for real images, not the empty placeholder
                             if (this.src && this.src !== 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7') {
                                 console.error(`Failed to load radar image: ${this.src}`);
                                 showError('Failed to load radar image. Using cached version if available.');
@@ -3749,23 +3512,17 @@
                     }
                 }
             
-                // Initialize the radar
                 function initialize() {
-                    // Check if elements exist before initializing
                     if (!radarImage) {
                         console.error("Radar elements not found. Cannot initialize radar.");
                         return;
                     }
                     
-                    // Set up event listeners
                     setupEventListeners();
                     
-                    // Load the map layers first
                     loadMapLayers().then(() => {
-                        // Then fetch the radar data
                         fetchRadarData();
                         
-                        // Set initial layer visibility
                         updateLayerVisibility();
                     }).catch(err => {
                         console.error("Error initializing radar:", err);
@@ -3773,46 +3530,35 @@
                     });
                 }
                 
-                // Handle tab changes to ensure proper initialization
                 function handleTabChange() {
-                    // Get all tab buttons
                     const tabButtons = document.querySelectorAll('.tab-button');
                     
                     if (!tabButtons || tabButtons.length === 0) {
-                        // No tabs, just initialize directly
                         initialize();
                         return;
                     }
                     
-                    // Add event listeners to all tab buttons
                     tabButtons.forEach(button => {
                         if (button) {
                             button.addEventListener('click', function() {
-                                // Check if this is the radar tab and we haven't loaded the layers yet
                                 if (this.id === 'tab-radar' && !mapLayersLoaded) {
-                                    // Initialize when the radar tab is selected for the first time
                                     initialize();
                                 }
                             });
                         }
                     });
                     
-                    // Check if the radar tab is active by default
                     const radarTab = document.getElementById('tab-radar');
                     const radarContent = document.getElementById('content-radar');
                     
                     if (radarTab && radarContent && radarContent.classList.contains('active')) {
-                        // If radar tab is active on page load, initialize immediately
                         initialize();
                     }
                 }
                 
-                // Call the initialization setup
                 handleTabChange();
                 
-                // Set up auto-refresh
                 if (document.getElementById('content-radar')) {
-                    // Auto-refresh every 5 minutes if the tab is active
                     setInterval(() => {
                         const radarContent = document.getElementById('content-radar');
                         if (radarContent && radarContent.classList.contains('active')) {
@@ -3822,12 +3568,9 @@
                 }
             }
             
-            // Make sure to initialize the radar when the page loads
             if (document.readyState === 'loading') {
                 document.addEventListener('DOMContentLoaded', () => {
-                    // Check if we're on a page with the radar tab
                     if (document.getElementById('content-radar')) {
-                        // If radar already initialized, refresh data instead of re-initializing
                         if (window.radarGlobalState && window.radarGlobalState.radarInitialized) {
                             if (window.refreshData) {
                                 window.refreshData();
@@ -3838,9 +3581,7 @@
                     }
                 });
             } else {
-                // Document already loaded
                 if (document.getElementById('content-radar')) {
-                    // If radar already initialized, refresh data instead of re-initializing
                     if (window.radarGlobalState && window.radarGlobalState.radarInitialized) {
                         if (window.refreshData) {
                             window.refreshData();
@@ -3851,7 +3592,6 @@
                 }
             }
             
-            // Check cyclone map
             const cycloneImg = new Image();
             cycloneImg.onload = function() {
                 cycloneStatusValue.textContent = 'Online';
@@ -3863,7 +3603,6 @@
             };
             cycloneImg.src = 'http://www.bom.gov.au/fwo/IDQ65001.png?' + new Date().getTime();
             
-            // Check flood map data
             if (floodMapInitialized) {
                 floodMapStatusValue.textContent = 'Online';
                 floodMapStatusValue.className = 'status-value online';
@@ -3873,33 +3612,25 @@
             }
         }
 
-        // Update the refresh interval for flood data
         function updateRefreshInterval() {
             const interval = parseInt(refreshIntervalSelect.value);
             
-            // Clear existing timer
             if (refreshTimer) {
                 clearInterval(refreshTimer);
             }
             
-            // Set up new timer
             refreshTimer = setInterval(fetchFloodData, interval);
             
-            // Show notification
             const minutes = interval / 60000;
             showNotification(`Data will refresh every ${minutes} ${minutes === 1 ? 'minute' : 'minutes'}`, 'info');
         }
 
-        // Fetch flood data using the proxy server
-                // Fetch flood data using the proxy server
         async function fetchFloodData() {
             showLoading(true);
             
-            // Store the previous Lismore level to check if it's changed
             const previousLismoreLevel = currentLismoreLevel;
             
             try {
-                // Fetch data from our proxy server
                 const response = await fetch(PROXY_URL);
                 
                 if (!response.ok) {
@@ -3911,51 +3642,40 @@
                 if (jsonData.success && jsonData.data && jsonData.data.length > 0) {
                     floodData = jsonData.data;
                     
-                    // Update last fetch time
                     lastFetchTime = new Date();
                     lastUpdateTime.textContent = lastFetchTime.toLocaleTimeString('en-AU') + ' (live data)';
                     
-                    // Show success notification
                     showNotification('Live flood data updated successfully', 'success');
                 } else {
                     throw new Error('No flood data returned from proxy');
                 }
                 
-                // Cache the data
                 cacheFloodData();
                 
-                // Render the data
                 renderFloodData();
                 
-                // Update statistics
                 updateStatistics();
                 
-                // Check if the current Lismore level has changed significantly
                 const levelChanged = (
                     previousLismoreLevel !== null && 
                     currentLismoreLevel !== null && 
-                    Math.abs(previousLismoreLevel - currentLismoreLevel) > 0.1 // 10cm change threshold
+                    Math.abs(previousLismoreLevel - currentLismoreLevel) > 0.1
                 );
                 
-                // If level changed significantly and user hasn't made a selection, notify them
                 if (levelChanged && userSelectedFloodHeight === null) {
                     showNotification(`Flood level has changed to ${currentLismoreLevel.toFixed(2)}m. Map updated.`, 'info');
                 }
                 
-                // Get current Lismore level and update the flood map's default height, respecting user choices
                 updateFloodMapWithCurrentLevelRespectingUserChoice();
                 
             } catch (error) {
                 console.error('Error fetching flood data:', error);
                 
-                // Show error notification
                 showNotification('Error fetching live data. Using cached data if available.', 'error');
                 
-                // If we have cached data, use it
                 if (floodData.length === 0) {
                     const loaded = loadCachedData();
                     if (!loaded) {
-                        // If no cached data, show a critical error
                         showNotification('CRITICAL: No flood data available. Please contact emergency services.', 'error');
                     }
                 }
@@ -3964,28 +3684,22 @@
             }
         }
 
-        // Render the flood data in the table
         function renderFloodData() {
             if (!floodData || floodData.length === 0) {
                 floodDataBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No data available</td></tr>';
                 return;
             }
             
-            // Remove duplicate entries by location
             const uniqueLocations = {};
             floodData.forEach(item => {
-                // Only keep the most recent data for each location
                 if (!uniqueLocations[item.location] || 
                     new Date(item.time) > new Date(uniqueLocations[item.location].time)) {
                     uniqueLocations[item.location] = item;
                 }
             });
             
-            // Convert back to array
             const uniqueData = Object.values(uniqueLocations);
 
-            // Data is already filtered on server side to only allowed locations
-            // Group data by river system
             const groupedData = {};
 
             uniqueData.forEach(item => {
@@ -4023,7 +3737,6 @@
                 groupedData[riverSystem].push(item);
             });
             
-            // Sort river systems alphabetically, but with Wilsons River and Wilsons River Tributaries first
             const sortedRiverSystems = Object.keys(groupedData).sort((a, b) => {
                 if (a.includes('Wilsons') && !b.includes('Wilsons')) return -1;
                 if (!a.includes('Wilsons') && b.includes('Wilsons')) return 1;
@@ -4032,18 +3745,14 @@
             
             let html = '';
             
-            // Render table with section headers for each river system
             sortedRiverSystems.forEach(riverSystem => {
-                // Add section header
                 html += `
                     <tr class="river-system-header">
                         <td colspan="5">${riverSystem}</td>
                     </tr>
                 `;
                 
-                // Add data rows for this river system
                 groupedData[riverSystem].forEach(item => {
-                    // Determine row class based on flood category
                     let rowClass = '';
                     if (item.floodCategory === 'Minor') {
                         rowClass = 'minor-flood';
@@ -4053,7 +3762,6 @@
                         rowClass = 'major-flood';
                     }
                     
-                    // Determine status class
                     let statusClass = '';
                     if (item.status === 'rising') {
                         statusClass = 'rising';
@@ -4063,7 +3771,6 @@
                         statusClass = 'steady';
                     }
                     
-                    // When creating each row
                     html += `
                       <tr class="${rowClass}" style="cursor: pointer;" title="Click to view height history">
                         <td>${item.location}</td>
@@ -4083,19 +3790,15 @@
             floodDataBody.innerHTML = html;
         }
 
-            // Update statistics panel
             function updateStatistics() {
                 if (!floodData || floodData.length === 0) return;
                 
-                // Find Lismore data - specifically "Wilsons R at Lismore (mAHD)" as first choice
                 const lismoreData = floodData.find(item => 
                     item.location === 'Wilsons R at Lismore (mAHD)') ||
                     floodData.find(item => 
                     item.location.toLowerCase().includes('lismore'));
                 
-                // Update Lismore level and status
                 if (lismoreData) {
-                    // Store current Lismore level for use with flood map
                     currentLismoreLevel = lismoreData.waterLevel;
                     
                     lismoreLevel.textContent = lismoreData.waterLevel !== null 
@@ -4104,7 +3807,6 @@
                     
                     lismoreStatus.textContent = capitalizeFirstLetter(lismoreData.status);
                     
-                    // Add status class
                     lismoreStatus.className = 'stat-footer';
                     if (lismoreData.status === 'rising') {
                         lismoreStatus.classList.add('rising');
@@ -4114,17 +3816,14 @@
                         lismoreStatus.classList.add('steady');
                     }
                     
-                    // Check if water level is approaching levee height (9.5m or higher)
                     const LEVEE_APPROACH_WARNING = 9.5;
                     const statsPanel = document.getElementById('stats-container').closest('.panel');
                     
-                    // Remove existing warning if present
                     const existingWarning = document.getElementById('levee-warning-panel');
                     if (existingWarning) {
                         existingWarning.remove();
                     }
                     
-                    // Add warning panel if water level is approaching levee height
                     if (lismoreData.waterLevel >= LEVEE_APPROACH_WARNING) {
                         const warningPanel = document.createElement('div');
                         warningPanel.id = 'levee-warning-panel';
@@ -4149,12 +3848,10 @@
                             <span>WARNING: Wilsons River at Lismore (${lismoreData.waterLevel.toFixed(2)}m) is approaching levee protection height (10.6m)</span>
                         `;
                         
-                        // Insert warning above the stats panel
                         statsPanel.parentNode.insertBefore(warningPanel, statsPanel);
                     }
                 }
                 
-                // Find highest reading from all locations (data is already filtered on server)
                 let highest = null;
                 floodData.forEach(item => {
                         if (item.waterLevel !== null && (highest === null || item.waterLevel > highest.waterLevel)) {
@@ -4162,39 +3859,32 @@
                         }
                     });
                 
-                // Update highest reading
                 if (highest) {
                     highestReading.textContent = highest.waterLevel.toFixed(2) + 'm';
                     highestLocation.textContent = highest.location;
                 }
                 
-                // Count rising and falling locations
                 const rising = floodData.filter(item => item.status === 'rising').length;
                 const falling = floodData.filter(item => item.status === 'falling').length;
                 
                 risingCount.textContent = rising;
                 fallingCount.textContent = falling;
                 
-                // Highlight rising count if there are many rising locations
                 if (rising > 0 && rising > falling) {
                     risingCount.parentElement.classList.add('critical');
                 } else {
                     risingCount.parentElement.classList.remove('critical');
                 }
-            } // Only one closing brace here
+            }
 
-            // Direct test function to force the warning panel
             function forceWarningPanel() {
-                // Get the stats panel
                 const statsPanel = document.getElementById('stats-container').closest('.panel');
                 
-                // Remove any existing warning
                 const existingWarning = document.getElementById('levee-warning-panel');
                 if (existingWarning) {
                     existingWarning.remove();
                 }
                 
-                // Create warning panel
                 const warningPanel = document.createElement('div');
                 warningPanel.id = 'levee-warning-panel';
                 warningPanel.className = 'panel-alert';
@@ -4218,7 +3908,6 @@
                     <span>WARNING: Wilsons River at Lismore (9.50m) is approaching levee protection height (10.6m)</span>
                 `;
                 
-                // Insert warning above the stats panel
                 if (statsPanel && statsPanel.parentNode) {
                     statsPanel.parentNode.insertBefore(warningPanel, statsPanel);
                 } else {
@@ -4226,9 +3915,7 @@
                 }
             }
 
-            // Enhanced console welcome message with dark mode support
             function displayConsoleWelcome() {
-                // Define styles with improved dark mode compatibility
                 const isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
                 
                 const styles = {
@@ -4283,12 +3970,8 @@
                     `
                 };
             
-                // Clear console for clean output
                 console.clear();
-            
-                // Title and subtitle with emojis and playful tone
                 
-                // Structured console output with categories
                 const categories = [
                     {
                         name: 'EMERGENCY SIMULATION',
@@ -4339,7 +4022,6 @@
                     }
                 ];
             
-                // Print categories and commands
                 categories.forEach(category => {
                     console.log('%c' + category.name + ':', styles.category);
                     category.commands.forEach(cmd => {
@@ -4349,24 +4031,18 @@
                             styles.description
                         );
                     });
-                    console.log(''); // Add a blank line between categories
+                    console.log('');
                 });
             
-                // Footer with warnings and tips
                 console.log('%c💡 TIP: Copy and paste any command to experiment!', styles.success);
                 console.log('%c⚠️ WARNING: These commands are for testing only - proceed with caution!', styles.warning);
                 console.log('%cRemember: With great power comes great responsibility... 🦸‍♀️', styles.footer);
             
-                // Add event listener for dark mode changes
                 if (window.matchMedia) {
                     window.matchMedia('(prefers-color-scheme: dark)').addListener(displayConsoleWelcome);
                 }
             }
             
-            // Disabled verbose console welcome message
-            // displayConsoleWelcome();
-
-        // Cache flood data in localStorage
         function cacheFloodData() {
             try {
                 const cacheData = {
@@ -4380,7 +4056,6 @@
             }
         }
 
-        // Load cached data from localStorage
         function loadCachedData() {
             try {
                 const cachedData = localStorage.getItem('lismoreFloodData');
@@ -4391,14 +4066,11 @@
                     if (parsed && parsed.data && parsed.data.length > 0) {
                         floodData = parsed.data;
                         
-                        // Update last fetch time
                         lastFetchTime = new Date(parsed.timestamp);
                         lastUpdateTime.textContent = lastFetchTime.toLocaleTimeString('en-AU') + ' (cached)';
                         
-                        // Render the data
                         renderFloodData();
                         
-                        // Update statistics
                         updateStatistics();
                         
                         return true;
@@ -4412,38 +4084,31 @@
             }
         }
         
-        // Helper function to create status elements
         function createStatusElement(id, label) {
             const statusPanel = document.querySelector('.status-panel');
-            
-            // Create new status item
+
             const statusItem = document.createElement('div');
             statusItem.id = id;
             statusItem.className = 'status-item';
             
-            // Create label
             const statusLabel = document.createElement('span');
             statusLabel.className = 'status-label';
             statusLabel.textContent = label + ':';
             
-            // Create value
             const statusValue = document.createElement('span');
             statusValue.id = id + '-value';
             statusValue.className = 'status-value';
             statusValue.textContent = 'Checking...';
             
-            // Add to status item
             statusItem.appendChild(statusLabel);
             statusItem.appendChild(statusValue);
             
-            // Add before the status actions
             const statusActions = document.querySelector('.status-actions');
             statusPanel.insertBefore(statusItem, statusActions);
             
             return statusValue;
         }
 
-        // Show loading overlay
         function showLoading(show) {
             if (show) {
                 loadingOverlay.style.display = 'flex';
@@ -4452,7 +4117,6 @@
             }
         }
 
-        // Show notification
         function showNotification(message, type) {
             notificationMessage.textContent = message;
             
@@ -4460,30 +4124,24 @@
             notification.classList.add(type);
             notification.classList.add('show');
             
-            // Auto-hide after 5 seconds
             setTimeout(() => {
                 notification.classList.remove('show');
             }, 5000);
         }
 
-        // Helper function to capitalize first letter
         function capitalizeFirstLetter(string) {
             return string.charAt(0).toUpperCase() + string.slice(1);
         }
 
-        // Handle page visibility changes to conserve resources
         document.addEventListener('visibilitychange', function() {
             if (document.hidden) {
-                // Page is hidden, pause the webcam refresh to save resources
                 clearInterval(webcamRefreshTimer);
             } else {
-                // Page is visible again, resume webcam refresh
                 refreshWebcam();
                 webcamRefreshTimer = setInterval(refreshWebcam, WEBCAM_REFRESH_INTERVAL);
             }
         });
 
-        // Handle errors on webcam load
         webcamImage.addEventListener('error', function() {
             webcamError.style.display = 'block';
         });
@@ -4492,42 +4150,32 @@
             webcamError.style.display = 'none';
         });
         
-            // Refresh radar image (compatible with both old and new implementations)
             function refreshRadar() {
-                // Check if we're using the new interactive radar
                 if (window.initializeRadar) {
-                    // New radar is handled by its own code
                     const refreshBtn = document.getElementById('refresh-btn');
                     if (refreshBtn) {
-                        // Trigger a click on the refresh button
                         refreshBtn.click();
                     }
                     return;
                 }
             
-                // Legacy radar code for backward compatibility
                 const radarImage = document.getElementById('radar-image');
                 const radarError = document.getElementById('radar-error');
                 const radarTimestamp = document.getElementById('radar-timestamp');
                 
-                // Only proceed if elements exist
                 if (radarImage) {
-                    // Add timestamp parameter to prevent caching
                     const timestamp = new Date().getTime();
                     radarImage.src = `http://www.bom.gov.au/radar/IDR282.gif?t=${timestamp}`;
                     
-                    // Update timestamp if element exists
                     if (radarTimestamp) {
                         radarTimestamp.textContent = `Last updated: ${new Date().toLocaleTimeString('en-AU')}`;
                     }
                     
-                    // Handle errors if element exists
                     if (radarError) {
                         radarImage.onerror = function() {
                             radarError.style.display = 'block';
                         };
                         
-                        // Safer version with null check
                         radarImg.onload = function() {
                             if (document.getElementById('radar-error')) {
                                 document.getElementById('radar-error').style.display = 'none';
@@ -4538,15 +4186,12 @@
             }
         
         function checkRadarStatus() {
-            // Get all possible radar-related elements
             const radarImg = document.getElementById('radar-image');
             const radarError = document.getElementById('radar-error');
             const radarStatusValue = document.getElementById('radar-status-value');
             
-            // Create a new image element for testing
             const radarTestImg = new Image();
             
-            // Set up success/failure handlers with null safety
             radarTestImg.onload = function() {
                 if (radarStatusValue) radarStatusValue.textContent = 'Online';
                 if (radarStatusValue) radarStatusValue.className = 'status-value online';
@@ -4559,24 +4204,19 @@
                 if (radarError) radarError.style.display = 'block';
             };
             
-            // Add timestamp to prevent caching
             radarTestImg.src = `http://www.bom.gov.au/radar/IDR282.gif?t=${new Date().getTime()}`;
         }
 
-        // Refresh the cyclone map
         function refreshCycloneMap() {
             const cycloneImage = document.getElementById('cyclone-image');
             const cycloneError = document.getElementById('cyclone-error');
             const cycloneTimestamp = document.getElementById('cyclone-timestamp');
             
-            // Add timestamp parameter to prevent caching
             const timestamp = new Date().getTime();
             cycloneImage.src = `http://www.bom.gov.au/fwo/IDQ65001.png?t=${timestamp}`;
             
-            // Update timestamp
             cycloneTimestamp.textContent = `Last updated: ${new Date().toLocaleTimeString('en-AU')}`;
             
-            // Handle errors
             cycloneImage.onerror = function() {
                 cycloneError.style.display = 'block';
             };
@@ -4586,33 +4226,26 @@
             };
         }
 
-        // Handle errors globally
         window.addEventListener('error', function(event) {
             console.error('Global error:', event.error);
             showNotification('An error occurred. Please refresh the page if issues persist.', 'error');
         });
 
-        // Function to mark a tab as unavailable and fully prevent tab selection
         function markTabUnavailable(tabId, reason) {
-            // Grey out the tab
             const tab = document.getElementById(tabId);
             if (tab) {
                 tab.classList.add('tab-unavailable');
                 tab.setAttribute('data-unavailable-reason', reason);
                 
-                // Remove active class if the tab is currently active
                 tab.classList.remove('active');
                 
-                // Hide the associated content
                 const contentId = tabId.replace('tab-', 'content-');
                 const contentElement = document.getElementById(contentId);
                 if (contentElement) {
                     contentElement.classList.remove('active');
                 }
                 
-                // Find another tab to activate if needed
                 if (tab.classList.contains('active')) {
-                    // Find the first available tab
                     const firstAvailableTab = document.querySelector('.tab-button:not(.tab-unavailable)');
                     if (firstAvailableTab) {
                         firstAvailableTab.classList.add('active');
@@ -4625,12 +4258,10 @@
                     }
                 }
                 
-                // Replace click handler completely to prevent tab selection
                 tab.onclick = function(event) {
                     event.preventDefault();
                     event.stopPropagation();
                     
-                    // Show popup with information about why the tab is unavailable
                     const reason = this.getAttribute('data-unavailable-reason');
                     showUnavailableContentPopup(tabId, reason);
                     
@@ -4639,24 +4270,19 @@
             }
         }
         
-        // Function to mark a tab as available again
         function markTabAvailable(tabId) {
             const tab = document.getElementById(tabId);
             if (tab) {
                 tab.classList.remove('tab-unavailable');
                 tab.removeAttribute('data-unavailable-reason');
                 
-                // Restore original click functionality (this would need to be modified to fully restore tab functionality)
                 tab.onclick = function() {
-                    // Activate the tab normally
                     activateTab(tabId);
                 };
             }
         }
         
-        // Function to show popup for unavailable content
         function showUnavailableContentPopup(tabId, reason) {
-            // Create a descriptive message based on which tab is unavailable
             let title, message, linkText, linkUrl;
             
             if (tabId === 'tab-cyclone') {
@@ -4676,11 +4302,9 @@
                 message = "This content is currently unavailable. Please try again later.";
             }
             
-            // Show the notification with appropriate styling and content
             const notificationElement = document.getElementById('notification');
             const notificationMessage = document.getElementById('notification-message');
             
-            // Create message HTML
             let messageHTML = `
                 <div style="text-align:left;">
                     <strong>${title}</strong><br>
@@ -4693,74 +4317,56 @@
             notification.className = 'notification info';
             notification.classList.add('show');
             
-            // Auto-hide after 7 seconds
             setTimeout(() => {
                 notification.classList.remove('show');
             }, 7000);
         }
         
-        // Function to check if cyclone data is available
         function checkCycloneAvailability() {
             const cycloneImg = new Image();
             
             cycloneImg.onload = function() {
-                // If image loads successfully, mark tab as available
                 markTabAvailable('tab-cyclone');
                 document.getElementById('cyclone-error').style.display = 'none';
             };
             
             cycloneImg.onerror = function() {
-                // If image fails to load, mark tab as unavailable
                 markTabUnavailable('tab-cyclone', 'No current cyclone warnings or bulletins for this area.');
                 document.getElementById('cyclone-error').style.display = 'block';
                 document.getElementById('cyclone-error').textContent = 'No current cyclone warnings for this area';
             };
             
-            // Add timestamp to prevent caching
             cycloneImg.src = `http://www.bom.gov.au/fwo/IDQ65001.png?t=${new Date().getTime()}`;
         }
         
-        // Fix for the error in radar image onload handler
-        // Add this function to your JavaScript file
-        
         function fixRadarStatusCheck() {
-            // Get the original function reference so we can restore it after fixing
             const originalCheckRadarAvailability = window.checkRadarAvailability || function(){};
             
-            // Create a safer version
             window.checkRadarAvailability = function() {
-                // The radar status checking happens in many places, so fix them all
                 const safelySetStyle = (element, property, value) => {
                     if (element && element.style) {
                         element.style[property] = value;
                     }
                 };
                 
-                // Find all possible radar error elements
                 const radarErrorElements = [
                     document.getElementById('radar-error'),
                     document.querySelector('.radar-error')
                 ];
                 
-                // Create a test image
                 const radarImg = new Image();
                 
-                // Set up safe onload handler
                 radarImg.onload = function() {
-                    // Safely hide all possible error elements
                     radarErrorElements.forEach(el => safelySetStyle(el, 'display', 'none'));
                     
-                    // Set status if available
                     const statusElement = document.getElementById('radar-status-value');
                     if (statusElement) {
                         statusElement.textContent = 'Online';
                         statusElement.className = 'status-value online';
                     }
                     
-                    // Call original function if it exists and is a function
                     if (typeof originalCheckRadarAvailability === 'function') {
                         try {
-                            // Capture any errors and prevent them from stopping execution
                             originalCheckRadarAvailability();
                         } catch (e) {
                             console.error('Error in original radar status check:', e);
@@ -4768,12 +4374,9 @@
                     }
                 };
                 
-                // Set up safe onerror handler
                 radarImg.onerror = function() {
-                    // Safely show all possible error elements
                     radarErrorElements.forEach(el => safelySetStyle(el, 'display', 'block'));
                     
-                    // Set status if available
                     const statusElement = document.getElementById('radar-status-value');
                     if (statusElement) {
                         statusElement.textContent = 'Offline';
@@ -4781,31 +4384,24 @@
                     }
                 };
                 
-                // Add timestamp to prevent caching
                 radarImg.src = `http://www.bom.gov.au/radar/IDR282.gif?t=${new Date().getTime()}`;
             };
             
-            // Fix existing radar refresh function if it exists
             const originalRefreshRadar = window.refreshRadar || function(){};
             
             window.refreshRadar = function() {
-                // Get all possible radar elements
                 const radarImage = document.getElementById('radar-image');
                 const radarError = document.getElementById('radar-error');
                 const radarTimestamp = document.getElementById('radar-timestamp');
                 
-                // Only proceed if elements exist
                 if (radarImage) {
-                    // Add timestamp parameter to prevent caching
                     const timestamp = new Date().getTime();
                     radarImage.src = `http://www.bom.gov.au/radar/IDR282.gif?t=${timestamp}`;
                     
-                    // Update timestamp if element exists
                     if (radarTimestamp) {
                         radarTimestamp.textContent = `Last updated: ${new Date().toLocaleTimeString('en-AU')}`;
                     }
                     
-                    // Handle errors if element exists - using safelySetStyle
                     if (radarError) {
                         radarImage.onerror = function() {
                             if (radarError && radarError.style) {
@@ -4821,7 +4417,6 @@
                     }
                 }
                 
-                // Try to also trigger refresh for the new interactive radar
                 const refreshBtn = document.getElementById('refresh-btn');
                 if (refreshBtn) {
                     try {
@@ -4835,15 +4430,12 @@
             console.log('Radar functions fixed for compatibility');
         }
         
-        // Call this function after the page loads
         document.addEventListener('DOMContentLoaded', fixRadarStatusCheck);
         
-        // Also call it now in case the page is already loaded
         if (document.readyState === 'complete' || document.readyState === 'interactive') {
             fixRadarStatusCheck();
         }
         
-        // Add CSS for unavailable tabs
         function addUnavailableTabStyles() {
             const styleElement = document.createElement('style');
             styleElement.textContent = `
@@ -4880,43 +4472,30 @@
             document.head.appendChild(styleElement);
         }
         
-        // Add this to your initialization function
         function initializeAvailabilityChecks() {
-            // Add the styles for unavailable tabs
             addUnavailableTabStyles();
             
-            // Check availability of cyclone and radar data
             checkCycloneAvailability();
             checkRadarStatus();
             
-            // Set up periodic checks
-            setInterval(checkCycloneAvailability, 60000); // Check every minute
+            setInterval(checkCycloneAvailability, 60000);
             setInterval(checkRadarAvailability, 60000);
         }
         
-        // Helper function to activate a tab
         function activateTab(tabId) {
-            // Remove active class from all tabs and contents
             document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
             
-            // Add active class to selected tab and its content
             document.getElementById(tabId).classList.add('active');
             const contentId = tabId.replace('tab-', 'content-');
             document.getElementById(contentId).classList.add('active');
         }
         
-        // Call this function after the document is loaded
         document.addEventListener('DOMContentLoaded', function() {
             initializeAvailabilityChecks();
         });
 
-        // ====================== FLOOD MAP FUNCTIONALITY WITH LEVEE PROTECTION ======================
-                
-        // Function to determine if a point is inside a polygon (ray casting algorithm)
         function isPointInPolygon(point, polygon) {
-            // point is [longitude, latitude]
-            // polygon is array of [longitude, latitude] coordinates
             
             const x = point[0];
             const y = point[1];
@@ -4934,33 +4513,26 @@
             return inside;
         }
 
-        // Add levee to map as a line
         function addLeveeToMap(floodMap, floodHeight) {
-            // Create reversed coordinates for Leaflet (it expects [lat, lng] not [lng, lat])
             const reversedCoordinates = leveeCoordinates.map(coord => [coord[1], coord[0]]);
-            
-            // Determine levee color based on flood height
-            let leveeColor = '#2196F3'; // Default blue
+        
+            let leveeColor = '#2196F3';
             let leveeWeight = 3;
             
             if (floodHeight >= LEVEE_HEIGHT) {
-                // Levee is breached - red
                 leveeColor = '#e74c3c';
                 leveeWeight = 4;
             } else if (floodHeight >= LEVEE_WARNING_THRESHOLD) {
-                // Approaching levee height - orange
                 leveeColor = '#f39c12';
                 leveeWeight = 4;
             }
             
-            // Create polyline (not polygon)
             const leveeLine = L.polyline(reversedCoordinates, {
                 color: leveeColor,
                 weight: leveeWeight,
                 opacity: 0.8
             }).addTo(floodMap);
             
-            // Add a popup with information about the levee
             if (floodHeight >= LEVEE_HEIGHT) {
                 leveeLine.bindPopup("<strong>Levee Wall - BREACHED</strong><br>Flood height exceeds levee protection height of 10.6m");
             } else if (floodHeight >= LEVEE_WARNING_THRESHOLD) {
@@ -4972,9 +4544,7 @@
             return leveeLine;
         }
         
-        // Process the flood data from CSV
         function processFloodData(data) {
-            // Convert to a more usable format
             floodProperties = data.map(row => {
                 const floorLevel = parseFloat(row['Floor Level']);
                 const gateLevel = parseFloat(row['Gate Level']);
@@ -4988,7 +4558,6 @@
                     coordinates: [parseFloat(row['Latitude']), parseFloat(row['Longitude'])]
                 };
             }).filter(property => {
-                // Filter out any properties with invalid data
                 return !isNaN(property.floorLevel) && 
                        !isNaN(property.gateLevel) && 
                        !isNaN(property.roadLevel) &&
@@ -4997,17 +4566,13 @@
             });
         }
 
-        // Check if property is inside levee area and if it would be affected by flooding
         function getFloodStatusWithLevee(floodHeight, property) {
-            // Check if property is inside the levee area
             const isInLeveeArea = isPointInPolygon([property.coordinates[1], property.coordinates[0]], leveeAreaCoordinates);
             
-            // Check if property would be affected without levee protection
             const floorAffected = property.floorLevel <= floodHeight;
             const gateAffected = property.gateLevel <= floodHeight;
             const roadAffected = property.roadLevel <= floodHeight;
             
-            // Determine if property would be affected without levee protection
             let wouldBeAffected = false;
             let normalStatus = 'safe';
             
@@ -5022,22 +4587,17 @@
                 normalStatus = 'alert';
             }
             
-            // Check if levee is protecting this property
             if (isInLeveeArea && wouldBeAffected && floodHeight <= LEVEE_HEIGHT) {
-                // Property would be affected but is protected by levee
                 property.leveeProtected = true;
-                property.normalStatus = normalStatus; // Store the status it would have without levee
+                property.normalStatus = normalStatus;
                 return 'safe';
             }
             
-            // Property is not protected by levee (either outside area, not affected, or flood exceeds levee height)
             property.leveeProtected = false;
             return normalStatus;
         }
         
-            // Create popup content showing levee protection status
             function createPopupContent(property, floodHeight, status) {
-                // Extract address details
                 const addressParts = property.address.match(/^(\d+)\s+(.+?)\s+([A-Z\s]+)$/);
                 let streetNumber = '', streetName = '';
                 
@@ -5048,12 +4608,10 @@
                     streetName = property.address;
                 }
                 
-                // Check flood conditions
                 const floorAffected = property.floorLevel <= floodHeight;
                 const gateAffected = property.gateLevel <= floodHeight;
                 const roadAffected = property.roadLevel <= floodHeight;
                 
-                // Build popup content
                 let content = `
                     <div style="font-family:'Inter',sans-serif;line-height:1.5;">
                         <div style="font-size:16px;font-weight:600;margin-bottom:12px;border-bottom:1px solid #eee;padding-bottom:8px;">
@@ -5077,7 +4635,6 @@
                     </div>
                 `;
                 
-                // Add levee protection info at the bottom if applicable
                 if (property.leveeProtected) {
                     content += `
                     <div style="background-color:#e3f2fd;padding:10px;margin:6px 0 0 0;border-radius:6px;border:1px solid #bbdefb;display:flex;align-items:center;justify-content:center;">
@@ -5093,12 +4650,10 @@
                 return content;
             }
         
-        // Add legend items for levee protection
         function addLeveeLegendItem() {
             const legendElement = document.querySelector('.flood-map-legend');
             if (!legendElement) return;
             
-            // Add levee legend entry if not already present
             if (!document.querySelector('.legend-item-levee')) {
                 const leveeLegendItem = document.createElement('div');
                 leveeLegendItem.className = 'legend-item legend-item-levee';
@@ -5110,7 +4665,6 @@
             }
         }
         
-        // Get status text for display
         function getStatusText(status) {
             switch (status) {
                 case 'critical': return 'Critical - Floor Level Affected';
@@ -5121,7 +4675,6 @@
             }
         }
         
-        // Get color based on flood status
         function getStatusColor(status) {
             const COLORS = {
                 critical: '#e74c3c',
@@ -5133,7 +4686,6 @@
             return COLORS[status] || COLORS.safe;
         }
         
-        // Get intensity value for heatmap (0-1)
         function getHeatIntensity(status) {
             switch (status) {
                 case 'critical': return 1.0;
@@ -5144,20 +4696,16 @@
             }
         }
         
-        // Update flood map with current river level respecting user's selection
         function updateFloodMapWithCurrentLevelRespectingUserChoice() {
             if (floodMapInitialized) {
                 const floodHeightSlider = document.getElementById('flood-height-slider');
                 const floodHeightDisplay = document.getElementById('flood-height-display');
                 
-                // If user has made a selection, respect it
                 if (userSelectedFloodHeight !== null) {
-                    // User has manually selected a height - keep it
                     floodHeightSlider.value = userSelectedFloodHeight;
                     floodHeightDisplay.textContent = userSelectedFloodHeight.toFixed(1) + 'm';
                     updateFloodVisualizationWithLevee(userSelectedFloodHeight);
                 } else if (currentLismoreLevel !== null) {
-                    // No user selection yet, use current level
                     floodHeightSlider.value = currentLismoreLevel;
                     floodHeightDisplay.textContent = currentLismoreLevel.toFixed(1) + 'm';
                     updateFloodVisualizationWithLevee(currentLismoreLevel);
@@ -5165,65 +4713,52 @@
             }
         }
         
-        // Update flood map visualization with levee protection
         function updateFloodVisualizationWithLevee(floodHeight) {
             if (!floodMapInitialized || floodProperties.length === 0) {
                 return;
             }
         
-            // Show loading overlay
             const floodLoadingOverlay = document.getElementById('flood-loading-overlay');
             floodLoadingOverlay.style.display = 'flex';
             
-            // Clear existing layers
             floodMarkers.clearLayers();
             if (floodHeatmapLayer) {
                 floodMap.removeLayer(floodHeatmapLayer);
             }
             
-            // Remove previous levee line if it exists
             if (leveeLine) {
                 floodMap.removeLayer(leveeLine);
             }
             
-            // Add updated levee line with appropriate color
             leveeLine = addLeveeToMap(floodMap, floodHeight);
             
-            // Count properties by status for statistics
             const stats = {
                 critical: 0,
                 warning: 0,
                 alert: 0,
                 safe: 0,
-                leveeProtected: 0 // Add counter for levee protected properties
+                leveeProtected: 0
             };
             
-            // Update the stats display
             document.getElementById('flood-stats-height').textContent = floodHeight.toFixed(1) + 'm';
             
-            // Prepare heatmap data
             const heatmapData = [];
             
-            // Process each property
             floodProperties.forEach((property, index) => {
-                // Get flood status for this property, accounting for levee protection
                 const status = getFloodStatusWithLevee(floodHeight, property);
                 
-                // Update statistics
                 stats[status]++;
                 if (property.leveeProtected) {
                     stats.leveeProtected++;
                 }
                 
-                // Create marker with appropriate color
                 let color;
                 if (property.leveeProtected) {
-                    color = '#2196F3'; // Use blue for levee protected properties
+                    color = '#2196F3';
                 } else {
                     color = getStatusColor(status);
                 }
                 
-                // Create marker
                 const marker = L.circleMarker(property.coordinates, {
                     color: 'white',
                     weight: 1.5,
@@ -5232,21 +4767,16 @@
                     radius: 8
                 });
                 
-                // Create popup content with levee information
                 const popupContent = createPopupContent(property, floodHeight, status);
                 
                 marker.bindPopup(popupContent);
                 floodMarkers.addLayer(marker);
                 
-                // Add to heatmap data
                 let intensity;
                 
                 if (property.leveeProtected) {
-                    // For levee-protected properties, use a special intensity value
-                    // that will map to blue in the heatmap
-                    intensity = 0.05; // Use a unique value for levee-protected properties
+                    intensity = 0.05;
                 } else {
-                    // For regular properties, use the standard intensity values
                     intensity = getHeatIntensity(status);
                 }
                 
@@ -5256,14 +4786,13 @@
                     intensity
                 ]);
             });
-            
-            // Create heatmap layer with updated gradient that includes levee protection color
+        
             floodHeatmapLayer = L.heatLayer(heatmapData, {
                 radius: 25,
                 blur: 15,
                 maxZoom: 17,
                 gradient: {
-                    0.05: '#2196F3', // Levee protected (blue)
+                    0.05: '#2196F3',
                     0.1: getStatusColor('safe'),
                     0.4: getStatusColor('alert'),
                     0.7: getStatusColor('warning'),
@@ -5271,14 +4800,12 @@
                 }
             });
             
-            // Update statistics display
             document.getElementById('flood-stat-total').textContent = floodProperties.length;
             document.getElementById('flood-stat-critical').textContent = stats.critical;
             document.getElementById('flood-stat-warning').textContent = stats.warning;
             document.getElementById('flood-stat-alert').textContent = stats.alert;
             document.getElementById('flood-stat-safe').textContent = stats.safe;
             
-            // Add levee protected info to stats display if not already present
             let leveeStatElement = document.getElementById('flood-stat-levee');
             if (!leveeStatElement && stats.leveeProtected > 0) {
                 const floodStatGrid = document.querySelector('.flood-stat-grid');
@@ -5301,7 +4828,6 @@
                 }
             }
             
-            // Show the appropriate layer based on user selection
             if (document.getElementById('flood-show-heatmap').checked) {
                 floodMap.removeLayer(floodMarkers);
                 floodMap.addLayer(floodHeatmapLayer);
@@ -5309,18 +4835,14 @@
                 floodMap.addLayer(floodMarkers);
             }
             
-            // Hide loading overlay
             floodLoadingOverlay.style.display = 'none';
         }
         
-        // Initialize the flood map with levee functionality
         function initFloodMapWithLevee() {
-            // Prevent double initialization
             if (floodMapInitialized) {
                 return;
             }
 
-            // Get elements
             const floodHeightSlider = document.getElementById('flood-height-slider');
             const floodHeightDisplay = document.getElementById('flood-height-display');
             const useCurrentLevelBtn = document.getElementById('use-current-level');
@@ -5329,42 +4851,32 @@
             const floodShowHeatmap = document.getElementById('flood-show-heatmap');
             const refreshFloodMapBtn = document.getElementById('refresh-floodmap');
 
-            // Create the map
             floodMap = L.map('flood-map').setView([-28.8167, 153.2833], 14);
 
-            // Mark as initialized
             floodMapInitialized = true;
             
-            // Add OpenStreetMap tiles
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             }).addTo(floodMap);
             
-            // Initialize layers
             floodMarkers = L.layerGroup().addTo(floodMap);
             
-            // Add levee legend item
             addLeveeLegendItem();
             
-            // Set Lismore area bounds
             const LISMORE_BOUNDS = [
-                [-28.8767, 153.2233], // Southwest
-                [-28.7767, 153.3433]  // Northeast - extended bounds for better visibility
+                [-28.8767, 153.2233],
+                [-28.7767, 153.3433]
             ];
             
-            // Restrict the map view to Lismore area
             floodMap.setMaxBounds(LISMORE_BOUNDS);
             floodMap.options.minZoom = 12;
             floodMap.options.maxZoom = 18;
             
-            // Process the CSV data if available, otherwise wait for it to load
             if (embeddedCSVData && embeddedCSVData.length > 0) {
                 processFloodData(embeddedCSVData);
             } else {
-                // The data will be processed when loadFloodData completes
             }
             
-            // Set initial height based on current Lismore level if available, otherwise use the slider's default
             let initialHeight;
             if (currentLismoreLevel !== null) {
                 initialHeight = currentLismoreLevel;
@@ -5374,23 +4886,20 @@
                 initialHeight = parseFloat(floodHeightSlider.value);
             }
             
-            // Set initial user selection to null (indicating they haven't made a choice yet)
             userSelectedFloodHeight = null;
             
-            // Update map visualization with initial value
             updateFloodVisualizationWithLevee(initialHeight);
             
-            // Event listeners
             floodHeightSlider.addEventListener('input', function() {
                 const height = parseFloat(this.value);
-                userSelectedFloodHeight = height; // Store user's selection when they manually adjust the slider
+                userSelectedFloodHeight = height;
                 floodHeightDisplay.textContent = height.toFixed(1) + 'm';
                 updateFloodVisualizationWithLevee(height);
             });
             
             useCurrentLevelBtn.addEventListener('click', function() {
                 if (currentLismoreLevel !== null) {
-                    userSelectedFloodHeight = currentLismoreLevel; // Update user selection to current level
+                    userSelectedFloodHeight = currentLismoreLevel;
                     floodHeightSlider.value = currentLismoreLevel;
                     floodHeightDisplay.textContent = currentLismoreLevel.toFixed(1) + 'm';
                     updateFloodVisualizationWithLevee(currentLismoreLevel);
@@ -5416,7 +4925,7 @@
             
             refreshFloodMapBtn.addEventListener('click', function() {
                 const height = parseFloat(floodHeightSlider.value);
-                userSelectedFloodHeight = null; // Reset user selection on manual refresh
+                userSelectedFloodHeight = null;
                 if (currentLismoreLevel !== null) {
                     floodHeightSlider.value = currentLismoreLevel;
                     floodHeightDisplay.textContent = currentLismoreLevel.toFixed(1) + 'm';
@@ -5427,14 +4936,11 @@
                 }
             });
             
-            // Mark as initialized
             floodMapInitialized = true;
             
-            // Hide loading overlay
             floodLoadingOverlay.style.display = 'none';
         }
 
-        // River height chart functionality
         document.addEventListener('DOMContentLoaded', function() {
             let riverChartInstance = null;
             const riverHeightModal = document.getElementById('river-height-modal');
@@ -5445,46 +4951,37 @@
             const closeRiverChart = document.getElementById('close-river-chart');
             const modalCloseBtn = document.querySelector('.modal-close');
         
-            // Function to open the modal - with more aggressive title cleaning
             function openRiverHeightModal(location) {
-                // For Wilsons River at Lismore specifically, use a simpler approach
                 let cleanLocation = location;
                 
                 if (location.includes("Wilsons") && location.includes("Lismore")) {
                     cleanLocation = "Wilsons R at Lismore (mAHD)";
                 } else {
-                    // For other locations, strip out everything after the location name
-                    cleanLocation = location.split(/\s+\d/)[0]; // Split at the first digit with space before it
-                    cleanLocation = cleanLocation.replace(/\s*\<span.*\<\/span\>/i, ""); // Remove any HTML spans
+                    cleanLocation = location.split(/\s+\d/)[0];
+                    cleanLocation = cleanLocation.replace(/\s*\<span.*\<\/span\>/i, "");
                     cleanLocation = cleanLocation.trim();
                 }
                 
-                // Set the modal title
                 riverName.textContent = cleanLocation + ' - Height History';
                 
-                // Show the modal and loading indicator
                 riverLoading.style.display = 'flex';
                 riverDataError.style.display = 'none';
                 riverHeightModal.style.display = 'block';
                 document.body.style.overflow = 'hidden';
                 
-                // Fetch the river height data using the original location for API request
                 fetchRiverHeightData(location, cleanLocation);
             }
         
-            // Function to close the modal
             function closeRiverHeightModal() {
                 riverHeightModal.style.display = 'none';
                 document.body.style.overflow = '';
                 
-                // Destroy the chart if it exists
                 if (riverChartInstance) {
                     riverChartInstance.destroy();
                     riverChartInstance = null;
                 }
             }
         
-            // Event listeners for closing the modal
             closeRiverChart.addEventListener('click', closeRiverHeightModal);
             modalCloseBtn.addEventListener('click', closeRiverHeightModal);
             riverHeightModal.addEventListener('click', function(event) {
@@ -5493,43 +4990,31 @@
                 }
             });
         
-            // Function to handle row click
             function handleRowClick(event) {
-                // Get the row that was clicked
                 const row = event.target.closest('tr');
                 
-                // Skip if clicked on header or if it's a river system row
                 if (!row || row.closest('thead') || row.classList.contains('river-system-header')) {
                     return;
                 }
                 
-                // Get the location from the first cell
                 const location = row.cells[0].textContent.trim();
                 
-                // Open the modal with this location
                 openRiverHeightModal(location);
             }
         
-            // Add click event listener to the flood data table
             document.getElementById('flood-data-body').addEventListener('click', handleRowClick);
         
-        // Function to fetch river height data with exact location name
         async function fetchRiverHeightData(location) {
           try {
-            // Show loading indicator
             const riverLoading = document.getElementById('river-loading');
             const riverDataError = document.getElementById('river-data-error');
             riverLoading.style.display = 'flex';
             riverDataError.style.display = 'none';
             
-            // First, let's remove the icon text from the location if it exists
             const cleanLocation = location.replace(/\s*\<span.*\<\/span\>/i, "");
             
-            // Encode the location to be safe for URLs
             const encodedLocation = encodeURIComponent(cleanLocation);
             
-            
-            // Request the data from our proxy server
             const response = await fetch(`${BASE_URL}/river-data?location=${encodedLocation}`);
             
             if (!response.ok) {
@@ -5540,7 +5025,6 @@
                   errorDetail += ` - ${errorData.message}`;
                 }
               } catch (e) {
-                // If we can't parse the error JSON, just use the status code
               }
               
               throw new Error(errorDetail);
@@ -5550,7 +5034,6 @@
             
             if (data.success && data.data && data.data.length > 0) {
               
-              // Process and render the chart
               renderRiverHeightChart(data.data, cleanLocation);
             } else {
               showRiverDataError("No data available for this location");
@@ -5561,33 +5044,25 @@
           }
         }
         
-        // Update the river height chart rendering function to include 0 on y-axis
         function renderRiverHeightChart(heightData, location) {
-          // Check if we need to reduce data points (if there are too many)
           let processedData = heightData;
           if (heightData.length > 100) {
-            // Apply data reduction to smoothen the chart without losing significant trends
             processedData = reduceDataPoints(heightData, 50);
           }
           
-          // Prepare data for Chart.js
           const dates = processedData.map(item => item.time);
           const heights = processedData.map(item => item.height);
           
-          // Get the canvas context
           const ctx = document.getElementById('river-chart').getContext('2d');
           
-          // Destroy previous chart if it exists
           if (riverChartInstance) {
             riverChartInstance.destroy();
           }
           
-          // Create gradient for the chart area
           const gradient = ctx.createLinearGradient(0, 0, 0, 400);
           gradient.addColorStop(0, 'rgba(30, 136, 229, 0.2)');
           gradient.addColorStop(1, 'rgba(30, 136, 229, 0)');
           
-          // Create new chart
           riverChartInstance = new Chart(ctx, {
             type: 'line',
             data: {
@@ -5598,15 +5073,15 @@
                 borderColor: 'rgba(30, 136, 229, 1)',
                 backgroundColor: gradient,
                 fill: true,
-                tension: 0.5,              // Moderate curve tension
-                pointRadius: 0,            // Hide individual points
-                pointHoverRadius: 6,       // Larger hover points
+                tension: 0.5,
+                pointRadius: 0,
+                pointHoverRadius: 6,
                 pointBackgroundColor: 'white',
                 pointBorderColor: 'rgba(30, 136, 229, 1)',
                 pointBorderWidth: 2,
-                pointHitRadius: 20,        // Large hit radius for easier hovering
-                borderWidth: 3,            // Thicker line
-                cubicInterpolationMode: 'monotone', // Natural curve interpolation
+                pointHitRadius: 20,
+                borderWidth: 3,
+                cubicInterpolationMode: 'monotone',
               }]
             },
             options: {
@@ -5614,7 +5089,7 @@
               maintainAspectRatio: false,
               plugins: {
                 title: {
-                  display: false,          // No title
+                  display: false,
                 },
                 legend: {
                   display: false
@@ -5643,25 +5118,24 @@
               scales: {
                 x: {
                   grid: {
-                    display: false,        // No x grid
+                    display: false,
                   },
                   ticks: {
                     maxRotation: 45,
                     minRotation: 45,
                     autoSkip: true,
-                    maxTicksLimit: 8       // Fewer labels
+                    maxTicksLimit: 8
                   }
                 },
                 y: {
-                  beginAtZero: true,      // Start y-axis at 0
-                  suggestedMin: 0,        // Suggest minimum of 0
+                  beginAtZero: true,
+                  suggestedMin: 0,
                   suggestedMax: function() {
-                    // Find max value and add 20% padding
                     const maxHeight = Math.max(...heights);
                     return maxHeight * 1.2;
                   }(),
                   grid: {
-                    color: 'rgba(0, 0, 0, 0.03)', // Light grid
+                    color: 'rgba(0, 0, 0, 0.03)',
                   },
                   ticks: {
                     callback: function(value) {
@@ -5676,7 +5150,7 @@
               },
               elements: {
                 line: {
-                  tension: 0.5              // Smooth line tension
+                  tension: 0.5
                 }
               },
               hover: {
@@ -5686,10 +5160,8 @@
             }
           });
           
-          // Hide loading indicator
           document.getElementById('river-loading').style.display = 'none';
           
-          // Update the data range text in the modal footer
           const dataRange = document.getElementById('river-data-range');
           if (dataRange && dates.length > 0) {
             const firstDate = dates[0];
@@ -5698,28 +5170,22 @@
           }
         }
         
-        // Helper function to reduce the number of data points while preserving trend
         function reduceDataPoints(data, targetPoints) {
           const originalLength = data.length;
           
-          // If we already have fewer points than target, return original data
           if (originalLength <= targetPoints) {
             return data;
           }
           
           const result = [];
-          // Always include the first and last points
           result.push(data[0]);
           
-          // Calculate how many points to skip
           const step = Math.floor(originalLength / (targetPoints - 2));
           
-          // Add intermediate points at regular intervals
           for (let i = step; i < originalLength - step; i += step) {
             result.push(data[i]);
           }
           
-          // Add the last point
           result.push(data[originalLength - 1]);
           
           return result;
@@ -5727,7 +5193,6 @@
         });
         </script>
 
-    <!-- River Height History Modal -->
     <div id="river-height-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
