@@ -3098,11 +3098,12 @@
                 let radarImages = [];
                 let currentFrame = 0;
                 let isPlaying = false;
-                let animationInterval;
+                let animationInterval = null;
                 let animationDelay = 500; // milliseconds
-                let animationRequestId = null; // Add this variable declaration
+                let animationRequestId = null;
                 let mapLayersLoaded = false;
                 let preloadedImages = new Map(); // To store preloaded images
+                let animationLock = false; // NEW: Prevent concurrent animations
                 
                 // Function to format date in locale format
                 function formatDate(dateString) {
@@ -3319,42 +3320,43 @@
             
                 function playAnimation() {
                   if (!radarImages || radarImages.length === 0) return;
-                  
+                  if (animationLock) return; // Prevent concurrent animations
+
+                  // CRITICAL: Stop any existing animation first
+                  pauseAnimation();
+
                   isPlaying = true;
+                  animationLock = true;
                   if (btnPlay) btnPlay.disabled = true;
                   if (btnPause) btnPause.disabled = false;
-                  
-                  // Clear any existing interval and animation frame
-                  clearTimeout(animationInterval);
-                  if (animationRequestId) {
-                    cancelAnimationFrame(animationRequestId);
-                  }
-                  
-                  // Define the animation frame function with better timing control
-                  const nextFrame = () => {
-                    // Calculate next frame index
-                    const nextIndex = (currentFrame + 1) % radarImages.length;
-                    
-                    // Update the displayed image
-                    updateRadarImage(nextIndex);
-                    
-                    // Schedule the next frame using setTimeout
-                    animationInterval = setTimeout(() => {
-                      // Use requestAnimationFrame for smoother animation
-                      animationRequestId = requestAnimationFrame(nextFrame);
-                    }, animationDelay);
+
+                  // Define the animation loop - SIMPLIFIED (no race conditions)
+                  const advanceFrame = () => {
+                    if (!isPlaying) return; // Safety check
+
+                    // ATOMIC: Update currentFrame first, THEN display
+                    currentFrame = (currentFrame + 1) % radarImages.length;
+                    updateRadarImage(currentFrame);
+
+                    // Schedule next frame
+                    animationInterval = setTimeout(advanceFrame, animationDelay);
                   };
-                  
+
                   // Start the animation loop
-                  nextFrame();
+                  advanceFrame();
                 }
             
                 function pauseAnimation() {
                   isPlaying = false;
+                  animationLock = false; // Release animation lock
                   if (btnPlay) btnPlay.disabled = false;
                   if (btnPause) btnPause.disabled = true;
-                  
-                  clearTimeout(animationInterval);
+
+                  // Clear ALL pending timers/frames
+                  if (animationInterval) {
+                    clearTimeout(animationInterval);
+                    animationInterval = null;
+                  }
                   if (animationRequestId) {
                     cancelAnimationFrame(animationRequestId);
                     animationRequestId = null;
@@ -3441,20 +3443,69 @@
                     }
                 }
                 
-                // Refresh function
-                function refreshData() {
-                    // Clear current data
+                // Connectivity check function
+                async function checkBOMConnectivity() {
+                    try {
+                        const controller = new AbortController();
+                        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+
+                        const response = await fetch('http://www.bom.gov.au/', {
+                            method: 'HEAD',
+                            mode: 'no-cors', // Avoid CORS issues
+                            signal: controller.signal
+                        });
+
+                        clearTimeout(timeoutId);
+                        return true; // BOM is reachable
+                    } catch (error) {
+                        console.warn('BOM connectivity check failed:', error.message);
+                        return false; // BOM is unreachable (likely no internet)
+                    }
+                }
+
+                // Refresh function with connectivity check
+                async function refreshData() {
+                    // FORCE STOP animation completely
+                    pauseAnimation();
+                    animationLock = false;
+                    isPlaying = false;
+
+                    // Clear ALL timers
+                    if (animationInterval) {
+                        clearTimeout(animationInterval);
+                        animationInterval = null;
+                    }
+
+                    // Check connectivity before clearing cache
+                    if (timestamp) timestamp.textContent = 'Checking connection...';
+
+                    const isConnected = await checkBOMConnectivity();
+
+                    if (!isConnected) {
+                        // No internet - keep current data
+                        showError('No internet connection. Keeping current data.');
+                        if (timestamp && radarImages.length > 0) {
+                            timestamp.textContent = formatDate(radarImages[currentFrame].timestamp) + ' (Offline)';
+                        }
+                        return; // EXIT - don't clear cache
+                    }
+
+                    // Connected - safe to clear cache and fetch new data
                     radarImages = [];
                     currentFrame = 0;
-                    pauseAnimation();
                     enableControls(false);
-                    preloadedImages.clear();
-                    
+                    preloadedImages.clear(); // Clear cache
+
+                    // Reset radar image visually
+                    if (radarImage) {
+                        radarImage.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+                    }
+
                     // Reset UI elements
                     if (timestamp) timestamp.textContent = 'Refreshing data...';
                     if (frameCounter) frameCounter.textContent = '';
                     if (progressBar) progressBar.style.width = '0%';
-                    
+
                     // Fetch fresh data
                     fetchRadarData();
                 }
