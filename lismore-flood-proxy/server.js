@@ -1154,12 +1154,20 @@ async function fetchRiverHeightData(location) {
 
     logInfo(`Extracted ${riverData.length} data points for ${location}`);
 
-    // Log sample data for debugging
+    // Log sample data for debugging - show FIRST and LAST entries
     if (VERBOSE_LOGGING && riverData.length > 0) {
-      console.log(`Sample data (first 3 points):`);
-      riverData.slice(0, 3).forEach(point => {
-        console.log(`  Time: ${point.time}, Height: ${point.height}`);
+      console.log(`\n========================================`);
+      console.log(`DATA ORDER CHECK FOR: ${location}`);
+      console.log(`Total points: ${riverData.length}`);
+      console.log(`\nFIRST 3 data points (as parsed from table):`);
+      riverData.slice(0, 3).forEach((point, idx) => {
+        console.log(`  [${idx}] Time: ${point.time}, Height: ${point.height}`);
       });
+      console.log(`\nLAST 3 data points (as parsed from table):`);
+      riverData.slice(-3).forEach((point, idx) => {
+        console.log(`  [${riverData.length - 3 + idx}] Time: ${point.time}, Height: ${point.height}`);
+      });
+      console.log(`========================================\n`);
     }
 
     return {
