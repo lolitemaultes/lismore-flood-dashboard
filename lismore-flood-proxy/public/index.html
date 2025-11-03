@@ -3584,7 +3584,7 @@
 
                     // CRITICAL: Invalidate current animation session to kill ALL running loops
                     window.radarGlobalState.currentAnimationSessionId++;
-                    console.log(`>>> INVALIDATED animation session, new ID: ${currentAnimationSessionId}`);
+                    console.log(`>>> INVALIDATED animation session, new ID: ${window.radarGlobalState.currentAnimationSessionId}`);
 
                     // CRITICAL: IMMEDIATELY clear the data FIRST before anything else
                     // This kills any pending setTimeout callbacks - they'll hit updateRadarImage's length check
