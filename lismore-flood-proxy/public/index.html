@@ -3626,7 +3626,7 @@
                     window.radarGlobalState.allTimeoutIds.forEach(id => clearTimeout(id));
                     window.radarGlobalState.allTimeoutIds.clear();
                     if (window.radarGlobalState.animationInterval) {
-                        clearTimeout(animationInterval);
+                        clearTimeout(window.radarGlobalState.animationInterval);
                         window.radarGlobalState.animationInterval = null;
                     }
                     // Triple-clear to catch any pending
@@ -3634,7 +3634,7 @@
                         window.radarGlobalState.allTimeoutIds.forEach(id => clearTimeout(id));
                         window.radarGlobalState.allTimeoutIds.clear();
                         if (window.radarGlobalState.animationInterval) {
-                            clearTimeout(animationInterval);
+                            clearTimeout(window.radarGlobalState.animationInterval);
                             window.radarGlobalState.animationInterval = null;
                         }
                     }, 0);
@@ -3649,8 +3649,8 @@
 
                     if (!isConnected) {
                         // No internet - restore old data and STOP force clearing
-                        if (forceClearInterval) {
-                            clearInterval(forceClearInterval);
+                        if (window.radarGlobalState.forceClearInterval) {
+                            clearInterval(window.radarGlobalState.forceClearInterval);
                             window.radarGlobalState.forceClearInterval = null;
                         }
                         radarImages = oldRadarImages;
@@ -3680,7 +3680,7 @@
 
                         // CRITICAL: Bump session ID ONE MORE TIME to kill any zombie loops
                         window.radarGlobalState.currentAnimationSessionId++;
-                        console.log(`>>> FINAL session bump to ID: ${currentAnimationSessionId}`);
+                        console.log(`>>> FINAL session bump to ID: ${window.radarGlobalState.currentAnimationSessionId}`);
 
                         // FORCE STOP - make absolutely sure animation is dead
                         window.radarGlobalState.isPlaying = false;
@@ -3690,13 +3690,13 @@
                         window.radarGlobalState.allTimeoutIds.forEach(id => clearTimeout(id));
                         window.radarGlobalState.allTimeoutIds.clear();
                         if (window.radarGlobalState.animationInterval) {
-                            clearTimeout(animationInterval);
+                            clearTimeout(window.radarGlobalState.animationInterval);
                             window.radarGlobalState.animationInterval = null;
                         }
 
                         // STOP the force clearing interval
-                        if (forceClearInterval) {
-                            clearInterval(forceClearInterval);
+                        if (window.radarGlobalState.forceClearInterval) {
+                            clearInterval(window.radarGlobalState.forceClearInterval);
                             window.radarGlobalState.forceClearInterval = null;
                         }
 
@@ -3744,7 +3744,7 @@
                         
                         switch(e.key) {
                             case ' ': // Space bar
-                                if (isPlaying) {
+                                if (window.radarGlobalState.isPlaying) {
                                     pauseAnimation();
                                 } else {
                                     playAnimation();
@@ -3770,12 +3770,12 @@
                         speedSlider.addEventListener('input', function() {
                             const speed = parseInt(this.value);
                             animationDelay = 1100 - (speed * 100); // 100ms to 1000ms range
-                            
+
                             if (speedValue) {
                                 speedValue.textContent = `${animationDelay}ms`;
                             }
-                            
-                            if (isPlaying) {
+
+                            if (window.radarGlobalState.isPlaying) {
                                 pauseAnimation();
                                 playAnimation();
                             }
