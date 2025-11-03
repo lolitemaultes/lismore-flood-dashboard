@@ -545,40 +545,23 @@ async function fetchBomFloodData() {
               console.log(`========================================\n`);
             }
 
-            const time = cells.eq(1).text().trim();
+            // BOM table format: [Location, Auto/Manual, Time, Water Level, Unit/AHD, Status, ...]
+            const time = cells.eq(2).text().trim(); // Cell 2 is the actual time
 
-            // Parse water level - try different cells to find the right one
-            let waterLevelText = cells.eq(2).text().trim();
-            let waterLevelMatch = waterLevelText.match(/(\d+\.\d+)/);
+            // Parse water level - Cell 3 contains the water level (can be negative for AHD)
+            let waterLevelText = cells.eq(3).text().trim();
+            let waterLevelMatch = waterLevelText.match(/(-?\d+\.\d+)/); // Allow negative numbers
             let waterLevel = waterLevelMatch ? parseFloat(waterLevelMatch[1]) : null;
 
-            // If no water level found in cell 2, try other cells
-            if (!waterLevel && cells.length > 4) {
-              for (let i = 2; i < cells.length; i++) {
-                const cellText = cells.eq(i).text().trim();
-                const match = cellText.match(/(\d+\.\d+)/);
-                if (match && !cellText.toLowerCase().includes('automatic') && !cellText.toLowerCase().includes('manual')) {
-                  waterLevel = parseFloat(match[1]);
-                  if (VERBOSE_LOGGING && location.includes('Wilsons') && location.includes('Lismore')) {
-                    console.log(`Found water level in cell ${i}: ${waterLevel}m`);
-                  }
-                  break;
-                }
-              }
+            if (VERBOSE_LOGGING && location.includes('Wilsons') && location.includes('Lismore')) {
+              console.log(`Extracted: Time="${time}", WaterLevel=${waterLevel}m`);
             }
 
-            // Parse status - might be in a different cell
+            // Parse status - typically in Cell 5
+            const statusText = cells.eq(5).text().trim().toLowerCase();
             let status = 'steady';
-            for (let i = 3; i < cells.length; i++) {
-              const statusText = cells.eq(i).text().trim().toLowerCase();
-              if (statusText.includes('rising')) {
-                status = 'rising';
-                break;
-              } else if (statusText.includes('falling')) {
-                status = 'falling';
-                break;
-              }
-            }
+            if (statusText.includes('rising')) status = 'rising';
+            else if (statusText.includes('falling')) status = 'falling';
 
             // When creating riverData objects:
             riverData.push({
@@ -632,40 +615,23 @@ async function fetchBomFloodData() {
               console.log(`========================================\n`);
             }
 
-            const time = cells.eq(1).text().trim();
+            // BOM table format: [Location, Auto/Manual, Time, Water Level, Unit/AHD, Status, ...]
+            const time = cells.eq(2).text().trim(); // Cell 2 is the actual time
 
-            // Parse water level - try different cells to find the right one
-            let waterLevelText = cells.eq(2).text().trim();
-            let waterLevelMatch = waterLevelText.match(/(\d+\.\d+)/);
+            // Parse water level - Cell 3 contains the water level (can be negative for AHD)
+            let waterLevelText = cells.eq(3).text().trim();
+            let waterLevelMatch = waterLevelText.match(/(-?\d+\.\d+)/); // Allow negative numbers
             let waterLevel = waterLevelMatch ? parseFloat(waterLevelMatch[1]) : null;
 
-            // If no water level found in cell 2, try other cells
-            if (!waterLevel && cells.length > 4) {
-              for (let i = 2; i < cells.length; i++) {
-                const cellText = cells.eq(i).text().trim();
-                const match = cellText.match(/(\d+\.\d+)/);
-                if (match && !cellText.toLowerCase().includes('automatic') && !cellText.toLowerCase().includes('manual')) {
-                  waterLevel = parseFloat(match[1]);
-                  if (VERBOSE_LOGGING && location.includes('Wilsons') && location.includes('Lismore')) {
-                    console.log(`[FALLBACK] Found water level in cell ${i}: ${waterLevel}m`);
-                  }
-                  break;
-                }
-              }
+            if (VERBOSE_LOGGING && location.includes('Wilsons') && location.includes('Lismore')) {
+              console.log(`[FALLBACK] Extracted: Time="${time}", WaterLevel=${waterLevel}m`);
             }
 
-            // Parse status - might be in a different cell
+            // Parse status - typically in Cell 5
+            const statusText = cells.eq(5).text().trim().toLowerCase();
             let status = 'steady';
-            for (let i = 3; i < cells.length; i++) {
-              const statusText = cells.eq(i).text().trim().toLowerCase();
-              if (statusText.includes('rising')) {
-                status = 'rising';
-                break;
-              } else if (statusText.includes('falling')) {
-                status = 'falling';
-                break;
-              }
-            }
+            if (statusText.includes('rising')) status = 'rising';
+            else if (statusText.includes('falling')) status = 'falling';
 
             riverData.push({
               location,
