@@ -2065,12 +2065,7 @@
                         </svg>
                         <span>EMERGENCY USE: This dashboard fetches LIVE data from the Bureau of Meteorology. Always follow directions from emergency services during flood events.</span>
                     </div>
-                    
-                    <div class="filter-buttons">
-                        <button id="show-all" class="button secondary">All Locations</button>
-                        <button id="show-critical" class="button">Key Monitoring Stations</button>
-                    </div>
-                    
+
                     <div class="table-container">
                         <table id="flood-data">
                             <thead>
@@ -2410,10 +2405,10 @@
                 }
                 embeddedCSVData = await response.json();
                 console.log(`Loaded ${embeddedCSVData.length} flood data records from server`);
-                
-                // Initialize flood map after data is loaded
-                if (typeof initFloodMapWithLevee === 'function') {
-                    initFloodMapWithLevee();
+
+                // Process flood data if map is already initialized
+                if (floodMapInitialized && embeddedCSVData && embeddedCSVData.length > 0) {
+                    processFloodData(embeddedCSVData);
                 }
             } catch (error) {
                 console.error('Error loading flood data:', error);
@@ -2435,8 +2430,6 @@
         const lastUpdateTime = document.getElementById('last-update-time');
         const refreshIntervalSelect = document.getElementById('refresh-interval');
         const refreshNowButton = document.getElementById('refresh-now');
-        const showAllButton = document.getElementById('show-all');
-        const showCriticalButton = document.getElementById('show-critical');
         const clockElement = document.getElementById('clock');
         const checkStatusButton = document.getElementById('check-status');
         
@@ -2468,7 +2461,6 @@
         let floodData = [];
         let refreshTimer = null;
         let webcamRefreshTimer = null;
-        let showingCriticalOnly = false;
         let lastFetchTime = null;
         let currentLismoreLevel = null;
         let floodMap = null;
@@ -2510,26 +2502,10 @@
             // Set up flood data refresh
             refreshIntervalSelect.value = DEFAULT_REFRESH_INTERVAL;
             refreshIntervalSelect.addEventListener('change', updateRefreshInterval);
-            
+
             // Set up buttons
             refreshNowButton.addEventListener('click', fetchFloodData);
-            showAllButton.addEventListener('click', () => {
-                showingCriticalOnly = false;
-                showAllButton.classList.remove('secondary');
-                showCriticalButton.classList.add('secondary');
-                renderFloodData();
-            });
-            
-            showCriticalButton.addEventListener('click', () => {
-                showingCriticalOnly = true;
-                showCriticalButton.classList.remove('secondary');
-                showAllButton.classList.add('secondary');
-                renderFloodData();
-            });
-            
-            // Set critical view by default
-            showingCriticalOnly = true;
-            
+
             // Check data sources status
             checkDataSources();
             checkStatusButton.addEventListener('click', checkDataSources);
@@ -3448,25 +3424,12 @@
             
             // Convert back to array
             const uniqueData = Object.values(uniqueLocations);
-            
-            // Filter data if showing critical only - use specific location list
-            const criticalLocations = [
-                'Wilsons R at Woodlawn (mAHD)',
-                'Browns Ck Pump Station',
-                'Lismore (Dawson Street)',
-                'Wilsons R at Lismore (mAHD)',
-                'Leycester Ck at Tuncester (mAHD)',
-                'Leycester Ck at South Lismore'
-            ];
-            
-            const dataToShow = showingCriticalOnly 
-                ? uniqueData.filter(item => criticalLocations.includes(item.location))
-                : uniqueData;
-            
+
+            // Data is already filtered on server side to only allowed locations
             // Group data by river system
             const groupedData = {};
-            
-            dataToShow.forEach(item => {
+
+            uniqueData.forEach(item => {
                 let riverSystem = 'Other';
                 
                 if (item.location.includes('Wilsons')) {
@@ -3632,21 +3595,9 @@
                     }
                 }
                 
-                // Define critical locations for highest reading calculation
-                const criticalLocations = [
-                    'Wilsons R at Woodlawn (mAHD)',
-                    'Browns Ck Pump Station',
-                    'Lismore (Dawson Street)',
-                    'Wilsons R at Lismore (mAHD)',
-                    'Leycester Ck at Tuncester (mAHD)',
-                    'Leycester Ck at South Lismore'
-                ];
-                
-                // Find highest reading only from critical locations
+                // Find highest reading from all locations (data is already filtered on server)
                 let highest = null;
-                floodData
-                    .filter(item => criticalLocations.includes(item.location))
-                    .forEach(item => {
+                floodData.forEach(item => {
                         if (item.waterLevel !== null && (highest === null || item.waterLevel > highest.waterLevel)) {
                             highest = item;
                         }
@@ -4808,6 +4759,12 @@
         
         // Initialize the flood map with levee functionality
         function initFloodMapWithLevee() {
+            // Prevent double initialization
+            if (floodMapInitialized) {
+                console.log('Flood map already initialized, skipping...');
+                return;
+            }
+
             // Get elements
             const floodHeightSlider = document.getElementById('flood-height-slider');
             const floodHeightDisplay = document.getElementById('flood-height-display');
@@ -4816,9 +4773,12 @@
             const floodShowMarkers = document.getElementById('flood-show-markers');
             const floodShowHeatmap = document.getElementById('flood-show-heatmap');
             const refreshFloodMapBtn = document.getElementById('refresh-floodmap');
-            
+
             // Create the map
             floodMap = L.map('flood-map').setView([-28.8167, 153.2833], 14);
+
+            // Mark as initialized
+            floodMapInitialized = true;
             
             // Add OpenStreetMap tiles
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
