@@ -529,23 +529,33 @@ async function fetchBomFloodData() {
         
         while (currentRow.length && !currentRow.find('th.rowlevel1').length) {
           const cells = currentRow.find('td');
-          
+
           if (cells.length >= 4) {
             // Extract data from the row
             const location = cells.eq(0).text().trim();
             const time = cells.eq(1).text().trim();
-            
+
             // Parse water level
             let waterLevelText = cells.eq(2).text().trim();
             const waterLevelMatch = waterLevelText.match(/(\d+\.\d+)/);
             const waterLevel = waterLevelMatch ? parseFloat(waterLevelMatch[1]) : null;
-            
+
+            // Debug logging for water level extraction
+            if (VERBOSE_LOGGING && ALLOWED_LOCATIONS.includes(location)) {
+              console.log(`\nParsing: ${location}`);
+              console.log(`  Cell 0 (Location): "${cells.eq(0).text().trim()}"`);
+              console.log(`  Cell 1 (Time): "${cells.eq(1).text().trim()}"`);
+              console.log(`  Cell 2 (Water Level): "${cells.eq(2).text().trim()}"`);
+              console.log(`  Cell 3 (Status): "${cells.eq(3).text().trim()}"`);
+              console.log(`  Extracted water level: ${waterLevel}m`);
+            }
+
             // Parse status
             const statusText = cells.eq(3).text().trim().toLowerCase();
             let status = 'steady';
             if (statusText.includes('rising')) status = 'rising';
             else if (statusText.includes('falling')) status = 'falling';
-            
+
             // When creating riverData objects:
             riverData.push({
               location,
@@ -555,7 +565,7 @@ async function fetchBomFloodData() {
               floodCategory: determineFloodCategory(waterLevel, location)
             });
           }
-          
+
           currentRow = currentRow.next();
         }
       }
@@ -588,18 +598,31 @@ async function fetchBomFloodData() {
               location.toLowerCase().includes('lismore')) {
             
             const time = cells.eq(1).text().trim();
-            
+
             // Parse water level
             let waterLevelText = cells.eq(2).text().trim();
             const waterLevelMatch = waterLevelText.match(/(\d+\.\d+)/);
             const waterLevel = waterLevelMatch ? parseFloat(waterLevelMatch[1]) : null;
-            
+
+            // Debug logging for water level extraction
+            if (VERBOSE_LOGGING && ALLOWED_LOCATIONS.includes(location)) {
+              console.log(`\n[Fallback] Parsing: ${location}`);
+              console.log(`  Cell 0 (Location): "${cells.eq(0).text().trim()}"`);
+              console.log(`  Cell 1 (Time): "${cells.eq(1).text().trim()}"`);
+              console.log(`  Cell 2 (Water Level): "${cells.eq(2).text().trim()}"`);
+              console.log(`  Cell 3 (Status): "${cells.eq(3).text().trim()}"`);
+              if (cells.length > 4) {
+                console.log(`  Cell 4: "${cells.eq(4).text().trim()}"`);
+              }
+              console.log(`  Extracted water level: ${waterLevel}m`);
+            }
+
             // Parse status
             const statusText = cells.eq(3).text().trim().toLowerCase();
             let status = 'steady';
             if (statusText.includes('rising')) status = 'rising';
             else if (statusText.includes('falling')) status = 'falling';
-            
+
             riverData.push({
               location,
               time,
