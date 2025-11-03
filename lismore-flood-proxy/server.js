@@ -1080,6 +1080,18 @@ async function fetchRiverHeightData(location) {
           const tableClass = tableHtml(table).attr('class') || 'no-class';
           const rowCount = tableHtml(table).find('tr').length;
           console.log(`  Table ${i}: id="${tableId}" class="${tableClass}" rows=${rowCount}`);
+
+          // For the main table, show last 5 actual rows from HTML
+          if (tableId === 'tableStyle1') {
+            const allRows = tableHtml(table).find('tr');
+            console.log(`\n  Last 5 rows in HTML table:`);
+            allRows.slice(-5).each((idx, row) => {
+              const cells = tableHtml(row).find('td');
+              if (cells.length >= 2) {
+                console.log(`    Row: time="${tableHtml(cells[0]).text().trim()}" height="${tableHtml(cells[1]).text().trim()}"`);
+              }
+            });
+          }
         });
       }
 
