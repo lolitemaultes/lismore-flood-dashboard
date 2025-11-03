@@ -699,6 +699,23 @@ app.get('/api/river-height', async (req, res) => {
   }
 });
 
+// Serve flood property data
+app.get('/api/flood-properties', (req, res) => {
+  const floodDataPath = path.join(__dirname, 'public', 'flood-data.json');
+  
+  try {
+    if (fs.existsSync(floodDataPath)) {
+      const data = fs.readFileSync(floodDataPath, 'utf8');
+      res.json(JSON.parse(data));
+    } else {
+      res.status(404).json({ error: 'Flood data file not found' });
+    }
+  } catch (error) {
+    console.error('Error reading flood data:', error);
+    res.status(500).json({ error: 'Failed to load flood data' });
+  }
+});
+
 // Extract the river height data fetching logic to a separate function
 async function fetchRiverHeightData(location) {
   console.log(`Fetching river height history for: "${location}"`);
