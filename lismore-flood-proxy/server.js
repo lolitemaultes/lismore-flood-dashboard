@@ -670,14 +670,37 @@ async function fetchBomFloodData() {
 }
 
 // Define which locations to include in the dashboard
+// Try multiple variations of location names that BOM might use
 const ALLOWED_LOCATIONS = [
+  // Wilsons River at Lismore - try all variations
   'Wilsons R at Lismore (mAHD)',
+  'Wilsons River at Lismore (mAHD)',
+  'Wilsons R at Lismore',
+  'Wilsons River at Lismore',
+
+  // Wilsons River at Eltham
   'Wilsons R at Eltham',
+  'Wilsons River at Eltham',
+
+  // Leycester Creek at Rock Valley
   'Leycester Ck at Rock Valley',
+  'Leycester Creek at Rock Valley',
+
+  // Coopers Creek at Corndale
   'Coopers Ck at Corndale',
+  'Coopers Creek at Corndale',
+
+  // Richmond River at Casino
   'Richmond R at Casino',
+  'Richmond River at Casino',
+
+  // Richmond River at Coraki
   'Richmond R at Coraki',
-  'Wilsons R at Tuckurimba'
+  'Richmond River at Coraki',
+
+  // Wilsons River at Tuckurimba
+  'Wilsons R at Tuckurimba',
+  'Wilsons River at Tuckurimba'
 ];
 
 // Helper function to calculate trend-based status from historical data
