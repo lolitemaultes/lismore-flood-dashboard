@@ -8,10 +8,8 @@ const fs = require('fs');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Logging configuration - set to false to reduce verbose output
 const VERBOSE_LOGGING = process.env.VERBOSE_LOGGING === 'true' || false;
 
-// Helper logging functions
 function logInfo(message, ...args) {
     console.log(message, ...args);
 }
@@ -26,19 +24,15 @@ function logError(message, ...args) {
     console.error('ERROR:', message, ...args);
 }
 
-// Enable CORS for all routes
 app.use(cors());
 
-// Serve static files from the public directory
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Create a resources directory if it doesn't exist for radar resources
 const RESOURCES_DIR = path.join(__dirname, '/public/resources/Rain Radar');
 if (!fs.existsSync(RESOURCES_DIR)) {
     fs.mkdirSync(RESOURCES_DIR, { recursive: true });
 }
 
-// Status route to check if the server is running
 app.get('/status', (req, res) => {
   res.json({
     status: 'online',
@@ -46,7 +40,6 @@ app.get('/status', (req, res) => {
   });
 });
 
-// Add a dedicated cleanup endpoint - this could be called by the frontend
 app.get('/cleanup-radar', (req, res) => {
   try {
     cleanupRadarImages();
@@ -65,7 +58,6 @@ app.get('/cleanup-radar', (req, res) => {
   }
 });
 
-// Start the server
 app.listen(PORT, () => {
   console.log('\n' + '='.repeat(60));
   console.log('🌊  Lismore Flood Dashboard Server');
@@ -76,7 +68,6 @@ app.listen(PORT, () => {
   console.log('='.repeat(60) + '\n');
 });
 
-// Browser-like headers to avoid being blocked
 const BROWSER_HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
     'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
@@ -84,10 +75,8 @@ const BROWSER_HEADERS = {
     'Referer': 'https://reg.bom.gov.au/products/IDR282.loop.shtml'
 };
 
-// Radar configuration - updated to new BOM domain
 const RADAR_BASE_URL = 'https://reg.bom.gov.au';
 
-// Function to clean up old radar images
 function cleanupRadarImages() {
   try {
     if (!fs.existsSync(RESOURCES_DIR)) {
@@ -106,14 +95,13 @@ function cleanupRadarImages() {
     });
 
     if (deletedCount > 0) {
-      logVerbose(`🗑️  Cleaned ${deletedCount} old radar images`);
+      logVerbose(`Cleaned ${deletedCount} old radar images`);
     }
   } catch (error) {
-    console.error('❌ Error cleaning radar images:', error.message);
+    console.error('Error cleaning radar images:', error.message);
   }
 }
 
-// Download the legend image at server startup
 async function downloadLegendOnStartup() {
   const imageUrl = `${RADAR_BASE_URL}/products/radar_transparencies/IDR.legend.0.png`;
   const resourceFile = path.join(RESOURCES_DIR, 'Legend.png');
@@ -123,7 +111,7 @@ async function downloadLegendOnStartup() {
   }
 
   try {
-    console.log('📥 Downloading radar legend...');
+    console.log('Downloading radar legend...');
 
     const response = await axios.get(imageUrl, {
       responseType: 'arraybuffer',
@@ -136,21 +124,19 @@ async function downloadLegendOnStartup() {
     }
 
     fs.writeFileSync(resourceFile, response.data);
-    console.log('✓ Legend downloaded\n');
+    console.log('Legend downloaded\n');
   } catch (error) {
-    console.error('❌ Error downloading legend:', error.message);
+    console.error('Error downloading legend:', error.message);
 
     try {
       createFallbackLegend(resourceFile);
     } catch (err) {
-      console.error('❌ Failed to create fallback legend');
+      console.error('Failed to create fallback legend');
     }
   }
 }
 
-// Create a simple fallback legend if the download fails
 function createFallbackLegend(filePath) {
-  // This is a very simple fallback - you could create a better one with canvas
   const legendHtml = `
     <svg width="400" height="80" xmlns="http://www.w3.org/2000/svg">
       <rect width="100%" height="100%" fill="white"/>
@@ -169,17 +155,12 @@ function createFallbackLegend(filePath) {
     </svg>
   `;
   
-  // Convert SVG to PNG using a library or save as SVG
   fs.writeFileSync(filePath, Buffer.from(legendHtml));
   console.log('Created fallback legend');
 }
 
-// Download legend at startup
 downloadLegendOnStartup();
 
-// ====================== RADAR PROXY ROUTES ======================
-
-// Proxy for BOM radar images
 app.get('/radar-proxy/*', async (req, res) => {
     try {
         const pathMatch = req.url.match(/\/radar-proxy(\/.+)/);
@@ -199,7 +180,7 @@ app.get('/radar-proxy/*', async (req, res) => {
         });
 
         if (response.status !== 200) {
-            console.error(`❌ Radar image fetch failed: HTTP ${response.status}`);
+            console.error(`Radar image fetch failed: HTTP ${response.status}`);
             return res.status(response.status).send(`Error fetching radar image: ${response.status}`);
         }
 
@@ -209,12 +190,11 @@ app.get('/radar-proxy/*', async (req, res) => {
         res.set('Content-Type', 'image/png');
         res.send(response.data);
     } catch (error) {
-        console.error('❌ Error fetching radar image:', error.message);
+        console.error('Error fetching radar image:', error.message);
         res.status(500).send('Error fetching radar image');
     }
 });
 
-// Proxy for map background layers with CORRECTED path
 app.get('/map-proxy/:filename', async (req, res) => {
     try {
         const filename = req.params.filename;
@@ -233,7 +213,7 @@ app.get('/map-proxy/:filename', async (req, res) => {
         });
 
         if (response.status !== 200) {
-            console.error(`❌ Map layer fetch failed: HTTP ${response.status}`);
+            console.error(`Map layer fetch failed: HTTP ${response.status}`);
             return res.status(response.status).send(`Error fetching map layer: ${response.status}`);
         }
 
@@ -243,22 +223,19 @@ app.get('/map-proxy/:filename', async (req, res) => {
         res.set('Content-Type', 'image/png');
         res.send(response.data);
     } catch (error) {
-        console.error('❌ Error fetching map layer:', error.message);
+        console.error('Error fetching map layer:', error.message);
         res.status(500).send('Error fetching map layer');
     }
 });
 
-// Updated legend route to serve the local file
 app.get('/public/resources/Rain Radar/Legend.png', (req, res) => {
   try {
     const resourceFile = path.join(RESOURCES_DIR, 'Legend.png');
     
     if (fs.existsSync(resourceFile)) {
-      // Set appropriate content type and send the file
       res.set('Content-Type', 'image/png');
       res.sendFile(resourceFile);
     } else {
-      // If the file doesn't exist for some reason, try to download it
       console.log('Legend file not found, attempting to download');
       downloadLegendOnStartup().then(() => {
         if (fs.existsSync(resourceFile)) {
@@ -277,7 +254,6 @@ app.get('/public/resources/Rain Radar/Legend.png', (req, res) => {
   }
 });
 
-// Get the actual image filenames from the BOM loop page
 app.get('/api/radar/:radarId', async (req, res) => {
     try {
         cleanupRadarImages();
@@ -296,7 +272,7 @@ app.get('/api/radar/:radarId', async (req, res) => {
         });
 
         if (response.status !== 200) {
-            console.error(`❌ Radar fetch failed for ${radarId}: HTTP ${response.status}`);
+            console.error(`Radar fetch failed for ${radarId}: HTTP ${response.status}`);
             return res.status(response.status).json({
                 error: `Failed to fetch radar page: ${response.status}`
             });
@@ -304,7 +280,6 @@ app.get('/api/radar/:radarId', async (req, res) => {
 
         const html = response.data;
         
-        // Extract the JavaScript array of image filenames
         const regex = /theImageNames\s*=\s*new Array\(\);([\s\S]*?)nImages\s*=\s*([0-9]+);/;
         const match = html.match(regex);
         
@@ -315,7 +290,6 @@ app.get('/api/radar/:radarId', async (req, res) => {
         const imageArrayJs = match[1];
         const nImages = parseInt(match[2], 10);
         
-        // Parse the JavaScript array of image filenames
         const imageFileRegex = /theImageNames\[([0-9]+)\]\s*=\s*"([^"]+)";/g;
         const images = [];
         let fileMatch;
@@ -324,15 +298,13 @@ app.get('/api/radar/:radarId', async (req, res) => {
             const index = parseInt(fileMatch[1], 10);
             const imagePath = fileMatch[2];
             
-            // Extract the timestamp from the filename
             const timestampMatch = imagePath.match(/\.(\d{12})\.png$/);
             let timestamp = new Date();
             
             if (timestampMatch) {
                 const timestampStr = timestampMatch[1];
-                // Parse YYYYMMDDHHNN format
                 const year = timestampStr.substring(0, 4);
-                const month = parseInt(timestampStr.substring(4, 6)) - 1; // JS months are 0-based
+                const month = parseInt(timestampStr.substring(4, 6)) - 1;
                 const day = timestampStr.substring(6, 8);
                 const hour = timestampStr.substring(8, 10);
                 const minute = timestampStr.substring(10, 12);
@@ -347,20 +319,16 @@ app.get('/api/radar/:radarId', async (req, res) => {
             };
         }
         
-        // Get radar name and range from the page title
         const $ = cheerio.load(html);
         const pageTitle = $('title').text();
         const radarName = pageTitle.split('Radar')[0].trim();
         
-        // Filter out any undefined elements in the array
         const filteredImages = images.filter(img => img);
         
-        // Sort images by timestamp to ensure correct order
         filteredImages.sort((a, b) => {
             return new Date(a.timestamp) - new Date(b.timestamp);
         });
         
-        // Extract Km range from the JavaScript
         const kmMatch = html.match(/Km\s*=\s*([0-9]+);/);
         const range = kmMatch ? `${kmMatch[1]}km` : '256km';
 
@@ -374,7 +342,7 @@ app.get('/api/radar/:radarId', async (req, res) => {
             lastUpdated: new Date().toISOString()
         });
     } catch (error) {
-        console.error('❌ Error fetching radar data:', error.message);
+        console.error('Error fetching radar data:', error.message);
         res.status(500).json({
             error: 'Failed to fetch radar data',
             details: error.message
@@ -382,12 +350,8 @@ app.get('/api/radar/:radarId', async (req, res) => {
     }
 });
 
-// ====================== FLOOD DATA ROUTES ======================
-
-// Legacy route for compatibility
 app.get('/flood-data', async (req, res) => {
   try {
-    // Redirect to the new API endpoint
     const floodData = await fetchBomFloodData();
     res.json(floodData);
   } catch (error) {
@@ -401,16 +365,12 @@ app.get('/flood-data', async (req, res) => {
   }
 });
 
-// New API endpoint for flood data
 app.get('/api/flood-data', async (req, res) => {
   try {
-    // Clean up old radar images whenever flood data is refreshed
     cleanupRadarImages();
     
-    // Get the flood data using the existing function
     const floodData = await fetchBomFloodData();
-    
-    // Send the result back to the client
+
     res.json(floodData);
   } catch (error) {
     console.error('Error in flood data proxy endpoint:', error);
@@ -423,17 +383,14 @@ app.get('/api/flood-data', async (req, res) => {
   }
 });
 
-// Extract the data fetching logic to a separate function
 async function fetchBomFloodData() {
-  // Try multiple possible URLs for the BOM flood data
   const urls = [
-    'http://www.bom.gov.au/cgi-bin/wrap_fwo.pl?IDN60140.html' // This might be the current endpoint
+    'http://www.bom.gov.au/cgi-bin/wrap_fwo.pl?IDN60140.html'
   ];
 
   let html = null;
   let successUrl = null;
 
-  // Try each URL until one works
   for (const url of urls) {
     try {
       const response = await axios.get(url, {
@@ -459,7 +416,7 @@ async function fetchBomFloodData() {
   }
 
   if (!html) {
-    console.error('❌ Could not fetch data from BOM');
+    console.error('Could not fetch data from BOM');
     return {
       success: false,
       message: 'Could not fetch data from BOM website. Service may be temporarily unavailable.',
@@ -469,26 +426,21 @@ async function fetchBomFloodData() {
 
   const $ = cheerio.load(html);
 
-  // Initialize array for river data
   let riverData = [];
 
-  // First attempt: Look for Wilson/Richmond river section specifically
   const sectionHeaders = $('a[name="Wilsons_River"], a[name="Richmond_River"], th:contains("Wilsons River"), th:contains("Richmond River")');
 
   if (sectionHeaders.length > 0) {
-    // For each river section, extract data
     sectionHeaders.each((i, header) => {
       const section = $(header);
       const sectionName = section.text().trim() || 'River Section';
       
-      // Find the table containing the data
       let table = section.closest('table');
       if (!table.length) {
         table = section.closest('tr').parents('table').first();
       }
       
       if (table.length) {
-        // Find all rows after the section header
         let currentRow = section.closest('tr').next();
         
         while (currentRow.length && !currentRow.find('th.rowlevel1').length) {
@@ -498,12 +450,10 @@ async function fetchBomFloodData() {
             const location = cells.eq(0).text().trim();
             const time = cells.eq(2).text().trim();
 
-            // Parse water level - Cell 3 contains the water level (can be negative for AHD)
             let waterLevelText = cells.eq(3).text().trim();
             let waterLevelMatch = waterLevelText.match(/(-?\d+\.\d+)/);
             let waterLevel = waterLevelMatch ? parseFloat(waterLevelMatch[1]) : null;
 
-            // Parse status - typically in Cell 5
             const statusText = cells.eq(5).text().trim().toLowerCase();
             let status = 'steady';
             if (statusText.includes('rising')) status = 'rising';
@@ -524,7 +474,6 @@ async function fetchBomFloodData() {
     });
   }
   
-  // If we couldn't find data using the first method, try a more general approach
   if (riverData.length === 0) {
     $('table').each((i, tableEl) => {
       const table = $(tableEl);
@@ -539,19 +488,16 @@ async function fetchBomFloodData() {
         if (cells.length >= 4) {
           const location = cells.eq(0).text().trim();
 
-          // Only include rows related to Wilsons or Richmond River
           if (location.toLowerCase().includes('wilson') ||
               location.toLowerCase().includes('richmond') ||
               location.toLowerCase().includes('lismore')) {
 
             const time = cells.eq(2).text().trim();
 
-            // Parse water level - Cell 3 contains the water level (can be negative for AHD)
             let waterLevelText = cells.eq(3).text().trim();
             let waterLevelMatch = waterLevelText.match(/(-?\d+\.\d+)/);
             let waterLevel = waterLevelMatch ? parseFloat(waterLevelMatch[1]) : null;
 
-            // Parse status - typically in Cell 5
             const statusText = cells.eq(5).text().trim().toLowerCase();
             let status = 'steady';
             if (statusText.includes('rising')) status = 'rising';
@@ -569,10 +515,9 @@ async function fetchBomFloodData() {
       });
     });
   }
-  
-  // If we still don't have data, return an error
+
   if (riverData.length === 0) {
-    console.error('❌ No river data found in BOM page');
+    console.error('No river data found in BOM page');
     return {
       success: false,
       message: 'No river data found in BOM website. Structure may have changed.',
@@ -580,12 +525,10 @@ async function fetchBomFloodData() {
     };
   }
 
-  // Filter to only allowed locations
   const filteredData = riverData.filter(item => ALLOWED_LOCATIONS.includes(item.location));
 
-  // If no locations match, log a warning with the first few actual locations
   if (filteredData.length === 0 && riverData.length > 0) {
-    console.error('❌ No locations matched filter. Sample locations from BOM:');
+    console.error('No locations matched filter. Sample locations from BOM:');
     riverData.slice(0, 5).forEach(item => {
       console.error(`   "${item.location}"`);
     });
@@ -593,7 +536,6 @@ async function fetchBomFloodData() {
     console.log(`✓ Flood data: ${filteredData.length} locations`);
   }
 
-  // Return the filtered data with BOM's official status
   return {
     success: true,
     timestamp: new Date().toISOString(),
@@ -602,41 +544,31 @@ async function fetchBomFloodData() {
   };
 }
 
-// Define which locations to include in the dashboard
-// Try multiple variations of location names that BOM might use
 const ALLOWED_LOCATIONS = [
-  // Wilsons River at Lismore - try all variations
   'Wilsons R at Lismore (mAHD)',
   'Wilsons River at Lismore (mAHD)',
   'Wilsons R at Lismore',
   'Wilsons River at Lismore',
 
-  // Wilsons River at Eltham
   'Wilsons R at Eltham',
   'Wilsons River at Eltham',
 
-  // Leycester Creek at Rock Valley
   'Leycester Ck at Rock Valley',
   'Leycester Creek at Rock Valley',
 
-  // Coopers Creek at Corndale
   'Coopers Ck at Corndale',
   'Coopers Creek at Corndale',
 
-  // Richmond River at Casino
   'Richmond R at Casino',
   'Richmond River at Casino',
 
-  // Richmond River at Coraki
   'Richmond R at Coraki',
   'Richmond River at Coraki',
 
-  // Wilsons River at Tuckurimba
   'Wilsons R at Tuckurimba',
   'Wilsons River at Tuckurimba'
 ];
 
-// Helper function to calculate trend-based status from historical data
 async function calculateTrendStatus(location) {
   try {
     const historicalData = await fetchRiverHeightData(location);
@@ -645,23 +577,19 @@ async function calculateTrendStatus(location) {
       return 'steady';
     }
 
-    // Get the last 5-10 data points (or as many as available)
     const numPoints = Math.min(10, historicalData.data.length);
     const recentPoints = historicalData.data.slice(0, numPoints);
 
-    // Extract water levels (using 'height' property from fetchRiverHeightData)
     const levels = recentPoints.map(point => point.height).filter(level => level !== null && !isNaN(level));
 
     if (levels.length < 3) {
       return 'steady';
     }
 
-    // Calculate the change between first and last point
-    const firstLevel = levels[levels.length - 1]; // Oldest
-    const lastLevel = levels[0]; // Most recent
+    const firstLevel = levels[levels.length - 1];
+    const lastLevel = levels[0];
     const totalChange = lastLevel - firstLevel;
 
-    // Also calculate average change between consecutive points
     let sumChanges = 0;
     let changeCount = 0;
     for (let i = 0; i < levels.length - 1; i++) {
@@ -671,8 +599,6 @@ async function calculateTrendStatus(location) {
     }
     const avgChange = sumChanges / changeCount;
 
-    // Determine status based on thresholds
-    // Use 0.02m (2cm) as the threshold for steady
     const STEADY_THRESHOLD = 0.02;
 
     if (Math.abs(avgChange) < STEADY_THRESHOLD && Math.abs(totalChange) < STEADY_THRESHOLD * 2) {
@@ -684,21 +610,18 @@ async function calculateTrendStatus(location) {
     }
 
   } catch (error) {
-    console.error(`❌ Error calculating trend: ${error.message}`);
+    console.error(`Error calculating trend: ${error.message}`);
     return 'steady';
   }
 }
 
-// Define which locations have official BoM flood classifications
 const officialClassificationLocations = [
   "Wilsons R at Eltham",
   "Wilsons R at Lismore (mAHD)",
   "Leycester Ck at Rock Valley",
   "Coopers Ck at Corndale",
-  // Add any other locations with official BoM classifications
 ];
 
-// Define flood thresholds for specific locations
 const floodLevelThresholds = {
   "Wilsons R at Eltham": { minor: 6.00, moderate: 8.20, major: 9.60 },
   "Wilsons R at Lismore (mAHD)": { minor: 4.20, moderate: 7.20, major: 9.70 },
@@ -706,20 +629,15 @@ const floodLevelThresholds = {
   "Coopers Ck at Corndale": { minor: 6.00, moderate: 7.50, major: 9.50 },
 };
 
-// Updated function to check if a location has official classifications first
 function determineFloodCategory(level, location) {
-  // First check if this location has official classifications
   if (!location || !officialClassificationLocations.includes(location)) {
-    return "N/A"; // No official classification
+    return "N/A";
   }
   
   if (!level) return 'Unknown';
   
-  // Get thresholds for this location
   const thresholds = floodLevelThresholds[location];
   
-  // If we don't have specific thresholds for this official location,
-  // we should log this as an error but still return something
   if (!thresholds) {
     console.error(`Missing thresholds for official location: ${location}`);
     return 'Unknown';
@@ -731,7 +649,6 @@ function determineFloodCategory(level, location) {
   return 'No flooding';
 }
 
-// Legacy endpoint for river data
 app.get('/river-data', async (req, res) => {
   try {
     const location = req.query.location;
@@ -754,10 +671,8 @@ app.get('/river-data', async (req, res) => {
   }
 });
 
-// New API endpoint for river height data
 app.get('/api/river-height', async (req, res) => {
   try {
-    // Get location parameter from the query string
     const location = req.query.location;
     
     if (!location) {
@@ -767,10 +682,8 @@ app.get('/api/river-height', async (req, res) => {
       });
     }
     
-    // Fetch the river height data
     const riverHeightData = await fetchRiverHeightData(location);
     
-    // Return the data
     res.json(riverHeightData);
   } catch (error) {
     console.error('Error in river height proxy endpoint:', error);
@@ -782,7 +695,6 @@ app.get('/api/river-height', async (req, res) => {
   }
 });
 
-// Serve flood property data
 app.get('/api/flood-properties', (req, res) => {
   const floodDataPath = path.join(__dirname, 'public', 'flood-data.json');
   
@@ -799,7 +711,6 @@ app.get('/api/flood-properties', (req, res) => {
   }
 });
 
-// Extract the river height data fetching logic to a separate function
 async function fetchRiverHeightData(location) {
   const floodWarningUrl = 'http://www.bom.gov.au/cgi-bin/wrap_fwo.pl?IDN60140.html';
 
@@ -823,20 +734,17 @@ async function fetchRiverHeightData(location) {
     let tableUrl = null;
     let exactLocationMatch = false;
 
-    // Step 1: Look for exact location match in table rows
     $('tr').each((i, row) => {
       const cells = $(row).find('td');
       if (cells.length > 0) {
         const locationCell = $(cells[0]);
         const locationText = locationCell.text().trim();
 
-        // Check if this is our exact location
         if (locationText === location ||
             locationText.replace(/\s+/g, ' ') === location.replace(/\s+/g, ' ')) {
 
           exactLocationMatch = true;
 
-          // Look for Table link in this row
           $(row).find('a').each((j, link) => {
             const linkText = $(link).text().trim();
             if (linkText === 'Table') {
@@ -854,7 +762,7 @@ async function fetchRiverHeightData(location) {
     });
 
     if (!tableUrl) {
-      console.error(`❌ No table URL found for: "${location}"`);
+      console.error(`No table URL found for: "${location}"`);
       return {
         success: false,
         message: 'Could not find table URL for the exact location: ' + location,
@@ -862,7 +770,6 @@ async function fetchRiverHeightData(location) {
       };
     }
 
-    // Now fetch the actual table data
     const tableResponse = await axios.get(tableUrl, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
@@ -877,18 +784,14 @@ async function fetchRiverHeightData(location) {
       throw new Error(`Failed to fetch table data: ${tableResponse.status}`);
     }
     
-    // Parse the table data
     const tableHtml = cheerio.load(tableResponse.data);
     let riverData = [];
 
-    // First try: Look for a pre tag which often contains the data
     const preContent = tableHtml('pre').text();
     if (preContent && preContent.trim().length > 0) {
-      // Split by lines and parse each line
       const lines = preContent.split('\n');
       
       for (const line of lines) {
-        // Match patterns like: 10/03/2025 12:44 7.77
         const match = line.match(/(\d{2}\/\d{2}\/\d{4}\s+\d{2}:\d{2})\s+(\d+\.\d+)/);
         if (match) {
           const timeStr = match[1];
@@ -905,7 +808,6 @@ async function fetchRiverHeightData(location) {
       }
     }
     
-    // If pre tag approach didn't work, try tables
     if (riverData.length === 0) {
       const tableSelectors = [
         'table#tableStyle1',
@@ -921,7 +823,7 @@ async function fetchRiverHeightData(location) {
           tableHtml(table).find('tr').each((j, row) => {
             const headers = tableHtml(row).find('th');
             if (headers.length >= 2) {
-              return; // Skip header row
+              return;
             }
 
             const cells = tableHtml(row).find('td');
@@ -949,7 +851,7 @@ async function fetchRiverHeightData(location) {
     }
 
     if (riverData.length === 0) {
-      console.error(`❌ No river data found for: "${location}"`);
+      console.error(`No river data found for: "${location}"`);
       return {
         success: false,
         message: 'No river data found in table response',
@@ -965,7 +867,7 @@ async function fetchRiverHeightData(location) {
     };
 
   } catch (error) {
-    console.error('❌ Error fetching river height data:', error.message);
+    console.error('Error fetching river height data:', error.message);
     return {
       success: false,
       message: error.message,
