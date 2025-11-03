@@ -3305,25 +3305,30 @@
             
                 // Function to update the radar image
                 function updateRadarImage(frameIndex) {
+                    // CRITICAL: Block ALL updates if refreshing or not playing
+                    if (isRefreshing) {
+                        console.log('updateRadarImage blocked: refreshing');
+                        return;
+                    }
                     if (!radarImages || radarImages.length === 0 || !radarImage) return;
-                    
+
                     if (frameIndex >= 0 && frameIndex < radarImages.length) {
                         currentFrame = frameIndex;
-                        
+
                         if (radarImages[frameIndex] && radarImages[frameIndex].url) {
                             // Update the image
                             radarImage.src = radarImages[frameIndex].url;
-                            
+
                             // Update the timestamp
                             if (timestamp) {
                                 timestamp.textContent = formatDate(radarImages[frameIndex].timestamp);
                             }
-                            
+
                             // Update the frame counter
                             if (frameCounter) {
                                 frameCounter.textContent = `Frame ${currentFrame + 1} of ${radarImages.length}`;
                             }
-                            
+
                             // Update progress bar
                             if (progressBar) {
                                 const progress = ((currentFrame + 1) / radarImages.length) * 100;
@@ -3546,8 +3551,14 @@
                     // Fetch fresh data
                     await fetchRadarData();
 
-                    // Re-enable animation capability
-                    isRefreshing = false;
+                    // CRITICAL: Wait before re-enabling animation to ensure ALL pending setTimeout callbacks have fired and died
+                    // Use animationDelay + buffer to catch any callbacks that were scheduled with current delay
+                    // This prevents any zombie callbacks from continuing to animate after refresh
+                    const safetyDelay = Math.max(animationDelay * 2, 1000); // At least 1 second, or 2x animation delay
+                    setTimeout(() => {
+                        isRefreshing = false;
+                        console.log('Refresh complete - animation capability re-enabled (but animation is STOPPED)');
+                    }, safetyDelay);
                 }
             
                 // Set up event listeners (with null checks)
