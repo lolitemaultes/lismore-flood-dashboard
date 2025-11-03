@@ -3082,8 +3082,33 @@
             };
             img.src = 'https://webcams.transport.nsw.gov.au/livetraffic-webcams/cameras/bruxner_highway_lismore.jpeg?' + new Date().getTime();
             
+            // CRITICAL: GLOBAL state variables to persist across re-initializations
+            // These MUST be outside initializeRadar() or they reset every time!
+            window.radarGlobalState = window.radarGlobalState || {
+                currentAnimationSessionId: 0,
+                lastRefreshTime: 0,
+                isRefreshing: false,
+                isPlaying: false,
+                animationLock: false,
+                allTimeoutIds: new Set(),
+                forceClearInterval: null,
+                animationInterval: null,
+                radarInitialized: false
+            };
+
             // Radar interactive functionality
             function initializeRadar() {
+                console.log('!!!!!! initializeRadar() CALLED !!!!!!');
+                console.trace('initializeRadar call stack:');
+
+                // PREVENT MULTIPLE INITIALIZATIONS
+                if (window.radarGlobalState.radarInitialized) {
+                    console.error('!!! RADAR ALREADY INITIALIZED - BLOCKING RE-INIT !!!');
+                    return;
+                }
+                window.radarGlobalState.radarInitialized = true;
+                console.log('>>> Radar initialization proceeding...');
+
                 // DOM elements
                 const radarImage = document.getElementById('radar-image');
                 const backgroundLayer = document.getElementById('background-layer');
@@ -3104,28 +3129,30 @@
                 const speedValue = document.getElementById('speed-value');
                 const errorElement = document.getElementById('error');
                 const lastUpdate = document.getElementById('last-update');
-                
+
                 // Layer toggle checkboxes - with null checks
                 const topographyToggle = document.getElementById('topography-toggle');
                 const locationsToggle = document.getElementById('locations-toggle');
-            
+
                 // Variables
                 const RADAR_ID = 'IDR282'; // Grafton 256km radar
                 let radarImages = [];
                 let currentFrame = 0;
-                let isPlaying = false;
-                let animationInterval = null;
                 let animationDelay = 500; // milliseconds
                 let animationRequestId = null;
                 let mapLayersLoaded = false;
                 let preloadedImages = new Map(); // To store preloaded images
-                let animationLock = false; // Prevent concurrent animations
-                let isRefreshing = false; // Prevent animation during data refresh
-                let forceClearInterval = null; // Interval to forcefully clear radar during refresh
-                let allTimeoutIds = new Set(); // Track ALL setTimeout IDs to kill them all
-                let lastRefreshTime = 0; // Timestamp of last refresh to prevent animation restart
                 const ANIMATION_LOCKOUT_MS = 5000; // Prevent animation for 5 seconds after refresh
-                let currentAnimationSessionId = 0; // Unique ID for each animation session to kill old loops
+
+                // Use GLOBAL state variables
+                let currentAnimationSessionId = window.radarGlobalState.currentAnimationSessionId;
+                let lastRefreshTime = window.radarGlobalState.lastRefreshTime;
+                let isRefreshing = window.radarGlobalState.isRefreshing;
+                let isPlaying = window.radarGlobalState.isPlaying;
+                let animationLock = window.radarGlobalState.animationLock;
+                let allTimeoutIds = window.radarGlobalState.allTimeoutIds;
+                let forceClearInterval = window.radarGlobalState.forceClearInterval;
+                let animationInterval = window.radarGlobalState.animationInterval;
                 
                 // Function to format date in locale format
                 function formatDate(dateString) {
