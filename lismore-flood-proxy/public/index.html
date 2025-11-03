@@ -3121,6 +3121,7 @@
                 let preloadedImages = new Map(); // To store preloaded images
                 let animationLock = false; // Prevent concurrent animations
                 let isRefreshing = false; // Prevent animation during data refresh
+                let forceClearInterval = null; // Interval to forcefully clear radar during refresh
                 
                 // Function to format date in locale format
                 function formatDate(dateString) {
@@ -3496,13 +3497,26 @@
                     currentFrame = 0;
                     isRefreshing = true;
 
+                    // BLANK IMAGE DATA URL
+                    const BLANK_IMAGE = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+
                     // IMMEDIATELY reset visual state so user sees it stopped
                     if (radarImage) {
-                        radarImage.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+                        radarImage.src = BLANK_IMAGE;
                     }
                     if (timestamp) timestamp.textContent = 'Stopping animation...';
                     if (frameCounter) frameCounter.textContent = '';
                     if (progressBar) progressBar.style.width = '0%';
+
+                    // CRITICAL: Start interval that FORCEFULLY keeps resetting radar to blank
+                    // This ensures NO frame changes can happen even if something bypasses our checks
+                    if (forceClearInterval) clearInterval(forceClearInterval);
+                    forceClearInterval = setInterval(() => {
+                        if (radarImage && isRefreshing) {
+                            radarImage.src = BLANK_IMAGE;
+                            console.log('Force clearing radar image');
+                        }
+                    }, 50); // Reset every 50ms to KILL any frame changes
 
                     // NOW force stop animation
                     pauseAnimation();
@@ -3531,7 +3545,11 @@
                     const isConnected = await checkBOMConnectivity();
 
                     if (!isConnected) {
-                        // No internet - restore old data
+                        // No internet - restore old data and STOP force clearing
+                        if (forceClearInterval) {
+                            clearInterval(forceClearInterval);
+                            forceClearInterval = null;
+                        }
                         radarImages = oldRadarImages;
                         isRefreshing = false;
                         showError('No internet connection. Keeping current data.');
@@ -3551,13 +3569,17 @@
                     // Fetch fresh data
                     await fetchRadarData();
 
-                    // CRITICAL: Wait before re-enabling animation to ensure ALL pending setTimeout callbacks have fired and died
+                    // CRITICAL: Wait before re-enabling animation AND stopping force clear
                     // Use animationDelay + buffer to catch any callbacks that were scheduled with current delay
-                    // This prevents any zombie callbacks from continuing to animate after refresh
                     const safetyDelay = Math.max(animationDelay * 2, 1000); // At least 1 second, or 2x animation delay
                     setTimeout(() => {
+                        // STOP the force clearing interval
+                        if (forceClearInterval) {
+                            clearInterval(forceClearInterval);
+                            forceClearInterval = null;
+                        }
                         isRefreshing = false;
-                        console.log('Refresh complete - animation capability re-enabled (but animation is STOPPED)');
+                        console.log('Refresh complete - force clearing stopped, animation capability re-enabled (but animation is STOPPED)');
                     }, safetyDelay);
                 }
             
