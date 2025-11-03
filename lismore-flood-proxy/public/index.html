@@ -3119,7 +3119,8 @@
                 let animationRequestId = null;
                 let mapLayersLoaded = false;
                 let preloadedImages = new Map(); // To store preloaded images
-                let animationLock = false; // NEW: Prevent concurrent animations
+                let animationLock = false; // Prevent concurrent animations
+                let isRefreshing = false; // Prevent animation during data refresh
                 
                 // Function to format date in locale format
                 function formatDate(dateString) {
@@ -3337,6 +3338,7 @@
                 function playAnimation() {
                   if (!radarImages || radarImages.length === 0) return;
                   if (animationLock) return; // Prevent concurrent animations
+                  if (isRefreshing) return; // Prevent animation during refresh
 
                   // CRITICAL: Stop any existing animation first
                   pauseAnimation();
@@ -3349,6 +3351,7 @@
                   // Define the animation loop - SIMPLIFIED (no race conditions)
                   const advanceFrame = () => {
                     if (!isPlaying) return; // Safety check
+                    if (isRefreshing) return; // CRITICAL: Stop animation during refresh
 
                     // ATOMIC: Update currentFrame first, THEN display
                     currentFrame = (currentFrame + 1) % radarImages.length;
@@ -3481,16 +3484,26 @@
 
                 // Refresh function with connectivity check
                 async function refreshData() {
+                    // CRITICAL: Set refreshing flag to completely prevent animation
+                    isRefreshing = true;
+
                     // FORCE STOP animation completely
                     pauseAnimation();
                     animationLock = false;
                     isPlaying = false;
 
-                    // Clear ALL timers
+                    // Clear ALL timers - multiple times to ensure they're cleared
                     if (animationInterval) {
                         clearTimeout(animationInterval);
                         animationInterval = null;
                     }
+                    // Clear again after a tick to catch any pending timeouts
+                    setTimeout(() => {
+                        if (animationInterval) {
+                            clearTimeout(animationInterval);
+                            animationInterval = null;
+                        }
+                    }, 0);
 
                     // Check connectivity before clearing cache
                     if (timestamp) timestamp.textContent = 'Checking connection...';
@@ -3499,6 +3512,7 @@
 
                     if (!isConnected) {
                         // No internet - keep current data
+                        isRefreshing = false; // Re-enable animation capability
                         showError('No internet connection. Keeping current data.');
                         if (timestamp && radarImages.length > 0) {
                             timestamp.textContent = formatDate(radarImages[currentFrame].timestamp) + ' (Offline)';
@@ -3523,7 +3537,10 @@
                     if (progressBar) progressBar.style.width = '0%';
 
                     // Fetch fresh data
-                    fetchRadarData();
+                    await fetchRadarData();
+
+                    // Re-enable animation capability after data is loaded
+                    isRefreshing = false;
                 }
             
                 // Set up event listeners (with null checks)
