@@ -533,28 +533,52 @@ async function fetchBomFloodData() {
           if (cells.length >= 4) {
             // Extract data from the row
             const location = cells.eq(0).text().trim();
-            const time = cells.eq(1).text().trim();
 
-            // Parse water level
-            let waterLevelText = cells.eq(2).text().trim();
-            const waterLevelMatch = waterLevelText.match(/(\d+\.\d+)/);
-            const waterLevel = waterLevelMatch ? parseFloat(waterLevelMatch[1]) : null;
-
-            // Debug logging for water level extraction
-            if (VERBOSE_LOGGING && ALLOWED_LOCATIONS.includes(location)) {
-              console.log(`\nParsing: ${location}`);
-              console.log(`  Cell 0 (Location): "${cells.eq(0).text().trim()}"`);
-              console.log(`  Cell 1 (Time): "${cells.eq(1).text().trim()}"`);
-              console.log(`  Cell 2 (Water Level): "${cells.eq(2).text().trim()}"`);
-              console.log(`  Cell 3 (Status): "${cells.eq(3).text().trim()}"`);
-              console.log(`  Extracted water level: ${waterLevel}m`);
+            // Enhanced debug logging - show ALL cells for problem diagnosis
+            if (VERBOSE_LOGGING && location.includes('Wilsons') && location.includes('Lismore')) {
+              console.log(`\n========================================`);
+              console.log(`PARSING ROW FOR: ${location}`);
+              console.log(`Total cells in row: ${cells.length}`);
+              for (let i = 0; i < cells.length; i++) {
+                console.log(`  Cell ${i}: "${cells.eq(i).text().trim()}"`);
+              }
+              console.log(`========================================\n`);
             }
 
-            // Parse status
-            const statusText = cells.eq(3).text().trim().toLowerCase();
+            const time = cells.eq(1).text().trim();
+
+            // Parse water level - try different cells to find the right one
+            let waterLevelText = cells.eq(2).text().trim();
+            let waterLevelMatch = waterLevelText.match(/(\d+\.\d+)/);
+            let waterLevel = waterLevelMatch ? parseFloat(waterLevelMatch[1]) : null;
+
+            // If no water level found in cell 2, try other cells
+            if (!waterLevel && cells.length > 4) {
+              for (let i = 2; i < cells.length; i++) {
+                const cellText = cells.eq(i).text().trim();
+                const match = cellText.match(/(\d+\.\d+)/);
+                if (match && !cellText.toLowerCase().includes('automatic') && !cellText.toLowerCase().includes('manual')) {
+                  waterLevel = parseFloat(match[1]);
+                  if (VERBOSE_LOGGING && location.includes('Wilsons') && location.includes('Lismore')) {
+                    console.log(`Found water level in cell ${i}: ${waterLevel}m`);
+                  }
+                  break;
+                }
+              }
+            }
+
+            // Parse status - might be in a different cell
             let status = 'steady';
-            if (statusText.includes('rising')) status = 'rising';
-            else if (statusText.includes('falling')) status = 'falling';
+            for (let i = 3; i < cells.length; i++) {
+              const statusText = cells.eq(i).text().trim().toLowerCase();
+              if (statusText.includes('rising')) {
+                status = 'rising';
+                break;
+              } else if (statusText.includes('falling')) {
+                status = 'falling';
+                break;
+              }
+            }
 
             // When creating riverData objects:
             riverData.push({
@@ -591,37 +615,57 @@ async function fetchBomFloodData() {
         
         if (cells.length >= 4) {
           const location = cells.eq(0).text().trim();
-          
+
           // Only include rows related to Wilsons or Richmond River
-          if (location.toLowerCase().includes('wilson') || 
+          if (location.toLowerCase().includes('wilson') ||
               location.toLowerCase().includes('richmond') ||
               location.toLowerCase().includes('lismore')) {
-            
-            const time = cells.eq(1).text().trim();
 
-            // Parse water level
-            let waterLevelText = cells.eq(2).text().trim();
-            const waterLevelMatch = waterLevelText.match(/(\d+\.\d+)/);
-            const waterLevel = waterLevelMatch ? parseFloat(waterLevelMatch[1]) : null;
-
-            // Debug logging for water level extraction
-            if (VERBOSE_LOGGING && ALLOWED_LOCATIONS.includes(location)) {
-              console.log(`\n[Fallback] Parsing: ${location}`);
-              console.log(`  Cell 0 (Location): "${cells.eq(0).text().trim()}"`);
-              console.log(`  Cell 1 (Time): "${cells.eq(1).text().trim()}"`);
-              console.log(`  Cell 2 (Water Level): "${cells.eq(2).text().trim()}"`);
-              console.log(`  Cell 3 (Status): "${cells.eq(3).text().trim()}"`);
-              if (cells.length > 4) {
-                console.log(`  Cell 4: "${cells.eq(4).text().trim()}"`);
+            // Enhanced debug logging for fallback parsing
+            if (VERBOSE_LOGGING && location.includes('Wilsons') && location.includes('Lismore')) {
+              console.log(`\n========================================`);
+              console.log(`[FALLBACK] PARSING ROW FOR: ${location}`);
+              console.log(`Total cells in row: ${cells.length}`);
+              for (let i = 0; i < cells.length; i++) {
+                console.log(`  Cell ${i}: "${cells.eq(i).text().trim()}"`);
               }
-              console.log(`  Extracted water level: ${waterLevel}m`);
+              console.log(`========================================\n`);
             }
 
-            // Parse status
-            const statusText = cells.eq(3).text().trim().toLowerCase();
+            const time = cells.eq(1).text().trim();
+
+            // Parse water level - try different cells to find the right one
+            let waterLevelText = cells.eq(2).text().trim();
+            let waterLevelMatch = waterLevelText.match(/(\d+\.\d+)/);
+            let waterLevel = waterLevelMatch ? parseFloat(waterLevelMatch[1]) : null;
+
+            // If no water level found in cell 2, try other cells
+            if (!waterLevel && cells.length > 4) {
+              for (let i = 2; i < cells.length; i++) {
+                const cellText = cells.eq(i).text().trim();
+                const match = cellText.match(/(\d+\.\d+)/);
+                if (match && !cellText.toLowerCase().includes('automatic') && !cellText.toLowerCase().includes('manual')) {
+                  waterLevel = parseFloat(match[1]);
+                  if (VERBOSE_LOGGING && location.includes('Wilsons') && location.includes('Lismore')) {
+                    console.log(`[FALLBACK] Found water level in cell ${i}: ${waterLevel}m`);
+                  }
+                  break;
+                }
+              }
+            }
+
+            // Parse status - might be in a different cell
             let status = 'steady';
-            if (statusText.includes('rising')) status = 'rising';
-            else if (statusText.includes('falling')) status = 'falling';
+            for (let i = 3; i < cells.length; i++) {
+              const statusText = cells.eq(i).text().trim().toLowerCase();
+              if (statusText.includes('rising')) {
+                status = 'rising';
+                break;
+              } else if (statusText.includes('falling')) {
+                status = 'falling';
+                break;
+              }
+            }
 
             riverData.push({
               location,
