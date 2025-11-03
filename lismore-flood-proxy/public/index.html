@@ -3411,7 +3411,7 @@
 
                   // CRITICAL: Create NEW animation session to kill old loops
                   console.log(`playAnimation: currentAnimationSessionId BEFORE increment: ${window.radarGlobalState.currentAnimationSessionId}`);
-                  $.window.radarGlobalState.currentAnimationSessionId++;
+                  window.radarGlobalState.currentAnimationSessionId++;
                   const mySessionId = window.radarGlobalState.currentAnimationSessionId;
                   console.log(`>>> Starting NEW animation session ID: ${mySessionId}`);
 
@@ -3457,15 +3457,15 @@
                 }
             
                 function pauseAnimation() {
-                  $.window.radarGlobalState.isPlaying = false;
-                  $.window.radarGlobalState.animationLock = false; // Release animation lock
+                  window.radarGlobalState.isPlaying = false;
+                  window.radarGlobalState.animationLock = false; // Release animation lock
                   if (btnPlay) btnPlay.disabled = false;
                   if (btnPause) btnPause.disabled = true;
 
                   // Clear ALL pending timers/frames
-                  if ($.window.radarGlobalState.animationInterval) {
+                  if (window.radarGlobalState.animationInterval) {
                     clearTimeout(window.radarGlobalState.animationInterval);
-                    $.window.radarGlobalState.animationInterval = null;
+                    window.radarGlobalState.animationInterval = null;
                   }
                   if (animationRequestId) {
                     cancelAnimationFrame(animationRequestId);
@@ -3473,8 +3473,8 @@
                   }
 
                   // CRITICAL: Clear ALL tracked timeouts
-                  $.window.radarGlobalState.allTimeoutIds.forEach(id => clearTimeout(id));
-                  $.window.radarGlobalState.allTimeoutIds.clear();
+                  window.radarGlobalState.allTimeoutIds.forEach(id => clearTimeout(id));
+                  window.radarGlobalState.allTimeoutIds.clear();
                   console.log('Cleared all animation timeouts');
                 }
             
