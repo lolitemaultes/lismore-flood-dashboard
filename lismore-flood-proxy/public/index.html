@@ -3332,14 +3332,14 @@
                 // Function to update the radar image
                 function updateRadarImage(frameIndex) {
                     // CRITICAL: Block ALL updates if refreshing
-                    if (isRefreshing) {
+                    if ($.isRefreshing) {
                         console.log('updateRadarImage blocked: refreshing');
                         return;
                     }
 
                     // CRITICAL: Block updates during lockout period after refresh
-                    const timeSinceRefresh = Date.now() - lastRefreshTime;
-                    if (lastRefreshTime > 0 && timeSinceRefresh < ANIMATION_LOCKOUT_MS) {
+                    const timeSinceRefresh = Date.now() - $.lastRefreshTime;
+                    if ($.lastRefreshTime > 0 && timeSinceRefresh < ANIMATION_LOCKOUT_MS) {
                         console.log(`updateRadarImage blocked: lockout period (${Math.ceil((ANIMATION_LOCKOUT_MS - timeSinceRefresh) / 1000)}s remaining)`);
                         return;
                     }
@@ -3351,7 +3351,7 @@
 
                         if (radarImages[frameIndex] && radarImages[frameIndex].url) {
                             // Update the image
-                            console.log(`>>> UPDATE RADAR IMAGE: frame ${frameIndex}, sessionID ${currentAnimationSessionId}, isPlaying=${isPlaying}, isRefreshing=${isRefreshing}`);
+                            console.log(`>>> UPDATE RADAR IMAGE: frame ${frameIndex}, sessionID ${$.currentAnimationSessionId}, isPlaying=${$.isPlaying}, isRefreshing=${$.isRefreshing}`);
                             radarImage.src = radarImages[frameIndex].url;
 
                             // Update the timestamp
