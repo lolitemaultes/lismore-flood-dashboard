@@ -8,6 +8,24 @@ const fs = require('fs');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Logging configuration - set to false to reduce verbose output
+const VERBOSE_LOGGING = process.env.VERBOSE_LOGGING === 'true' || false;
+
+// Helper logging functions
+function logInfo(message, ...args) {
+    console.log(message, ...args);
+}
+
+function logVerbose(message, ...args) {
+    if (VERBOSE_LOGGING) {
+        console.log(message, ...args);
+    }
+}
+
+function logError(message, ...args) {
+    console.error('ERROR:', message, ...args);
+}
+
 // Enable CORS for all routes
 app.use(cors());
 
@@ -49,10 +67,10 @@ app.get('/cleanup-radar', (req, res) => {
 
 // Start the server
 app.listen(PORT, () => {
-  console.log(`Flood dashboard server running on port ${PORT}`);
-  console.log(`Dashboard available at http://localhost:${PORT}`);
-  console.log(`API available at http://localhost:${PORT}/api/flood-data`);
-  console.log(`Public directory path: ${path.join(__dirname, 'public')}`);
+  logInfo(`Flood dashboard server running on port ${PORT}`);
+  logInfo(`Dashboard available at http://localhost:${PORT}`);
+  logInfo(`API available at http://localhost:${PORT}/api/flood-data`);
+  logVerbose(`Public directory path: ${path.join(__dirname, 'public')}`);
 });
 
 // Browser-like headers to avoid being blocked
@@ -60,26 +78,29 @@ const BROWSER_HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
     'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
     'Accept-Language': 'en-US,en;q=0.9',
-    'Referer': 'https://www.bom.gov.au/products/IDR282.loop.shtml'
+    'Referer': 'https://reg.bom.gov.au/products/IDR282.loop.shtml'
 };
+
+// Radar configuration - updated to new BOM domain
+const RADAR_BASE_URL = 'https://reg.bom.gov.au';
 
 // Function to clean up old radar images
 function cleanupRadarImages() {
   try {
-    console.log('Cleaning up old radar images from resources directory...');
-    
+    logVerbose('Cleaning up old radar images...');
+
     // Check if the directory exists first
     if (!fs.existsSync(RESOURCES_DIR)) {
-      console.log('Resources directory does not exist yet, nothing to clean');
+      logVerbose('Resources directory does not exist yet, nothing to clean');
       return;
     }
-    
+
     // Read all files in the directory
     const files = fs.readdirSync(RESOURCES_DIR);
-    
+
     // Count for logging
     let deletedCount = 0;
-    
+
     // Filter and delete radar image files
     files.forEach(file => {
       // Only delete files that match radar image naming pattern
@@ -90,48 +111,50 @@ function cleanupRadarImages() {
         deletedCount++;
       }
     });
-    
-    console.log(`Cleaned up ${deletedCount} radar image files`);
+
+    if (deletedCount > 0) {
+      logVerbose(`Cleaned up ${deletedCount} radar image files`);
+    }
   } catch (error) {
-    console.error('Error cleaning up radar images:', error.message);
+    logError('Error cleaning up radar images:', error.message);
   }
 }
 
 // Download the legend image at server startup
 async function downloadLegendOnStartup() {
-  const imageUrl = 'http://www.bom.gov.au/products/radar_transparencies/IDR.legend.0.png';
+  const imageUrl = `${RADAR_BASE_URL}/products/radar_transparencies/IDR.legend.0.png`;
   const resourceFile = path.join(RESOURCES_DIR, 'Legend.png');
-  
+
   // Check if legend already exists
   if (fs.existsSync(resourceFile)) {
-    console.log('Legend file already exists, skipping download');
+    logVerbose('Legend file already exists, skipping download');
     return;
   }
-  
+
   try {
-    console.log(`Downloading legend image: ${imageUrl}`);
-    
+    logInfo('Downloading radar legend...');
+
     const response = await axios.get(imageUrl, {
       responseType: 'arraybuffer',
       headers: BROWSER_HEADERS,
       validateStatus: null
     });
-    
+
     if (response.status !== 200) {
       throw new Error(`Failed to fetch legend ${imageUrl}: ${response.status}`);
     }
-    
+
     // Store in resources directory
     fs.writeFileSync(resourceFile, response.data);
-    console.log('Legend image saved successfully');
+    logInfo('Legend downloaded successfully');
   } catch (error) {
-    console.error('Error downloading legend image:', error.message);
-    
+    logError('Error downloading legend image:', error.message);
+
     // Create a simple fallback legend if download fails
     try {
       createFallbackLegend(resourceFile);
     } catch (err) {
-      console.error('Failed to create fallback legend:', err);
+      logError('Failed to create fallback legend:', err);
     }
   }
 }
@@ -172,36 +195,37 @@ app.get('/radar-proxy/*', async (req, res) => {
     try {
         // Get the part after /radar-proxy/
         const pathMatch = req.url.match(/\/radar-proxy(\/.+)/);
-        
+
         if (!pathMatch || !pathMatch[1]) {
             return res.status(400).send('Invalid path format');
         }
-        
+
         const imagePath = pathMatch[1];
-        const imageUrl = `http://www.bom.gov.au${imagePath}`;
-        
+        const imageUrl = `${RADAR_BASE_URL}${imagePath}`;
+
         // Always fetch fresh data without caching
-        console.log(`Fetching radar: ${imageUrl}`);
+        logVerbose(`Fetching radar image: ${imagePath}`);
 
         const response = await axios.get(imageUrl, {
             responseType: 'arraybuffer',
             headers: BROWSER_HEADERS,
-            validateStatus: null
+            validateStatus: null,
+            timeout: 10000
         });
-        
+
         if (response.status !== 200) {
-            console.error(`Error fetching radar ${imageUrl}: ${response.status}`);
+            logError(`Failed to fetch radar image ${imagePath}: ${response.status}`);
             return res.status(response.status).send(`Error fetching radar image: ${response.status}`);
         }
 
         // Store in resources directory but don't check for cache
         const resourceFile = path.join(RESOURCES_DIR, `radar_${encodeURIComponent(imagePath)}.png`);
         fs.writeFileSync(resourceFile, response.data);
-        
+
         res.set('Content-Type', 'image/png');
         res.send(response.data);
     } catch (error) {
-        console.error('Error fetching radar image:', error.message);
+        logError('Error fetching radar image:', error.message);
         res.status(500).send('Error fetching radar image');
     }
 });
@@ -210,36 +234,37 @@ app.get('/radar-proxy/*', async (req, res) => {
 app.get('/map-proxy/:filename', async (req, res) => {
     try {
         const filename = req.params.filename;
-        
+
         // Make sure the filename is in the expected format to prevent attacks
         if (!filename.match(/^IDR[0-9]{3}\.[a-z]+\.png$/)) {
             return res.status(400).send('Invalid filename format');
         }
-        
-        // CORRECTED URL path for transparencies
-        const imageUrl = `http://www.bom.gov.au/products/radar_transparencies/${filename}`;
-        
-        console.log(`Fetching map layer: ${imageUrl}`);
+
+        // CORRECTED URL path for transparencies with new BOM domain
+        const imageUrl = `${RADAR_BASE_URL}/products/radar_transparencies/${filename}`;
+
+        logVerbose(`Fetching map layer: ${filename}`);
 
         const response = await axios.get(imageUrl, {
             responseType: 'arraybuffer',
             headers: BROWSER_HEADERS,
-            validateStatus: null
+            validateStatus: null,
+            timeout: 10000
         });
-        
+
         if (response.status !== 200) {
-            console.error(`Error fetching ${imageUrl}: ${response.status}`);
+            logError(`Failed to fetch map layer ${filename}: ${response.status}`);
             return res.status(response.status).send(`Error fetching map layer: ${response.status}`);
         }
 
         // Store in resources directory
         const resourceFile = path.join(RESOURCES_DIR, filename);
         fs.writeFileSync(resourceFile, response.data);
-        
+
         res.set('Content-Type', 'image/png');
         res.send(response.data);
     } catch (error) {
-        console.error('Error fetching map layer:', error.message);
+        logError('Error fetching map layer:', error.message);
         res.status(500).send('Error fetching map layer');
     }
 });
@@ -286,17 +311,18 @@ app.get('/api/radar/:radarId', async (req, res) => {
         }
 
         // Fetch the radar loop page to extract the image filenames
-        const loopUrl = `http://www.bom.gov.au/products/${radarId}.loop.shtml`;
-        console.log(`Fetching radar page: ${loopUrl}`);
-        
-        const response = await axios.get(loopUrl, { 
+        const loopUrl = `${RADAR_BASE_URL}/products/${radarId}.loop.shtml`;
+        logInfo(`Fetching radar data for ${radarId}...`);
+
+        const response = await axios.get(loopUrl, {
             headers: BROWSER_HEADERS,
-            validateStatus: null
+            validateStatus: null,
+            timeout: 15000
         });
-        
+
         if (response.status !== 200) {
-            console.error(`Error fetching radar page: ${response.status}`);
-            return res.status(response.status).json({ 
+            logError(`Failed to fetch radar page for ${radarId}: ${response.status}`);
+            return res.status(response.status).json({
                 error: `Failed to fetch radar page: ${response.status}`
             });
         }
@@ -363,6 +389,8 @@ app.get('/api/radar/:radarId', async (req, res) => {
         const kmMatch = html.match(/Km\s*=\s*([0-9]+);/);
         const range = kmMatch ? `${kmMatch[1]}km` : '256km';
         
+        logInfo(`Successfully fetched ${filteredImages.length} radar images for ${radarId}`);
+
         res.json({
             id: radarId,
             name: radarName || radarId,
@@ -371,10 +399,10 @@ app.get('/api/radar/:radarId', async (req, res) => {
             lastUpdated: new Date().toISOString()
         });
     } catch (error) {
-        console.error('Error fetching radar data:', error);
-        res.status(500).json({ 
-            error: 'Failed to fetch radar data', 
-            details: error.message 
+        logError('Error fetching radar data:', error.message);
+        res.status(500).json({
+            error: 'Failed to fetch radar data',
+            details: error.message
         });
     }
 });
@@ -426,16 +454,16 @@ async function fetchBomFloodData() {
   const urls = [
     'http://www.bom.gov.au/cgi-bin/wrap_fwo.pl?IDN60140.html' // This might be the current endpoint
   ];
-  
+
   let html = null;
   let successUrl = null;
-  
-  console.log('Attempting to fetch BOM data from multiple possible URLs...');
-  
+
+  logVerbose('Fetching BOM flood data...');
+
   // Try each URL until one works
   for (const url of urls) {
     try {
-      console.log(`Trying URL: ${url}`);
+      logVerbose(`Trying URL: ${url}`);
       const response = await axios.get(url, {
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
@@ -447,47 +475,47 @@ async function fetchBomFloodData() {
         timeout: 10000,
         maxRedirects: 5 // Limit redirect chain
       });
-      
+
       if (response.status === 200) {
         html = response.data;
         successUrl = url;
-        console.log(`Successfully fetched data from: ${url}`);
+        logVerbose(`Successfully fetched flood data`);
         break;
       }
     } catch (error) {
-      console.log(`Failed to fetch from ${url}: ${error.message}`);
+      logError(`Failed to fetch from ${url}:`, error.message);
     }
   }
-  
+
   // If we couldn't fetch from any URL, return error
   if (!html) {
-    console.log('Could not fetch data from any BOM URL');
+    logError('Could not fetch data from any BOM URL');
     return {
       success: false,
       message: 'Could not fetch data from BOM website. Service may be temporarily unavailable.',
       timestamp: new Date().toISOString()
     };
   }
-  
+
   // Parse the HTML to extract river data
-  console.log('Parsing HTML from BOM website...');
+  logVerbose('Parsing flood data from BOM...');
   const $ = cheerio.load(html);
-  
+
   // Initialize array for river data
   let riverData = [];
-  
+
   // First attempt: Look for Wilson/Richmond river section specifically
-  console.log('Looking for Wilsons River section...');
+  logVerbose('Looking for river sections...');
   const sectionHeaders = $('a[name="Wilsons_River"], a[name="Richmond_River"], th:contains("Wilsons River"), th:contains("Richmond River")');
-  
+
   if (sectionHeaders.length > 0) {
-    console.log('Found river section headers');
-    
+    logVerbose('Found river section headers');
+
     // For each river section, extract data
     sectionHeaders.each((i, header) => {
       const section = $(header);
       const sectionName = section.text().trim() || 'River Section';
-      console.log(`Processing section: ${sectionName}`);
+      logVerbose(`Processing section: ${sectionName}`);
       
       // Find the table containing the data
       let table = section.closest('table');
@@ -587,16 +615,16 @@ async function fetchBomFloodData() {
   
   // If we still don't have data, return an error
   if (riverData.length === 0) {
-    console.log('No river data found in BOM page');
+    logError('No river data found in BOM page');
     return {
       success: false,
       message: 'No river data found in BOM website. Structure may have changed.',
       timestamp: new Date().toISOString()
     };
   }
-  
-  console.log(`Found ${riverData.length} river data entries`);
-  
+
+  logInfo(`Fetched ${riverData.length} river height data points`);
+
   // Return the data
   return {
     success: true,
@@ -718,47 +746,48 @@ app.get('/api/flood-properties', (req, res) => {
 
 // Extract the river height data fetching logic to a separate function
 async function fetchRiverHeightData(location) {
-  console.log(`Fetching river height history for: "${location}"`);
-  
+  logVerbose(`Fetching river height history for: "${location}"`);
+
   const floodWarningUrl = 'http://www.bom.gov.au/cgi-bin/wrap_fwo.pl?IDN60140.html';
-  
+
   try {
-    console.log(`Fetching main flood warning page: ${floodWarningUrl}`);
+    logVerbose(`Fetching flood warning page...`);
     const response = await axios.get(floodWarningUrl, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
         'Accept': 'text/html,application/xhtml+xml,application/xml',
         'Accept-Language': 'en-US,en;q=0.9',
         'Cache-Control': 'no-cache'
-      }
+      },
+      timeout: 10000
     });
-    
+
     if (response.status !== 200) {
       throw new Error(`Failed to fetch flood data page: ${response.status}`);
     }
-    
+
     // Load the HTML content
     const $ = cheerio.load(response.data);
-    
+
     // EXACT MATCHING: Use the exact location name to find the row
-    console.log(`Searching for exact location match: "${location}"`);
-    
+    logVerbose(`Searching for location: "${location}"`);
+
     let tableUrl = null;
     let exactLocationMatch = false;
-    
+
     // Step 1: Look for exact location match in table rows
     $('tr').each((i, row) => {
       const cells = $(row).find('td');
       if (cells.length > 0) {
         const locationCell = $(cells[0]);
         const locationText = locationCell.text().trim();
-        
+
         // Check if this is our exact location
-        if (locationText === location || 
+        if (locationText === location ||
             // Handle slight variations like parentheses or small formatting differences
             locationText.replace(/\s+/g, ' ') === location.replace(/\s+/g, ' ')) {
-          
-          console.log(`Found exact location match: "${locationText}"`);
+
+          logVerbose(`Found location match: "${locationText}"`);
           exactLocationMatch = true;
           
           // Look for Table link in this row
@@ -769,36 +798,37 @@ async function fetchRiverHeightData(location) {
               if (!tableUrl.startsWith('http')) {
                 tableUrl = 'http://www.bom.gov.au' + tableUrl;
               }
-              console.log(`Found Table link: ${tableUrl}`);
+              logVerbose(`Found table link for ${location}`);
               return false; // Break the inner loop
             }
           });
-          
+
           if (tableUrl) return false; // Break the outer loop if we found the URL
         }
       }
     });
-    
+
     // If we couldn't find an exact match, log this for debugging
     if (!exactLocationMatch) {
-      console.log(`Warning: Could not find exact match for location: "${location}"`);
-      console.log('Listing all locations in the page for debugging:');
-      
-      // List all location cells for debugging
-      $('tr').each((i, row) => {
-        const cells = $(row).find('td');
-        if (cells.length > 0) {
-          const locationText = $(cells[0]).text().trim();
-          if (locationText) {
-            console.log(`- "${locationText}"`);
+      logError(`Could not find location: "${location}"`);
+      if (VERBOSE_LOGGING) {
+        // List all location cells for debugging
+        console.log('Available locations:');
+        $('tr').each((i, row) => {
+          const cells = $(row).find('td');
+          if (cells.length > 0) {
+            const locationText = $(cells[0]).text().trim();
+            if (locationText) {
+              console.log(`- "${locationText}"`);
+            }
           }
-        }
-      });
+        });
+      }
     }
-    
+
     // If we still can't find the URL after all these attempts
     if (!tableUrl) {
-      console.log('No table URL found after exact matching attempt');
+      logError('No table URL found for location');
       
       return {
         success: false,
@@ -807,8 +837,8 @@ async function fetchRiverHeightData(location) {
       };
     }
     
-    console.log(`Fetching table data from: ${tableUrl}`);
-    
+    logVerbose(`Fetching table data for ${location}...`);
+
     // Now fetch the actual table data
     const tableResponse = await axios.get(tableUrl, {
       headers: {
@@ -816,7 +846,8 @@ async function fetchRiverHeightData(location) {
         'Accept': 'text/html,application/xhtml+xml,application/xml',
         'Accept-Language': 'en-US,en;q=0.9',
         'Cache-Control': 'no-cache'
-      }
+      },
+      timeout: 10000
     });
     
     if (tableResponse.status !== 200) {
@@ -830,8 +861,8 @@ async function fetchRiverHeightData(location) {
     // First try: Look for a pre tag which often contains the data
     const preContent = tableHtml('pre').text();
     if (preContent && preContent.trim().length > 0) {
-      console.log('Found pre-formatted data');
-      
+      logVerbose('Found pre-formatted data');
+
       // Split by lines and parse each line
       const lines = preContent.split('\n');
       
@@ -855,7 +886,7 @@ async function fetchRiverHeightData(location) {
     
     // If pre tag approach didn't work, try tables
     if (riverData.length === 0) {
-      console.log('No data found in pre tag, checking tables');
+      logVerbose('No data in pre tag, checking tables');
       
       // Try various table selectors
       const tableSelectors = ['table.tabledata', 'table'];
@@ -887,25 +918,25 @@ async function fetchRiverHeightData(location) {
     }
     
     if (riverData.length === 0) {
-      console.log('No river data found in the response.');
+      logError('No river data found in response');
       return {
         success: false,
         message: 'No river data found in table response',
         tableUrlUsed: tableUrl
       };
     }
-    
-    console.log(`Successfully extracted ${riverData.length} data points for "${location}"`);
-    
+
+    logInfo(`Extracted ${riverData.length} data points for ${location}`);
+
     return {
       success: true,
       location: location, // Return the EXACT location name that was requested
       data: riverData,
       tableUrl: tableUrl // Include the URL for debugging
     };
-    
+
   } catch (error) {
-    console.error('Error fetching river height data:', error);
+    logError('Error fetching river height data:', error.message);
     return {
       success: false,
       message: error.message,
