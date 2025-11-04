@@ -1,14 +1,13 @@
-# 🌊 Lismore Flood Emergency Dashboard
+# Lismore Flood Emergency Dashboard
 
 ![Version](https://img.shields.io/badge/version-2.0.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
-A real-time emergency dashboard to monitor flood conditions in the Lismore, NSW area. This dashboard aggregates critical information from multiple sources to assist emergency management and the public during flood events.
+A real-time emergency dashboard for monitoring flood conditions in the Lismore, NSW area. This application aggregates critical information from multiple official sources to assist emergency management personnel and the public during flood events.
 
 ![Lismore Flood Dashboard](https://github.com/user-attachments/assets/406417d6-c64b-4671-b318-690e95b34e34)
 
-
-## 🚨 Features
+## Features
 
 - **Real-Time Flood Impact Map**: This map displays street addresses and areas within Lismore that are currently affected by floods in Lismore, using floor height council data
 - **Interactive Flood Height Plot Data**: Provides 4 days of water level height data in an interactive graph
@@ -23,11 +22,12 @@ A real-time emergency dashboard to monitor flood conditions in the Lismore, NSW 
 - **Offline Capability**: Caches data for use during network outages
 - **Useful Resource Panel**: Provides links to other websites to help monitor weather activity
 
-## 👀 Upcoming Features
-- **Flood Map Water Level Simulation**: This feature will add a simulated water rise element to the Flood Map
-- **Localised Rise & Fall Prediction**: This feature will ensure the rising and falling of flood levels are accurate, based on previous flood data
+## Upcoming Features
 
-## ⚙️ Technical Architecture
+- **Flood Map Water Level Simulation**: Simulated water rise visualization on the flood map
+- **Localised Rise & Fall Prediction**: Accurate flood level predictions based on historical data
+
+## Technical Architecture
 
 The dashboard consists of two primary components:
 
@@ -35,17 +35,17 @@ The dashboard consists of two primary components:
 2. **Backend (server.js)**: Node.js proxy server to fetch and parse flood data from BoM
 
 ```
-📁 lismore-flood-proxy/
+lismore-flood-proxy/
 │
-├── 📄 server.js          # Proxy server to fetch & parse BoM data
-├── 📄 package.json       # Node.js dependencies
-└── 📁 public/            
-    ├── 📄 index.html     # Main dashboard interface
-    ├── 📄 flood-data.json # Floor height data for map
-    └── 📁 resources/     # Static assets for the dashboard and user information
+├── server.js          # Proxy server to fetch & parse BoM data
+├── package.json       # Node.js dependencies
+└── public/
+    ├── index.html     # Main dashboard interface
+    ├── flood-data.json # Floor height data for map
+    └── resources/     # Static assets for the dashboard and user information
 ```
 
-## 🔧 Installation & Setup
+## Installation & Setup
 
 ### Prerequisites
 
@@ -62,20 +62,37 @@ The dashboard consists of two primary components:
 
 2. Install dependencies:
    ```bash
-   npm install express axios cheerio cors
+   npm install
    ```
 
 3. Start the server:
    ```bash
+   npm start
+   ```
+
+   Or directly with Node.js:
+   ```bash
    node server.js
    ```
 
-4. Open the dashboard in your browser:
+4. Access the dashboard:
    ```
    http://localhost:3000
    ```
 
-## 🌐 API Endpoints
+### Configuration
+
+The server supports the following environment variables:
+
+- `PORT`: Server port (default: 3000)
+- `VERBOSE_LOGGING`: Enable detailed logging (default: false)
+
+Example:
+```bash
+PORT=8080 VERBOSE_LOGGING=true node server.js
+```
+
+## API Endpoints
 
 The server exposes the following API endpoints:
 
@@ -100,7 +117,7 @@ The server exposes the following API endpoints:
 
 - **GET /status**: Health check endpoint for server status
 
-## 📊 Flood Categories
+## Flood Categories
 
 The dashboard uses the following standard BoM flood categories:
 
@@ -110,7 +127,7 @@ The dashboard uses the following standard BoM flood categories:
 | Moderate | 7.20+             | Above floor flooding of some rural buildings |
 | Major    | 9.70+             | Extensive rural and urban flooding           |
 
-## 🛠️ Customization
+## Customization
 
 ### Modifying Critical Locations
 
@@ -131,20 +148,64 @@ const criticalLocations = [
 
 To add new data sources, modify the `server.js` file to include additional endpoints or modify the existing flood data parsing logic.
 
-## ⚠️ Disclaimer
+## Data Sources
+
+The dashboard aggregates data from multiple authoritative sources:
+
+- **Bureau of Meteorology (BoM)**: Real-time river gauge data and flood warnings
+- **BoM Grafton Radar**: Animated rainfall radar imagery
+- **Transport for NSW**: Live traffic camera feeds from Bruxner Highway
+- **Essential Energy**: Power outage information for the region
+- **Lismore City Council**: Floor height data for flood impact mapping
+
+## Troubleshooting
+
+### Server won't start
+- Ensure Node.js is installed and up to date
+- Check that port 3000 (or your configured port) is not in use
+- Verify all dependencies are installed with `npm install`
+
+### Data not loading
+- Check your internet connection
+- Verify the BoM website is accessible
+- Enable verbose logging to see detailed error messages: `VERBOSE_LOGGING=true node server.js`
+
+### Radar images not displaying
+- The server automatically fetches and caches radar images
+- If images fail to load, check the `/cleanup-radar` endpoint to clear cached images
+- Verify access to `reg.bom.gov.au`
+
+## Development
+
+### Project Structure
+
+- `server.js`: Express server handling data aggregation and proxy requests
+- `public/index.html`: Main dashboard interface
+- `public/flood-data.json`: Static floor height data for flood impact visualization
+- `public/resources/`: Static assets including radar images and documentation
+
+### Technologies Used
+
+- **Backend**: Node.js, Express
+- **Data Fetching**: Axios
+- **HTML Parsing**: Cheerio
+- **CORS**: Enabled for cross-origin requests
+- **Frontend**: Vanilla JavaScript, HTML5, CSS3
+
+## Disclaimer
 
 This dashboard is intended for emergency use and information purposes only. Always follow directions from emergency services during flood events. The data presented is sourced from official channels but may not always be up-to-date or accurate due to network issues or other technical constraints.
 
-## 📄 License
+## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-## 🙏 Acknowledgements
+## Acknowledgements
 
-- [Bureau of Meteorology](http://www.bom.gov.au) for river height data
+- [Bureau of Meteorology](http://www.bom.gov.au) for providing river height data
 - [Transport for NSW](https://www.transport.nsw.gov.au) for traffic camera feeds
 - [Essential Energy](https://www.essentialenergy.com.au) for power outage information
 
-## 📞 Contact & Support
+## Contact & Support
 
-For issues, feature requests, or contributions, please open an issue on this repository
+For issues, feature requests, or contributions, please open an issue on this repository.
