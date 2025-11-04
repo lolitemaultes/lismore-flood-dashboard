@@ -3234,7 +3234,6 @@
             let allOutageBounds = [];
             let outageMapInitialized = false;
             let currentlyOpenMarker = null;
-            let programmaticZoom = false;
             
             function initializeOutageMap() {
                 if (outageMapInitialized) return;
@@ -3332,7 +3331,7 @@
                     if (!polygon || polygon.length < 3) {
                         return {
                             zoom: 14,
-                            paddingTopLeft: [50, 280],
+                            paddingTopLeft: [50, 320],
                             paddingBottomRight: [50, 120],
                             maxZoom: 15
                         };
@@ -3345,31 +3344,31 @@
 
                     if (area < 0.0001) {
                         return {
-                            paddingTopLeft: [50, 280],
+                            paddingTopLeft: [50, 320],
                             paddingBottomRight: [50, 120],
                             maxZoom: 16
                         };
                     } else if (area < 0.001) {
                         return {
-                            paddingTopLeft: [50, 280],
+                            paddingTopLeft: [50, 320],
                             paddingBottomRight: [50, 120],
                             maxZoom: 15
                         };
                     } else if (area < 0.01) {
                         return {
-                            paddingTopLeft: [50, 300],
+                            paddingTopLeft: [50, 340],
                             paddingBottomRight: [50, 130],
                             maxZoom: 14
                         };
                     } else if (area < 0.05) {
                         return {
-                            paddingTopLeft: [50, 320],
+                            paddingTopLeft: [50, 360],
                             paddingBottomRight: [50, 140],
                             maxZoom: 13
                         };
                     } else {
                         return {
-                            paddingTopLeft: [50, 350],
+                            paddingTopLeft: [50, 380],
                             paddingBottomRight: [50, 150],
                             maxZoom: 12
                         };
@@ -3392,9 +3391,6 @@
 
                     // Update the currently open marker
                     currentlyOpenMarker = clickedMarker;
-
-                    // Set flag to prevent popup from closing during programmatic zoom
-                    programmaticZoom = true;
 
                     const settings = getOptimalViewSettings(polygon);
 
@@ -3431,10 +3427,6 @@
                         } else if (marker._popup) {
                             marker.openPopup();
                         }
-                        // Reset flag after animation completes
-                        setTimeout(() => {
-                            programmaticZoom = false;
-                        }, 100);
                     }, 550);
                 };
                 
@@ -3694,34 +3686,26 @@
                 });
             }
             
-            // Close popup on user-initiated map interaction (scroll, drag, zoom)
+            // Close popup on user-initiated map interaction (scroll, drag, zoom) - same as flood map
             if (outageMap) {
-                // Detect mouse wheel scroll to close popup
                 outageMap.getContainer().addEventListener('wheel', () => {
-                    programmaticZoom = false;
                     currentlyOpenMarker = null;
                     outageMap.closePopup();
                 }, { passive: true });
 
                 outageMap.on('zoomstart', () => {
-                    if (!programmaticZoom) {
-                        currentlyOpenMarker = null;
-                        outageMap.closePopup();
-                    }
+                    currentlyOpenMarker = null;
+                    outageMap.closePopup();
                 });
 
                 outageMap.on('dragstart', () => {
-                    // Always allow drag, reset all locks
-                    programmaticZoom = false;
                     currentlyOpenMarker = null;
                     outageMap.closePopup();
                 });
 
                 outageMap.on('movestart', () => {
-                    if (!programmaticZoom) {
-                        currentlyOpenMarker = null;
-                        outageMap.closePopup();
-                    }
+                    currentlyOpenMarker = null;
+                    outageMap.closePopup();
                 });
             }
             
