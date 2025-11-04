@@ -765,7 +765,6 @@ async function fetchRiverHeightData(location) {
   }
 }
 
-// Start server
 app.listen(PORT, () => {
   console.log('\n' + '='.repeat(60));
   console.log('🌊  Lismore Flood Dashboard Server');
@@ -775,3 +774,4 @@ app.listen(PORT, () => {
   console.log(`✓ API: http://localhost:${PORT}/api/flood-data`);
   console.log('='.repeat(60) + '\n');
 });
+
