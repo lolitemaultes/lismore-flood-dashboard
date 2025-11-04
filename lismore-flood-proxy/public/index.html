@@ -3333,7 +3333,7 @@
                             zoom: 14,
                             paddingTopLeft: [50, 320],
                             paddingBottomRight: [50, 120],
-                            maxZoom: 15
+                            maxZoom: 17
                         };
                     }
 
@@ -3342,35 +3342,41 @@
                     const lngDiff = Math.abs(bounds.getEast() - bounds.getWest());
                     const area = latDiff * lngDiff;
 
-                    if (area < 0.0001) {
+                    if (area < 0.00005) {
                         return {
                             paddingTopLeft: [50, 320],
                             paddingBottomRight: [50, 120],
-                            maxZoom: 16
+                            maxZoom: 18
+                        };
+                    } else if (area < 0.0001) {
+                        return {
+                            paddingTopLeft: [50, 320],
+                            paddingBottomRight: [50, 120],
+                            maxZoom: 17
                         };
                     } else if (area < 0.001) {
                         return {
                             paddingTopLeft: [50, 320],
                             paddingBottomRight: [50, 120],
-                            maxZoom: 15
+                            maxZoom: 16
                         };
                     } else if (area < 0.01) {
                         return {
                             paddingTopLeft: [50, 340],
                             paddingBottomRight: [50, 130],
-                            maxZoom: 14
+                            maxZoom: 15
                         };
                     } else if (area < 0.05) {
                         return {
                             paddingTopLeft: [50, 360],
                             paddingBottomRight: [50, 140],
-                            maxZoom: 13
+                            maxZoom: 14
                         };
                     } else {
                         return {
                             paddingTopLeft: [50, 380],
                             paddingBottomRight: [50, 150],
-                            maxZoom: 12
+                            maxZoom: 13
                         };
                     }
                 }
@@ -3431,7 +3437,11 @@
                 };
                 
                 if (marker._polygon && marker._centerMarker) {
+                    // ONLY bind popup to center marker so it always anchors to the center point
                     marker._centerMarker.bindPopup(popupContent, popupOptions);
+
+                    // Both polygon and center marker trigger the same click handler
+                    // Click handler will open popup on center marker, ensuring arrow points to center
                     marker._polygon.on('click', clickHandler);
                     marker._centerMarker.on('click', clickHandler);
                 } else {
