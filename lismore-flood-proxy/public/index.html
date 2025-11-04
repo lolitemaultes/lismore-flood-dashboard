@@ -438,61 +438,335 @@
             text-align: center;
         }
 
-        .outage-info-container {
-            padding: 1rem;
-        }
-        
-        .outage-card {
-            display: flex;
-            align-items: flex-start;
-            gap: 1rem;
-            background-color: var(--gray-100);
+        /* Outage Map Container */
+        .outage-map-wrapper {
+            position: relative;
+            height: 500px;
+            background-color: white;
             border-radius: var(--border-radius);
-            padding: 1.25rem;
-            margin-bottom: 1.5rem;
+            overflow: hidden;
         }
         
-        .outage-card-icon {
-            flex-shrink: 0;
-            color: var(--primary-color);
+        #outage-map {
+            width: 100%;
+            height: 100%;
+            z-index: 1;
         }
         
-        .outage-card-content h3 {
-            margin: 0 0 0.75rem;
-            font-size: 1.125rem;
+        /* Outage Legend */
+        .outage-legend { 
+            position: absolute; 
+            right: 10px; 
+            bottom: 30px;
+            z-index: 1000; 
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 12px;
+            box-shadow: var(--shadow-md);
+            min-width: 200px;
+        }
+        
+        .legend-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #111827;
+        }
+        
+        .outage-legend label { 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            cursor: pointer; 
+            margin: 6px 0;
+            padding: 8px 10px;
+            border-radius: 6px;
+            transition: all 0.2s;
+            font-size: 13px;
+            border: 2px solid transparent;
+            background: var(--gray-100);
+        }
+        
+        .outage-legend label:hover {
+            background: var(--gray-200);
+        }
+        
+        .outage-legend input[type="radio"] {
+            display: none;
+        }
+        
+        .outage-legend input[type="radio"]:checked + .legend-content {
             font-weight: 600;
         }
         
-        .outage-card-content p {
-            margin: 0 0 0.5rem;
-            color: var(--gray-700);
+        .outage-legend input[type="radio"]:checked ~ .outage-dot {
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+            transform: scale(1.2);
         }
         
-        .outage-alternatives h3 {
-            font-size: 1.125rem;
-            font-weight: 600;
-            margin: 0 0 1rem;
+        .outage-legend label:has(input:checked) {
+            background: white;
+            border-color: var(--primary-color);
         }
         
-        .outage-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        
-        .outage-list li {
+        .legend-content {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem;
-            background-color: var(--gray-100);
-            border-radius: var(--border-radius);
-            margin-bottom: 0.5rem;
+            gap: 8px;
+            flex: 1;
         }
         
-        .outage-list li svg {
-            color: var(--primary-color);
-            flex-shrink: 0;
+        .outage-dot { 
+            width: 12px; 
+            height: 12px; 
+            border-radius: 50%; 
+            display: inline-block;
+            border: 1px solid rgba(0,0,0,0.1);
+            transition: all 0.2s ease;
+        }
+        
+        .outage-dot.cur { background: #ff4d4f; }
+        .outage-dot.fut { background: #f7ba1e; }
+        .outage-dot.can { background: #7aa2f7; }
+        
+        .legend-note {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid var(--gray-200);
+            font-size: 11px;
+            color: var(--gray-600);
+        }
+        
+        /* Outage Controls Panel */
+        .outage-controls-panel {
+            background: white;
+            border-top: 1px solid var(--gray-200);
+            padding: 1rem 1.5rem;
+        }
+        
+        .outage-controls-inner {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .outage-control-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        /* Outage Statistics */
+        .outage-stats-container {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: var(--gray-100);
+            border-radius: var(--border-radius);
+        }
+        
+        .outage-stats-title {
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            font-size: 0.875rem;
+            color: #111827;
+        }
+        
+        .outage-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.75rem;
+        }
+        
+        .outage-stat-card {
+            background: white;
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            transition: all 0.2s;
+        }
+        
+        .outage-stat-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-1px);
+        }
+        
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--gray-600);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #111827;
+            display: flex;
+            align-items: baseline;
+            gap: 0.5rem;
+        }
+        
+        .outage-stat-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: var(--border-radius);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .outage-stat-badge.current { 
+            background: rgba(255, 77, 79, 0.1); 
+            color: #ff4d4f; 
+        }
+        
+        .outage-stat-badge.future { 
+            background: rgba(247, 186, 30, 0.1); 
+            color: #f7ba1e; 
+        }
+        
+        .outage-stat-badge.cancelled { 
+            background: rgba(122, 162, 247, 0.1); 
+            color: #7aa2f7; 
+        }
+        
+        /* Outage Popup Styling */
+        .outage-popup-title {
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+            color: #111827;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--gray-200);
+        }
+        
+        .outage-popup-row {
+            margin: 0.5rem 0;
+            display: grid;
+            grid-template-columns: 130px 1fr;
+            gap: 0.5rem;
+            align-items: start;
+        }
+        
+        .outage-popup-label {
+            font-weight: 600;
+            color: var(--gray-600);
+            font-size: 0.8125rem;
+        }
+        
+        .outage-popup-value {
+            color: #111827;
+            font-size: 0.875rem;
+        }
+        
+        .outage-popup-badge {
+            display: inline-block;
+            padding: 0.25rem 0.625rem;
+            border-radius: var(--border-radius);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .outage-popup-badge.current { 
+            background: rgba(255, 77, 79, 0.1); 
+            color: #ff4d4f; 
+        }
+        
+        .outage-popup-badge.future { 
+            background: rgba(247, 186, 30, 0.1); 
+            color: #f7ba1e; 
+        }
+        
+        .outage-popup-badge.cancelled { 
+            background: rgba(122, 162, 247, 0.1); 
+            color: #7aa2f7; 
+        }
+        
+        .outage-popup-footer {
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid var(--gray-200);
+            font-size: 0.75rem;
+            color: var(--gray-600);
+        }
+        
+        /* Leaflet Popup Customization for Outages */
+        .leaflet-popup-content-wrapper {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-lg);
+            border: 1px solid var(--gray-200);
+        }
+        
+        .leaflet-popup-content {
+            margin: 1rem;
+            margin-right: 2.5rem;
+            font-size: 0.875rem;
+            line-height: 1.6;
+            max-width: 350px;
+        }
+        
+        .leaflet-popup-tip {
+            background: white;
+            border: 1px solid var(--gray-200);
+            border-top: none;
+            border-right: none;
+        }
+        
+        .leaflet-popup-close-button {
+            color: var(--gray-600) !important;
+            font-size: 18px !important;
+            padding: 4px 8px !important;
+            width: 24px !important;
+            height: 24px !important;
+            position: absolute !important;
+            top: 8px !important;
+            right: 8px !important;
+            border-radius: 4px !important;
+        }
+        
+        .leaflet-popup-close-button:hover {
+            background: var(--gray-100) !important;
+        }
+        
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+            .outage-map-wrapper {
+                height: 400px;
+            }
+            
+            .outage-legend {
+                font-size: 0.75rem;
+                min-width: 180px;
+                right: 8px;
+                bottom: 24px;
+            }
+            
+            .outage-controls-inner {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .outage-control-group {
+                flex-direction: column;
+            }
+            
+            .outage-stats-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .outage-map-wrapper {
+                height: 350px;
+            }
+            
+            .outage-stats-grid {
+                grid-template-columns: 1fr;
+            }
         }
         
         .maps-grid {
@@ -2253,56 +2527,102 @@
                                 </a>
                             </div>
                         </div>
-                        <div class="outage-info-container">
-                            <div class="outage-card">
-                                <div class="outage-card-icon">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
-                                    </svg>
+                        <div class="outage-map-wrapper">
+                            <div id="outage-map"></div>
+                            
+                            <div class="outage-legend">
+                                <div class="legend-title">Outage Categories</div>
+                                <label>
+                                    <input type="radio" name="outage-category" id="radio-current-outage" value="current" checked />
+                                    <div class="legend-content">
+                                        <span class="outage-dot cur"></span>
+                                        <span>Current Outages</span>
+                                    </div>
+                                </label>
+                                <label>
+                                    <input type="radio" name="outage-category" id="radio-future-outage" value="future" />
+                                    <div class="legend-content">
+                                        <span class="outage-dot fut"></span>
+                                        <span>Planned Outages</span>
+                                    </div>
+                                </label>
+                                <label>
+                                    <input type="radio" name="outage-category" id="radio-cancelled-outage" value="cancelled" />
+                                    <div class="legend-content">
+                                        <span class="outage-dot can"></span>
+                                        <span>Cancelled</span>
+                                    </div>
+                                </label>
+                                <div class="legend-note">
+                                    Select a category to view on map
                                 </div>
-                                <div class="outage-card-content">
-                                    <h3>Unable to Display Power Outage Map</h3>
-                                    <p>The Essential Energy website prevents embedding their outage map in other websites.</p>
-                                    <p>Please click the "Open Map" button above to view the current power outages in a new tab.</p>
-                                </div>
-                            </div>
-                            <div class="outage-alternatives">
-                                <h3>Power Outage Information</h3>
-                                <ul class="outage-list">
-                                    <li>
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <circle cx="12" cy="12" r="10"></circle>
-                                            <polyline points="12 6 12 12 16 14"></polyline>
-                                        </svg>
-                                        <span>Call <strong>13 20 80</strong> for power outage updates</span>
-                                    </li>
-                                    <li>
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
-                                        </svg>
-                                        <span>Report outages: <strong>13 20 80</strong></span>
-                                    </li>
-                                    <li>
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <circle cx="12" cy="12" r="10"></circle>
-                                            <line x1="12" y1="8" x2="12" y2="12"></line>
-                                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                                        </svg>
-                                        <span>Life-threatening emergencies: <strong>000</strong></span>
-                                    </li>
-                                </ul>
                             </div>
                         </div>
+                        
+                        <div class="outage-controls-panel">
+                            <div class="outage-controls-inner">
+                                <div class="outage-control-group">
+                                    <button class="button" id="outage-fit-bounds" title="Fit all outages in view">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+                                        </svg>
+                                        Fit to View
+                                    </button>
+                                    <button class="button" id="outage-locate-me" title="Center on your location">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <circle cx="12" cy="12" r="10"></circle>
+                                            <circle cx="12" cy="12" r="3"></circle>
+                                        </svg>
+                                        My Location
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="outage-stats-container">
+                                <div class="outage-stats-title">Network Status Overview</div>
+                                <div class="outage-stats-grid">
+                                    <div class="outage-stat-card">
+                                        <div class="stat-label">Current Outages</div>
+                                        <div class="stat-value">
+                                            <span id="outage-stat-current">0</span>
+                                            <span class="outage-stat-badge current">Active</span>
+                                        </div>
+                                    </div>
+                                    <div class="outage-stat-card">
+                                        <div class="stat-label">Planned Outages</div>
+                                        <div class="stat-value">
+                                            <span id="outage-stat-future">0</span>
+                                            <span class="outage-stat-badge future">Scheduled</span>
+                                        </div>
+                                    </div>
+                                    <div class="outage-stat-card">
+                                        <div class="stat-label">Cancelled</div>
+                                        <div class="stat-value">
+                                            <span id="outage-stat-cancelled">0</span>
+                                            <span class="outage-stat-badge cancelled">Resolved</span>
+                                        </div>
+                                    </div>
+                                    <div class="outage-stat-card">
+                                        <div class="stat-label">Currently Affected</div>
+                                        <div class="stat-value">
+                                            <span id="outage-stat-customers">0</span>
+                                            <span style="font-size: 0.875rem; color: var(--gray-600)">customers</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
                         <div class="tab-footer">
+                            <span>Last updated: <span id="outage-last-update">Never</span></span>
                             <a href="https://www.essentialenergy.com.au/outages-and-faults/power-outages" target="_blank" rel="noopener noreferrer" class="tab-link">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
                                     <polyline points="15 3 21 3 21 9"></polyline>
                                     <line x1="10" y1="14" x2="21" y2="3"></line>
                                 </svg>
-                                View power outage map
+                                View on Essential Energy
                             </a>
-                            <span>Essential Energy: 13 20 80</span>
                         </div>
                     </div>
                 </div>
@@ -2863,6 +3183,469 @@
             webcamImage.src = `https://webcams.transport.nsw.gov.au/livetraffic-webcams/cameras/bruxner_highway_lismore.jpeg?t=${timestamp}`;
             webcamTimestamp.textContent = new Date().toLocaleTimeString('en-AU');
         }
+
+        // Power Outage Map Functionality
+        (function() {
+            const OUTAGE_API = '/api/outages';
+            const outageColors = { current: '#ff4d4f', future: '#f7ba1e', cancelled: '#7aa2f7' };
+            
+            let outageMap = null;
+            let outageLayerGroups = {
+                current: null,
+                future: null,
+                cancelled: null
+            };
+            let allOutageBounds = [];
+            let outageMapInitialized = false;
+            
+            function initializeOutageMap() {
+                if (outageMapInitialized) return;
+                
+                const maxBounds = [
+                    [-29.2, 152.7],
+                    [-28.4, 153.9]
+                ];
+                
+                outageMap = L.map('outage-map', { 
+                    zoomControl: true,
+                    maxBounds: maxBounds,
+                    maxBoundsViscosity: 0.75,
+                    minZoom: 10,
+                    maxZoom: 18,
+                    zoom: 10
+                }).setView([-28.836252984829166, 153.30047607421878], 10);
+                
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    minZoom: 10,
+                    maxZoom: 18,
+                    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+                }).addTo(outageMap);
+                
+                outageLayerGroups.current = L.layerGroup().addTo(outageMap);
+                outageLayerGroups.future = L.layerGroup();
+                outageLayerGroups.cancelled = L.layerGroup();
+                
+                outageMapInitialized = true;
+            }
+            
+            function createOutageCircle(lat, lon, color, small = false) {
+                return L.circleMarker([lat, lon], {
+                    radius: small ? 5 : 8,
+                    weight: small ? 1.5 : 2,
+                    opacity: 1,
+                    fillOpacity: small ? 0.9 : 0.7,
+                    color: small ? '#fff' : '#fff',
+                    fillColor: color
+                });
+            }
+            
+            function createOutagePolygon(coordinates, color) {
+                const polygon = L.polygon(coordinates, {
+                    weight: 2,
+                    opacity: 0.8,
+                    color: color,
+                    fillColor: color,
+                    fillOpacity: 0.35,
+                    smoothFactor: 1
+                });
+                
+                polygon.on('mouseover', function(e) {
+                    this.setStyle({
+                        weight: 3,
+                        fillOpacity: 0.5
+                    });
+                    e.target._path.style.cursor = 'pointer';
+                });
+                
+                polygon.on('mouseout', function() {
+                    this.setStyle({
+                        weight: 2,
+                        fillOpacity: 0.35
+                    });
+                });
+                
+                return polygon;
+            }
+            
+            function createOutageMarker(outage, color) {
+                if (outage.polygon && outage.polygon.length > 0) {
+                    const group = L.layerGroup();
+                    const polygon = createOutagePolygon(outage.polygon, color);
+                    polygon.addTo(group);
+                    const centerMarker = createOutageCircle(outage.latitude, outage.longitude, color, true);
+                    centerMarker.addTo(group);
+                    group._polygon = polygon;
+                    group._centerMarker = centerMarker;
+                    return group;
+                } else {
+                    return createOutageCircle(outage.latitude, outage.longitude, color, false);
+                }
+            }
+            
+            function bindOutagePopup(marker, popupContent, lat, lng, polygon) {
+                const popupOptions = {
+                    maxWidth: 350,
+                    autoPan: false,
+                    closeButton: true,
+                    offset: [0, -10]
+                };
+                
+                function getOptimalViewSettings(polygon) {
+                    if (!polygon || polygon.length < 3) {
+                        return { 
+                            zoom: 14, 
+                            paddingTopLeft: [50, 250],
+                            paddingBottomRight: [50, 80],
+                            maxZoom: 15
+                        };
+                    }
+                    
+                    const bounds = L.latLngBounds(polygon);
+                    const latDiff = Math.abs(bounds.getNorth() - bounds.getSouth());
+                    const lngDiff = Math.abs(bounds.getEast() - bounds.getWest());
+                    const area = latDiff * lngDiff;
+                    
+                    if (area < 0.0001) {
+                        return { 
+                            paddingTopLeft: [50, 220],
+                            paddingBottomRight: [50, 70],
+                            maxZoom: 16
+                        };
+                    } else if (area < 0.001) {
+                        return { 
+                            paddingTopLeft: [50, 240],
+                            paddingBottomRight: [50, 80],
+                            maxZoom: 15
+                        };
+                    } else if (area < 0.01) {
+                        return { 
+                            paddingTopLeft: [50, 260],
+                            paddingBottomRight: [50, 90],
+                            maxZoom: 14
+                        };
+                    } else if (area < 0.05) {
+                        return { 
+                            paddingTopLeft: [50, 280],
+                            paddingBottomRight: [50, 100],
+                            maxZoom: 13
+                        };
+                    } else {
+                        return { 
+                            paddingTopLeft: [50, 320],
+                            paddingBottomRight: [50, 80],
+                            maxZoom: 12
+                        };
+                    }
+                }
+                
+                const clickHandler = function(e) {
+                    if (e) {
+                        L.DomEvent.stopPropagation(e);
+                    }
+                    
+                    const settings = getOptimalViewSettings(polygon);
+                    
+                    if (polygon && polygon.length > 3) {
+                        const bounds = L.latLngBounds(polygon);
+                        
+                        outageMap.flyToBounds(bounds, {
+                            paddingTopLeft: settings.paddingTopLeft,
+                            paddingBottomRight: settings.paddingBottomRight,
+                            duration: 0.5,
+                            maxZoom: settings.maxZoom,
+                            easeLinearity: 0.2
+                        });
+                    } else {
+                        outageMap.flyTo([lat, lng], settings.zoom, {
+                            duration: 0.5,
+                            easeLinearity: 0.2
+                        });
+                    }
+                    
+                    setTimeout(() => {
+                        if (marker._centerMarker && marker._centerMarker._popup) {
+                            marker._centerMarker.openPopup();
+                        } else if (marker._popup) {
+                            marker.openPopup();
+                        }
+                    }, 550);
+                };
+                
+                if (marker._polygon && marker._centerMarker) {
+                    marker._centerMarker.bindPopup(popupContent, popupOptions);
+                    marker._polygon.on('click', clickHandler);
+                    marker._centerMarker.on('click', clickHandler);
+                } else {
+                    marker.bindPopup(popupContent, popupOptions);
+                    marker.on('click', clickHandler);
+                }
+            }
+            
+            function formatOutageDate(dt) {
+                if (!dt) return null;
+                try {
+                    const date = new Date(dt);
+                    if (isNaN(date.getTime())) return null;
+                    
+                    const day = date.getDate();
+                    const month = date.toLocaleString('en-US', { month: 'short' });
+                    const year = date.getFullYear();
+                    const time = date.toLocaleString('en-US', { 
+                        hour: '2-digit', 
+                        minute: '2-digit',
+                        hour12: true 
+                    }).toLowerCase();
+                    
+                    return `${day} ${month} ${year}, ${time}`;
+                } catch {
+                    return null;
+                }
+            }
+            
+            function escapeHtml(s) {
+                if (s == null) return '';
+                const div = document.createElement('div');
+                div.textContent = String(s);
+                return div.innerHTML;
+            }
+            
+            function applyOutageVisibility() {
+                const selectedCategory = document.querySelector('input[name="outage-category"]:checked').value;
+                
+                for (const [k, layer] of Object.entries(outageLayerGroups)) {
+                    if (k === selectedCategory) {
+                        if (!outageMap.hasLayer(layer)) layer.addTo(outageMap);
+                    } else {
+                        if (outageMap.hasLayer(layer)) outageMap.removeLayer(layer);
+                    }
+                }
+            }
+            
+            async function loadOutageData(force = false) {
+                const refreshBtn = document.getElementById('refresh-outages');
+                if (refreshBtn) refreshBtn.disabled = true;
+                
+                try {
+                    const url = force ? OUTAGE_API + '?refresh=1' : OUTAGE_API;
+                    const res = await fetch(url);
+                    
+                    if (!res.ok) {
+                        const text = await res.text();
+                        let errorMsg = 'Failed to load outages';
+                        try {
+                            const json = JSON.parse(text);
+                            errorMsg = json.error || json.hint || errorMsg;
+                        } catch {
+                            errorMsg = text.slice(0, 200);
+                        }
+                        throw new Error(errorMsg);
+                    }
+                    
+                    const data = await res.json();
+                    
+                    for (const layer of Object.values(outageLayerGroups)) {
+                        layer.clearLayers();
+                    }
+                    
+                    allOutageBounds = [];
+                    const counts = { current: 0, future: 0, cancelled: 0 };
+                    let currentCustomers = 0;
+                    
+                    const lockedBounds = {
+                        south: -29.076575403045364,
+                        north: -28.595374292349927,
+                        west: 152.86651611328128,
+                        east: 153.73443603515628
+                    };
+                    
+                    for (const f of data.features) {
+                        if (!Number.isFinite(f.latitude) || !Number.isFinite(f.longitude)) continue;
+                        
+                        if (f.latitude <= lockedBounds.south || f.latitude >= lockedBounds.north ||
+                            f.longitude <= lockedBounds.west || f.longitude >= lockedBounds.east) {
+                            continue;
+                        }
+                        
+                        counts[f.category] = (counts[f.category] || 0) + 1;
+                        
+                        if (f.category === 'current' && f.customersAffected) {
+                            currentCustomers += f.customersAffected;
+                        }
+                        
+                        const marker = createOutageMarker(f, outageColors[f.category]);
+                        const cust = f.customersAffected != null ? f.customersAffected.toLocaleString() : 'Not specified';
+                        const startTime = f.start ? formatOutageDate(f.start) : 'Not specified';
+                        const endTime = f.end ? formatOutageDate(f.end) : 'Not specified';
+                        const reason = f.reason && f.reason !== 'Not specified' ? f.reason : 'Not specified';
+                        
+                        const popupContent = `
+                            <div>
+                                <div class="outage-popup-title">${escapeHtml(f.name)}</div>
+                                <div class="outage-popup-row">
+                                    <span class="outage-popup-label">Status</span>
+                                    <span class="outage-popup-value">
+                                        <span class="outage-popup-badge ${f.category}">${escapeHtml(f.status || f.categoryName)}</span>
+                                    </span>
+                                </div>
+                                <div class="outage-popup-row">
+                                    <span class="outage-popup-label">Type</span>
+                                    <span class="outage-popup-value">${escapeHtml(f.type)}</span>
+                                </div>
+                                <div class="outage-popup-row">
+                                    <span class="outage-popup-label">Time Off</span>
+                                    <span class="outage-popup-value">${escapeHtml(startTime)}</span>
+                                </div>
+                                <div class="outage-popup-row">
+                                    <span class="outage-popup-label">Est. Time On</span>
+                                    <span class="outage-popup-value">${escapeHtml(endTime)}</span>
+                                </div>
+                                <div class="outage-popup-row">
+                                    <span class="outage-popup-label">Customers</span>
+                                    <span class="outage-popup-value"><strong>${escapeHtml(cust)}</strong></span>
+                                </div>
+                                <div class="outage-popup-row">
+                                    <span class="outage-popup-label">Reason</span>
+                                    <span class="outage-popup-value">${escapeHtml(reason)}</span>
+                                </div>
+                                ${f.lastUpdated ? `
+                                <div class="outage-popup-footer">
+                                    Last updated: ${escapeHtml(formatOutageDate(f.lastUpdated))}
+                                </div>
+                                ` : ''}
+                            </div>
+                        `;
+                        
+                        bindOutagePopup(marker, popupContent, f.latitude, f.longitude, f.polygon);
+                        marker.addTo(outageLayerGroups[f.category]);
+                        allOutageBounds.push([f.latitude, f.longitude]);
+                    }
+                    
+                    document.getElementById('outage-stat-current').textContent = counts.current || 0;
+                    document.getElementById('outage-stat-future').textContent = counts.future || 0;
+                    document.getElementById('outage-stat-cancelled').textContent = counts.cancelled || 0;
+                    document.getElementById('outage-stat-customers').textContent = currentCustomers.toLocaleString();
+                    
+                    applyOutageVisibility();
+                    
+                    const total = counts.current + counts.future + counts.cancelled;
+                    document.getElementById('outage-last-update').textContent = new Date().toLocaleTimeString('en-AU');
+                    
+                    if (force) {
+                        showNotification(`Successfully loaded ${total} outages`, 'success');
+                    }
+                    
+                } catch (error) {
+                    console.error('Load outage error:', error);
+                    showNotification(error.message, 'error');
+                } finally {
+                    if (refreshBtn) refreshBtn.disabled = false;
+                }
+            }
+            
+            // Setup event listeners when tab becomes active
+            const outageTab = document.getElementById('tab-outage');
+            if (outageTab) {
+                outageTab.addEventListener('click', function() {
+                    setTimeout(() => {
+                        if (!outageMapInitialized) {
+                            initializeOutageMap();
+                            loadOutageData();
+                        } else {
+                            outageMap.invalidateSize();
+                        }
+                    }, 100);
+                });
+            }
+            
+            // Radio button listeners
+            document.querySelectorAll('input[name="outage-category"]').forEach(radio => {
+                radio.addEventListener('change', applyOutageVisibility);
+            });
+            
+            // Refresh button
+            const refreshBtn = document.getElementById('refresh-outages');
+            if (refreshBtn) {
+                refreshBtn.addEventListener('click', () => loadOutageData(true));
+            }
+            
+            // Fit bounds button
+            const fitBoundsBtn = document.getElementById('outage-fit-bounds');
+            if (fitBoundsBtn) {
+                fitBoundsBtn.addEventListener('click', () => {
+                    if (allOutageBounds.length > 0) {
+                        const selectedCategory = document.querySelector('input[name="outage-category"]:checked').value;
+                        
+                        const categoryBounds = [];
+                        outageLayerGroups[selectedCategory].eachLayer(layer => {
+                            if (layer._latlng) {
+                                categoryBounds.push([layer._latlng.lat, layer._latlng.lng]);
+                            } else if (layer._layers) {
+                                Object.values(layer._layers).forEach(sublayer => {
+                                    if (sublayer._latlng) {
+                                        categoryBounds.push([sublayer._latlng.lat, sublayer._latlng.lng]);
+                                    }
+                                });
+                            }
+                        });
+                        
+                        if (categoryBounds.length > 0) {
+                            const bounds = L.latLngBounds(categoryBounds);
+                            outageMap.fitBounds(bounds.pad(0.1));
+                            showNotification(`Showing ${categoryBounds.length} ${selectedCategory} outages`, 'info');
+                        } else {
+                            outageMap.setView([-28.836252984829166, 153.30047607421878], 10);
+                            showNotification(`No ${selectedCategory} outages in this region`, 'warning');
+                        }
+                    } else {
+                        showNotification('No outages to display', 'warning');
+                    }
+                });
+            }
+            
+            // Locate me button
+            const locateMeBtn = document.getElementById('outage-locate-me');
+            if (locateMeBtn) {
+                locateMeBtn.addEventListener('click', () => {
+                    if ('geolocation' in navigator) {
+                        navigator.geolocation.getCurrentPosition(
+                            (position) => {
+                                const { latitude, longitude } = position.coords;
+                                outageMap.setView([latitude, longitude], 13);
+                                L.marker([latitude, longitude])
+                                    .addTo(outageMap)
+                                    .bindPopup('📍 Your Location')
+                                    .openPopup();
+                                showNotification('Centered on your location', 'success');
+                            },
+                            (error) => {
+                                showNotification('Could not get your location: ' + error.message, 'error');
+                            }
+                        );
+                    } else {
+                        showNotification('Geolocation not supported by your browser', 'warning');
+                    }
+                });
+            }
+            
+            // Close popup on map interaction
+            if (outageMap) {
+                outageMap.on('zoomstart', () => {
+                    outageMap.closePopup();
+                });
+                
+                outageMap.on('dragstart', () => {
+                    outageMap.closePopup();
+                });
+            }
+            
+            // Auto-refresh every 5 minutes
+            setInterval(() => {
+                const outageContent = document.getElementById('content-outage');
+                if (outageContent && outageContent.classList.contains('active')) {
+                    loadOutageData(false);
+                }
+            }, 5 * 60 * 1000);
+        })();
 
         function checkDataSources() {
             proxyStatusValue.textContent = 'Checking...';
