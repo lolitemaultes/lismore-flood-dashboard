@@ -94,6 +94,432 @@ async function cleanupRadarImages() {
   }
 }
 
+const NodeCache = require('node-cache');
+const { XMLParser } = require('fast-xml-parser');
+
+// Cache configuration for outages
+const OUTAGE_CACHE_TTL = 60;
+const outageCache = new NodeCache({ stdTTL: OUTAGE_CACHE_TTL, useClones: false });
+
+// KML URLs for Essential Energy outages
+const KML_URLS = {
+  current: 'https://www.essentialenergy.com.au/Assets/kmz/current.kml',
+  future: 'https://www.essentialenergy.com.au/Assets/kmz/future.kml',
+  cancelled: 'https://www.essentialenergy.com.au/Assets/kmz/cancelled.kml'
+};
+
+// XML Parser configuration
+const xmlParser = new XMLParser({
+  ignoreAttributes: false,
+  attributeNamePrefix: '@_',
+  textNodeName: '#text',
+  cdataPropName: '__cdata',
+  trimValues: true,
+  parseTagValue: false,
+  parseAttributeValue: false,
+  isArray: (name) => name === 'Placemark'
+});
+
+// Fetch KML with retry logic
+async function fetchKML(url, retries = 3) {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      const response = await axios.get(url, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0 Safari/537.36'
+        },
+        timeout: 10000
+      });
+
+      if (response.status !== 200) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      return response.data;
+    } catch (error) {
+      if (attempt === retries) {
+        console.error(`Failed to fetch KML after ${retries} attempts:`, error.message);
+        throw error;
+      }
+      await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+    }
+  }
+}
+
+// Extract coordinates from KML point
+function extractCoordinates(point) {
+  if (!point || !point.coordinates) return null;
+  
+  const coords = String(point.coordinates).trim().split(/[\s,]+/);
+  if (coords.length >= 2) {
+    return {
+      longitude: parseFloat(coords[0]),
+      latitude: parseFloat(coords[1])
+    };
+  }
+  return null;
+}
+
+// Extract polygon coordinates
+function extractPolygon(polygon) {
+  if (!polygon) return null;
+  
+  try {
+    let coordinates = null;
+    if (polygon.outerBoundaryIs?.LinearRing?.coordinates) {
+      coordinates = polygon.outerBoundaryIs.LinearRing.coordinates;
+    } else if (polygon.LinearRing?.coordinates) {
+      coordinates = polygon.LinearRing.coordinates;
+    }
+    
+    if (!coordinates) return null;
+    
+    const coordString = String(coordinates).trim();
+    const coordPairs = coordString.split(/\s+/);
+    
+    const points = [];
+    for (const pair of coordPairs) {
+      const [lon, lat] = pair.split(',').map(parseFloat);
+      if (isFinite(lat) && isFinite(lon)) {
+        points.push([lat, lon]);
+      }
+    }
+    
+    return points.length > 0 ? points : null;
+  } catch (error) {
+    console.error('Failed to parse polygon:', error.message);
+    return null;
+  }
+}
+
+// Parse HTML description from KML
+function parseDescription(html) {
+  if (!html) return {};
+  
+  const result = {};
+  
+  try {
+    let decoded = String(html).replace(/<!\[CDATA\[|\]\]>/g, '').trim();
+    
+    decoded = decoded
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&amp;/g, '&')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'");
+    
+    // Extract Time Off
+    let timeOffMatch = decoded.match(/<span>Time Off:<\/span>\s*(\d{2}\/\d{2}\/\d{4}\s+\d{2}:\d{2}:\d{2})/i);
+    if (!timeOffMatch) {
+      timeOffMatch = decoded.match(/Time Off:<\/span>\s*([^<]+)/i);
+    }
+    if (timeOffMatch) {
+      const value = timeOffMatch[1].trim();
+      if (value && value !== '—' && value !== '') {
+        result.timeOff = value;
+      }
+    }
+    
+    // Extract Est. Time On
+    let timeOnMatch = decoded.match(/<span>Est\.\s*Time On:<\/span>\s*(\d{2}\/\d{2}\/\d{4}\s+\d{2}:\d{2}:\d{2})/i);
+    if (!timeOnMatch) {
+      timeOnMatch = decoded.match(/Est\.\s*Time On:<\/span>\s*([^<]+)/i);
+    }
+    if (timeOnMatch) {
+      const value = timeOnMatch[1].trim();
+      if (value && value !== '—' && value !== '') {
+        result.timeOn = value;
+      }
+    }
+    
+    // Extract Customers affected
+    let customersMatch = decoded.match(/<span>No\.\s*of Customers affected:<\/span>\s*(\d+)/i);
+    if (!customersMatch) {
+      customersMatch = decoded.match(/No\.\s*of Customers affected:<\/span>\s*([^<]+)/i);
+    }
+    if (!customersMatch) {
+      customersMatch = decoded.match(/<span>Customers affected:<\/span>\s*(\d+)/i);
+    }
+    if (customersMatch) {
+      const value = customersMatch[1].trim();
+      if (value && value !== '—' && value !== '') {
+        const num = parseInt(value.replace(/,/g, ''));
+        result.customersAffected = isNaN(num) ? null : num;
+      }
+    }
+    
+    // Extract Reason
+    let reasonMatch = decoded.match(/<span>Reason:<\/span>\s*([^<]+)/i);
+    if (reasonMatch) {
+      const value = reasonMatch[1].trim();
+      if (value && value !== '—' && value !== '') {
+        result.reason = value;
+      }
+    }
+    
+    // Extract Last Updated
+    let updatedMatch = decoded.match(/<span>Last Updated:<\/span>\s*(\d{2}\/\d{2}\/\d{4}\s+\d{2}:\d{2}:\d{2})/i);
+    if (!updatedMatch) {
+      updatedMatch = decoded.match(/Last Updated:<\/span>\s*([^<]+)/i);
+    }
+    if (updatedMatch) {
+      const value = updatedMatch[1].trim();
+      if (value && value !== '—' && value !== '') {
+        result.lastUpdated = value;
+      }
+    }
+    
+  } catch (error) {
+    console.error('Error parsing description:', error.message);
+  }
+  
+  return result;
+}
+
+// Parse date string to ISO format
+function parseOutageDate(dateStr) {
+  if (!dateStr || dateStr === '—' || dateStr === '' || dateStr.trim() === '') return null;
+  try {
+    const [datePart, timePart] = dateStr.trim().split(' ');
+    if (!datePart) return null;
+    
+    const [day, month, year] = datePart.split('/');
+    if (!day || !month || !year) return null;
+    
+    const [hour, minute, second] = (timePart || '00:00:00').split(':');
+    
+    const date = new Date(
+      parseInt(year),
+      parseInt(month) - 1,
+      parseInt(day),
+      parseInt(hour || 0),
+      parseInt(minute || 0),
+      parseInt(second || 0)
+    );
+    
+    if (isNaN(date.getTime())) return null;
+    
+    return date.toISOString();
+  } catch (error) {
+    console.error('Failed to parse date:', dateStr, error.message);
+    return null;
+  }
+}
+
+// Determine outage type from style
+function getOutageType(styleUrl) {
+  if (!styleUrl) return 'Unplanned Outage';
+  const url = styleUrl.toLowerCase();
+  if (url.includes('planned')) return 'Planned Outage';
+  if (url.includes('unplanned')) return 'Unplanned Outage';
+  return 'Unplanned Outage';
+}
+
+// Format category name
+function formatCategory(category) {
+  const categoryMap = {
+    'current': 'Current',
+    'future': 'Future',
+    'cancelled': 'Cancelled'
+  };
+  return categoryMap[category] || category;
+}
+
+// Parse KML and extract outages
+function parseKML(kmlText, category) {
+  const parsed = xmlParser.parse(kmlText);
+  const outages = [];
+  
+  if (!parsed.kml || !parsed.kml.Document) {
+    console.warn('Invalid KML structure for category:', category);
+    return outages;
+  }
+  
+  const document = parsed.kml.Document;
+  const folder = document.Folder;
+  
+  if (!folder || !folder.Placemark) {
+    console.log('No placemarks found for category:', category);
+    return outages;
+  }
+  
+  const placemarks = Array.isArray(folder.Placemark) ? folder.Placemark : [folder.Placemark];
+  
+  for (const placemark of placemarks) {
+    try {
+      const id = placemark['@_id'] || 'unknown';
+      const snippet = placemark.Snippet?.['#text'] || id;
+      
+      let description = '';
+      if (placemark.description) {
+        if (typeof placemark.description === 'string') {
+          description = placemark.description;
+        } else if (placemark.description['__cdata']) {
+          description = placemark.description['__cdata'];
+        } else if (placemark.description['#text']) {
+          description = placemark.description['#text'];
+        } else if (typeof placemark.description === 'object') {
+          for (const key of Object.keys(placemark.description)) {
+            if (typeof placemark.description[key] === 'string' && placemark.description[key].length > 0) {
+              description = placemark.description[key];
+              break;
+            }
+          }
+        }
+      }
+      
+      const styleUrl = placemark.styleUrl || '';
+      
+      let coords = null;
+      if (placemark.MultiGeometry && placemark.MultiGeometry.Point) {
+        coords = extractCoordinates(placemark.MultiGeometry.Point);
+      } else if (placemark.Point) {
+        coords = extractCoordinates(placemark.Point);
+      }
+      
+      let polygonCoords = null;
+      if (placemark.MultiGeometry && placemark.MultiGeometry.Polygon) {
+        polygonCoords = extractPolygon(placemark.MultiGeometry.Polygon);
+      } else if (placemark.Polygon) {
+        polygonCoords = extractPolygon(placemark.Polygon);
+      }
+      
+      if (!coords && !polygonCoords) {
+        continue;
+      }
+      
+      if (!coords && polygonCoords) {
+        const lats = polygonCoords.map(p => p[0]);
+        const lons = polygonCoords.map(p => p[1]);
+        coords = {
+          latitude: (Math.min(...lats) + Math.max(...lats)) / 2,
+          longitude: (Math.min(...lons) + Math.max(...lons)) / 2
+        };
+      }
+      
+      const details = parseDescription(description);
+      const outageType = getOutageType(styleUrl);
+      
+      outages.push({
+        id,
+        category,
+        categoryName: formatCategory(category),
+        name: snippet,
+        latitude: coords.latitude,
+        longitude: coords.longitude,
+        polygon: polygonCoords,
+        start: parseOutageDate(details.timeOff),
+        end: parseOutageDate(details.timeOn),
+        customersAffected: details.customersAffected,
+        reason: details.reason || 'Not specified',
+        status: formatCategory(category),
+        lastUpdated: parseOutageDate(details.lastUpdated),
+        type: outageType
+      });
+    } catch (error) {
+      console.error('Error parsing placemark:', error.message);
+    }
+  }
+  
+  return outages;
+}
+
+// Fetch and parse a category
+async function fetchOutageCategory(category) {
+  const cacheKey = `outage:${category}`;
+  const cached = outageCache.get(cacheKey);
+  
+  if (cached) {
+    console.log(`Using cached outage data for ${category}`);
+    return cached;
+  }
+  
+  const url = KML_URLS[category];
+  if (!url) {
+    throw new Error(`Unknown outage category: ${category}`);
+  }
+  
+  try {
+    const kmlText = await fetchKML(url);
+    const outages = parseKML(kmlText, category);
+    outageCache.set(cacheKey, outages);
+    console.log(`Parsed ${category} outages: ${outages.length}`);
+    return outages;
+  } catch (error) {
+    console.error(`Failed to fetch ${category} outages:`, error.message);
+    throw error;
+  }
+}
+
+// API endpoint for power outages
+app.get('/api/outages', async (req, res) => {
+  try {
+    const startTime = Date.now();
+    
+    if (req.query.refresh) {
+      outageCache.flushAll();
+      console.log('Outage cache cleared by user request');
+    }
+    
+    const [current, future, cancelled] = await Promise.all([
+      fetchOutageCategory('current'),
+      fetchOutageCategory('future'),
+      fetchOutageCategory('cancelled')
+    ]);
+    
+    const allOutages = [...current, ...future, ...cancelled];
+    
+    // Calculate bounds
+    let minLat = Infinity, maxLat = -Infinity;
+    let minLon = Infinity, maxLon = -Infinity;
+    
+    for (const outage of allOutages) {
+      if (outage.latitude < minLat) minLat = outage.latitude;
+      if (outage.latitude > maxLat) maxLat = outage.latitude;
+      if (outage.longitude < minLon) minLon = outage.longitude;
+      if (outage.longitude > maxLon) maxLon = outage.longitude;
+    }
+    
+    const duration = Date.now() - startTime;
+    
+    console.log(`✓ Outages fetched: ${allOutages.length} (${duration}ms)`);
+    
+    res.json({
+      success: true,
+      timestamp: new Date().toISOString(),
+      counts: {
+        current: current.length,
+        future: future.length,
+        cancelled: cancelled.length,
+        total: allOutages.length
+      },
+      bounds: allOutages.length > 0 ? {
+        north: maxLat,
+        south: minLat,
+        east: maxLon,
+        west: minLon
+      } : null,
+      features: allOutages
+    });
+    
+  } catch (error) {
+    console.error('Error in /api/outages:', error.message);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      hint: 'Check server logs for details'
+    });
+  }
+});
+
+// Clear outage cache endpoint
+app.get('/api/outages/clear-cache', (req, res) => {
+  outageCache.flushAll();
+  console.log('Outage cache cleared via API endpoint');
+  res.json({ success: true, message: 'Outage cache cleared' });
+});
+
 async function downloadLegendOnStartup() {
   const imageUrl = `${RADAR_BASE_URL}/products/radar_transparencies/IDR.legend.0.png`;
   const resourceFile = path.join(RESOURCES_DIR, 'Legend.png');
