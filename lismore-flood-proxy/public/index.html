@@ -1306,12 +1306,18 @@
             font-size: 0.875rem;
             color: var(--gray-600);
             margin-bottom: 0.5rem;
+            text-align: center;
         }
 
         .stat-value {
             font-size: 1.5rem;
             font-weight: 700;
             color: var(--gray-900);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
 
         .stat-item.critical .stat-value {
@@ -1321,6 +1327,7 @@
         .stat-footer {
             font-size: 0.75rem;
             margin-top: 0.5rem;
+            text-align: center;
         }
 
         .status-panel {
@@ -3315,13 +3322,9 @@
             function bindOutagePopup(marker, popupContent, lat, lng, polygon) {
                 const popupOptions = {
                     maxWidth: 350,
-                    autoPan: true,
-                    autoPanPadding: [50, 50],
-                    autoPanPaddingTopLeft: [50, 100],
-                    autoPanPaddingBottomRight: [50, 50],
+                    autoPan: false,
                     closeButton: true,
-                    offset: [0, -10],
-                    keepInView: true
+                    offset: [0, -10]
                 };
                 
                 function getOptimalViewSettings(polygon) {
@@ -3690,8 +3693,17 @@
                 });
 
                 outageMap.on('dragstart', () => {
+                    // Always allow drag, reset all locks
+                    programmaticZoom = false;
                     currentlyOpenMarker = null;
                     outageMap.closePopup();
+                });
+
+                outageMap.on('movestart', () => {
+                    if (!programmaticZoom) {
+                        currentlyOpenMarker = null;
+                        outageMap.closePopup();
+                    }
                 });
             }
             
@@ -5482,8 +5494,7 @@
                 const popupContent = createPopupContent(property, floodHeight, status);
 
                 marker.bindPopup(popupContent, {
-                    autoPan: true,
-                    autoPanPadding: [50, 50],
+                    autoPan: false,
                     closeButton: true
                 });
 
@@ -5494,10 +5505,13 @@
                     // Zoom to the property with nice padding
                     floodMap.flyTo(property.coordinates, 16, {
                         duration: 0.6,
-                        easeLinearity: 0.25,
-                        paddingTopLeft: [50, 100],
-                        paddingBottomRight: [50, 50]
+                        easeLinearity: 0.25
                     });
+
+                    // Open popup after animation completes
+                    setTimeout(() => {
+                        marker.openPopup();
+                    }, 650);
                 });
 
                 floodMarkers.addLayer(marker);
