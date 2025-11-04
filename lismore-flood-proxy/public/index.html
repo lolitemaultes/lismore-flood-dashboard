@@ -3683,8 +3683,15 @@
                 });
             }
             
-            // Close popup on user-initiated map interaction (not programmatic zooms)
+            // Close popup on user-initiated map interaction (scroll, drag, zoom)
             if (outageMap) {
+                // Detect mouse wheel scroll to close popup
+                outageMap.getContainer().addEventListener('wheel', () => {
+                    programmaticZoom = false;
+                    currentlyOpenMarker = null;
+                    outageMap.closePopup();
+                }, { passive: true });
+
                 outageMap.on('zoomstart', () => {
                     if (!programmaticZoom) {
                         currentlyOpenMarker = null;
@@ -5495,15 +5502,45 @@
 
                 marker.bindPopup(popupContent, {
                     autoPan: false,
-                    closeButton: true
+                    closeButton: true,
+                    maxWidth: 300
                 });
 
                 // Add click handler for auto-zoom to property
                 marker.on('click', function(e) {
                     L.DomEvent.stopPropagation(e);
 
-                    // Zoom to the property with nice padding
-                    floodMap.flyTo(property.coordinates, 16, {
+                    // Calculate optimal view position to keep popup visible
+                    const mapContainer = floodMap.getContainer();
+                    const mapHeight = mapContainer.clientHeight;
+                    const markerPoint = floodMap.latLngToContainerPoint(property.coordinates);
+
+                    // Estimate popup height (approximate)
+                    const estimatedPopupHeight = 250;
+                    const topPadding = 80;
+                    const bottomPadding = 50;
+
+                    // Check if popup would extend beyond top of viewport
+                    const popupTop = markerPoint.y - estimatedPopupHeight - 20;
+                    const popupBottom = markerPoint.y + 50;
+
+                    let targetLatLng = property.coordinates;
+
+                    // If popup would go off top, adjust the center point
+                    if (popupTop < topPadding) {
+                        const offsetY = (estimatedPopupHeight / 2) - 40;
+                        const adjustedPoint = L.point(markerPoint.x, mapHeight / 2 + offsetY);
+                        targetLatLng = floodMap.containerPointToLatLng(adjustedPoint);
+                    }
+                    // If popup would go off bottom
+                    else if (popupBottom > mapHeight - bottomPadding) {
+                        const offsetY = -(estimatedPopupHeight / 2);
+                        const adjustedPoint = L.point(markerPoint.x, mapHeight / 2 + offsetY);
+                        targetLatLng = floodMap.containerPointToLatLng(adjustedPoint);
+                    }
+
+                    // Zoom to the adjusted position
+                    floodMap.flyTo(targetLatLng, 16, {
                         duration: 0.6,
                         easeLinearity: 0.25
                     });
@@ -5598,13 +5635,30 @@
             floodMap = L.map('flood-map').setView([-28.8167, 153.2833], 14);
 
             floodMapInitialized = true;
-            
+
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             }).addTo(floodMap);
-            
+
             floodMarkers = L.layerGroup().addTo(floodMap);
-            
+
+            // Close popup on user-initiated map interaction (scroll, drag, zoom)
+            floodMap.getContainer().addEventListener('wheel', () => {
+                floodMap.closePopup();
+            }, { passive: true });
+
+            floodMap.on('zoomstart', () => {
+                floodMap.closePopup();
+            });
+
+            floodMap.on('dragstart', () => {
+                floodMap.closePopup();
+            });
+
+            floodMap.on('movestart', () => {
+                floodMap.closePopup();
+            });
+
             addLeveeLegendItem();
             
             const LISMORE_BOUNDS = [
