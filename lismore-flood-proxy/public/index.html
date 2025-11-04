@@ -3333,7 +3333,7 @@
                             zoom: 14,
                             paddingTopLeft: [50, 320],
                             paddingBottomRight: [50, 120],
-                            maxZoom: 17
+                            maxZoom: 18
                         };
                     }
 
@@ -3352,31 +3352,31 @@
                         return {
                             paddingTopLeft: [50, 320],
                             paddingBottomRight: [50, 120],
-                            maxZoom: 17
+                            maxZoom: 18
                         };
                     } else if (area < 0.001) {
                         return {
                             paddingTopLeft: [50, 320],
                             paddingBottomRight: [50, 120],
-                            maxZoom: 16
+                            maxZoom: 17
                         };
                     } else if (area < 0.01) {
                         return {
                             paddingTopLeft: [50, 340],
                             paddingBottomRight: [50, 130],
-                            maxZoom: 15
+                            maxZoom: 16
                         };
                     } else if (area < 0.05) {
                         return {
                             paddingTopLeft: [50, 360],
                             paddingBottomRight: [50, 140],
-                            maxZoom: 14
+                            maxZoom: 15
                         };
                     } else {
                         return {
                             paddingTopLeft: [50, 380],
                             paddingBottomRight: [50, 150],
-                            maxZoom: 13
+                            maxZoom: 14
                         };
                     }
                 }
@@ -3698,22 +3698,36 @@
             
             // Close popup on user-initiated map interaction (scroll, drag, zoom) - same as flood map
             if (outageMap) {
+                // Mouse wheel scroll
                 outageMap.getContainer().addEventListener('wheel', () => {
                     currentlyOpenMarker = null;
                     outageMap.closePopup();
                 }, { passive: true });
 
+                // Zoom via buttons or pinch
                 outageMap.on('zoomstart', () => {
                     currentlyOpenMarker = null;
                     outageMap.closePopup();
                 });
 
+                // Drag/pan map
                 outageMap.on('dragstart', () => {
                     currentlyOpenMarker = null;
                     outageMap.closePopup();
                 });
 
+                outageMap.on('drag', () => {
+                    currentlyOpenMarker = null;
+                    outageMap.closePopup();
+                });
+
+                // Any movement
                 outageMap.on('movestart', () => {
+                    currentlyOpenMarker = null;
+                    outageMap.closePopup();
+                });
+
+                outageMap.on('move', () => {
                     currentlyOpenMarker = null;
                     outageMap.closePopup();
                 });
