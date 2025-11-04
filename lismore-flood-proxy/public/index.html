@@ -3408,8 +3408,18 @@
                             easeLinearity: 0.2
                         });
                     } else {
-                        outageMap.flyTo([lat, lng], settings.zoom, {
+                        // Create small bounds for single point to use with padding
+                        const offset = 0.0005;
+                        const bounds = L.latLngBounds(
+                            [lat - offset, lng - offset],
+                            [lat + offset, lng + offset]
+                        );
+
+                        outageMap.flyToBounds(bounds, {
+                            paddingTopLeft: settings.paddingTopLeft,
+                            paddingBottomRight: settings.paddingBottomRight,
                             duration: 0.5,
+                            maxZoom: settings.maxZoom,
                             easeLinearity: 0.2
                         });
                     }
@@ -5510,37 +5520,20 @@
                 marker.on('click', function(e) {
                     L.DomEvent.stopPropagation(e);
 
-                    // Calculate optimal view position to keep popup visible
-                    const mapContainer = floodMap.getContainer();
-                    const mapHeight = mapContainer.clientHeight;
-                    const markerPoint = floodMap.latLngToContainerPoint(property.coordinates);
+                    // Create a small bounds around the property to use with padding
+                    const offset = 0.0005; // Small offset to create bounds
+                    const bounds = L.latLngBounds(
+                        [property.coordinates[0] - offset, property.coordinates[1] - offset],
+                        [property.coordinates[0] + offset, property.coordinates[1] + offset]
+                    );
 
-                    // Estimate popup height (approximate)
-                    const estimatedPopupHeight = 250;
-                    const topPadding = 80;
-                    const bottomPadding = 50;
-
-                    // Check if popup would extend beyond top of viewport
-                    const popupTop = markerPoint.y - estimatedPopupHeight - 20;
-                    const popupBottom = markerPoint.y + 50;
-
-                    let targetLatLng = property.coordinates;
-
-                    // If popup would go off top, adjust the center point
-                    if (popupTop < topPadding) {
-                        const offsetY = (estimatedPopupHeight / 2) - 40;
-                        const adjustedPoint = L.point(markerPoint.x, mapHeight / 2 + offsetY);
-                        targetLatLng = floodMap.containerPointToLatLng(adjustedPoint);
-                    }
-                    // If popup would go off bottom
-                    else if (popupBottom > mapHeight - bottomPadding) {
-                        const offsetY = -(estimatedPopupHeight / 2);
-                        const adjustedPoint = L.point(markerPoint.x, mapHeight / 2 + offsetY);
-                        targetLatLng = floodMap.containerPointToLatLng(adjustedPoint);
-                    }
-
-                    // Zoom to the adjusted position
-                    floodMap.flyTo(targetLatLng, 16, {
+                    // Fly to bounds with padding to ensure popup stays in viewport
+                    // Top padding: 250px ensures popup doesn't exceed top of view
+                    // Bottom padding: 80px ensures marker doesn't exceed bottom of view
+                    floodMap.flyToBounds(bounds, {
+                        paddingTopLeft: [50, 250],
+                        paddingBottomRight: [50, 80],
+                        maxZoom: 16,
                         duration: 0.6,
                         easeLinearity: 0.25
                     });
