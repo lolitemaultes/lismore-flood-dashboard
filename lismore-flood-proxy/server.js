@@ -97,18 +97,15 @@ async function cleanupRadarImages() {
 const NodeCache = require('node-cache');
 const { XMLParser } = require('fast-xml-parser');
 
-// Cache configuration for outages
 const OUTAGE_CACHE_TTL = 60;
 const outageCache = new NodeCache({ stdTTL: OUTAGE_CACHE_TTL, useClones: false });
 
-// KML URLs for Essential Energy outages
 const KML_URLS = {
   current: 'https://www.essentialenergy.com.au/Assets/kmz/current.kml',
   future: 'https://www.essentialenergy.com.au/Assets/kmz/future.kml',
   cancelled: 'https://www.essentialenergy.com.au/Assets/kmz/cancelled.kml'
 };
 
-// XML Parser configuration
 const xmlParser = new XMLParser({
   ignoreAttributes: false,
   attributeNamePrefix: '@_',
@@ -120,7 +117,6 @@ const xmlParser = new XMLParser({
   isArray: (name) => name === 'Placemark'
 });
 
-// Fetch KML with retry logic
 async function fetchKML(url, retries = 3) {
   for (let attempt = 1; attempt <= retries; attempt++) {
     try {
@@ -146,7 +142,6 @@ async function fetchKML(url, retries = 3) {
   }
 }
 
-// Extract coordinates from KML point
 function extractCoordinates(point) {
   if (!point || !point.coordinates) return null;
   
@@ -160,7 +155,6 @@ function extractCoordinates(point) {
   return null;
 }
 
-// Extract polygon coordinates
 function extractPolygon(polygon) {
   if (!polygon) return null;
   
@@ -192,7 +186,6 @@ function extractPolygon(polygon) {
   }
 }
 
-// Parse HTML description from KML
 function parseDescription(html) {
   if (!html) return {};
   
@@ -209,7 +202,6 @@ function parseDescription(html) {
       .replace(/&quot;/g, '"')
       .replace(/&#39;/g, "'");
     
-    // Extract Time Off
     let timeOffMatch = decoded.match(/<span>Time Off:<\/span>\s*(\d{2}\/\d{2}\/\d{4}\s+\d{2}:\d{2}:\d{2})/i);
     if (!timeOffMatch) {
       timeOffMatch = decoded.match(/Time Off:<\/span>\s*([^<]+)/i);
@@ -221,7 +213,6 @@ function parseDescription(html) {
       }
     }
     
-    // Extract Est. Time On
     let timeOnMatch = decoded.match(/<span>Est\.\s*Time On:<\/span>\s*(\d{2}\/\d{2}\/\d{4}\s+\d{2}:\d{2}:\d{2})/i);
     if (!timeOnMatch) {
       timeOnMatch = decoded.match(/Est\.\s*Time On:<\/span>\s*([^<]+)/i);
@@ -233,7 +224,6 @@ function parseDescription(html) {
       }
     }
     
-    // Extract Customers affected
     let customersMatch = decoded.match(/<span>No\.\s*of Customers affected:<\/span>\s*(\d+)/i);
     if (!customersMatch) {
       customersMatch = decoded.match(/No\.\s*of Customers affected:<\/span>\s*([^<]+)/i);
@@ -249,7 +239,6 @@ function parseDescription(html) {
       }
     }
     
-    // Extract Reason
     let reasonMatch = decoded.match(/<span>Reason:<\/span>\s*([^<]+)/i);
     if (reasonMatch) {
       const value = reasonMatch[1].trim();
@@ -258,7 +247,6 @@ function parseDescription(html) {
       }
     }
     
-    // Extract Last Updated
     let updatedMatch = decoded.match(/<span>Last Updated:<\/span>\s*(\d{2}\/\d{2}\/\d{4}\s+\d{2}:\d{2}:\d{2})/i);
     if (!updatedMatch) {
       updatedMatch = decoded.match(/Last Updated:<\/span>\s*([^<]+)/i);
@@ -277,7 +265,6 @@ function parseDescription(html) {
   return result;
 }
 
-// Parse date string to ISO format
 function parseOutageDate(dateStr) {
   if (!dateStr || dateStr === '—' || dateStr === '' || dateStr.trim() === '') return null;
   try {
@@ -307,7 +294,6 @@ function parseOutageDate(dateStr) {
   }
 }
 
-// Determine outage type from style
 function getOutageType(styleUrl) {
   if (!styleUrl) return 'Unplanned Outage';
   const url = styleUrl.toLowerCase();
@@ -316,7 +302,6 @@ function getOutageType(styleUrl) {
   return 'Unplanned Outage';
 }
 
-// Format category name
 function formatCategory(category) {
   const categoryMap = {
     'current': 'Current',
@@ -326,7 +311,6 @@ function formatCategory(category) {
   return categoryMap[category] || category;
 }
 
-// Parse KML and extract outages
 function parseKML(kmlText, category) {
   const parsed = xmlParser.parse(kmlText);
   const outages = [];
@@ -425,7 +409,6 @@ function parseKML(kmlText, category) {
   return outages;
 }
 
-// Fetch and parse a category
 async function fetchOutageCategory(category) {
   const cacheKey = `outage:${category}`;
   const cached = outageCache.get(cacheKey);
@@ -452,7 +435,6 @@ async function fetchOutageCategory(category) {
   }
 }
 
-// API endpoint for power outages
 app.get('/api/outages', async (req, res) => {
   try {
     const startTime = Date.now();
@@ -470,7 +452,6 @@ app.get('/api/outages', async (req, res) => {
     
     const allOutages = [...current, ...future, ...cancelled];
     
-    // Calculate bounds
     let minLat = Infinity, maxLat = -Infinity;
     let minLon = Infinity, maxLon = -Infinity;
     
@@ -513,7 +494,6 @@ app.get('/api/outages', async (req, res) => {
   }
 });
 
-// Clear outage cache endpoint
 app.get('/api/outages/clear-cache', (req, res) => {
   outageCache.flushAll();
   console.log('Outage cache cleared via API endpoint');
@@ -1200,4 +1180,5 @@ app.listen(PORT, () => {
   console.log(`✓ API: http://localhost:${PORT}/api/flood-data`);
   console.log('='.repeat(60) + '\n');
 });
+
 
