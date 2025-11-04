@@ -3075,6 +3075,7 @@
         let floodMarkers = null;
         let floodHeatmapLayer = null;
         let floodMapInitialized = false;
+        let currentlyOpenFloodMarker = null;
 
         initializeDashboard();
 
@@ -3329,47 +3330,47 @@
                 
                 function getOptimalViewSettings(polygon) {
                     if (!polygon || polygon.length < 3) {
-                        return { 
-                            zoom: 14, 
-                            paddingTopLeft: [50, 250],
-                            paddingBottomRight: [50, 80],
+                        return {
+                            zoom: 14,
+                            paddingTopLeft: [50, 280],
+                            paddingBottomRight: [50, 120],
                             maxZoom: 15
                         };
                     }
-                    
+
                     const bounds = L.latLngBounds(polygon);
                     const latDiff = Math.abs(bounds.getNorth() - bounds.getSouth());
                     const lngDiff = Math.abs(bounds.getEast() - bounds.getWest());
                     const area = latDiff * lngDiff;
-                    
+
                     if (area < 0.0001) {
-                        return { 
-                            paddingTopLeft: [50, 220],
-                            paddingBottomRight: [50, 70],
+                        return {
+                            paddingTopLeft: [50, 280],
+                            paddingBottomRight: [50, 120],
                             maxZoom: 16
                         };
                     } else if (area < 0.001) {
-                        return { 
-                            paddingTopLeft: [50, 240],
-                            paddingBottomRight: [50, 80],
+                        return {
+                            paddingTopLeft: [50, 280],
+                            paddingBottomRight: [50, 120],
                             maxZoom: 15
                         };
                     } else if (area < 0.01) {
-                        return { 
-                            paddingTopLeft: [50, 260],
-                            paddingBottomRight: [50, 90],
+                        return {
+                            paddingTopLeft: [50, 300],
+                            paddingBottomRight: [50, 130],
                             maxZoom: 14
                         };
                     } else if (area < 0.05) {
-                        return { 
-                            paddingTopLeft: [50, 280],
-                            paddingBottomRight: [50, 100],
+                        return {
+                            paddingTopLeft: [50, 320],
+                            paddingBottomRight: [50, 140],
                             maxZoom: 13
                         };
                     } else {
-                        return { 
-                            paddingTopLeft: [50, 320],
-                            paddingBottomRight: [50, 80],
+                        return {
+                            paddingTopLeft: [50, 350],
+                            paddingBottomRight: [50, 150],
                             maxZoom: 12
                         };
                     }
@@ -5520,6 +5521,17 @@
                 marker.on('click', function(e) {
                     L.DomEvent.stopPropagation(e);
 
+                    // Check if clicking on the currently open marker
+                    const isCurrentlyOpen = currentlyOpenFloodMarker === marker && marker.isPopupOpen();
+
+                    // If clicking the same marker that's already open, just keep it open
+                    if (isCurrentlyOpen) {
+                        return;
+                    }
+
+                    // Update the currently open marker
+                    currentlyOpenFloodMarker = marker;
+
                     // Create a small bounds around the property to use with padding
                     const offset = 0.0005; // Small offset to create bounds
                     const bounds = L.latLngBounds(
@@ -5637,18 +5649,22 @@
 
             // Close popup on user-initiated map interaction (scroll, drag, zoom)
             floodMap.getContainer().addEventListener('wheel', () => {
+                currentlyOpenFloodMarker = null;
                 floodMap.closePopup();
             }, { passive: true });
 
             floodMap.on('zoomstart', () => {
+                currentlyOpenFloodMarker = null;
                 floodMap.closePopup();
             });
 
             floodMap.on('dragstart', () => {
+                currentlyOpenFloodMarker = null;
                 floodMap.closePopup();
             });
 
             floodMap.on('movestart', () => {
+                currentlyOpenFloodMarker = null;
                 floodMap.closePopup();
             });
 
