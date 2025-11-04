@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lismore Flood Emergency Dashboard</title>
+    <title>Lismore Flood Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -438,7 +438,6 @@
             text-align: center;
         }
 
-        /* Outage Map Container */
         .outage-map-wrapper {
             position: relative;
             height: 500px;
@@ -453,7 +452,6 @@
             z-index: 1;
         }
         
-        /* Outage Legend */
         .outage-legend { 
             position: absolute; 
             right: 10px; 
@@ -537,7 +535,6 @@
             color: var(--gray-600);
         }
         
-        /* Outage Controls Panel */
         .outage-controls-panel {
             background: white;
             border-top: 1px solid var(--gray-200);
@@ -556,7 +553,6 @@
             gap: 0.5rem;
         }
         
-        /* Outage Statistics */
         .outage-stats-container {
             margin-top: 1rem;
             padding: 1rem;
@@ -632,7 +628,6 @@
             color: #7aa2f7; 
         }
         
-        /* Outage Popup Styling */
         .outage-popup-title {
             font-weight: 700;
             font-size: 1rem;
@@ -693,7 +688,6 @@
             color: var(--gray-600);
         }
         
-        /* Leaflet Popup Customization for Outages */
         .leaflet-popup-content-wrapper {
             background: white;
             border-radius: var(--border-radius);
@@ -732,7 +726,6 @@
             background: var(--gray-100) !important;
         }
         
-        /* Mobile Responsive Styles */
         @media (max-width: 768px) {
             .outage-map-wrapper {
                 height: 400px;
@@ -3228,7 +3221,6 @@
             webcamTimestamp.textContent = new Date().toLocaleTimeString('en-AU');
         }
 
-        // Power Outage Map Functionality
         (function() {
             const OUTAGE_API = '/api/outages';
             const outageColors = { current: '#ff4d4f', future: '#f7ba1e', cancelled: '#7aa2f7' };
@@ -3272,11 +3264,8 @@
                 
                 outageMapInitialized = true;
                 
-                // Track if we're in a programmatic zoom
                 let isProgrammaticMove = false;
                 
-                // Add popup close handlers immediately after map initialization
-                // Mouse wheel scroll
                 outageMap.getContainer().addEventListener('wheel', () => {
                     if (currentlyOpenMarker && !isProgrammaticMove) {
                         currentlyOpenMarker = null;
@@ -3284,7 +3273,6 @@
                     }
                 }, { passive: true });
                 
-                // Touch events for mobile drag
                 let touchStarted = false;
                 outageMap.getContainer().addEventListener('touchstart', () => {
                     touchStarted = true;
@@ -3298,7 +3286,6 @@
                     }
                 }, { passive: true });
                 
-                // Zoom controls (buttons)
                 outageMap.on('zoomstart', () => {
                     if (currentlyOpenMarker && !isProgrammaticMove) {
                         currentlyOpenMarker = null;
@@ -3306,7 +3293,6 @@
                     }
                 });
                 
-                // Dragging/panning
                 outageMap.on('dragstart', () => {
                     if (currentlyOpenMarker && !isProgrammaticMove) {
                         currentlyOpenMarker = null;
@@ -3314,7 +3300,6 @@
                     }
                 });
                 
-                // Store reference to set programmatic move flag
                 outageMap._isProgrammaticMove = function(val) {
                     isProgrammaticMove = val;
                 };
@@ -3387,7 +3372,6 @@
                         L.DomEvent.stopPropagation(e);
                     }
                 
-                    // Check if clicking on the currently open marker
                     const clickedMarker = marker._centerMarker || marker;
                     const isCurrentlyOpen = currentlyOpenMarker === clickedMarker && clickedMarker.isPopupOpen();
                 
@@ -3395,22 +3379,18 @@
                         return;
                     }
                 
-                    // Close any existing popup
                     outageMap.closePopup();
                     currentlyOpenMarker = clickedMarker;
                 
-                    // Set flag to indicate programmatic movement
                     if (outageMap._isProgrammaticMove) {
                         outageMap._isProgrammaticMove(true);
                     }
                 
-                    // Calculate zoom level based on area if polygon exists
-                    let zoomLevel = 17; // Default for single points
+                    let zoomLevel = 17;
                     let centerLat = lat;
                     let centerLng = lng;
                     
                     if (polygon && Array.isArray(polygon) && polygon.length >= 3) {
-                        // Calculate bounds to get vertical span
                         let minLat = polygon[0][0], maxLat = polygon[0][0];
                         let minLng = polygon[0][1], maxLng = polygon[0][1];
                         
@@ -3421,12 +3401,10 @@
                             maxLng = Math.max(maxLng, coord[1]);
                         }
                         
-                        // Calculate vertical span (north to south distance)
                         const verticalSpan = maxLat - minLat;
                         const horizontalSpan = maxLng - minLng;
                         const maxSpan = Math.max(verticalSpan, horizontalSpan);
                         
-                        // Calculate zoom based on span
                         if (maxSpan > 0.1) zoomLevel = 10;
                         else if (maxSpan > 0.05) zoomLevel = 11;
                         else if (maxSpan > 0.02) zoomLevel = 12;
@@ -3436,42 +3414,33 @@
                         else if (maxSpan > 0.001) zoomLevel = 16;
                         else zoomLevel = 17;
                         
-                        // Use the provided center point (lat, lng) for popup anchor
                         centerLat = lat;
                         centerLng = lng;
                     }
                     
-                    // Calculate the offset position BEFORE flying
-                    // We need to temporarily set the view to calculate where the point will be
                     const originalView = outageMap.getCenter();
                     const originalZoom = outageMap.getZoom();
                     
-                    // Temporarily set to target view (without animation)
                     outageMap.setView([centerLat, centerLng], zoomLevel, {animate: false});
                     
-                    // Calculate where the marker will be and where we need to pan to
                     const point = outageMap.latLngToContainerPoint([centerLat, centerLng]);
                     const panOffset = zoomLevel >= 16 ? -180 : (zoomLevel >= 14 ? -140 : -100);
                     const adjustedPoint = L.point(point.x, point.y + panOffset);
                     const adjustedLatLng = outageMap.containerPointToLatLng(adjustedPoint);
                     
-                    // Reset to original view (without animation)
                     outageMap.setView(originalView, originalZoom, {animate: false});
                     
-                    // Now fly DIRECTLY to the adjusted position in one smooth movement
                     outageMap.flyTo(adjustedLatLng, zoomLevel, {
                         duration: 0.7,
                         easeLinearity: 0.25
                     });
                     
-                    // Open popup after all animations complete
                     setTimeout(() => {
                         if (marker._centerMarker && marker._centerMarker._popup) {
                             marker._centerMarker.openPopup();
                         } else if (marker._popup) {
                             marker.openPopup();
                         } else {
-                            // Fallback
                             const targetMarker = marker._centerMarker || marker;
                             targetMarker.bindPopup(popupContent, popupOptions).openPopup();
                         }
@@ -3484,14 +3453,11 @@
                     }, 1100);
                 };
                 
-                // Bind popup and click handlers
                 if (marker._polygon && marker._centerMarker) {
-                    // Polygon with center marker - popup on center
                     marker._centerMarker.bindPopup(popupContent, popupOptions);
                     marker._polygon.on('click', clickHandler);
                     marker._centerMarker.on('click', clickHandler);
                 } else if (marker._layers) {
-                    // Layer group
                     const layers = Object.values(marker._layers);
                     const centerMarker = layers.find(l => l._latlng);
                     if (centerMarker) {
@@ -3499,7 +3465,6 @@
                         marker.on('click', clickHandler);
                     }
                 } else {
-                    // Simple marker
                     marker.bindPopup(popupContent, popupOptions);
                     marker.on('click', clickHandler);
                 }
@@ -3549,7 +3514,6 @@
                 const refreshBtn = document.getElementById('refresh-outages');
                 if (refreshBtn) refreshBtn.disabled = true;
                 
-                // Show the main loading overlay if force refresh
                 if (force) {
                     const loadingOverlay = document.getElementById('loading-overlay');
                     const loadingText = loadingOverlay.querySelector('p');
@@ -3577,12 +3541,10 @@
                     
                     const data = await res.json();
                     
-                    // Clear all existing layers
                     for (const layer of Object.values(outageLayerGroups)) {
                         layer.clearLayers();
                     }
                     
-                    // Close any open popups
                     if (outageMap) {
                         outageMap.closePopup();
                         currentlyOpenMarker = null;
@@ -3672,14 +3634,12 @@
                     document.getElementById('outage-last-update').textContent = new Date().toLocaleTimeString('en-AU');
                     
                     if (force) {
-                        // Hide loading overlay
                         const loadingOverlay = document.getElementById('loading-overlay');
                         if (loadingOverlay) {
                             loadingOverlay.style.display = 'none';
                         }
                         showNotification(`Successfully refreshed outage data - ${total} outages loaded`, 'success');
                         
-                        // Reset view after refresh
                         if (outageMap) {
                             outageMap.setView([-28.836252984829166, 153.30047607421878], 10, { animate: true, duration: 0.5 });
                         }
@@ -3688,7 +3648,6 @@
                 } catch (error) {
                     console.error('Load outage error:', error);
                     
-                    // Hide loading overlay on error
                     const loadingOverlay = document.getElementById('loading-overlay');
                     if (loadingOverlay) {
                         loadingOverlay.style.display = 'none';
@@ -3700,7 +3659,6 @@
                 }
             }
             
-            // Setup event listeners when tab becomes active
             const outageTab = document.getElementById('tab-outage');
             if (outageTab) {
                 outageTab.addEventListener('click', function() {
@@ -3715,12 +3673,10 @@
                 });
             }
             
-            // Radio button listeners
             document.querySelectorAll('input[name="outage-category"]').forEach(radio => {
                 radio.addEventListener('change', applyOutageVisibility);
             });
             
-            // Refresh button - bind after DOM is ready
             setTimeout(() => {
                 const refreshBtn = document.getElementById('refresh-outages');
                 if (refreshBtn) {
@@ -3728,7 +3684,6 @@
                 }
             }, 100);
             
-            // Fit bounds button
             const fitBoundsBtn = document.getElementById('outage-fit-bounds');
             if (fitBoundsBtn) {
                 fitBoundsBtn.addEventListener('click', () => {
@@ -3762,7 +3717,6 @@
                 });
             }
             
-            // Locate me button
             const locateMeBtn = document.getElementById('outage-locate-me');
             if (locateMeBtn) {
                 locateMeBtn.addEventListener('click', () => {
@@ -3787,7 +3741,6 @@
                 });
             }
             
-            // Auto-refresh every 5 minutes
             setInterval(() => {
                 const outageContent = document.getElementById('content-outage');
                 if (outageContent && outageContent.classList.contains('active')) {
@@ -3796,32 +3749,25 @@
             }, 5 * 60 * 1000);
         })();
 
-// Reset outage map when switching tabs
         function resetOutageMap() {
             const outageMapElement = document.getElementById('outage-map');
             if (outageMapElement && outageMapElement._leaflet_map) {
                 const map = outageMapElement._leaflet_map;
-                // Reset to default view
                 map.setView([-28.836252984829166, 153.30047607421878], 10, { animate: false });
-                // Close any open popups
                 map.closePopup();
-                // Reset currently open marker tracker
                 if (window.currentlyOpenMarker) {
                     window.currentlyOpenMarker = null;
                 }
             }
         }
 
-        // Hook into existing tab setup to add reset
         const originalSetupTabs = setupTabs;
         setupTabs = function() {
             originalSetupTabs();
             
-            // Add reset to all tab buttons
             const tabButtons = document.querySelectorAll('.tab-button');
             tabButtons.forEach(button => {
                 button.addEventListener('click', () => {
-                    // Reset outage map when leaving the outage tab
                     const outageContent = document.getElementById('content-outage');
                     if (outageContent && outageContent.classList.contains('active') && button.id !== 'tab-outage') {
                         resetOutageMap();
@@ -5613,31 +5559,23 @@
                     maxWidth: 300
                 });
 
-                // Add click handler for auto-zoom to property
                 marker.on('click', function(e) {
                     L.DomEvent.stopPropagation(e);
 
-                    // Check if clicking on the currently open marker
                     const isCurrentlyOpen = currentlyOpenFloodMarker === marker && marker.isPopupOpen();
 
-                    // If clicking the same marker that's already open, just keep it open
                     if (isCurrentlyOpen) {
                         return;
                     }
 
-                    // Update the currently open marker
                     currentlyOpenFloodMarker = marker;
 
-                    // Create a small bounds around the property to use with padding
-                    const offset = 0.0005; // Small offset to create bounds
+                    const offset = 0.0005;
                     const bounds = L.latLngBounds(
                         [property.coordinates[0] - offset, property.coordinates[1] - offset],
                         [property.coordinates[0] + offset, property.coordinates[1] + offset]
                     );
 
-                    // Fly to bounds with padding to ensure popup stays in viewport
-                    // Top padding: 250px ensures popup doesn't exceed top of view
-                    // Bottom padding: 80px ensures marker doesn't exceed bottom of view
                     floodMap.flyToBounds(bounds, {
                         paddingTopLeft: [50, 250],
                         paddingBottomRight: [50, 80],
@@ -5646,7 +5584,6 @@
                         easeLinearity: 0.25
                     });
 
-                    // Open popup after animation completes
                     setTimeout(() => {
                         marker.openPopup();
                     }, 650);
@@ -5743,7 +5680,6 @@
 
             floodMarkers = L.layerGroup().addTo(floodMap);
 
-            // Close popup on user-initiated map interaction (scroll, drag, zoom)
             floodMap.getContainer().addEventListener('wheel', () => {
                 currentlyOpenFloodMarker = null;
                 floodMap.closePopup();
