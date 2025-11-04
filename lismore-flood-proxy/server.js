@@ -1180,5 +1180,3 @@ app.listen(PORT, () => {
   console.log(`✓ API: http://localhost:${PORT}/api/flood-data`);
   console.log('='.repeat(60) + '\n');
 });
-
-
