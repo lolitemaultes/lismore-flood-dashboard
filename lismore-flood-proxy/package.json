@@ -2,6 +2,9 @@
   "name": "lismore-flood-proxy",
   "version": "1.0.0",
   "main": "server.js",
+  "engines": {
+    "node": ">=16.0.0"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
@@ -9,7 +12,7 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "Lismore Flood Dashboard - Proxy server for aggregating flood, weather, and emergency data",
   "dependencies": {
     "axios": "^1.8.2",
     "cheerio": "^1.0.0",
@@ -19,3 +22,4 @@
     "node-cache": "^5.1.2"
   }
 }
+
