@@ -84,7 +84,6 @@ const LEVEE_WARNING_THRESHOLD = 9.0;
 
 let leveeLine = null;
 
-// Use relative URLs to work with both HTTP and HTTPS
 const BASE_URL = window.location.origin || '';
 const PROXY_URL = '/flood-data';
 
