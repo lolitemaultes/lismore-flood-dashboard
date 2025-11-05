@@ -2196,27 +2196,38 @@
             radarTestImg.src = `/proxy/radar-image?t=${new Date().getTime()}`;
         }
 
-        function refreshCycloneMap() {
+        async function refreshCycloneMap() {
             const cycloneImage = document.getElementById('cyclone-image');
             const cycloneError = document.getElementById('cyclone-error');
             const cycloneTimestamp = document.getElementById('cyclone-timestamp');
 
-            const timestamp = new Date().getTime();
-            cycloneImage.src = `/proxy/cyclone-image?t=${timestamp}`;
+            try {
+                // Check availability first (server logs in terminal)
+                const checkResponse = await fetch('/api/check-cyclone');
+                const checkData = await checkResponse.json();
 
-            cycloneTimestamp.textContent = `Last updated: ${new Date().toLocaleTimeString('en-AU')}`;
+                if (checkData.available) {
+                    // Only load image if available
+                    const timestamp = new Date().getTime();
+                    cycloneImage.src = `/proxy/cyclone-image?t=${timestamp}`;
+                    cycloneTimestamp.textContent = `Last updated: ${new Date().toLocaleTimeString('en-AU')}`;
 
-            cycloneImage.onerror = function() {
-                // Mark tab as unavailable when image doesn't exist (e.g., no active cyclone)
-                markTabUnavailable('tab-cyclone', 'No current cyclone warnings or bulletins for this area.');
+                    cycloneImage.onload = function() {
+                        markTabAvailable('tab-cyclone');
+                        cycloneError.style.display = 'none';
+                    };
+                } else {
+                    // Mark as unavailable without trying to load
+                    markTabUnavailable('tab-cyclone', 'No current cyclone warnings or bulletins for this area.');
+                    cycloneError.style.display = 'block';
+                    cycloneError.textContent = 'No current cyclone warnings for this area';
+                }
+            } catch (error) {
+                // Silent fail - server handles logging
+                markTabUnavailable('tab-cyclone', 'Unable to check cyclone status.');
                 cycloneError.style.display = 'block';
-                cycloneError.textContent = 'No current cyclone warnings for this area';
-            };
-
-            cycloneImage.onload = function() {
-                markTabAvailable('tab-cyclone');
-                cycloneError.style.display = 'none';
-            };
+                cycloneError.textContent = 'Unable to check cyclone status';
+            }
         }
 
         window.addEventListener('error', function(event) {
@@ -2315,21 +2326,38 @@
             }, 7000);
         }
         
-        function checkCycloneAvailability() {
-            const cycloneImg = new Image();
-            
-            cycloneImg.onload = function() {
-                markTabAvailable('tab-cyclone');
-                document.getElementById('cyclone-error').style.display = 'none';
-            };
-            
-            cycloneImg.onerror = function() {
-                markTabUnavailable('tab-cyclone', 'No current cyclone warnings or bulletins for this area.');
-                document.getElementById('cyclone-error').style.display = 'block';
-                document.getElementById('cyclone-error').textContent = 'No current cyclone warnings for this area';
-            };
-            
-            cycloneImg.src = `/proxy/cyclone-image?t=${new Date().getTime()}`;
+        async function checkCycloneAvailability() {
+            try {
+                // Check availability first (server logs in terminal)
+                const checkResponse = await fetch('/api/check-cyclone');
+                const checkData = await checkResponse.json();
+
+                if (checkData.available) {
+                    markTabAvailable('tab-cyclone');
+                    const errorEl = document.getElementById('cyclone-error');
+                    if (errorEl) errorEl.style.display = 'none';
+
+                    // Load image directly without re-checking availability
+                    const cycloneImage = document.getElementById('cyclone-image');
+                    const cycloneTimestamp = document.getElementById('cyclone-timestamp');
+                    if (cycloneImage) {
+                        const timestamp = new Date().getTime();
+                        cycloneImage.src = `/proxy/cyclone-image?t=${timestamp}`;
+                        if (cycloneTimestamp) {
+                            cycloneTimestamp.textContent = `Last updated: ${new Date().toLocaleTimeString('en-AU')}`;
+                        }
+                    }
+                } else {
+                    markTabUnavailable('tab-cyclone', 'No current cyclone warnings or bulletins for this area.');
+                    const errorEl = document.getElementById('cyclone-error');
+                    if (errorEl) {
+                        errorEl.style.display = 'block';
+                        errorEl.textContent = 'No current cyclone warnings for this area';
+                    }
+                }
+            } catch (error) {
+                // Silent fail - server handles logging
+            }
         }
         
         function fixRadarStatusCheck() {
