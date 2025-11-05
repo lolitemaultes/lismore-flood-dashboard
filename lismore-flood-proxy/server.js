@@ -758,20 +758,34 @@ class FloodService {
 
         const normalizedSearchLocation = normalizeLocation(location);
 
+        Logger.verbose(`Searching for location: "${location}" (normalized: "${normalizedSearchLocation}")`);
+
         $('tr').each((i, row) => {
             const cells = $(row).find('td');
             if (cells.length > 0) {
                 const locationText = $(cells[0]).text().trim();
                 const normalizedLocationText = normalizeLocation(locationText);
 
+                // Log all locations for debugging
+                if (locationText && locationText.length > 5) {
+                    Logger.verbose(`Found location on page: "${locationText}" (normalized: "${normalizedLocationText}")`);
+                }
+
                 // Try exact match first, then normalized match
                 if (locationText === location || normalizedLocationText === normalizedSearchLocation) {
+                    Logger.verbose(`Matched location: "${locationText}"`);
+
+                    // Look for any link in the row
                     $(row).find('a').each((j, link) => {
-                        if ($(link).text().trim() === 'Table') {
+                        const linkText = $(link).text().trim();
+                        Logger.verbose(`Found link in row: "${linkText}"`);
+
+                        if (linkText === 'Table' || linkText.toLowerCase().includes('table')) {
                             tableUrl = $(link).attr('href');
                             if (!tableUrl.startsWith('http')) {
                                 tableUrl = Config.urls.BOM_BASE + tableUrl;
                             }
+                            Logger.verbose(`Found table URL: ${tableUrl}`);
                             return false;
                         }
                     });
