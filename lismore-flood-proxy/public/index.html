@@ -2541,7 +2541,20 @@
             }
         
             document.getElementById('flood-data-body').addEventListener('click', handleRowClick);
-        
+
+        function showRiverDataError(message) {
+          const riverLoading = document.getElementById('river-loading');
+          const riverDataError = document.getElementById('river-data-error');
+          const riverDataErrorMessage = riverDataError.querySelector('p');
+
+          riverLoading.style.display = 'none';
+          riverDataError.style.display = 'flex';
+
+          if (riverDataErrorMessage) {
+            riverDataErrorMessage.textContent = message || 'Failed to load river height data';
+          }
+        }
+
         async function fetchRiverHeightData(location) {
           try {
             const riverLoading = document.getElementById('river-loading');
