@@ -405,14 +405,30 @@
             
             const total = counts.current + counts.future + counts.cancelled;
             document.getElementById('outage-last-update').textContent = new Date().toLocaleTimeString('en-AU');
-            
+
+            // Check if there were any errors fetching categories
+            if (data.errors && data.errors.length > 0) {
+                const errorCategories = data.errors.map(e => e.category).join(', ');
+                console.warn('Some outage categories failed to load:', data.errors);
+                if (total === 0) {
+                    showNotification(`Warning: Could not load outage data from some sources (${errorCategories}). Service may be temporarily unavailable.`, 'warning');
+                } else if (!force) {
+                    // Only show warning on initial load if we got partial data
+                    showNotification(`Loaded ${total} outages. Note: ${errorCategories} outages unavailable.`, 'warning');
+                }
+            }
+
             if (force) {
                 const loadingOverlay = document.getElementById('loading-overlay');
                 if (loadingOverlay) {
                     loadingOverlay.style.display = 'none';
                 }
-                showNotification(`Successfully refreshed outage data - ${total} outages loaded`, 'success');
-                
+                if (data.errors && data.errors.length > 0 && total === 0) {
+                    showNotification('Outage data service is currently unavailable. Please try again later.', 'error');
+                } else {
+                    showNotification(`Successfully refreshed outage data - ${total} outages loaded`, 'success');
+                }
+
                 if (outageMap) {
                     outageMap.setView([-28.836252984829166, 153.30047607421878], 10, { animate: true, duration: 0.5 });
                 }
