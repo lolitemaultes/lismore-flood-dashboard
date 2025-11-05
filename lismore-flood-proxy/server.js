@@ -13,7 +13,7 @@ const { XMLParser } = require('fast-xml-parser');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const VERBOSE_LOGGING = process.env.VERBOSE_LOGGING === 'true' || true; // Temporarily enabled for debugging
+const VERBOSE_LOGGING = process.env.VERBOSE_LOGGING === 'true' || false;
 
 // Cache Configuration
 const OUTAGE_CACHE_TTL = 60;
@@ -196,19 +196,39 @@ const FloodConfig = {
         'Wilsons R at Tuckurimba',
         'Wilsons River at Tuckurimba'
     ],
-    
+
     officialClassificationLocations: [
         "Wilsons R at Eltham",
         "Wilsons R at Lismore (mAHD)",
         "Leycester Ck at Rock Valley",
         "Coopers Ck at Corndale"
     ],
-    
+
     thresholds: {
         "Wilsons R at Eltham": { minor: 6.00, moderate: 8.20, major: 9.60 },
         "Wilsons R at Lismore (mAHD)": { minor: 4.20, moderate: 7.20, major: 9.70 },
         "Leycester Ck at Rock Valley": { minor: 6.00, moderate: 8.00, major: 9.00 },
         "Coopers Ck at Corndale": { minor: 6.00, moderate: 7.50, major: 9.50 }
+    },
+
+    // Direct URL mappings to BOM river height tables
+    riverHeightUrls: {
+        "Wilsons R at Lismore (mAHD)": "https://www.bom.gov.au/fwo/IDN60231/IDN60231.058176.tbl.shtml",
+        "Wilsons River at Lismore (mAHD)": "https://www.bom.gov.au/fwo/IDN60231/IDN60231.058176.tbl.shtml",
+        "Wilsons R at Lismore": "https://www.bom.gov.au/fwo/IDN60231/IDN60231.058176.tbl.shtml",
+        "Wilsons River at Lismore": "https://www.bom.gov.au/fwo/IDN60231/IDN60231.058176.tbl.shtml",
+        "Wilsons R at Eltham": "https://www.bom.gov.au/fwo/IDN60231/IDN60231.058200.tbl.shtml",
+        "Wilsons River at Eltham": "https://www.bom.gov.au/fwo/IDN60231/IDN60231.058200.tbl.shtml",
+        "Leycester Ck at Rock Valley": "https://www.bom.gov.au/fwo/IDN60231/IDN60231.058199.tbl.shtml",
+        "Leycester Creek at Rock Valley": "https://www.bom.gov.au/fwo/IDN60231/IDN60231.058199.tbl.shtml",
+        "Coopers Ck at Corndale": "https://www.bom.gov.au/fwo/IDN60231/IDN60231.058206.tbl.shtml",
+        "Coopers Creek at Corndale": "https://www.bom.gov.au/fwo/IDN60231/IDN60231.058206.tbl.shtml",
+        "Richmond R at Casino": "https://www.bom.gov.au/fwo/IDN60231/IDN60231.558013.tbl.shtml",
+        "Richmond River at Casino": "https://www.bom.gov.au/fwo/IDN60231/IDN60231.558013.tbl.shtml",
+        "Richmond R at Coraki": "https://www.bom.gov.au/fwo/IDN60231/IDN60231.058175.tbl.shtml",
+        "Richmond River at Coraki": "https://www.bom.gov.au/fwo/IDN60231/IDN60231.058175.tbl.shtml",
+        "Wilsons R at Tuckurimba": "https://www.bom.gov.au/fwo/IDN60231/IDN60231.558076.tbl.shtml",
+        "Wilsons River at Tuckurimba": "https://www.bom.gov.au/fwo/IDN60231/IDN60231.558076.tbl.shtml"
     }
 };
 
@@ -735,68 +755,15 @@ class FloodService {
     }
     
     static async fetchRiverHeightData(location) {
-        const response = await axios.get(Config.urls.BOM_FLOOD_WARNING, {
-            headers: Config.headers.html,
-            timeout: 10000
-        });
-
-        if (response.status !== 200) {
-            throw new Error(`Failed to fetch flood data page: ${response.status}`);
-        }
-
-        const $ = cheerio.load(response.data);
-        let tableUrl = null;
-
-        // Helper function to normalize location names for matching
-        const normalizeLocation = (loc) => {
-            return loc.toLowerCase()
-                .replace(/\s+/g, ' ')
-                .replace(/\briver\b/g, 'r')
-                .replace(/\bcreek\b/g, 'ck')
-                .trim();
-        };
-
-        const normalizedSearchLocation = normalizeLocation(location);
-
-        Logger.verbose(`Searching for location: "${location}" (normalized: "${normalizedSearchLocation}")`);
-
-        $('tr').each((i, row) => {
-            const cells = $(row).find('td');
-            if (cells.length > 0) {
-                const locationText = $(cells[0]).text().trim();
-                const normalizedLocationText = normalizeLocation(locationText);
-
-                // Log all locations for debugging
-                if (locationText && locationText.length > 5) {
-                    Logger.verbose(`Found location on page: "${locationText}" (normalized: "${normalizedLocationText}")`);
-                }
-
-                // Try exact match first, then normalized match
-                if (locationText === location || normalizedLocationText === normalizedSearchLocation) {
-                    Logger.verbose(`Matched location: "${locationText}"`);
-
-                    // Look for any link in the row
-                    $(row).find('a').each((j, link) => {
-                        const linkText = $(link).text().trim();
-                        Logger.verbose(`Found link in row: "${linkText}"`);
-
-                        if (linkText === 'Table' || linkText.toLowerCase().includes('table')) {
-                            tableUrl = $(link).attr('href');
-                            if (!tableUrl.startsWith('http')) {
-                                tableUrl = Config.urls.BOM_BASE + tableUrl;
-                            }
-                            Logger.verbose(`Found table URL: ${tableUrl}`);
-                            return false;
-                        }
-                    });
-                    if (tableUrl) return false;
-                }
-            }
-        });
+        // Get the direct URL from our mapping
+        const tableUrl = FloodConfig.riverHeightUrls[location];
 
         if (!tableUrl) {
-            throw new Error(`No table URL found for location: ${location}`);
+            Logger.error(`No URL mapping found for location: ${location}`);
+            throw new Error(`River height data not available for location: ${location}`);
         }
+
+        Logger.verbose(`Fetching river height data for "${location}" from ${tableUrl}`);
         
         const tableResponse = await axios.get(tableUrl, {
             headers: Config.headers.html,
@@ -807,24 +774,49 @@ class FloodService {
             throw new Error(`Failed to fetch table data: ${tableResponse.status}`);
         }
         
-        const tableHtml = cheerio.load(tableResponse.data);
+        const $ = cheerio.load(tableResponse.data);
         const riverData = [];
-        
-        const preContent = tableHtml('pre').text();
-        if (preContent && preContent.trim().length > 0) {
-            const lines = preContent.split('\n');
-            
-            for (const line of lines) {
-                const match = line.match(/(\d{2}\/\d{2}\/\d{4}\s+\d{2}:\d{2})\s+(\d+\.\d+)/);
-                if (match) {
-                    riverData.push({
-                        time: match[1],
-                        height: parseFloat(match[2])
-                    });
+
+        // Try parsing HTML table format first (newer format)
+        $('table tbody tr').each((i, row) => {
+            const cells = $(row).find('td');
+            if (cells.length >= 2) {
+                const dateTime = $(cells[0]).text().trim();
+                const heightText = $(cells[1]).text().trim();
+
+                // Match date format: DD/MM/YYYY HH:MM
+                if (dateTime.match(/^\d{2}\/\d{2}\/\d{4}\s+\d{2}:\d{2}$/)) {
+                    const height = parseFloat(heightText);
+                    if (!isNaN(height)) {
+                        riverData.push({
+                            time: dateTime,
+                            height: height
+                        });
+                    }
+                }
+            }
+        });
+
+        // Fallback: try parsing pre-formatted text (older format)
+        if (riverData.length === 0) {
+            const preContent = $('pre').text();
+            if (preContent && preContent.trim().length > 0) {
+                const lines = preContent.split('\n');
+
+                for (const line of lines) {
+                    const match = line.match(/(\d{2}\/\d{2}\/\d{4}\s+\d{2}:\d{2})\s+(\d+\.\d+)/);
+                    if (match) {
+                        riverData.push({
+                            time: match[1],
+                            height: parseFloat(match[2])
+                        });
+                    }
                 }
             }
         }
-        
+
+        Logger.verbose(`Parsed ${riverData.length} river height data points for ${location}`);
+
         return {
             success: true,
             location: location,
