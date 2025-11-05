@@ -14,6 +14,7 @@
 - Separation of css and js to maintain clean directory
 
 **LOLITEMAULTES Original Weather Radar Map**
+- Implement original interactive rain radar map
 - The aggregation of multiple free radar APIs to get the most accurate result
 
 **Bug Fixes**
