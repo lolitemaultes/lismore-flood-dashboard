@@ -7,10 +7,11 @@ Based on your error logs, you have **3 issues** to fix:
 ### Error 1: Wrong Node.js Version
 ```
 ReferenceError: ReadableStream is not defined
+ReferenceError: File is not defined
 ```
-**Problem:** You're running Node.js 14 or 16, but this app requires Node.js 18+
+**Problem:** You're running Node.js 14, 16, or 18.x, but this app requires Node.js 20+
 
-**Solution:** Upgrade to Node.js 18 (LTS) or higher in your hosting panel
+**Solution:** Upgrade to Node.js 20 LTS in your hosting panel
 
 ### Error 2: Wrong Directory Path
 ```
@@ -52,16 +53,17 @@ cd /home/lolizzmg/flood.lolitemaultes.online/lismore-flood-dashboard/lismore-flo
 node --version
 ```
 
-**You need:** Node.js 18.0.0 or higher (Node 18 LTS recommended)
+**You need:** Node.js 20.0.0 or higher (Node 20 LTS recommended)
 
-**If you have Node 16 or lower:**
+**If you have Node 18 or lower:**
 
 #### Option A: Use cPanel Node.js Selector (RECOMMENDED)
 1. Log into cPanel
 2. Go to "Setup Node.js App" or "Node.js Selector"
-3. Select Node.js version **18.x LTS** (NOT 16.x or 14.x)
+3. Select Node.js version **20.x LTS** (NOT 18.x, 16.x, or 14.x)
 4. Set the application root to: `lismore-flood-dashboard/lismore-flood-proxy`
 5. Click "Save"
+6. **IMPORTANT:** After changing version, click "Run NPM Install" button
 
 #### Option B: Use NVM (if SSH access)
 ```bash
@@ -69,13 +71,13 @@ node --version
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
 source ~/.bashrc
 
-# Install Node.js 18 LTS
-nvm install 18
-nvm use 18
-nvm alias default 18
+# Install Node.js 20 LTS
+nvm install 20
+nvm use 20
+nvm alias default 20
 
 # Verify
-node --version  # Should show v18.x.x
+node --version  # Should show v20.x.x
 ```
 
 ### Step 4: Install Dependencies
@@ -83,6 +85,9 @@ node --version  # Should show v18.x.x
 ```bash
 # Make sure you're in lismore-flood-proxy directory!
 pwd  # Should show: /home/lolizzmg/.../lismore-flood-proxy
+
+# IMPORTANT: Clean install (required if you changed Node versions)
+rm -rf node_modules package-lock.json
 
 # Install packages
 npm install
@@ -93,9 +98,16 @@ npm install
 added 85 packages, and audited 86 packages in 5s
 ```
 
-**If you get errors:** Delete `node_modules` and `package-lock.json` first:
+**If "Cannot find module 'express'" error persists:**
 ```bash
-rm -rf node_modules package-lock.json
+# Verify you're in the RIGHT directory
+cd /home/lolizzmg/flood.lolitemaultes.online/lismore-flood-dashboard/lismore-flood-proxy
+ls -la  # Should see server.js and package.json
+
+# Force local install
+npm install --prefix . express axios cheerio cors fast-xml-parser node-cache
+
+# Then install everything
 npm install
 ```
 
@@ -127,7 +139,7 @@ node server.js
 2. **Find "Setup Node.js App"** (or similar)
 
 3. **Create New Application:**
-   - **Node.js Version:** 18.x LTS (NOT 16.x or 14.x)
+   - **Node.js Version:** 20.x LTS (NOT 18.x, 16.x, or 14.x)
    - **Application Mode:** Production
    - **Application Root:** `lismore-flood-dashboard/lismore-flood-proxy`
    - **Application URL:** `https://flood.lolitemaultes.online`
@@ -140,9 +152,14 @@ node server.js
 
 4. **Click "Create"**
 
-5. **Click "Run NPM Install"** button
+5. **CRITICAL: Run npm install via SSH** (cPanel button may install to wrong location)
+   ```bash
+   cd /home/lolizzmg/flood.lolitemaultes.online/lismore-flood-dashboard/lismore-flood-proxy
+   rm -rf node_modules package-lock.json
+   npm install
+   ```
 
-6. **Click "Restart"**
+6. **Click "Restart"** in cPanel
 
 ### Step 7: Configure .htaccess (if needed)
 
@@ -201,13 +218,16 @@ rm -rf node_modules package-lock.json
 npm install
 ```
 
-### Issue: "ReferenceError: ReadableStream is not defined"
+### Issue: "ReferenceError: ReadableStream is not defined" or "ReferenceError: File is not defined"
 
-**Cause:** Node.js version too old (you have v14 or v16, need v18+)
+**Cause:** Node.js version too old (you have v14, v16, or v18, need v20+)
 
-**Fix:** Upgrade Node.js to version 18 LTS in cPanel
+**Fix:** Upgrade Node.js to version 20 LTS in cPanel
 
-**Why Node 18?** Modern dependencies (like axios/undici) require the `ReadableStream` API, which is only stable in Node 18+
+**Why Node 20?**
+- Node 18.20.8 doesn't have the `File` API
+- Modern dependencies (like axios/undici) require these Web APIs
+- Node 20+ has full support without flags
 
 ### Issue: "EADDRINUSE: Port 3000 already in use"
 
@@ -275,7 +295,7 @@ Your deployment should look like this:
 
 Before going live, confirm:
 
-- [ ] Node.js version is 18+ (`node --version` shows v18.x.x)
+- [ ] Node.js version is 20+ (`node --version` shows v20.x.x)
 - [ ] You're in `lismore-flood-proxy` directory
 - [ ] Dependencies installed (`ls node_modules/` shows packages)
 - [ ] Server starts without errors (`node server.js`)
@@ -296,10 +316,10 @@ Run these in order if still having issues:
 # 1. Go to correct directory
 cd /home/lolizzmg/flood.lolitemaultes.online/lismore-flood-dashboard/lismore-flood-proxy
 
-# 2. Check Node version (must be 18+)
+# 2. Check Node version (must be 20+)
 node --version
 
-# If not 18, upgrade in cPanel to Node.js 18.x LTS
+# If not 20, upgrade in cPanel to Node.js 20.x LTS
 
 # 3. Clean install dependencies
 rm -rf node_modules package-lock.json
@@ -346,21 +366,23 @@ node server.js
 **Hostinger:**
 - Use "Node.js" option in hPanel
 - Set root to `lismore-flood-dashboard/lismore-flood-proxy`
-- Node version: 18.x
+- Node version: 20.x LTS
 
 **SiteGround:**
 - Use "Node.js Manager" in Site Tools
 - Set entry point to `server.js`
-- Node version: 18.x
+- Node version: 20.x LTS
 
 **A2 Hosting:**
 - Use "Setup Node.js App" in cPanel
 - Set application root correctly
+- Node version: 20.x LTS
 - Enable "Passenger" for auto-restart
 
 **Namecheap:**
 - Enable Node.js in cPanel
 - Set document root to app folder
+- Node version: 20.x LTS
 - Configure environment variables
 
 ---
