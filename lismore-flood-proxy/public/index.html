@@ -36,7 +36,7 @@
     <header>
         <div class="header-content">
             <div class="header-title">
-                <h1>Lismore Flood Emergency Dashboard</h1>
+                <h1>Lismore Flood Dashboard</h1>
             </div>
             <div class="header-info">
                 <div id="clock" class="clock-container">Loading time...</div>
@@ -2562,7 +2562,6 @@
             riverLoading.style.display = 'flex';
             riverDataError.style.display = 'none';
 
-            // Use the provided cleanLocation if available, otherwise clean the location
             const locationToUse = cleanLocation || location.replace(/\s*\<span.*\<\/span\>/i, "");
 
             const encodedLocation = encodeURIComponent(locationToUse);
@@ -2781,3 +2780,4 @@
     </div>
 </body>
 </html>
+
