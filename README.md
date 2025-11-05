@@ -28,6 +28,9 @@ A real-time emergency dashboard for monitoring flood conditions in the Lismore, 
 - **Dashboard Restyling for V3**
 - **Code Restructure / Cleaner Architecture**
 - **LOLITEMAULTES Original Weather Radar Map**
+- **Bug Fixes**
+- **Add Outage Loading Screen**
+- **Better Flood Map Statistic Method**
 
 ## Technical Architecture
 
