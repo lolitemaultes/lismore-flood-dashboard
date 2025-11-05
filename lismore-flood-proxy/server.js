@@ -841,15 +841,35 @@ app.get('/api/outages', async (req, res) => {
             outageCache.flushAll();
             Logger.info('Outage cache cleared by user request');
         }
-        
-        const [current, future, cancelled] = await Promise.all([
+
+        // Fetch all categories with individual error handling
+        const results = await Promise.allSettled([
             OutageService.fetchCategory('current'),
             OutageService.fetchCategory('future'),
             OutageService.fetchCategory('cancelled')
         ]);
-        
+
+        const current = results[0].status === 'fulfilled' ? results[0].value : [];
+        const future = results[1].status === 'fulfilled' ? results[1].value : [];
+        const cancelled = results[2].status === 'fulfilled' ? results[2].value : [];
+
+        // Track which categories failed
+        const errors = [];
+        if (results[0].status === 'rejected') {
+            Logger.error('Failed to fetch current outages:', results[0].reason.message);
+            errors.push({ category: 'current', error: results[0].reason.message });
+        }
+        if (results[1].status === 'rejected') {
+            Logger.error('Failed to fetch future outages:', results[1].reason.message);
+            errors.push({ category: 'future', error: results[1].reason.message });
+        }
+        if (results[2].status === 'rejected') {
+            Logger.error('Failed to fetch cancelled outages:', results[2].reason.message);
+            errors.push({ category: 'cancelled', error: results[2].reason.message });
+        }
+
         const allOutages = [...current, ...future, ...cancelled];
-        
+
         let bounds = null;
         if (allOutages.length > 0) {
             const lats = allOutages.map(o => o.latitude);
@@ -861,7 +881,7 @@ app.get('/api/outages', async (req, res) => {
                 west: Math.min(...lons)
             };
         }
-        
+
         res.json({
             success: true,
             timestamp: new Date().toISOString(),
@@ -872,9 +892,10 @@ app.get('/api/outages', async (req, res) => {
                 total: allOutages.length
             },
             bounds: bounds,
-            features: allOutages
+            features: allOutages,
+            errors: errors.length > 0 ? errors : undefined
         });
-        
+
     } catch (error) {
         Logger.error('Error in /api/outages:', error.message);
         res.status(500).json({
