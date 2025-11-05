@@ -31,6 +31,7 @@ A real-time emergency dashboard for monitoring flood conditions in the Lismore, 
 - **Bug Fixes**
 - **Add Outage Loading Screen**
 - **Better Flood Map Statistic Method**
+- **Fix Singular Outage Area Zooming**
 
 ## Technical Architecture
 
