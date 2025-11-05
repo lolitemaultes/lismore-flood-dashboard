@@ -368,10 +368,6 @@
                             </span>
                         </div>
                         <div class="outage-popup-row">
-                            <span class="outage-popup-label">Type</span>
-                            <span class="outage-popup-value">${escapeHtml(f.type)}</span>
-                        </div>
-                        <div class="outage-popup-row">
                             <span class="outage-popup-label">Time Off</span>
                             <span class="outage-popup-value">${escapeHtml(startTime)}</span>
                         </div>
@@ -538,17 +534,25 @@ function resetOutageMap() {
     }
 }
 
-const originalSetupTabs = setupTabs;
-setupTabs = function() {
-    originalSetupTabs();
-    
-    const tabButtons = document.querySelectorAll('.tab-button');
-    tabButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            const outageContent = document.getElementById('content-outage');
-            if (outageContent && outageContent.classList.contains('active') && button.id !== 'tab-outage') {
-                resetOutageMap();
-            }
-        });
-    });
-};
+// Wait for setupTabs to be defined, then wrap it
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof setupTabs !== 'undefined') {
+        const originalSetupTabs = setupTabs;
+        setupTabs = function() {
+            originalSetupTabs();
+
+            const tabButtons = document.querySelectorAll('.tab-button');
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const outageContent = document.getElementById('content-outage');
+                    if (outageContent && outageContent.classList.contains('active') && button.id !== 'tab-outage') {
+                        resetOutageMap();
+                    }
+                });
+            });
+        };
+
+        // Re-run setupTabs to apply our modifications
+        setupTabs();
+    }
+});

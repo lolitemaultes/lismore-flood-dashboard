@@ -196,19 +196,39 @@ const FloodConfig = {
         'Wilsons R at Tuckurimba',
         'Wilsons River at Tuckurimba'
     ],
-    
+
     officialClassificationLocations: [
         "Wilsons R at Eltham",
         "Wilsons R at Lismore (mAHD)",
         "Leycester Ck at Rock Valley",
         "Coopers Ck at Corndale"
     ],
-    
+
     thresholds: {
         "Wilsons R at Eltham": { minor: 6.00, moderate: 8.20, major: 9.60 },
         "Wilsons R at Lismore (mAHD)": { minor: 4.20, moderate: 7.20, major: 9.70 },
         "Leycester Ck at Rock Valley": { minor: 6.00, moderate: 8.00, major: 9.00 },
         "Coopers Ck at Corndale": { minor: 6.00, moderate: 7.50, major: 9.50 }
+    },
+
+    // Direct URL mappings to BOM river height tables
+    riverHeightUrls: {
+        "Wilsons R at Lismore (mAHD)": "https://www.bom.gov.au/fwo/IDN60231/IDN60231.058176.tbl.shtml",
+        "Wilsons River at Lismore (mAHD)": "https://www.bom.gov.au/fwo/IDN60231/IDN60231.058176.tbl.shtml",
+        "Wilsons R at Lismore": "https://www.bom.gov.au/fwo/IDN60231/IDN60231.058176.tbl.shtml",
+        "Wilsons River at Lismore": "https://www.bom.gov.au/fwo/IDN60231/IDN60231.058176.tbl.shtml",
+        "Wilsons R at Eltham": "https://www.bom.gov.au/fwo/IDN60231/IDN60231.058200.tbl.shtml",
+        "Wilsons River at Eltham": "https://www.bom.gov.au/fwo/IDN60231/IDN60231.058200.tbl.shtml",
+        "Leycester Ck at Rock Valley": "https://www.bom.gov.au/fwo/IDN60231/IDN60231.058199.tbl.shtml",
+        "Leycester Creek at Rock Valley": "https://www.bom.gov.au/fwo/IDN60231/IDN60231.058199.tbl.shtml",
+        "Coopers Ck at Corndale": "https://www.bom.gov.au/fwo/IDN60231/IDN60231.058206.tbl.shtml",
+        "Coopers Creek at Corndale": "https://www.bom.gov.au/fwo/IDN60231/IDN60231.058206.tbl.shtml",
+        "Richmond R at Casino": "https://www.bom.gov.au/fwo/IDN60231/IDN60231.558013.tbl.shtml",
+        "Richmond River at Casino": "https://www.bom.gov.au/fwo/IDN60231/IDN60231.558013.tbl.shtml",
+        "Richmond R at Coraki": "https://www.bom.gov.au/fwo/IDN60231/IDN60231.058175.tbl.shtml",
+        "Richmond River at Coraki": "https://www.bom.gov.au/fwo/IDN60231/IDN60231.058175.tbl.shtml",
+        "Wilsons R at Tuckurimba": "https://www.bom.gov.au/fwo/IDN60231/IDN60231.558076.tbl.shtml",
+        "Wilsons River at Tuckurimba": "https://www.bom.gov.au/fwo/IDN60231/IDN60231.558076.tbl.shtml"
     }
 };
 
@@ -367,12 +387,18 @@ class OutageService {
     
     static parseDescription(html) {
         if (!html) return {};
-        
+
         const result = {};
-        
+
         try {
-            let decoded = String(html).replace(/<!\[CDATA\[|\]\]>/g, '').trim();
-            
+            // Extract content from CDATA or text node if it's an object
+            let content = html;
+            if (typeof html === 'object') {
+                content = html.__cdata || html['#text'] || String(html);
+            }
+
+            let decoded = String(content).replace(/<!\[CDATA\[|\]\]>/g, '').trim();
+
             decoded = decoded
                 .replace(/&nbsp;/g, ' ')
                 .replace(/&lt;/g, '<')
@@ -380,7 +406,7 @@ class OutageService {
                 .replace(/&amp;/g, '&')
                 .replace(/&quot;/g, '"')
                 .replace(/&#39;/g, "'");
-            
+
             const patterns = {
                 timeOff: /<span>Time Off:<\/span>\s*(\d{2}\/\d{2}\/\d{4}\s+\d{2}:\d{2}:\d{2})/i,
                 timeOn: /<span>Est\.\s*Time On:<\/span>\s*(\d{2}\/\d{2}\/\d{4}\s+\d{2}:\d{2}:\d{2})/i,
@@ -388,7 +414,7 @@ class OutageService {
                 reason: /<span>Reason:<\/span>\s*([^<]+)/i,
                 lastUpdated: /<span>Last Updated:<\/span>\s*(\d{2}\/\d{2}\/\d{4}\s+\d{2}:\d{2}:\d{2})/i
             };
-            
+
             for (const [key, pattern] of Object.entries(patterns)) {
                 const match = decoded.match(pattern);
                 if (match && match[1]) {
@@ -406,7 +432,7 @@ class OutageService {
         } catch (error) {
             Logger.verbose('Error parsing description:', error.message);
         }
-        
+
         return result;
     }
     
@@ -729,41 +755,15 @@ class FloodService {
     }
     
     static async fetchRiverHeightData(location) {
-        const response = await axios.get(Config.urls.BOM_FLOOD_WARNING, {
-            headers: Config.headers.html,
-            timeout: 10000
-        });
-        
-        if (response.status !== 200) {
-            throw new Error(`Failed to fetch flood data page: ${response.status}`);
-        }
-        
-        const $ = cheerio.load(response.data);
-        let tableUrl = null;
-        
-        $('tr').each((i, row) => {
-            const cells = $(row).find('td');
-            if (cells.length > 0) {
-                const locationText = $(cells[0]).text().trim();
-                
-                if (locationText === location) {
-                    $(row).find('a').each((j, link) => {
-                        if ($(link).text().trim() === 'Table') {
-                            tableUrl = $(link).attr('href');
-                            if (!tableUrl.startsWith('http')) {
-                                tableUrl = Config.urls.BOM_BASE + tableUrl;
-                            }
-                            return false;
-                        }
-                    });
-                    if (tableUrl) return false;
-                }
-            }
-        });
-        
+        // Get the direct URL from our mapping
+        const tableUrl = FloodConfig.riverHeightUrls[location];
+
         if (!tableUrl) {
-            throw new Error(`No table URL found for location: ${location}`);
+            Logger.error(`No URL mapping found for location: ${location}`);
+            throw new Error(`River height data not available for location: ${location}`);
         }
+
+        Logger.verbose(`Fetching river height data for "${location}" from ${tableUrl}`);
         
         const tableResponse = await axios.get(tableUrl, {
             headers: Config.headers.html,
@@ -774,24 +774,49 @@ class FloodService {
             throw new Error(`Failed to fetch table data: ${tableResponse.status}`);
         }
         
-        const tableHtml = cheerio.load(tableResponse.data);
+        const $ = cheerio.load(tableResponse.data);
         const riverData = [];
-        
-        const preContent = tableHtml('pre').text();
-        if (preContent && preContent.trim().length > 0) {
-            const lines = preContent.split('\n');
-            
-            for (const line of lines) {
-                const match = line.match(/(\d{2}\/\d{2}\/\d{4}\s+\d{2}:\d{2})\s+(\d+\.\d+)/);
-                if (match) {
-                    riverData.push({
-                        time: match[1],
-                        height: parseFloat(match[2])
-                    });
+
+        // Try parsing HTML table format first (newer format)
+        $('table tbody tr').each((i, row) => {
+            const cells = $(row).find('td');
+            if (cells.length >= 2) {
+                const dateTime = $(cells[0]).text().trim();
+                const heightText = $(cells[1]).text().trim();
+
+                // Match date format: DD/MM/YYYY HH:MM
+                if (dateTime.match(/^\d{2}\/\d{2}\/\d{4}\s+\d{2}:\d{2}$/)) {
+                    const height = parseFloat(heightText);
+                    if (!isNaN(height)) {
+                        riverData.push({
+                            time: dateTime,
+                            height: height
+                        });
+                    }
+                }
+            }
+        });
+
+        // Fallback: try parsing pre-formatted text (older format)
+        if (riverData.length === 0) {
+            const preContent = $('pre').text();
+            if (preContent && preContent.trim().length > 0) {
+                const lines = preContent.split('\n');
+
+                for (const line of lines) {
+                    const match = line.match(/(\d{2}\/\d{2}\/\d{4}\s+\d{2}:\d{2})\s+(\d+\.\d+)/);
+                    if (match) {
+                        riverData.push({
+                            time: match[1],
+                            height: parseFloat(match[2])
+                        });
+                    }
                 }
             }
         }
-        
+
+        Logger.verbose(`Parsed ${riverData.length} river height data points for ${location}`);
+
         return {
             success: true,
             location: location,
