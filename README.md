@@ -21,18 +21,6 @@ A real-time emergency dashboard for monitoring flood conditions in the Lismore, 
 - **Responsive Design**
 - **Basic Offline Capability**
 
-## Upcoming Features & Changes
-
-- **Flood Map Water Level Simulation**
-- **Localised Rise & Fall Prediction**
-- **Dashboard Restyling for V3**
-- **Code Restructure / Cleaner Architecture**
-- **LOLITEMAULTES Original Weather Radar Map**
-- **Bug Fixes**
-- **Add Outage Loading Screen**
-- **Better Flood Map Statistic Method**
-- **Fix Singular Outage Area Zooming**
-
 ## Technical Architecture
 
 The dashboard consists of two primary components and multiple backend scripts:
