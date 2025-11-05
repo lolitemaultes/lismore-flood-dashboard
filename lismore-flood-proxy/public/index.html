@@ -1712,7 +1712,7 @@
                 cycloneStatusValue.textContent = 'Offline';
                 cycloneStatusValue.className = 'status-value offline';
             };
-            cycloneImg.src = 'http://www.bom.gov.au/fwo/IDQ65001.png?' + new Date().getTime();
+            cycloneImg.src = '/proxy/cyclone-image?' + new Date().getTime();
             
             if (floodMapInitialized) {
                 floodMapStatusValue.textContent = 'Online';
@@ -2141,14 +2141,14 @@
                     }
                     return;
                 }
-            
+
                 const radarImage = document.getElementById('radar-image');
                 const radarError = document.getElementById('radar-error');
                 const radarTimestamp = document.getElementById('radar-timestamp');
-                
+
                 if (radarImage) {
                     const timestamp = new Date().getTime();
-                    radarImage.src = `http://www.bom.gov.au/radar/IDR282.gif?t=${timestamp}`;
+                    radarImage.src = `/proxy/radar-image?t=${timestamp}`;
                     
                     if (radarTimestamp) {
                         radarTimestamp.textContent = `Last updated: ${new Date().toLocaleTimeString('en-AU')}`;
@@ -2187,7 +2187,7 @@
                 if (radarError) radarError.style.display = 'block';
             };
             
-            radarTestImg.src = `http://www.bom.gov.au/radar/IDR282.gif?t=${new Date().getTime()}`;
+            radarTestImg.src = `/proxy/radar-image?t=${new Date().getTime()}`;
         }
 
         function refreshCycloneMap() {
@@ -2196,7 +2196,7 @@
             const cycloneTimestamp = document.getElementById('cyclone-timestamp');
             
             const timestamp = new Date().getTime();
-            cycloneImage.src = `http://www.bom.gov.au/fwo/IDQ65001.png?t=${timestamp}`;
+            cycloneImage.src = `/proxy/cyclone-image?t=${timestamp}`;
             
             cycloneTimestamp.textContent = `Last updated: ${new Date().toLocaleTimeString('en-AU')}`;
             
@@ -2272,7 +2272,7 @@
                 title = "Cyclone Information Unavailable";
                 message = "No current warnings and bulletins for cyclones in this area.";
                 linkText = "View BOM cyclone information";
-                linkUrl = "http://www.bom.gov.au/cyclone/";
+                linkUrl = "https://www.bom.gov.au/cyclone/";
             } 
             else if (tabId === 'tab-radar') {
                 title = "Radar Image Unavailable";
@@ -2319,7 +2319,7 @@
                 document.getElementById('cyclone-error').textContent = 'No current cyclone warnings for this area';
             };
             
-            cycloneImg.src = `http://www.bom.gov.au/fwo/IDQ65001.png?t=${new Date().getTime()}`;
+            cycloneImg.src = `/proxy/cyclone-image?t=${new Date().getTime()}`;
         }
         
         function fixRadarStatusCheck() {
@@ -2367,20 +2367,20 @@
                     }
                 };
                 
-                radarImg.src = `http://www.bom.gov.au/radar/IDR282.gif?t=${new Date().getTime()}`;
+                radarImg.src = `/proxy/radar-image?t=${new Date().getTime()}`;
             };
             
             const originalRefreshRadar = window.refreshRadar || function(){};
-            
+
             window.refreshRadar = function() {
                 const radarImage = document.getElementById('radar-image');
                 const radarError = document.getElementById('radar-error');
                 const radarTimestamp = document.getElementById('radar-timestamp');
-                
+
                 if (radarImage) {
                     const timestamp = new Date().getTime();
-                    radarImage.src = `http://www.bom.gov.au/radar/IDR282.gif?t=${timestamp}`;
-                    
+                    radarImage.src = `/proxy/radar-image?t=${timestamp}`;
+
                     if (radarTimestamp) {
                         radarTimestamp.textContent = `Last updated: ${new Date().toLocaleTimeString('en-AU')}`;
                     }

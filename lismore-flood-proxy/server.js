@@ -1108,6 +1108,33 @@ app.get('/proxy/webcam', async (req, res) => {
     }
 });
 
+app.get('/proxy/radar-image', async (req, res) => {
+    try {
+        const radarUrl = 'http://www.bom.gov.au/radar/IDR282.gif';
+
+        const response = await axios.get(radarUrl, {
+            responseType: 'arraybuffer',
+            headers: Config.headers.browser,
+            validateStatus: null,
+            timeout: 10000
+        });
+
+        if (response.status !== 200) {
+            Logger.error(`Radar GIF fetch failed: HTTP ${response.status}`);
+            return res.status(response.status).send(`Error: ${response.status}`);
+        }
+
+        res.set('Content-Type', 'image/gif');
+        res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.set('Pragma', 'no-cache');
+        res.set('Expires', '0');
+        res.send(response.data);
+    } catch (error) {
+        Logger.error('Error fetching radar GIF:', error.message);
+        res.status(500).send('Error fetching radar GIF');
+    }
+});
+
 app.get('/proxy/bom/*', async (req, res) => {
     try {
         const pathMatch = req.url.match(/\/proxy\/bom(\/.+)/);
