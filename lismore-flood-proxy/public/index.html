@@ -1459,7 +1459,7 @@
                     if (radarImage) {
                         radarImage.src = BLANK_IMAGE;
                     }
-                    if (timestamp) timestamp.textContent = 'Stopping animation...';
+                    if (timestamp) timestamp.textContent = 'Refreshing data...';
                     if (frameCounter) frameCounter.textContent = '';
                     if (progressBar) progressBar.style.width = '0%';
 
@@ -1491,30 +1491,26 @@
 
                     enableControls(false);
 
-                    if (timestamp) timestamp.textContent = 'Checking connection...';
+                    preloadedImages.clear();
 
-                    const isConnected = await checkBOMConnectivity();
-
-                    if (!isConnected) {
+                    // Try to fetch radar data directly - no pre-check needed
+                    try {
+                        await fetchRadarData();
+                    } catch (error) {
+                        // Only if actual fetch fails, then show error and revert
                         if (window.radarGlobalState.forceClearInterval) {
                             clearInterval(window.radarGlobalState.forceClearInterval);
                             window.radarGlobalState.forceClearInterval = null;
                         }
                         radarImages = oldRadarImages;
                         window.radarGlobalState.isRefreshing = false;
-                        showError('No internet connection. Keeping current data.');
+                        showError('Unable to refresh radar data. Keeping current data.');
                         if (timestamp && radarImages.length > 0) {
                             timestamp.textContent = formatDate(radarImages[currentFrame].timestamp) + ' (Offline)';
                         }
                         enableControls(true);
                         return;
                     }
-
-                    preloadedImages.clear();
-
-                    if (timestamp) timestamp.textContent = 'Refreshing data...';
-
-                    await fetchRadarData();
 
                     const safetyDelay = Math.max(animationDelay * 2, 1000);
                     setTimeout(() => {
