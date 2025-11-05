@@ -19,7 +19,6 @@ const colors = {
     bright: '\x1b[1m',
     dim: '\x1b[2m',
     
-    // Text colors
     black: '\x1b[30m',
     red: '\x1b[31m',
     green: '\x1b[32m',
@@ -1032,7 +1031,7 @@ app.get('/river-data', async (req, res) => {
 });
 
 app.get('/api/flood-properties', (req, res) => {
-    const floodDataPath = path.join(__dirname, 'public', 'flood-data.json');
+    const floodDataPath = path.join(__dirname, 'public', 'floodmap-data.json');
 
     try {
         if (fs.existsSync(floodDataPath)) {
@@ -1269,3 +1268,4 @@ async function initializeServer() {
 }
 
 initializeServer();
+
