@@ -1703,16 +1703,22 @@
                 }
             }
             
-            const cycloneImg = new Image();
-            cycloneImg.onload = function() {
-                cycloneStatusValue.textContent = 'Online';
-                cycloneStatusValue.className = 'status-value online';
-            };
-            cycloneImg.onerror = function() {
-                cycloneStatusValue.textContent = 'Offline';
+            // Check cyclone status based on tab availability (avoid duplicate image fetch)
+            const cycloneTab = document.getElementById('tab-cyclone');
+            if (cycloneTab && cycloneTab.classList.contains('tab-unavailable')) {
+                cycloneStatusValue.textContent = 'No Active Cyclone';
                 cycloneStatusValue.className = 'status-value offline';
-            };
-            cycloneImg.src = '/proxy/cyclone-image?' + new Date().getTime();
+            } else {
+                // Check if image exists (cyclone availability check runs separately every 60s)
+                const cycloneImage = document.getElementById('cyclone-image');
+                if (cycloneImage && cycloneImage.complete && cycloneImage.naturalHeight !== 0) {
+                    cycloneStatusValue.textContent = 'Online';
+                    cycloneStatusValue.className = 'status-value online';
+                } else {
+                    cycloneStatusValue.textContent = 'Checking...';
+                    cycloneStatusValue.className = 'status-value unknown';
+                }
+            }
             
             if (floodMapInitialized) {
                 floodMapStatusValue.textContent = 'Online';
