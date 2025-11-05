@@ -534,7 +534,6 @@ function resetOutageMap() {
     }
 }
 
-// Wait for setupTabs to be defined, then wrap it
 document.addEventListener('DOMContentLoaded', function() {
     if (typeof setupTabs !== 'undefined') {
         const originalSetupTabs = setupTabs;
@@ -552,7 +551,6 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         };
 
-        // Re-run setupTabs to apply our modifications
         setupTabs();
     }
 });
