@@ -84,8 +84,9 @@ const LEVEE_WARNING_THRESHOLD = 9.0;
 
 let leveeLine = null;
 
-const BASE_URL = 'http://localhost:3000';
-const PROXY_URL = BASE_URL + '/flood-data';
+// Use relative URLs to work with both HTTP and HTTPS
+const BASE_URL = window.location.origin || '';
+const PROXY_URL = '/flood-data';
 
 let embeddedCSVData = [];
 

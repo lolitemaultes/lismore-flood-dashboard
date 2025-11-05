@@ -798,6 +798,27 @@ app.get('/status', (req, res) => {
     });
 });
 
+app.get('/api/bom-connectivity', async (req, res) => {
+    try {
+        const response = await axios.head(Config.urls.BOM_BASE, {
+            timeout: 5000,
+            validateStatus: null
+        });
+
+        res.json({
+            success: response.status >= 200 && response.status < 400,
+            status: response.status,
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        res.json({
+            success: false,
+            error: error.message,
+            timestamp: new Date().toISOString()
+        });
+    }
+});
+
 app.get('/cleanup-radar', async (req, res) => {
     try {
         await FileUtils.cleanupRadarImages();
@@ -1012,35 +1033,220 @@ app.get('/river-data', async (req, res) => {
 
 app.get('/api/flood-properties', (req, res) => {
     const floodDataPath = path.join(__dirname, 'public', 'flood-data.json');
-    
+
     try {
         if (fs.existsSync(floodDataPath)) {
             const data = fs.readFileSync(floodDataPath, 'utf8');
             res.json(JSON.parse(data));
         } else {
-            res.status(404).json({ 
+            res.status(404).json({
                 success: false,
-                error: 'Flood data file not found' 
+                error: 'Flood data file not found'
             });
         }
     } catch (error) {
         Logger.error('Error reading flood data:', error.message);
-        res.status(500).json({ 
+        res.status(500).json({
             success: false,
-            error: 'Failed to load flood data' 
+            error: 'Failed to load flood data'
         });
+    }
+});
+
+// Check if cyclone image is available (HEAD request)
+app.get('/api/check-cyclone', async (req, res) => {
+    try {
+        Logger.info('Checking cyclone image availability...');
+        const imageUrl = 'http://www.bom.gov.au/fwo/IDQ65001.png';
+
+        const response = await axios.head(imageUrl, {
+            headers: Config.headers.browser,
+            validateStatus: null,
+            timeout: 5000
+        });
+
+        const available = response.status === 200;
+        Logger.info(`Cyclone image ${available ? 'available' : 'not available'} (HTTP ${response.status})`);
+
+        res.json({
+            available,
+            status: response.status,
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        Logger.info('Cyclone image not available (connection error)');
+        res.json({
+            available: false,
+            error: error.message,
+            timestamp: new Date().toISOString()
+        });
+    }
+});
+
+// Check if radar image is available (HEAD request)
+app.get('/api/check-radar', async (req, res) => {
+    try {
+        Logger.info('Checking radar image availability...');
+        const radarUrl = 'http://www.bom.gov.au/radar/IDR282.gif';
+
+        const response = await axios.head(radarUrl, {
+            headers: Config.headers.browser,
+            validateStatus: null,
+            timeout: 5000
+        });
+
+        const available = response.status === 200;
+        Logger.info(`Radar image ${available ? 'available' : 'not available'} (HTTP ${response.status})`);
+
+        res.json({
+            available,
+            status: response.status,
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        Logger.info('Radar image not available (connection error)');
+        res.json({
+            available: false,
+            error: error.message,
+            timestamp: new Date().toISOString()
+        });
+    }
+});
+
+app.get('/proxy/cyclone-image', async (req, res) => {
+    try {
+        const imageUrl = 'http://www.bom.gov.au/fwo/IDQ65001.png';
+
+        const response = await axios.get(imageUrl, {
+            responseType: 'arraybuffer',
+            headers: Config.headers.browser,
+            validateStatus: null,
+            timeout: 10000
+        });
+
+        if (response.status !== 200) {
+            return res.status(response.status).send(`Error: ${response.status}`);
+        }
+
+        res.set('Content-Type', 'image/png');
+        res.set('Cache-Control', 'public, max-age=60');
+        res.send(response.data);
+    } catch (error) {
+        Logger.error('Error fetching cyclone image:', error.message);
+        res.status(500).send('Error fetching cyclone image');
+    }
+});
+
+app.get('/proxy/webcam', async (req, res) => {
+    try {
+        const webcamUrl = 'https://webcams.transport.nsw.gov.au/livetraffic-webcams/cameras/bruxner_highway_lismore.jpeg';
+
+        const response = await axios.get(webcamUrl, {
+            responseType: 'arraybuffer',
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                'Accept': 'image/avif,image/webp,image/apng,image/jpeg,image/*,*/*;q=0.8'
+            },
+            validateStatus: null,
+            timeout: 10000
+        });
+
+        if (response.status !== 200) {
+            Logger.error(`Webcam image fetch failed: HTTP ${response.status}`);
+            return res.status(response.status).send(`Error: ${response.status}`);
+        }
+
+        res.set('Content-Type', 'image/jpeg');
+        res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.set('Pragma', 'no-cache');
+        res.set('Expires', '0');
+        res.send(response.data);
+    } catch (error) {
+        Logger.error('Error fetching webcam image:', error.message);
+        res.status(500).send('Error fetching webcam image');
+    }
+});
+
+app.get('/proxy/radar-image', async (req, res) => {
+    try {
+        const radarUrl = 'http://www.bom.gov.au/radar/IDR282.gif';
+
+        const response = await axios.get(radarUrl, {
+            responseType: 'arraybuffer',
+            headers: Config.headers.browser,
+            validateStatus: null,
+            timeout: 10000
+        });
+
+        if (response.status !== 200) {
+            Logger.error(`Radar GIF fetch failed: HTTP ${response.status}`);
+            return res.status(response.status).send(`Error: ${response.status}`);
+        }
+
+        res.set('Content-Type', 'image/gif');
+        res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.set('Pragma', 'no-cache');
+        res.set('Expires', '0');
+        res.send(response.data);
+    } catch (error) {
+        Logger.error('Error fetching radar GIF:', error.message);
+        res.status(500).send('Error fetching radar GIF');
+    }
+});
+
+app.get('/proxy/bom/*', async (req, res) => {
+    try {
+        const pathMatch = req.url.match(/\/proxy\/bom(\/.+)/);
+        if (!pathMatch || !pathMatch[1]) {
+            return res.status(400).send('Invalid path format');
+        }
+
+        const resourcePath = pathMatch[1];
+        const resourceUrl = `http://www.bom.gov.au${resourcePath}`;
+
+        const response = await axios.get(resourceUrl, {
+            responseType: 'arraybuffer',
+            headers: Config.headers.browser,
+            validateStatus: null,
+            timeout: 10000
+        });
+
+        if (response.status !== 200) {
+            Logger.error(`BOM resource fetch failed: HTTP ${response.status}`);
+            return res.status(response.status).send(`Error: ${response.status}`);
+        }
+
+        const contentType = response.headers['content-type'] || 'application/octet-stream';
+        res.set('Content-Type', contentType);
+        res.set('Cache-Control', 'public, max-age=60');
+        res.send(response.data);
+    } catch (error) {
+        Logger.error('Error fetching BOM resource:', error.message);
+        res.status(500).send('Error fetching BOM resource');
     }
 });
 
 async function initializeServer() {
     Logger.header('LISMORE FLOOD DASHBOARD SERVER');
-    
+
     try {
         await FileUtils.ensureDirectory(Config.paths.RESOURCES_DIR);
         Logger.success('Directory structure verified');
-        
+
         await RadarService.downloadLegend();
-        
+
+        // Set up periodic cleanup every 5 minutes
+        const CLEANUP_INTERVAL = 5 * 60 * 1000; // 5 minutes
+        setInterval(async () => {
+            try {
+                await FileUtils.cleanupRadarImages();
+                Logger.verbose('Periodic cleanup completed');
+            } catch (error) {
+                Logger.error('Periodic cleanup error:', error.message);
+            }
+        }, CLEANUP_INTERVAL);
+        Logger.info('Periodic cleanup scheduled (every 5 minutes)');
+
         app.listen(PORT, () => {
             console.log('');
             Logger.success(`Server running on port ${PORT}`);
@@ -1058,7 +1264,7 @@ async function initializeServer() {
             Logger.info('Server initialization complete');
             console.log(`${colors.gray}${'─'.repeat(60)}${colors.reset}\n`);
         });
-        
+
     } catch (error) {
         Logger.error('Failed to initialize server:', error.message);
         process.exit(1);

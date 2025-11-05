@@ -106,7 +106,7 @@
                             </div>
                         </div>
                         <div class="webcam-image-container">
-                            <img id="webcam" src="https://webcams.transport.nsw.gov.au/livetraffic-webcams/cameras/bruxner_highway_lismore.jpeg" alt="Bruxner Highway Lismore Traffic Camera" class="webcam-image">
+                            <img id="webcam" src="/proxy/webcam" alt="Bruxner Highway Lismore Traffic Camera" class="webcam-image">
                             <div id="webcam-error" class="webcam-error">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <circle cx="12" cy="12" r="10"></circle>
@@ -155,7 +155,7 @@
                             </div>
                             
                             <div class="legend-container">
-                                <img src="/resources/Rain Radar/legend.png" alt="Radar Legend" class="legend-image">
+                                <img src="/resources/Rain Radar/Legend.png" alt="Radar Legend" class="legend-image">
                             </div>
                             
                             <div id="timestamp">No data loaded</div>
@@ -222,7 +222,7 @@
                         
                         <div class="tab-footer">
                             <span>Data source: Bureau of Meteorology, Australia</span>
-                            <a href="http://www.bom.gov.au/products/IDR282.loop.shtml" target="_blank" rel="noopener noreferrer" class="tab-link">
+                            <a href="https://www.bom.gov.au/products/IDR282.loop.shtml" target="_blank" rel="noopener noreferrer" class="tab-link">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
                                     <polyline points="15 3 21 3 21 9"></polyline>
@@ -248,7 +248,7 @@
                             </div>
                         </div>
                         <div class="cyclone-container">
-                            <img id="cyclone-image" src="http://www.bom.gov.au/fwo/IDQ65001.png" alt="Tropical Cyclone Forecast Track Map" class="cyclone-image">
+                            <img id="cyclone-image" src="/proxy/cyclone-image" alt="Tropical Cyclone Forecast Track Map" class="cyclone-image">
                             <div id="cyclone-error" class="cyclone-error">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <circle cx="12" cy="12" r="10"></circle>
@@ -259,7 +259,7 @@
                             </div>
                         </div>
                         <div class="tab-footer">
-                            <a href="http://www.bom.gov.au/cyclone/" target="_blank" rel="noopener noreferrer" class="tab-link">
+                            <a href="https://www.bom.gov.au/cyclone/" target="_blank" rel="noopener noreferrer" class="tab-link">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
                                     <polyline points="15 3 21 3 21 9"></polyline>
@@ -756,7 +756,7 @@
     </div>
 
     <footer class="data-attribution">
-        <p>Data sourced from <a href="http://www.bom.gov.au" target="_blank" rel="noopener noreferrer">Bureau of Meteorology</a> and <a href="https://www.transport.nsw.gov.au" target="_blank" rel="noopener noreferrer">Transport for NSW</a>.</p>
+        <p>Data sourced from <a href="https://www.bom.gov.au" target="_blank" rel="noopener noreferrer">Bureau of Meteorology</a> and <a href="https://www.transport.nsw.gov.au" target="_blank" rel="noopener noreferrer">Transport for NSW</a>.</p>
         <p>This dashboard is for emergency use during flood events in the Lismore area.</p>
     </footer>
 
@@ -842,18 +842,18 @@
             document.getElementById('refresh-cyclone').addEventListener('click', refreshCycloneMap);
 
             setupTabs();
-            
+
             refreshWebcam();
             webcamRefreshTimer = setInterval(refreshWebcam, WEBCAM_REFRESH_INTERVAL);
             document.getElementById('refresh-webcam').addEventListener('click', refreshWebcam);
-            
+
             const refreshRadarBtn = document.getElementById('refresh-radar') || document.getElementById('refresh-btn');
             if (refreshRadarBtn) {
                 refreshRadarBtn.addEventListener('click', refreshRadar);
             }
-            
+
+            // Initial cyclone load - availability check runs every 60s
             refreshCycloneMap();
-            setInterval(refreshCycloneMap, 1000);
 
             refreshIntervalSelect.value = DEFAULT_REFRESH_INTERVAL;
             refreshIntervalSelect.addEventListener('change', updateRefreshInterval);
@@ -972,7 +972,7 @@
 
         function refreshWebcam() {
             const timestamp = new Date().getTime();
-            webcamImage.src = `https://webcams.transport.nsw.gov.au/livetraffic-webcams/cameras/bruxner_highway_lismore.jpeg?t=${timestamp}`;
+            webcamImage.src = `/proxy/webcam?t=${timestamp}`;
             webcamTimestamp.textContent = new Date().toLocaleTimeString('en-AU');
         }
 
@@ -1035,7 +1035,7 @@
                 webcamStatusValue.textContent = 'Offline';
                 webcamStatusValue.className = 'status-value offline';
             };
-            img.src = 'https://webcams.transport.nsw.gov.au/livetraffic-webcams/cameras/bruxner_highway_lismore.jpeg?' + new Date().getTime();
+            img.src = '/proxy/webcam?' + new Date().getTime();
             
             window.radarGlobalState = window.radarGlobalState || {
                 currentAnimationSessionId: 0,
@@ -1426,14 +1426,17 @@
                         const controller = new AbortController();
                         const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-                        const response = await fetch('http://www.bom.gov.au/', {
-                            method: 'HEAD',
-                            mode: 'no-cors',
+                        const response = await fetch('/api/bom-connectivity', {
                             signal: controller.signal
                         });
 
                         clearTimeout(timeoutId);
-                        return true;
+
+                        if (response.ok) {
+                            const data = await response.json();
+                            return data.success;
+                        }
+                        return false;
                     } catch (error) {
                         console.warn('BOM connectivity check failed:', error.message);
                         return false;
@@ -1456,7 +1459,7 @@
                     if (radarImage) {
                         radarImage.src = BLANK_IMAGE;
                     }
-                    if (timestamp) timestamp.textContent = 'Stopping animation...';
+                    if (timestamp) timestamp.textContent = 'Refreshing data...';
                     if (frameCounter) frameCounter.textContent = '';
                     if (progressBar) progressBar.style.width = '0%';
 
@@ -1488,30 +1491,26 @@
 
                     enableControls(false);
 
-                    if (timestamp) timestamp.textContent = 'Checking connection...';
+                    preloadedImages.clear();
 
-                    const isConnected = await checkBOMConnectivity();
-
-                    if (!isConnected) {
+                    // Try to fetch radar data directly - no pre-check needed
+                    try {
+                        await fetchRadarData();
+                    } catch (error) {
+                        // Only if actual fetch fails, then show error and revert
                         if (window.radarGlobalState.forceClearInterval) {
                             clearInterval(window.radarGlobalState.forceClearInterval);
                             window.radarGlobalState.forceClearInterval = null;
                         }
                         radarImages = oldRadarImages;
                         window.radarGlobalState.isRefreshing = false;
-                        showError('No internet connection. Keeping current data.');
+                        showError('Unable to refresh radar data. Keeping current data.');
                         if (timestamp && radarImages.length > 0) {
                             timestamp.textContent = formatDate(radarImages[currentFrame].timestamp) + ' (Offline)';
                         }
                         enableControls(true);
                         return;
                     }
-
-                    preloadedImages.clear();
-
-                    if (timestamp) timestamp.textContent = 'Refreshing data...';
-
-                    await fetchRadarData();
 
                     const safetyDelay = Math.max(animationDelay * 2, 1000);
                     setTimeout(() => {
@@ -1704,16 +1703,22 @@
                 }
             }
             
-            const cycloneImg = new Image();
-            cycloneImg.onload = function() {
-                cycloneStatusValue.textContent = 'Online';
-                cycloneStatusValue.className = 'status-value online';
-            };
-            cycloneImg.onerror = function() {
-                cycloneStatusValue.textContent = 'Offline';
+            // Check cyclone status based on tab availability (avoid duplicate image fetch)
+            const cycloneTab = document.getElementById('tab-cyclone');
+            if (cycloneTab && cycloneTab.classList.contains('tab-unavailable')) {
+                cycloneStatusValue.textContent = 'No Active Cyclone';
                 cycloneStatusValue.className = 'status-value offline';
-            };
-            cycloneImg.src = 'http://www.bom.gov.au/fwo/IDQ65001.png?' + new Date().getTime();
+            } else {
+                // Check if image exists (cyclone availability check runs separately every 60s)
+                const cycloneImage = document.getElementById('cyclone-image');
+                if (cycloneImage && cycloneImage.complete && cycloneImage.naturalHeight !== 0) {
+                    cycloneStatusValue.textContent = 'Online';
+                    cycloneStatusValue.className = 'status-value online';
+                } else {
+                    cycloneStatusValue.textContent = 'Checking...';
+                    cycloneStatusValue.className = 'status-value unknown';
+                }
+            }
             
             if (floodMapInitialized) {
                 floodMapStatusValue.textContent = 'Online';
@@ -2142,14 +2147,14 @@
                     }
                     return;
                 }
-            
+
                 const radarImage = document.getElementById('radar-image');
                 const radarError = document.getElementById('radar-error');
                 const radarTimestamp = document.getElementById('radar-timestamp');
-                
+
                 if (radarImage) {
                     const timestamp = new Date().getTime();
-                    radarImage.src = `http://www.bom.gov.au/radar/IDR282.gif?t=${timestamp}`;
+                    radarImage.src = `/proxy/radar-image?t=${timestamp}`;
                     
                     if (radarTimestamp) {
                         radarTimestamp.textContent = `Last updated: ${new Date().toLocaleTimeString('en-AU')}`;
@@ -2188,26 +2193,41 @@
                 if (radarError) radarError.style.display = 'block';
             };
             
-            radarTestImg.src = `http://www.bom.gov.au/radar/IDR282.gif?t=${new Date().getTime()}`;
+            radarTestImg.src = `/proxy/radar-image?t=${new Date().getTime()}`;
         }
 
-        function refreshCycloneMap() {
+        async function refreshCycloneMap() {
             const cycloneImage = document.getElementById('cyclone-image');
             const cycloneError = document.getElementById('cyclone-error');
             const cycloneTimestamp = document.getElementById('cyclone-timestamp');
-            
-            const timestamp = new Date().getTime();
-            cycloneImage.src = `http://www.bom.gov.au/fwo/IDQ65001.png?t=${timestamp}`;
-            
-            cycloneTimestamp.textContent = `Last updated: ${new Date().toLocaleTimeString('en-AU')}`;
-            
-            cycloneImage.onerror = function() {
+
+            try {
+                // Check availability first (server logs in terminal)
+                const checkResponse = await fetch('/api/check-cyclone');
+                const checkData = await checkResponse.json();
+
+                if (checkData.available) {
+                    // Only load image if available
+                    const timestamp = new Date().getTime();
+                    cycloneImage.src = `/proxy/cyclone-image?t=${timestamp}`;
+                    cycloneTimestamp.textContent = `Last updated: ${new Date().toLocaleTimeString('en-AU')}`;
+
+                    cycloneImage.onload = function() {
+                        markTabAvailable('tab-cyclone');
+                        cycloneError.style.display = 'none';
+                    };
+                } else {
+                    // Mark as unavailable without trying to load
+                    markTabUnavailable('tab-cyclone', 'No current cyclone warnings or bulletins for this area.');
+                    cycloneError.style.display = 'block';
+                    cycloneError.textContent = 'No current cyclone warnings for this area';
+                }
+            } catch (error) {
+                // Silent fail - server handles logging
+                markTabUnavailable('tab-cyclone', 'Unable to check cyclone status.');
                 cycloneError.style.display = 'block';
-            };
-            
-            cycloneImage.onload = function() {
-                cycloneError.style.display = 'none';
-            };
+                cycloneError.textContent = 'Unable to check cyclone status';
+            }
         }
 
         window.addEventListener('error', function(event) {
@@ -2273,7 +2293,7 @@
                 title = "Cyclone Information Unavailable";
                 message = "No current warnings and bulletins for cyclones in this area.";
                 linkText = "View BOM cyclone information";
-                linkUrl = "http://www.bom.gov.au/cyclone/";
+                linkUrl = "https://www.bom.gov.au/cyclone/";
             } 
             else if (tabId === 'tab-radar') {
                 title = "Radar Image Unavailable";
@@ -2306,21 +2326,38 @@
             }, 7000);
         }
         
-        function checkCycloneAvailability() {
-            const cycloneImg = new Image();
-            
-            cycloneImg.onload = function() {
-                markTabAvailable('tab-cyclone');
-                document.getElementById('cyclone-error').style.display = 'none';
-            };
-            
-            cycloneImg.onerror = function() {
-                markTabUnavailable('tab-cyclone', 'No current cyclone warnings or bulletins for this area.');
-                document.getElementById('cyclone-error').style.display = 'block';
-                document.getElementById('cyclone-error').textContent = 'No current cyclone warnings for this area';
-            };
-            
-            cycloneImg.src = `http://www.bom.gov.au/fwo/IDQ65001.png?t=${new Date().getTime()}`;
+        async function checkCycloneAvailability() {
+            try {
+                // Check availability first (server logs in terminal)
+                const checkResponse = await fetch('/api/check-cyclone');
+                const checkData = await checkResponse.json();
+
+                if (checkData.available) {
+                    markTabAvailable('tab-cyclone');
+                    const errorEl = document.getElementById('cyclone-error');
+                    if (errorEl) errorEl.style.display = 'none';
+
+                    // Load image directly without re-checking availability
+                    const cycloneImage = document.getElementById('cyclone-image');
+                    const cycloneTimestamp = document.getElementById('cyclone-timestamp');
+                    if (cycloneImage) {
+                        const timestamp = new Date().getTime();
+                        cycloneImage.src = `/proxy/cyclone-image?t=${timestamp}`;
+                        if (cycloneTimestamp) {
+                            cycloneTimestamp.textContent = `Last updated: ${new Date().toLocaleTimeString('en-AU')}`;
+                        }
+                    }
+                } else {
+                    markTabUnavailable('tab-cyclone', 'No current cyclone warnings or bulletins for this area.');
+                    const errorEl = document.getElementById('cyclone-error');
+                    if (errorEl) {
+                        errorEl.style.display = 'block';
+                        errorEl.textContent = 'No current cyclone warnings for this area';
+                    }
+                }
+            } catch (error) {
+                // Silent fail - server handles logging
+            }
         }
         
         function fixRadarStatusCheck() {
@@ -2368,20 +2405,20 @@
                     }
                 };
                 
-                radarImg.src = `http://www.bom.gov.au/radar/IDR282.gif?t=${new Date().getTime()}`;
+                radarImg.src = `/proxy/radar-image?t=${new Date().getTime()}`;
             };
             
             const originalRefreshRadar = window.refreshRadar || function(){};
-            
+
             window.refreshRadar = function() {
                 const radarImage = document.getElementById('radar-image');
                 const radarError = document.getElementById('radar-error');
                 const radarTimestamp = document.getElementById('radar-timestamp');
-                
+
                 if (radarImage) {
                     const timestamp = new Date().getTime();
-                    radarImage.src = `http://www.bom.gov.au/radar/IDR282.gif?t=${timestamp}`;
-                    
+                    radarImage.src = `/proxy/radar-image?t=${timestamp}`;
+
                     if (radarTimestamp) {
                         radarTimestamp.textContent = `Last updated: ${new Date().toLocaleTimeString('en-AU')}`;
                     }
