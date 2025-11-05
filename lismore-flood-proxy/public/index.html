@@ -842,18 +842,18 @@
             document.getElementById('refresh-cyclone').addEventListener('click', refreshCycloneMap);
 
             setupTabs();
-            
+
             refreshWebcam();
             webcamRefreshTimer = setInterval(refreshWebcam, WEBCAM_REFRESH_INTERVAL);
             document.getElementById('refresh-webcam').addEventListener('click', refreshWebcam);
-            
+
             const refreshRadarBtn = document.getElementById('refresh-radar') || document.getElementById('refresh-btn');
             if (refreshRadarBtn) {
                 refreshRadarBtn.addEventListener('click', refreshRadar);
             }
-            
+
+            // Initial cyclone load - availability check runs every 60s
             refreshCycloneMap();
-            setInterval(refreshCycloneMap, 1000);
 
             refreshIntervalSelect.value = DEFAULT_REFRESH_INTERVAL;
             refreshIntervalSelect.addEventListener('change', updateRefreshInterval);
@@ -2194,17 +2194,21 @@
             const cycloneImage = document.getElementById('cyclone-image');
             const cycloneError = document.getElementById('cyclone-error');
             const cycloneTimestamp = document.getElementById('cyclone-timestamp');
-            
+
             const timestamp = new Date().getTime();
             cycloneImage.src = `/proxy/cyclone-image?t=${timestamp}`;
-            
+
             cycloneTimestamp.textContent = `Last updated: ${new Date().toLocaleTimeString('en-AU')}`;
-            
+
             cycloneImage.onerror = function() {
+                // Mark tab as unavailable when image doesn't exist (e.g., no active cyclone)
+                markTabUnavailable('tab-cyclone', 'No current cyclone warnings or bulletins for this area.');
                 cycloneError.style.display = 'block';
+                cycloneError.textContent = 'No current cyclone warnings for this area';
             };
-            
+
             cycloneImage.onload = function() {
+                markTabAvailable('tab-cyclone');
                 cycloneError.style.display = 'none';
             };
         }
