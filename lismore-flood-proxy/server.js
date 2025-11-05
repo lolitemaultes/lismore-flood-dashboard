@@ -1070,11 +1070,41 @@ app.get('/proxy/cyclone-image', async (req, res) => {
         }
 
         res.set('Content-Type', 'image/png');
-        res.set('Cache-Control', 'public, max-age=300');
+        res.set('Cache-Control', 'public, max-age=60');
         res.send(response.data);
     } catch (error) {
         Logger.error('Error fetching cyclone image:', error.message);
         res.status(500).send('Error fetching cyclone image');
+    }
+});
+
+app.get('/proxy/webcam', async (req, res) => {
+    try {
+        const webcamUrl = 'https://webcams.transport.nsw.gov.au/livetraffic-webcams/cameras/bruxner_highway_lismore.jpeg';
+
+        const response = await axios.get(webcamUrl, {
+            responseType: 'arraybuffer',
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                'Accept': 'image/avif,image/webp,image/apng,image/jpeg,image/*,*/*;q=0.8'
+            },
+            validateStatus: null,
+            timeout: 10000
+        });
+
+        if (response.status !== 200) {
+            Logger.error(`Webcam image fetch failed: HTTP ${response.status}`);
+            return res.status(response.status).send(`Error: ${response.status}`);
+        }
+
+        res.set('Content-Type', 'image/jpeg');
+        res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.set('Pragma', 'no-cache');
+        res.set('Expires', '0');
+        res.send(response.data);
+    } catch (error) {
+        Logger.error('Error fetching webcam image:', error.message);
+        res.status(500).send('Error fetching webcam image');
     }
 });
 
@@ -1102,7 +1132,7 @@ app.get('/proxy/bom/*', async (req, res) => {
 
         const contentType = response.headers['content-type'] || 'application/octet-stream';
         res.set('Content-Type', contentType);
-        res.set('Cache-Control', 'public, max-age=300');
+        res.set('Cache-Control', 'public, max-age=60');
         res.send(response.data);
     } catch (error) {
         Logger.error('Error fetching BOM resource:', error.message);
@@ -1112,13 +1142,25 @@ app.get('/proxy/bom/*', async (req, res) => {
 
 async function initializeServer() {
     Logger.header('LISMORE FLOOD DASHBOARD SERVER');
-    
+
     try {
         await FileUtils.ensureDirectory(Config.paths.RESOURCES_DIR);
         Logger.success('Directory structure verified');
-        
+
         await RadarService.downloadLegend();
-        
+
+        // Set up periodic cleanup every 5 minutes
+        const CLEANUP_INTERVAL = 5 * 60 * 1000; // 5 minutes
+        setInterval(async () => {
+            try {
+                await FileUtils.cleanupRadarImages();
+                Logger.verbose('Periodic cleanup completed');
+            } catch (error) {
+                Logger.error('Periodic cleanup error:', error.message);
+            }
+        }, CLEANUP_INTERVAL);
+        Logger.info('Periodic cleanup scheduled (every 5 minutes)');
+
         app.listen(PORT, () => {
             console.log('');
             Logger.success(`Server running on port ${PORT}`);
@@ -1136,7 +1178,7 @@ async function initializeServer() {
             Logger.info('Server initialization complete');
             console.log(`${colors.gray}${'─'.repeat(60)}${colors.reset}\n`);
         });
-        
+
     } catch (error) {
         Logger.error('Failed to initialize server:', error.message);
         process.exit(1);

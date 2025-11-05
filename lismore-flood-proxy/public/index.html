@@ -106,7 +106,7 @@
                             </div>
                         </div>
                         <div class="webcam-image-container">
-                            <img id="webcam" src="https://webcams.transport.nsw.gov.au/livetraffic-webcams/cameras/bruxner_highway_lismore.jpeg" alt="Bruxner Highway Lismore Traffic Camera" class="webcam-image">
+                            <img id="webcam" src="/proxy/webcam" alt="Bruxner Highway Lismore Traffic Camera" class="webcam-image">
                             <div id="webcam-error" class="webcam-error">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <circle cx="12" cy="12" r="10"></circle>
@@ -972,7 +972,7 @@
 
         function refreshWebcam() {
             const timestamp = new Date().getTime();
-            webcamImage.src = `https://webcams.transport.nsw.gov.au/livetraffic-webcams/cameras/bruxner_highway_lismore.jpeg?t=${timestamp}`;
+            webcamImage.src = `/proxy/webcam?t=${timestamp}`;
             webcamTimestamp.textContent = new Date().toLocaleTimeString('en-AU');
         }
 
@@ -1035,7 +1035,7 @@
                 webcamStatusValue.textContent = 'Offline';
                 webcamStatusValue.className = 'status-value offline';
             };
-            img.src = 'https://webcams.transport.nsw.gov.au/livetraffic-webcams/cameras/bruxner_highway_lismore.jpeg?' + new Date().getTime();
+            img.src = '/proxy/webcam?' + new Date().getTime();
             
             window.radarGlobalState = window.radarGlobalState || {
                 currentAnimationSessionId: 0,
