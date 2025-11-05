@@ -1,6 +1,6 @@
 ![Lismore Flood Dashboard](https://github.com/user-attachments/assets/406417d6-c64b-4671-b318-690e95b34e34)
 
-# Lismore Flood Emergency Dashboard
+# Lismore Flood Dashboard
 
 ![Version](https://img.shields.io/badge/version-2.6.0-red)
 ![License](https://img.shields.io/badge/license-MIT-green)
