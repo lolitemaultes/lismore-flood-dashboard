@@ -367,12 +367,18 @@ class OutageService {
     
     static parseDescription(html) {
         if (!html) return {};
-        
+
         const result = {};
-        
+
         try {
-            let decoded = String(html).replace(/<!\[CDATA\[|\]\]>/g, '').trim();
-            
+            // Extract content from CDATA or text node if it's an object
+            let content = html;
+            if (typeof html === 'object') {
+                content = html.__cdata || html['#text'] || String(html);
+            }
+
+            let decoded = String(content).replace(/<!\[CDATA\[|\]\]>/g, '').trim();
+
             decoded = decoded
                 .replace(/&nbsp;/g, ' ')
                 .replace(/&lt;/g, '<')
@@ -380,7 +386,7 @@ class OutageService {
                 .replace(/&amp;/g, '&')
                 .replace(/&quot;/g, '"')
                 .replace(/&#39;/g, "'");
-            
+
             const patterns = {
                 timeOff: /<span>Time Off:<\/span>\s*(\d{2}\/\d{2}\/\d{4}\s+\d{2}:\d{2}:\d{2})/i,
                 timeOn: /<span>Est\.\s*Time On:<\/span>\s*(\d{2}\/\d{2}\/\d{4}\s+\d{2}:\d{2}:\d{2})/i,
@@ -388,7 +394,7 @@ class OutageService {
                 reason: /<span>Reason:<\/span>\s*([^<]+)/i,
                 lastUpdated: /<span>Last Updated:<\/span>\s*(\d{2}\/\d{2}\/\d{4}\s+\d{2}:\d{2}:\d{2})/i
             };
-            
+
             for (const [key, pattern] of Object.entries(patterns)) {
                 const match = decoded.match(pattern);
                 if (match && match[1]) {
@@ -406,7 +412,7 @@ class OutageService {
         } catch (error) {
             Logger.verbose('Error parsing description:', error.message);
         }
-        
+
         return result;
     }
     
