@@ -129,8 +129,8 @@ const Config = {
     
     urls: {
         RADAR_BASE: 'https://reg.bom.gov.au',
-        BOM_BASE: 'http://www.bom.gov.au',
-        BOM_FLOOD_WARNING: 'http://www.bom.gov.au/cgi-bin/wrap_fwo.pl?IDN60140.html',
+        BOM_BASE: 'https://www.bom.gov.au',
+        BOM_FLOOD_WARNING: 'https://www.bom.gov.au/cgi-bin/wrap_fwo.pl?IDN60140.html',
         
         KML: {
             current: 'https://www.essentialenergy.com.au/Assets/kmz/current.kml',
@@ -531,7 +531,7 @@ class RadarService {
     
     static createFallbackLegend(filePath) {
         const legendSvg = `
-            <svg width="400" height="80" xmlns="http://www.w3.org/2000/svg">
+            <svg width="400" height="80" xmlns="https://www.w3.org/2000/svg">
                 <rect width="100%" height="100%" fill="white"/>
                 <text x="10" y="20" font-family="Arial" font-size="14">Radar Legend</text>
                 <linearGradient id="rainGradient" x1="0%" y1="0%" x2="100%" y1="0%" y2="0%">
@@ -842,7 +842,6 @@ app.get('/api/outages', async (req, res) => {
             Logger.info('Outage cache cleared by user request');
         }
 
-        // Fetch all categories with individual error handling
         const results = await Promise.allSettled([
             OutageService.fetchCategory('current'),
             OutageService.fetchCategory('future'),
@@ -853,7 +852,6 @@ app.get('/api/outages', async (req, res) => {
         const future = results[1].status === 'fulfilled' ? results[1].value : [];
         const cancelled = results[2].status === 'fulfilled' ? results[2].value : [];
 
-        // Track which categories failed
         const errors = [];
         if (results[0].status === 'rejected') {
             Logger.error('Failed to fetch current outages:', results[0].reason.message);
@@ -1076,7 +1074,7 @@ app.get('/api/flood-properties', (req, res) => {
 app.get('/api/check-cyclone', async (req, res) => {
     try {
         Logger.info('Checking cyclone image availability...');
-        const imageUrl = 'http://www.bom.gov.au/fwo/IDQ65001.png';
+        const imageUrl = 'https://www.bom.gov.au/fwo/IDQ65001.png';
 
         const response = await axios.head(imageUrl, {
             headers: Config.headers.browser,
@@ -1105,7 +1103,7 @@ app.get('/api/check-cyclone', async (req, res) => {
 app.get('/api/check-radar', async (req, res) => {
     try {
         Logger.info('Checking radar image availability...');
-        const radarUrl = 'http://www.bom.gov.au/radar/IDR282.gif';
+        const radarUrl = 'https://www.bom.gov.au/radar/IDR282.gif';
 
         const response = await axios.head(radarUrl, {
             headers: Config.headers.browser,
@@ -1133,7 +1131,7 @@ app.get('/api/check-radar', async (req, res) => {
 
 app.get('/proxy/cyclone-image', async (req, res) => {
     try {
-        const imageUrl = 'http://www.bom.gov.au/fwo/IDQ65001.png';
+        const imageUrl = 'https://www.bom.gov.au/fwo/IDQ65001.png';
 
         const response = await axios.get(imageUrl, {
             responseType: 'arraybuffer',
@@ -1187,7 +1185,7 @@ app.get('/proxy/webcam', async (req, res) => {
 
 app.get('/proxy/radar-image', async (req, res) => {
     try {
-        const radarUrl = 'http://www.bom.gov.au/radar/IDR282.gif';
+        const radarUrl = 'https://www.bom.gov.au/radar/IDR282.gif';
 
         const response = await axios.get(radarUrl, {
             responseType: 'arraybuffer',
@@ -1220,7 +1218,7 @@ app.get('/proxy/bom/*', async (req, res) => {
         }
 
         const resourcePath = pathMatch[1];
-        const resourceUrl = `http://www.bom.gov.au${resourcePath}`;
+        const resourceUrl = `https://www.bom.gov.au${resourcePath}`;
 
         const response = await axios.get(resourceUrl, {
             responseType: 'arraybuffer',
@@ -1267,8 +1265,8 @@ async function initializeServer() {
         app.listen(PORT, () => {
             console.log('');
             Logger.success(`Server running on port ${PORT}`);
-            Logger.info(`Dashboard: http://localhost:${PORT}`);
-            Logger.info(`API Base: http://localhost:${PORT}/api`);
+            Logger.info(`Dashboard: https://localhost:${PORT}`);
+            Logger.info(`API Base: https://localhost:${PORT}/api`);
             console.log('');
             Logger.table([
                 { Endpoint: '/api/outages', Description: 'Power outage data' },
@@ -1289,4 +1287,3 @@ async function initializeServer() {
 }
 
 initializeServer();
-
