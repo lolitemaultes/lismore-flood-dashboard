@@ -6,11 +6,11 @@ Based on your error logs, you have **3 issues** to fix:
 
 ### Error 1: Wrong Node.js Version
 ```
-SyntaxError: Unexpected token '??='
+ReferenceError: ReadableStream is not defined
 ```
-**Problem:** You're running Node.js 14, but this app requires Node.js 16+
+**Problem:** You're running Node.js 14 or 16, but this app requires Node.js 18+
 
-**Solution:** Upgrade to Node.js 16 or higher in your hosting panel
+**Solution:** Upgrade to Node.js 18 (LTS) or higher in your hosting panel
 
 ### Error 2: Wrong Directory Path
 ```
@@ -52,14 +52,14 @@ cd /home/lolizzmg/flood.lolitemaultes.online/lismore-flood-dashboard/lismore-flo
 node --version
 ```
 
-**You need:** Node.js 16.0.0 or higher
+**You need:** Node.js 18.0.0 or higher (Node 18 LTS recommended)
 
-**If you have Node 14 or lower:**
+**If you have Node 16 or lower:**
 
-#### Option A: Use cPanel Node.js Selector
+#### Option A: Use cPanel Node.js Selector (RECOMMENDED)
 1. Log into cPanel
 2. Go to "Setup Node.js App" or "Node.js Selector"
-3. Select Node.js version **16.x, 18.x, or 20.x** (recommended: 18.x LTS)
+3. Select Node.js version **18.x LTS** (NOT 16.x or 14.x)
 4. Set the application root to: `lismore-flood-dashboard/lismore-flood-proxy`
 5. Click "Save"
 
@@ -127,7 +127,7 @@ node server.js
 2. **Find "Setup Node.js App"** (or similar)
 
 3. **Create New Application:**
-   - **Node.js Version:** 16.x or 18.x (NOT 14.x)
+   - **Node.js Version:** 18.x LTS (NOT 16.x or 14.x)
    - **Application Mode:** Production
    - **Application Root:** `lismore-flood-dashboard/lismore-flood-proxy`
    - **Application URL:** `https://flood.lolitemaultes.online`
@@ -201,11 +201,13 @@ rm -rf node_modules package-lock.json
 npm install
 ```
 
-### Issue: "SyntaxError: Unexpected token '??='"
+### Issue: "ReferenceError: ReadableStream is not defined"
 
-**Cause:** Node.js version too old (you have v14, need v16+)
+**Cause:** Node.js version too old (you have v14 or v16, need v18+)
 
-**Fix:** Upgrade Node.js to version 16 or 18 in cPanel
+**Fix:** Upgrade Node.js to version 18 LTS in cPanel
+
+**Why Node 18?** Modern dependencies (like axios/undici) require the `ReadableStream` API, which is only stable in Node 18+
 
 ### Issue: "EADDRINUSE: Port 3000 already in use"
 
@@ -273,7 +275,7 @@ Your deployment should look like this:
 
 Before going live, confirm:
 
-- [ ] Node.js version is 16+ (`node --version`)
+- [ ] Node.js version is 18+ (`node --version` shows v18.x.x)
 - [ ] You're in `lismore-flood-proxy` directory
 - [ ] Dependencies installed (`ls node_modules/` shows packages)
 - [ ] Server starts without errors (`node server.js`)
@@ -294,8 +296,10 @@ Run these in order if still having issues:
 # 1. Go to correct directory
 cd /home/lolizzmg/flood.lolitemaultes.online/lismore-flood-dashboard/lismore-flood-proxy
 
-# 2. Check Node version (must be 16+)
+# 2. Check Node version (must be 18+)
 node --version
+
+# If not 18, upgrade in cPanel to Node.js 18.x LTS
 
 # 3. Clean install dependencies
 rm -rf node_modules package-lock.json
