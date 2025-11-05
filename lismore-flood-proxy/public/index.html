@@ -248,7 +248,7 @@
                             </div>
                         </div>
                         <div class="cyclone-container">
-                            <img id="cyclone-image" src="http://www.bom.gov.au/fwo/IDQ65001.png" alt="Tropical Cyclone Forecast Track Map" class="cyclone-image">
+                            <img id="cyclone-image" src="/proxy/cyclone-image" alt="Tropical Cyclone Forecast Track Map" class="cyclone-image">
                             <div id="cyclone-error" class="cyclone-error">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <circle cx="12" cy="12" r="10"></circle>
@@ -1426,14 +1426,17 @@
                         const controller = new AbortController();
                         const timeoutId = setTimeout(() => controller.abort(), 5000);
 
-                        const response = await fetch('http://www.bom.gov.au/', {
-                            method: 'HEAD',
-                            mode: 'no-cors',
+                        const response = await fetch('/api/bom-connectivity', {
                             signal: controller.signal
                         });
 
                         clearTimeout(timeoutId);
-                        return true;
+
+                        if (response.ok) {
+                            const data = await response.json();
+                            return data.success;
+                        }
+                        return false;
                     } catch (error) {
                         console.warn('BOM connectivity check failed:', error.message);
                         return false;

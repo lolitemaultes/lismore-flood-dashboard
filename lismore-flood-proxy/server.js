@@ -798,6 +798,27 @@ app.get('/status', (req, res) => {
     });
 });
 
+app.get('/api/bom-connectivity', async (req, res) => {
+    try {
+        const response = await axios.head(Config.urls.BOM_BASE, {
+            timeout: 5000,
+            validateStatus: null
+        });
+
+        res.json({
+            success: response.status >= 200 && response.status < 400,
+            status: response.status,
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        res.json({
+            success: false,
+            error: error.message,
+            timestamp: new Date().toISOString()
+        });
+    }
+});
+
 app.get('/cleanup-radar', async (req, res) => {
     try {
         await FileUtils.cleanupRadarImages();
@@ -1012,23 +1033,80 @@ app.get('/river-data', async (req, res) => {
 
 app.get('/api/flood-properties', (req, res) => {
     const floodDataPath = path.join(__dirname, 'public', 'flood-data.json');
-    
+
     try {
         if (fs.existsSync(floodDataPath)) {
             const data = fs.readFileSync(floodDataPath, 'utf8');
             res.json(JSON.parse(data));
         } else {
-            res.status(404).json({ 
+            res.status(404).json({
                 success: false,
-                error: 'Flood data file not found' 
+                error: 'Flood data file not found'
             });
         }
     } catch (error) {
         Logger.error('Error reading flood data:', error.message);
-        res.status(500).json({ 
+        res.status(500).json({
             success: false,
-            error: 'Failed to load flood data' 
+            error: 'Failed to load flood data'
         });
+    }
+});
+
+app.get('/proxy/cyclone-image', async (req, res) => {
+    try {
+        const imageUrl = 'http://www.bom.gov.au/fwo/IDQ65001.png';
+
+        const response = await axios.get(imageUrl, {
+            responseType: 'arraybuffer',
+            headers: Config.headers.browser,
+            validateStatus: null,
+            timeout: 10000
+        });
+
+        if (response.status !== 200) {
+            Logger.error(`Cyclone image fetch failed: HTTP ${response.status}`);
+            return res.status(response.status).send(`Error: ${response.status}`);
+        }
+
+        res.set('Content-Type', 'image/png');
+        res.set('Cache-Control', 'public, max-age=300');
+        res.send(response.data);
+    } catch (error) {
+        Logger.error('Error fetching cyclone image:', error.message);
+        res.status(500).send('Error fetching cyclone image');
+    }
+});
+
+app.get('/proxy/bom/*', async (req, res) => {
+    try {
+        const pathMatch = req.url.match(/\/proxy\/bom(\/.+)/);
+        if (!pathMatch || !pathMatch[1]) {
+            return res.status(400).send('Invalid path format');
+        }
+
+        const resourcePath = pathMatch[1];
+        const resourceUrl = `http://www.bom.gov.au${resourcePath}`;
+
+        const response = await axios.get(resourceUrl, {
+            responseType: 'arraybuffer',
+            headers: Config.headers.browser,
+            validateStatus: null,
+            timeout: 10000
+        });
+
+        if (response.status !== 200) {
+            Logger.error(`BOM resource fetch failed: HTTP ${response.status}`);
+            return res.status(response.status).send(`Error: ${response.status}`);
+        }
+
+        const contentType = response.headers['content-type'] || 'application/octet-stream';
+        res.set('Content-Type', contentType);
+        res.set('Cache-Control', 'public, max-age=300');
+        res.send(response.data);
+    } catch (error) {
+        Logger.error('Error fetching BOM resource:', error.message);
+        res.status(500).send('Error fetching BOM resource');
     }
 });
 
