@@ -1053,7 +1053,6 @@ app.get('/api/flood-properties', (req, res) => {
     }
 });
 
-// Check if cyclone image is available (HEAD request)
 app.get('/api/check-cyclone', async (req, res) => {
     try {
         Logger.info('Checking cyclone image availability...');
@@ -1083,7 +1082,6 @@ app.get('/api/check-cyclone', async (req, res) => {
     }
 });
 
-// Check if radar image is available (HEAD request)
 app.get('/api/check-radar', async (req, res) => {
     try {
         Logger.info('Checking radar image availability...');
@@ -1235,8 +1233,7 @@ async function initializeServer() {
 
         await RadarService.downloadLegend();
 
-        // Set up periodic cleanup every 5 minutes
-        const CLEANUP_INTERVAL = 5 * 60 * 1000; // 5 minutes
+        const CLEANUP_INTERVAL = 5 * 60 * 1000;
         setInterval(async () => {
             try {
                 await FileUtils.cleanupRadarImages();
