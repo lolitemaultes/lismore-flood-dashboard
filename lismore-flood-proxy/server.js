@@ -7,21 +7,12 @@ const fs = require('fs');
 const NodeCache = require('node-cache');
 const { XMLParser } = require('fast-xml-parser');
 
-// ============================================================================
-// CONFIGURATION & INITIALIZATION
-// ============================================================================
-
 const app = express();
 const PORT = process.env.PORT || 3000;
 const VERBOSE_LOGGING = process.env.VERBOSE_LOGGING === 'true' || false;
 
-// Cache Configuration
 const OUTAGE_CACHE_TTL = 60;
 const outageCache = new NodeCache({ stdTTL: OUTAGE_CACHE_TTL, useClones: false });
-
-// ============================================================================
-// LOGGING SYSTEM
-// ============================================================================
 
 const colors = {
     reset: '\x1b[0m',
@@ -39,7 +30,6 @@ const colors = {
     white: '\x1b[37m',
     gray: '\x1b[90m',
     
-    // Background colors
     bgRed: '\x1b[41m',
     bgGreen: '\x1b[42m',
     bgYellow: '\x1b[43m',
@@ -119,14 +109,9 @@ class Logger {
     }
 }
 
-// ============================================================================
-// MIDDLEWARE
-// ============================================================================
-
 app.use(cors());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Request logging middleware
 app.use((req, res, next) => {
     const startTime = Date.now();
     
@@ -137,10 +122,6 @@ app.use((req, res, next) => {
     
     next();
 });
-
-// ============================================================================
-// CONSTANTS & CONFIGURATIONS
-// ============================================================================
 
 const Config = {
     paths: {
@@ -211,7 +192,6 @@ const FloodConfig = {
         "Coopers Ck at Corndale": { minor: 6.00, moderate: 7.50, major: 9.50 }
     },
 
-    // Direct URL mappings to BOM river height tables
     riverHeightUrls: {
         "Wilsons R at Lismore (mAHD)": "https://www.bom.gov.au/fwo/IDN60231/IDN60231.058176.tbl.shtml",
         "Wilsons River at Lismore (mAHD)": "https://www.bom.gov.au/fwo/IDN60231/IDN60231.058176.tbl.shtml",
@@ -232,10 +212,6 @@ const FloodConfig = {
     }
 };
 
-// ============================================================================
-// XML PARSER CONFIGURATION
-// ============================================================================
-
 const xmlParser = new XMLParser({
     ignoreAttributes: false,
     attributeNamePrefix: '@_',
@@ -246,10 +222,6 @@ const xmlParser = new XMLParser({
     parseAttributeValue: false,
     isArray: (name) => name === 'Placemark'
 });
-
-// ============================================================================
-// UTILITY FUNCTIONS
-// ============================================================================
 
 class FileUtils {
     static async ensureDirectory(dirPath) {
@@ -313,10 +285,6 @@ class DateUtils {
         }
     }
 }
-
-// ============================================================================
-// SERVICE CLASSES
-// ============================================================================
 
 class OutageService {
     static async fetchKML(url, retries = 3) {
@@ -391,7 +359,6 @@ class OutageService {
         const result = {};
 
         try {
-            // Extract content from CDATA or text node if it's an object
             let content = html;
             if (typeof html === 'object') {
                 content = html.__cdata || html['#text'] || String(html);
@@ -755,7 +722,6 @@ class FloodService {
     }
     
     static async fetchRiverHeightData(location) {
-        // Get the direct URL from our mapping
         const tableUrl = FloodConfig.riverHeightUrls[location];
 
         if (!tableUrl) {
@@ -777,14 +743,12 @@ class FloodService {
         const $ = cheerio.load(tableResponse.data);
         const riverData = [];
 
-        // Try parsing HTML table format first (newer format)
         $('table tbody tr').each((i, row) => {
             const cells = $(row).find('td');
             if (cells.length >= 2) {
                 const dateTime = $(cells[0]).text().trim();
                 const heightText = $(cells[1]).text().trim();
 
-                // Match date format: DD/MM/YYYY HH:MM
                 if (dateTime.match(/^\d{2}\/\d{2}\/\d{4}\s+\d{2}:\d{2}$/)) {
                     const height = parseFloat(heightText);
                     if (!isNaN(height)) {
@@ -796,8 +760,7 @@ class FloodService {
                 }
             }
         });
-
-        // Fallback: try parsing pre-formatted text (older format)
+        
         if (riverData.length === 0) {
             const preContent = $('pre').text();
             if (preContent && preContent.trim().length > 0) {
@@ -826,10 +789,6 @@ class FloodService {
     }
 }
 
-// ============================================================================
-// API ROUTES - SYSTEM
-// ============================================================================
-
 app.get('/status', (req, res) => {
     res.json({
         status: 'online',
@@ -855,10 +814,6 @@ app.get('/cleanup-radar', async (req, res) => {
         });
     }
 });
-
-// ============================================================================
-// API ROUTES - OUTAGES
-// ============================================================================
 
 app.get('/api/outages', async (req, res) => {
     try {
@@ -918,10 +873,6 @@ app.get('/api/outages/clear-cache', (req, res) => {
         timestamp: new Date().toISOString()
     });
 });
-
-// ============================================================================
-// API ROUTES - RADAR
-// ============================================================================
 
 app.get('/api/radar/:radarId', async (req, res) => {
     try {
@@ -1023,10 +974,6 @@ app.get('/public/resources/Rain Radar/Legend.png', async (req, res) => {
     }
 });
 
-// ============================================================================
-// API ROUTES - FLOOD DATA
-// ============================================================================
-
 app.get('/flood-data', async (req, res) => {
     try {
         await FileUtils.cleanupRadarImages();
@@ -1085,22 +1032,15 @@ app.get('/api/flood-properties', (req, res) => {
     }
 });
 
-// ============================================================================
-// SERVER INITIALIZATION
-// ============================================================================
-
 async function initializeServer() {
     Logger.header('LISMORE FLOOD DASHBOARD SERVER');
     
     try {
-        // Ensure required directories exist
         await FileUtils.ensureDirectory(Config.paths.RESOURCES_DIR);
         Logger.success('Directory structure verified');
         
-        // Download radar legend on startup
         await RadarService.downloadLegend();
         
-        // Start server
         app.listen(PORT, () => {
             console.log('');
             Logger.success(`Server running on port ${PORT}`);
@@ -1125,5 +1065,4 @@ async function initializeServer() {
     }
 }
 
-// Start the server
 initializeServer();
