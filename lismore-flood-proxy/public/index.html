@@ -852,7 +852,6 @@
                 refreshRadarBtn.addEventListener('click', refreshRadar);
             }
 
-            // Initial cyclone load - availability check runs every 60s
             refreshCycloneMap();
 
             refreshIntervalSelect.value = DEFAULT_REFRESH_INTERVAL;
@@ -1493,11 +1492,9 @@
 
                     preloadedImages.clear();
 
-                    // Try to fetch radar data directly - no pre-check needed
                     try {
                         await fetchRadarData();
                     } catch (error) {
-                        // Only if actual fetch fails, then show error and revert
                         if (window.radarGlobalState.forceClearInterval) {
                             clearInterval(window.radarGlobalState.forceClearInterval);
                             window.radarGlobalState.forceClearInterval = null;
@@ -1703,13 +1700,11 @@
                 }
             }
             
-            // Check cyclone status based on tab availability (avoid duplicate image fetch)
             const cycloneTab = document.getElementById('tab-cyclone');
             if (cycloneTab && cycloneTab.classList.contains('tab-unavailable')) {
                 cycloneStatusValue.textContent = 'No Active Cyclone';
                 cycloneStatusValue.className = 'status-value offline';
             } else {
-                // Check if image exists (cyclone availability check runs separately every 60s)
                 const cycloneImage = document.getElementById('cyclone-image');
                 if (cycloneImage && cycloneImage.complete && cycloneImage.naturalHeight !== 0) {
                     cycloneStatusValue.textContent = 'Online';
@@ -2202,12 +2197,10 @@
             const cycloneTimestamp = document.getElementById('cyclone-timestamp');
 
             try {
-                // Check availability first (server logs in terminal)
                 const checkResponse = await fetch('/api/check-cyclone');
                 const checkData = await checkResponse.json();
 
                 if (checkData.available) {
-                    // Only load image if available
                     const timestamp = new Date().getTime();
                     cycloneImage.src = `/proxy/cyclone-image?t=${timestamp}`;
                     cycloneTimestamp.textContent = `Last updated: ${new Date().toLocaleTimeString('en-AU')}`;
@@ -2217,13 +2210,11 @@
                         cycloneError.style.display = 'none';
                     };
                 } else {
-                    // Mark as unavailable without trying to load
                     markTabUnavailable('tab-cyclone', 'No current cyclone warnings or bulletins for this area.');
                     cycloneError.style.display = 'block';
                     cycloneError.textContent = 'No current cyclone warnings for this area';
                 }
             } catch (error) {
-                // Silent fail - server handles logging
                 markTabUnavailable('tab-cyclone', 'Unable to check cyclone status.');
                 cycloneError.style.display = 'block';
                 cycloneError.textContent = 'Unable to check cyclone status';
@@ -2328,7 +2319,6 @@
         
         async function checkCycloneAvailability() {
             try {
-                // Check availability first (server logs in terminal)
                 const checkResponse = await fetch('/api/check-cyclone');
                 const checkData = await checkResponse.json();
 
@@ -2337,7 +2327,6 @@
                     const errorEl = document.getElementById('cyclone-error');
                     if (errorEl) errorEl.style.display = 'none';
 
-                    // Load image directly without re-checking availability
                     const cycloneImage = document.getElementById('cyclone-image');
                     const cycloneTimestamp = document.getElementById('cyclone-timestamp');
                     if (cycloneImage) {
@@ -2356,7 +2345,6 @@
                     }
                 }
             } catch (error) {
-                // Silent fail - server handles logging
             }
         }
         
@@ -2817,4 +2805,5 @@
     </div>
 </body>
 </html>
+
 
