@@ -739,20 +739,33 @@ class FloodService {
             headers: Config.headers.html,
             timeout: 10000
         });
-        
+
         if (response.status !== 200) {
             throw new Error(`Failed to fetch flood data page: ${response.status}`);
         }
-        
+
         const $ = cheerio.load(response.data);
         let tableUrl = null;
-        
+
+        // Helper function to normalize location names for matching
+        const normalizeLocation = (loc) => {
+            return loc.toLowerCase()
+                .replace(/\s+/g, ' ')
+                .replace(/\briver\b/g, 'r')
+                .replace(/\bcreek\b/g, 'ck')
+                .trim();
+        };
+
+        const normalizedSearchLocation = normalizeLocation(location);
+
         $('tr').each((i, row) => {
             const cells = $(row).find('td');
             if (cells.length > 0) {
                 const locationText = $(cells[0]).text().trim();
-                
-                if (locationText === location) {
+                const normalizedLocationText = normalizeLocation(locationText);
+
+                // Try exact match first, then normalized match
+                if (locationText === location || normalizedLocationText === normalizedSearchLocation) {
                     $(row).find('a').each((j, link) => {
                         if ($(link).text().trim() === 'Table') {
                             tableUrl = $(link).attr('href');
@@ -766,7 +779,7 @@ class FloodService {
                 }
             }
         });
-        
+
         if (!tableUrl) {
             throw new Error(`No table URL found for location: ${location}`);
         }
