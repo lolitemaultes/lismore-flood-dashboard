@@ -8,7 +8,7 @@
 
 **Dashboard Restyling for V3**
 - Overhaul of current styling
-- Adding mobile/tablet support
+- Adding completely different mobile/tablet support
 
 **Code Restructure / Cleaner Architecture**
 - Separation of css and js to maintain clean directory
