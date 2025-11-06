@@ -1265,8 +1265,8 @@ async function initializeServer() {
         app.listen(PORT, () => {
             console.log('');
             Logger.success(`Server running on port ${PORT}`);
-            Logger.info(`Dashboard: https://localhost:${PORT}`);
-            Logger.info(`API Base: https://localhost:${PORT}/api`);
+            Logger.info(`Dashboard: http://localhost:${PORT}`);
+            Logger.info(`API Base: http://localhost:${PORT}/api`);
             console.log('');
             Logger.table([
                 { Endpoint: '/api/outages', Description: 'Power outage data' },
@@ -1287,3 +1287,4 @@ async function initializeServer() {
 }
 
 initializeServer();
+
