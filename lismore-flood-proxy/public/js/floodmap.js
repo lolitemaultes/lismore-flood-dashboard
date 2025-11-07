@@ -83,14 +83,131 @@ const LEVEE_HEIGHT = 10.6;
 const LEVEE_WARNING_THRESHOLD = 9.0;
 
 let leveeLine = null;
+let floodMap = null;
+let floodProperties = [];
+let floodMarkers = null;
+let floodOverlayLayer = null;
+let floodMapInitialized = false;
+let currentlyOpenFloodMarker = null;
+let userSelectedFloodHeight = null;
+let currentLismoreLevel = null;
 
 const BASE_URL = window.location.origin || '';
 const PROXY_URL = '/flood-data';
 
+console.log('FloodMap.js loaded - initializing flood mapping system');
+
 let embeddedCSVData = [];
 
-function isPointInPolygon(point, polygon) {
+const terrariumToMeters = (r, g, b) => (r * 256 + g + b / 256) - 32768;
+
+L.GridLayer.FloodOverlay = L.GridLayer.extend({
+    initialize: function(opts) {
+        L.setOptions(this, opts);
+        this._elevation = opts.elevation ?? 12;
+        this._maxDepth = opts.maxDepth ?? 15;
+        this._opacity = opts.opacity ?? 0.7;
+    },
     
+    setElevation: function(v) {
+        this._elevation = Number(v);
+        this.redraw();
+    },
+    
+    setOpacity: function(v) {
+        this._opacity = v;
+        if (this._container) {
+            this._container.style.opacity = String(v);
+        }
+    },
+    
+    createTile: function(coords, done) {
+        const tile = L.DomUtil.create('canvas', 'leaflet-tile');
+        const size = this.getTileSize();
+        tile.width = size.x;
+        tile.height = size.y;
+        const ctx = tile.getContext('2d');
+        
+        ctx.clearRect(0, 0, size.x, size.y);
+        
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        
+        let completed = false;
+        
+        let timeoutId = setTimeout(() => {
+            if (!completed) {
+                completed = true;
+                done(null, tile);
+            }
+        }, 5000);
+        
+        img.onload = () => {
+            if (completed) return;
+            completed = true;
+            clearTimeout(timeoutId);
+            
+            try {
+                ctx.drawImage(img, 0, 0, size.x, size.y);
+                const imageData = ctx.getImageData(0, 0, size.x, size.y);
+                const data = imageData.data;
+                const level = this._elevation;
+                const maxDepth = Math.max(1, this._maxDepth);
+                
+                for (let i = 0; i < data.length; i += 4) {
+                    const r = data[i];
+                    const g = data[i + 1];
+                    const b = data[i + 2];
+                    const h = terrariumToMeters(r, g, b);
+                    
+                    if (!Number.isFinite(h) || h <= -32760) {
+                        data[i + 3] = 0;
+                        continue;
+                    }
+                    
+                    if (h <= level) {
+                        const depth = Math.min(level - h, maxDepth);
+                        const t = depth / maxDepth;
+                    
+                        const R = Math.round(30 + 60 * (1 - t));
+                        const G = Math.round(100 + 100 * (1 - t));
+                        const B = Math.round(200 + 55 * (1 - t));
+                        const A = Math.round(120 + 135 * t);
+                        
+                        data[i] = R;
+                        data[i + 1] = G;
+                        data[i + 2] = B;
+                        data[i + 3] = A;
+                    } else {
+                        data[i + 3] = 0;
+                    }
+                }
+                
+                ctx.putImageData(imageData, 0, 0);
+                done(null, tile);
+            } catch (err) {
+                console.error('Error processing tile:', err);
+                done(null, tile);
+            }
+        };
+        
+        img.onerror = () => {
+            if (completed) return;
+            completed = true;
+            clearTimeout(timeoutId);
+            done(null, tile);
+        };
+        
+        const cacheBust = Math.floor(Date.now() / 60000);
+        img.src = `/terrarium/${coords.z}/${coords.x}/${coords.y}.png?t=${cacheBust}`;
+        
+        return tile;
+    }
+});
+
+L.gridLayer.floodOverlay = (opts) => new L.GridLayer.FloodOverlay(opts);
+
+function isPointInPolygon(point, polygon) {
     const x = point[0];
     const y = point[1];
     
@@ -191,84 +308,6 @@ function getFloodStatusWithLevee(floodHeight, property) {
     return normalStatus;
 }
 
-    function createPopupContent(property, floodHeight, status) {
-        const addressParts = property.address.match(/^(\d+)\s+(.+?)\s+([A-Z\s]+)$/);
-        let streetNumber = '', streetName = '';
-        
-        if (addressParts) {
-            streetNumber = addressParts[1];
-            streetName = addressParts[2];
-        } else {
-            streetName = property.address;
-        }
-        
-        const floorAffected = property.floorLevel <= floodHeight;
-        const gateAffected = property.gateLevel <= floodHeight;
-        const roadAffected = property.roadLevel <= floodHeight;
-        
-        let content = `
-            <div style="font-family:'Inter',sans-serif;line-height:1.5;">
-                <div style="font-size:16px;font-weight:600;margin-bottom:12px;border-bottom:1px solid #eee;padding-bottom:8px;">
-                    ${streetNumber} ${streetName}
-                </div>
-                
-                <div style="margin-bottom:8px;">
-                    <div style="font-weight:500;margin-bottom:4px;">Status: <span style="color:${getStatusColor(status)};font-weight:600;">${getStatusText(status)}</span></div>
-                </div>
-                
-                <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 8px;margin-bottom:10px;">
-                    <div style="font-weight:500;">Floor Level:</div>
-                    <div>${property.floorLevel.toFixed(2)}m ${floorAffected && !property.leveeProtected ? '<span style="color:#e74c3c;font-weight:bold;padding:1px 4px;background-color:rgba(231,76,60,0.1);border-radius:3px;">AFFECTED</span>' : ''}</div>
-                    
-                    <div style="font-weight:500;">Gate Level:</div>
-                    <div>${property.gateLevel.toFixed(2)}m ${gateAffected && !property.leveeProtected ? '<span style="color:#f39c12;font-weight:bold;padding:1px 4px;background-color:rgba(243,156,18,0.1);border-radius:3px;">AFFECTED</span>' : ''}</div>
-                    
-                    <div style="font-weight:500;">Road Level:</div>
-                    <div>${property.roadLevel.toFixed(2)}m ${roadAffected && !property.leveeProtected ? '<span style="color:#f1c40f;font-weight:bold;padding:1px 4px;background-color:rgba(241,196,15,0.1);border-radius:3px;">AFFECTED</span>' : ''}</div>
-                </div>
-            </div>
-        `;
-        
-        if (property.leveeProtected) {
-            content += `
-            <div style="background-color:#e3f2fd;padding:10px;margin:6px 0 0 0;border-radius:6px;border:1px solid #bbdefb;display:flex;align-items:center;justify-content:center;">
-                <span style="color:#1976d2;margin-right:8px;display:flex;align-items:center;">
-                    <svg xmlns="https://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1976d2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-                    </svg>
-                </span>
-                <span style="color:#1976d2;font-weight:600;font-size:14px;">Protected by Levee</span>
-            </div>`;
-        }
-        
-        return content;
-    }
-
-function addLeveeLegendItem() {
-    const legendElement = document.querySelector('.flood-map-legend');
-    if (!legendElement) return;
-    
-    if (!document.querySelector('.legend-item-levee')) {
-        const leveeLegendItem = document.createElement('div');
-        leveeLegendItem.className = 'legend-item legend-item-levee';
-        leveeLegendItem.innerHTML = `
-            <div class="legend-color" style="background-color: #2196F3;"></div>
-            <div class="legend-label">Levee Protected</div>
-        `;
-        legendElement.appendChild(leveeLegendItem);
-    }
-}
-
-function getStatusText(status) {
-    switch (status) {
-        case 'critical': return 'Critical - Floor Level Affected';
-        case 'warning': return 'Warning - Gate Level Affected';
-        case 'alert': return 'Alert - Road Level Affected';
-        case 'safe': return 'Safe - Not Affected';
-        default: return 'Unknown';
-    }
-}
-
 function getStatusColor(status) {
     const COLORS = {
         critical: '#e74c3c',
@@ -280,13 +319,61 @@ function getStatusColor(status) {
     return COLORS[status] || COLORS.safe;
 }
 
-function getHeatIntensity(status) {
+function createPopupContent(property, floodHeight, status) {
+    const addressParts = property.address.match(/^(\d+)\s+(.+?)\s+([A-Z\s]+)$/);
+    let streetNumber = '', streetName = '';
+    
+    if (addressParts) {
+        streetNumber = addressParts[1];
+        streetName = addressParts[2];
+    } else {
+        streetName = property.address;
+    }
+    
+    const floorAffected = property.floorLevel <= floodHeight;
+    const gateAffected = property.gateLevel <= floodHeight;
+    const roadAffected = property.roadLevel <= floodHeight;
+    
+    let content = `
+        <div style="font-family:'Inter',sans-serif;line-height:1.5;">
+            <div style="font-size:16px;font-weight:600;margin-bottom:12px;border-bottom:1px solid #eee;padding-bottom:8px;">
+                ${streetNumber} ${streetName}
+            </div>
+            
+            <div style="margin-bottom:8px;">
+                <div style="font-weight:500;margin-bottom:4px;">Status: <span style="color:${getStatusColor(status)};font-weight:600;">${getStatusText(status)}</span></div>
+            </div>
+            
+            <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 8px;margin-bottom:10px;">
+                <div style="font-weight:500;">Floor Level:</div>
+                <div>${property.floorLevel.toFixed(2)}m ${floorAffected && !property.leveeProtected ? '<span style="color:#e74c3c;font-weight:bold;">AFFECTED</span>' : ''}</div>
+                
+                <div style="font-weight:500;">Gate Level:</div>
+                <div>${property.gateLevel.toFixed(2)}m ${gateAffected && !property.leveeProtected ? '<span style="color:#f39c12;font-weight:bold;">AFFECTED</span>' : ''}</div>
+                
+                <div style="font-weight:500;">Road Level:</div>
+                <div>${property.roadLevel.toFixed(2)}m ${roadAffected && !property.leveeProtected ? '<span style="color:#f1c40f;font-weight:bold;">AFFECTED</span>' : ''}</div>
+            </div>
+        </div>
+    `;
+    
+    if (property.leveeProtected) {
+        content += `
+        <div style="background-color:#e3f2fd;padding:10px;margin-top:10px;border-radius:6px;">
+            <span style="color:#1976d2;font-weight:600;">Protected by Levee</span>
+        </div>`;
+    }
+    
+    return content;
+}
+
+function getStatusText(status) {
     switch (status) {
-        case 'critical': return 1.0;
-        case 'warning': return 0.7;
-        case 'alert': return 0.4;
-        case 'safe': return 0.1;
-        default: return 0;
+        case 'critical': return 'Critical - Floor Level Affected';
+        case 'warning': return 'Warning - Gate Level Affected';
+        case 'alert': return 'Alert - Road Level Affected';
+        case 'safe': return 'Safe - Not Affected';
+        default: return 'Unknown';
     }
 }
 
@@ -315,10 +402,11 @@ function updateFloodVisualizationWithLevee(floodHeight) {
     const floodLoadingOverlay = document.getElementById('flood-loading-overlay');
     floodLoadingOverlay.style.display = 'flex';
     
-    floodMarkers.clearLayers();
-    if (floodHeatmapLayer) {
-        floodMap.removeLayer(floodHeatmapLayer);
+    if (floodOverlayLayer) {
+        floodOverlayLayer.setElevation(floodHeight);
     }
+    
+    floodMarkers.clearLayers();
     
     if (leveeLine) {
         floodMap.removeLayer(leveeLine);
@@ -336,9 +424,7 @@ function updateFloodVisualizationWithLevee(floodHeight) {
     
     document.getElementById('flood-stats-height').textContent = floodHeight.toFixed(1) + 'm';
     
-    const heatmapData = [];
-    
-    floodProperties.forEach((property, index) => {
+    floodProperties.forEach((property) => {
         const status = getFloodStatusWithLevee(floodHeight, property);
         
         stats[status]++;
@@ -400,33 +486,6 @@ function updateFloodVisualizationWithLevee(floodHeight) {
         });
 
         floodMarkers.addLayer(marker);
-        
-        let intensity;
-        
-        if (property.leveeProtected) {
-            intensity = 0.05;
-        } else {
-            intensity = getHeatIntensity(status);
-        }
-        
-        heatmapData.push([
-            property.coordinates[0], 
-            property.coordinates[1], 
-            intensity
-        ]);
-    });
-
-    floodHeatmapLayer = L.heatLayer(heatmapData, {
-        radius: 25,
-        blur: 15,
-        maxZoom: 17,
-        gradient: {
-            0.05: '#2196F3',
-            0.1: getStatusColor('safe'),
-            0.4: getStatusColor('alert'),
-            0.7: getStatusColor('warning'),
-            1.0: getStatusColor('critical')
-        }
     });
     
     document.getElementById('flood-stat-total').textContent = floodProperties.length;
@@ -434,35 +493,6 @@ function updateFloodVisualizationWithLevee(floodHeight) {
     document.getElementById('flood-stat-warning').textContent = stats.warning;
     document.getElementById('flood-stat-alert').textContent = stats.alert;
     document.getElementById('flood-stat-safe').textContent = stats.safe;
-    
-    let leveeStatElement = document.getElementById('flood-stat-levee');
-    if (!leveeStatElement && stats.leveeProtected > 0) {
-        const floodStatGrid = document.querySelector('.flood-stat-grid');
-        const leveeStatItem = document.createElement('div');
-        leveeStatItem.className = 'flood-stat-item';
-        leveeStatItem.innerHTML = `
-            <div class="flood-stat-label">Levee Protected</div>
-            <div class="flood-stat-value" id="flood-stat-levee">0 <span class="category-badge" style="background-color:rgba(33, 150, 243, 0.1);color:#2196F3;">Levee</span></div>
-        `;
-        floodStatGrid.appendChild(leveeStatItem);
-        leveeStatElement = document.getElementById('flood-stat-levee');
-    }
-    
-    if (leveeStatElement) {
-        if (stats.leveeProtected > 0) {
-            leveeStatElement.innerHTML = stats.leveeProtected + ' <span class="category-badge" style="background-color:rgba(33, 150, 243, 0.1);color:#2196F3;">Levee</span>';
-            leveeStatElement.parentElement.style.display = 'block';
-        } else {
-            leveeStatElement.parentElement.style.display = 'none';
-        }
-    }
-    
-    if (document.getElementById('flood-show-heatmap').checked) {
-        floodMap.removeLayer(floodMarkers);
-        floodMap.addLayer(floodHeatmapLayer);
-    } else {
-        floodMap.addLayer(floodMarkers);
-    }
     
     floodLoadingOverlay.style.display = 'none';
 }
@@ -476,8 +506,6 @@ function initFloodMapWithLevee() {
     const floodHeightDisplay = document.getElementById('flood-height-display');
     const useCurrentLevelBtn = document.getElementById('use-current-level');
     const floodLoadingOverlay = document.getElementById('flood-loading-overlay');
-    const floodShowMarkers = document.getElementById('flood-show-markers');
-    const floodShowHeatmap = document.getElementById('flood-show-heatmap');
     const refreshFloodMapBtn = document.getElementById('refresh-floodmap');
 
     floodMap = L.map('flood-map').setView([-28.8167, 153.2833], 14);
@@ -485,8 +513,30 @@ function initFloodMapWithLevee() {
     floodMapInitialized = true;
 
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 18
     }).addTo(floodMap);
+
+    try {
+        floodOverlayLayer = L.gridLayer.floodOverlay({
+            tileSize: 256,
+            updateWhenIdle: false,
+            detectRetina: false,
+            elevation: 12,
+            maxDepth: 15,
+            opacity: 0.7,
+            errorTileUrl: 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
+        }).addTo(floodMap);
+        
+        console.log('Flood overlay layer initialized');
+        
+        setTimeout(() => {
+            console.log('Note: Some elevation tiles may load slowly. The map will show flooded areas as tiles become available.');
+        }, 2000);
+    } catch (error) {
+        console.error('Failed to initialize flood overlay:', error);
+        showNotification('Flood visualization may be limited. Property markers will still function.', 'warning');
+    }
 
     floodMarkers = L.layerGroup().addTo(floodMap);
 
@@ -495,23 +545,11 @@ function initFloodMapWithLevee() {
         floodMap.closePopup();
     }, { passive: true });
 
-    floodMap.on('zoomstart', () => {
+    floodMap.on('zoomstart dragstart movestart', () => {
         currentlyOpenFloodMarker = null;
         floodMap.closePopup();
     });
 
-    floodMap.on('dragstart', () => {
-        currentlyOpenFloodMarker = null;
-        floodMap.closePopup();
-    });
-
-    floodMap.on('movestart', () => {
-        currentlyOpenFloodMarker = null;
-        floodMap.closePopup();
-    });
-
-    addLeveeLegendItem();
-    
     const LISMORE_BOUNDS = [
         [-28.8767, 153.2233],
         [-28.7767, 153.3433]
@@ -523,7 +561,6 @@ function initFloodMapWithLevee() {
     
     if (embeddedCSVData && embeddedCSVData.length > 0) {
         processFloodData(embeddedCSVData);
-    } else {
     }
     
     let initialHeight;
@@ -558,20 +595,6 @@ function initFloodMapWithLevee() {
         }
     });
     
-    floodShowMarkers.addEventListener('change', function() {
-        if (this.checked) {
-            floodMap.removeLayer(floodHeatmapLayer);
-            floodMap.addLayer(floodMarkers);
-        }
-    });
-    
-    floodShowHeatmap.addEventListener('change', function() {
-        if (this.checked && floodHeatmapLayer) {
-            floodMap.removeLayer(floodMarkers);
-            floodMap.addLayer(floodHeatmapLayer);
-        }
-    });
-    
     refreshFloodMapBtn.addEventListener('click', function() {
         const height = parseFloat(floodHeightSlider.value);
         userSelectedFloodHeight = null;
@@ -584,6 +607,19 @@ function initFloodMapWithLevee() {
             updateFloodVisualizationWithLevee(height);
         }
     });
+    
+    const showMarkersToggle = document.getElementById('flood-show-markers');
+    if (showMarkersToggle) {
+        showMarkersToggle.addEventListener('change', function() {
+            if (this.checked) {
+                floodMap.addLayer(floodMarkers);
+                console.log('Property markers shown');
+            } else {
+                floodMap.removeLayer(floodMarkers);
+                console.log('Property markers hidden');
+            }
+        });
+    }
     
     floodMapInitialized = true;
     
