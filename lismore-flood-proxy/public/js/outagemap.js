@@ -1,7 +1,8 @@
 (function() {
     const OUTAGE_API = '/api/outages';
     const outageColors = { current: '#ff4d4f', future: '#f7ba1e', cancelled: '#7aa2f7' };
-    
+    const OUTAGE_REFRESH_INTERVAL = 5 * 60 * 1000;
+
     let outageMap = null;
     let outageLayerGroups = {
         current: null,
@@ -11,6 +12,8 @@
     let allOutageBounds = [];
     let outageMapInitialized = false;
     let currentlyOpenMarker = null;
+    let cachedOutageData = null;
+    let outageRefreshTimer = null;
     
     function initializeOutageMap() {
         if (outageMapInitialized) return;
@@ -277,7 +280,7 @@
     
     function applyOutageVisibility() {
         const selectedCategory = document.querySelector('input[name="outage-category"]:checked').value;
-        
+
         for (const [k, layer] of Object.entries(outageLayerGroups)) {
             if (k === selectedCategory) {
                 if (!outageMap.hasLayer(layer)) layer.addTo(outageMap);
@@ -286,11 +289,131 @@
             }
         }
     }
-    
+
+    function renderOutageData(data, force = false) {
+        if (!outageMapInitialized || !data) {
+            return;
+        }
+
+        for (const layer of Object.values(outageLayerGroups)) {
+            layer.clearLayers();
+        }
+
+        if (outageMap) {
+            outageMap.closePopup();
+            currentlyOpenMarker = null;
+        }
+
+        allOutageBounds = [];
+        const counts = { current: 0, future: 0, cancelled: 0 };
+        let currentCustomers = 0;
+
+        const lockedBounds = {
+            south: -29.076575403045364,
+            north: -28.595374292349927,
+            west: 152.86651611328128,
+            east: 153.73443603515628
+        };
+
+        for (const f of data.features) {
+            if (!Number.isFinite(f.latitude) || !Number.isFinite(f.longitude)) continue;
+
+            if (f.latitude <= lockedBounds.south || f.latitude >= lockedBounds.north ||
+                f.longitude <= lockedBounds.west || f.longitude >= lockedBounds.east) {
+                continue;
+            }
+
+            counts[f.category] = (counts[f.category] || 0) + 1;
+
+            if (f.category === 'current' && f.customersAffected) {
+                currentCustomers += f.customersAffected;
+            }
+
+            const marker = createOutageMarker(f, outageColors[f.category]);
+            const cust = f.customersAffected != null ? f.customersAffected.toLocaleString() : 'Not specified';
+            const startTime = f.start ? formatOutageDate(f.start) : 'Not specified';
+            const endTime = f.end ? formatOutageDate(f.end) : 'Not specified';
+            const reason = f.reason && f.reason !== 'Not specified' ? f.reason : 'Not specified';
+
+            const popupContent = `
+                <div>
+                    <div class="outage-popup-title">${escapeHtml(f.name)}</div>
+                    <div class="outage-popup-row">
+                        <span class="outage-popup-label">Status</span>
+                        <span class="outage-popup-value">
+                            <span class="outage-popup-badge ${f.category}">${escapeHtml(f.status || f.categoryName)}</span>
+                        </span>
+                    </div>
+                    <div class="outage-popup-row">
+                        <span class="outage-popup-label">Time Off</span>
+                        <span class="outage-popup-value">${escapeHtml(startTime)}</span>
+                    </div>
+                    <div class="outage-popup-row">
+                        <span class="outage-popup-label">Est. Time On</span>
+                        <span class="outage-popup-value">${escapeHtml(endTime)}</span>
+                    </div>
+                    <div class="outage-popup-row">
+                        <span class="outage-popup-label">Customers</span>
+                        <span class="outage-popup-value"><strong>${escapeHtml(cust)}</strong></span>
+                    </div>
+                    <div class="outage-popup-row">
+                        <span class="outage-popup-label">Reason</span>
+                        <span class="outage-popup-value">${escapeHtml(reason)}</span>
+                    </div>
+                    ${f.lastUpdated ? `
+                    <div class="outage-popup-footer">
+                        Last updated: ${escapeHtml(formatOutageDate(f.lastUpdated))}
+                    </div>
+                    ` : ''}
+                </div>
+            `;
+
+            bindOutagePopup(marker, popupContent, f.latitude, f.longitude, f.polygon);
+            marker.addTo(outageLayerGroups[f.category]);
+            allOutageBounds.push([f.latitude, f.longitude]);
+        }
+
+        document.getElementById('outage-stat-current').textContent = counts.current || 0;
+        document.getElementById('outage-stat-future').textContent = counts.future || 0;
+        document.getElementById('outage-stat-cancelled').textContent = counts.cancelled || 0;
+        document.getElementById('outage-stat-customers').textContent = currentCustomers.toLocaleString();
+
+        applyOutageVisibility();
+
+        const total = counts.current + counts.future + counts.cancelled;
+        document.getElementById('outage-last-update').textContent = new Date().toLocaleTimeString('en-AU');
+
+        if (data.errors && data.errors.length > 0) {
+            const errorCategories = data.errors.map(e => e.category).join(', ');
+            console.warn('Some outage categories failed to load:', data.errors);
+            if (total === 0) {
+                showNotification(`Warning: Could not load outage data from some sources (${errorCategories}). Service may be temporarily unavailable.`, 'warning');
+            } else if (!force) {
+                showNotification(`Loaded ${total} outages. Note: ${errorCategories} outages unavailable.`, 'warning');
+            }
+        }
+
+        if (force) {
+            const loadingOverlay = document.getElementById('loading-overlay');
+            if (loadingOverlay) {
+                loadingOverlay.style.display = 'none';
+            }
+            if (data.errors && data.errors.length > 0 && total === 0) {
+                showNotification('Outage data service is currently unavailable. Please try again later.', 'error');
+            } else {
+                showNotification(`Successfully refreshed outage data - ${total} outages loaded`, 'success');
+            }
+
+            if (outageMap) {
+                outageMap.setView([-28.836252984829166, 153.30047607421878], 10, { animate: true, duration: 0.5 });
+            }
+        }
+    }
+
     async function loadOutageData(force = false) {
         const refreshBtn = document.getElementById('refresh-outages');
         if (refreshBtn) refreshBtn.disabled = true;
-        
+
         if (force) {
             const loadingOverlay = document.getElementById('loading-overlay');
             const loadingText = loadingOverlay.querySelector('p');
@@ -299,11 +422,11 @@
                 loadingOverlay.style.display = 'flex';
             }
         }
-        
+
         try {
             const url = force ? OUTAGE_API + '?refresh=1' : OUTAGE_API;
             const res = await fetch(url);
-            
+
             if (!res.ok) {
                 const text = await res.text();
                 let errorMsg = 'Failed to load outages';
@@ -315,122 +438,17 @@
                 }
                 throw new Error(errorMsg);
             }
-            
+
             const data = await res.json();
-            
-            for (const layer of Object.values(outageLayerGroups)) {
-                layer.clearLayers();
-            }
-            
-            if (outageMap) {
-                outageMap.closePopup();
-                currentlyOpenMarker = null;
-            }
-            
-            allOutageBounds = [];
-            const counts = { current: 0, future: 0, cancelled: 0 };
-            let currentCustomers = 0;
-            
-            const lockedBounds = {
-                south: -29.076575403045364,
-                north: -28.595374292349927,
-                west: 152.86651611328128,
-                east: 153.73443603515628
-            };
-            
-            for (const f of data.features) {
-                if (!Number.isFinite(f.latitude) || !Number.isFinite(f.longitude)) continue;
-                
-                if (f.latitude <= lockedBounds.south || f.latitude >= lockedBounds.north ||
-                    f.longitude <= lockedBounds.west || f.longitude >= lockedBounds.east) {
-                    continue;
-                }
-                
-                counts[f.category] = (counts[f.category] || 0) + 1;
-                
-                if (f.category === 'current' && f.customersAffected) {
-                    currentCustomers += f.customersAffected;
-                }
-                
-                const marker = createOutageMarker(f, outageColors[f.category]);
-                const cust = f.customersAffected != null ? f.customersAffected.toLocaleString() : 'Not specified';
-                const startTime = f.start ? formatOutageDate(f.start) : 'Not specified';
-                const endTime = f.end ? formatOutageDate(f.end) : 'Not specified';
-                const reason = f.reason && f.reason !== 'Not specified' ? f.reason : 'Not specified';
-                
-                const popupContent = `
-                    <div>
-                        <div class="outage-popup-title">${escapeHtml(f.name)}</div>
-                        <div class="outage-popup-row">
-                            <span class="outage-popup-label">Status</span>
-                            <span class="outage-popup-value">
-                                <span class="outage-popup-badge ${f.category}">${escapeHtml(f.status || f.categoryName)}</span>
-                            </span>
-                        </div>
-                        <div class="outage-popup-row">
-                            <span class="outage-popup-label">Time Off</span>
-                            <span class="outage-popup-value">${escapeHtml(startTime)}</span>
-                        </div>
-                        <div class="outage-popup-row">
-                            <span class="outage-popup-label">Est. Time On</span>
-                            <span class="outage-popup-value">${escapeHtml(endTime)}</span>
-                        </div>
-                        <div class="outage-popup-row">
-                            <span class="outage-popup-label">Customers</span>
-                            <span class="outage-popup-value"><strong>${escapeHtml(cust)}</strong></span>
-                        </div>
-                        <div class="outage-popup-row">
-                            <span class="outage-popup-label">Reason</span>
-                            <span class="outage-popup-value">${escapeHtml(reason)}</span>
-                        </div>
-                        ${f.lastUpdated ? `
-                        <div class="outage-popup-footer">
-                            Last updated: ${escapeHtml(formatOutageDate(f.lastUpdated))}
-                        </div>
-                        ` : ''}
-                    </div>
-                `;
-                
-                bindOutagePopup(marker, popupContent, f.latitude, f.longitude, f.polygon);
-                marker.addTo(outageLayerGroups[f.category]);
-                allOutageBounds.push([f.latitude, f.longitude]);
-            }
-            
-            document.getElementById('outage-stat-current').textContent = counts.current || 0;
-            document.getElementById('outage-stat-future').textContent = counts.future || 0;
-            document.getElementById('outage-stat-cancelled').textContent = counts.cancelled || 0;
-            document.getElementById('outage-stat-customers').textContent = currentCustomers.toLocaleString();
-            
-            applyOutageVisibility();
-            
-            const total = counts.current + counts.future + counts.cancelled;
-            document.getElementById('outage-last-update').textContent = new Date().toLocaleTimeString('en-AU');
 
-            if (data.errors && data.errors.length > 0) {
-                const errorCategories = data.errors.map(e => e.category).join(', ');
-                console.warn('Some outage categories failed to load:', data.errors);
-                if (total === 0) {
-                    showNotification(`Warning: Could not load outage data from some sources (${errorCategories}). Service may be temporarily unavailable.`, 'warning');
-                } else if (!force) {
-                    showNotification(`Loaded ${total} outages. Note: ${errorCategories} outages unavailable.`, 'warning');
-                }
+            cachedOutageData = data;
+
+            if (!outageMapInitialized) {
+                console.log('Outage data fetched and cached. Map not yet initialized.');
+                return;
             }
 
-            if (force) {
-                const loadingOverlay = document.getElementById('loading-overlay');
-                if (loadingOverlay) {
-                    loadingOverlay.style.display = 'none';
-                }
-                if (data.errors && data.errors.length > 0 && total === 0) {
-                    showNotification('Outage data service is currently unavailable. Please try again later.', 'error');
-                } else {
-                    showNotification(`Successfully refreshed outage data - ${total} outages loaded`, 'success');
-                }
-
-                if (outageMap) {
-                    outageMap.setView([-28.836252984829166, 153.30047607421878], 10, { animate: true, duration: 0.5 });
-                }
-            }
+            renderOutageData(data, force);
             
         } catch (error) {
             console.error('Load outage error:', error);
@@ -452,7 +470,11 @@
             setTimeout(() => {
                 if (!outageMapInitialized) {
                     initializeOutageMap();
-                    loadOutageData();
+                    if (cachedOutageData) {
+                        renderOutageData(cachedOutageData, false);
+                    } else {
+                        loadOutageData(true);
+                    }
                 } else {
                     outageMap.invalidateSize();
                 }
@@ -491,9 +513,14 @@
                 });
                 
                 if (categoryBounds.length > 0) {
-                    const bounds = L.latLngBounds(categoryBounds);
-                    outageMap.fitBounds(bounds.pad(0.1));
-                    showNotification(`Showing ${categoryBounds.length} ${selectedCategory} outages`, 'info');
+                    if (categoryBounds.length === 1) {
+                        outageMap.setView(categoryBounds[0], 13, { animate: true });
+                        showNotification(`Showing ${categoryBounds.length} ${selectedCategory} outage`, 'info');
+                    } else {
+                        const bounds = L.latLngBounds(categoryBounds);
+                        outageMap.fitBounds(bounds.pad(0.1), { animate: true });
+                        showNotification(`Showing ${categoryBounds.length} ${selectedCategory} outages`, 'info');
+                    }
                 } else {
                     outageMap.setView([-28.836252984829166, 153.30047607421878], 10);
                     showNotification(`No ${selectedCategory} outages in this region`, 'warning');
@@ -527,44 +554,43 @@
             }
         });
     }
-    
-    setInterval(() => {
-        const outageContent = document.getElementById('content-outage');
-        if (outageContent && outageContent.classList.contains('active')) {
+
+    function startOutageDataRefresh() {
+        loadOutageData(false);
+
+        if (outageRefreshTimer) {
+            clearInterval(outageRefreshTimer);
+        }
+        outageRefreshTimer = setInterval(() => {
             loadOutageData(false);
+        }, OUTAGE_REFRESH_INTERVAL);
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', startOutageDataRefresh);
+    } else {
+        startOutageDataRefresh();
+    }
+
+    window.refreshOutageData = function() {
+        return loadOutageData(true);
+    };
+
+    window.resetOutageMap = function() {
+        if (outageMap && outageMapInitialized) {
+            outageMap.setView([-28.836252984829166, 153.30047607421878], 10, { animate: false });
+
+            outageMap.closePopup();
+
+            if (currentlyOpenMarker) {
+                currentlyOpenMarker = null;
+            }
+
+            const currentRadio = document.querySelector('input[name="outage-category"][value="current"]');
+            if (currentRadio && !currentRadio.checked) {
+                currentRadio.checked = true;
+                applyOutageVisibility();
+            }
         }
-    }, 5 * 60 * 1000);
+    };
 })();
-
-function resetOutageMap() {
-    const outageMapElement = document.getElementById('outage-map');
-    if (outageMapElement && outageMapElement._leaflet_map) {
-        const map = outageMapElement._leaflet_map;
-        map.setView([-28.836252984829166, 153.30047607421878], 10, { animate: false });
-        map.closePopup();
-        if (window.currentlyOpenMarker) {
-            window.currentlyOpenMarker = null;
-        }
-    }
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-    if (typeof setupTabs !== 'undefined') {
-        const originalSetupTabs = setupTabs;
-        setupTabs = function() {
-            originalSetupTabs();
-
-            const tabButtons = document.querySelectorAll('.tab-button');
-            tabButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    const outageContent = document.getElementById('content-outage');
-                    if (outageContent && outageContent.classList.contains('active') && button.id !== 'tab-outage') {
-                        resetOutageMap();
-                    }
-                });
-            });
-        };
-
-        setupTabs();
-    }
-});
