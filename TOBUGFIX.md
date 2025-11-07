@@ -8,6 +8,7 @@
 
 **Dashboard Restyling for V3**
 - Overhaul of current styling
+- ~~Restyling header~~
 - Adding completely different mobile/tablet support
 
 **Code Restructure / Cleaner Architecture**
@@ -21,13 +22,13 @@
 - Fixing bugs as they show
 
 **Reset Maps on Tab Switch**
-- Resetting map view and element when the tab is unfocused
+- ~~Resetting map view and element when the tab is unfocused~~
 
 **Better Flood Map Statistic Method**
-- Ensuring that certain affect stats are included even when the affect level rises e.g. Street level reached > gate level reached > floor height reached, all stay ticked as affected
+- ~~Ensuring that certain affect stats are included even when the affect level rises e.g. Street level reached > gate level reached > floor height reached, all stay ticked as affected~~
 
 **Fix Singular Outage Area Zooming**
-- Fix bug where singular outage categories zoom in too far when fit to view is selected
+- ~~Fix bug where singular outage categories zoom in too far when fit to view is selected~~
 
 **Single fetch functionality**
 - Fetching live data at selected interval and startup through server.js
