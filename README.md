@@ -11,6 +11,7 @@ A real-time emergency dashboard for monitoring flood conditions in the Lismore, 
 ## Features
 
 - **Interactive Flood Impact Map**
+- **Realistic Floodwater Simulation**
 - **Interactive River Height Graphs**
 - **Live River Level Information**
 - **Traffic Webcam Integration**
