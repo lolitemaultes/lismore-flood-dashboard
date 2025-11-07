@@ -9,6 +9,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
     <link rel="stylesheet" href="css/main.css">
+
+    <link rel="stylesheet" href="temporary/maintenance.css">
 </head>
 <body>
     <div id="loading-overlay" class="loading-overlay">
@@ -344,14 +346,10 @@
                                     </button>
                                     
                                     <div class="toggle-group">
-                                        <div class="toggle-option">
-                                            <input type="radio" id="flood-show-markers" name="floodViewMode" checked>
-                                            <label for="flood-show-markers" class="toggle-label">Markers</label>
-                                        </div>
-                                        <div class="toggle-option">
-                                            <input type="radio" id="flood-show-heatmap" name="floodViewMode">
-                                            <label for="flood-show-heatmap" class="toggle-label">Heatmap</label>
-                                        </div>
+                                        <label class="toggle-option">
+                                            <input type="checkbox" id="flood-show-markers" checked>
+                                            <span class="toggle-label">Show Property Markers</span>
+                                        </label>
                                     </div>
                                 </div>
                             </div>
@@ -762,7 +760,6 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.0/papaparse.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.heat/0.2.0/leaflet-heat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 
     <script src="js/floodmap.js"></script>
@@ -825,13 +822,6 @@
         let refreshTimer = null;
         let webcamRefreshTimer = null;
         let lastFetchTime = null;
-        let currentLismoreLevel = null;
-        let floodMap = null;
-        let floodProperties = [];
-        let floodMarkers = null;
-        let floodHeatmapLayer = null;
-        let floodMapInitialized = false;
-        let currentlyOpenFloodMarker = null;
 
         initializeDashboard();
 
@@ -2768,6 +2758,27 @@
         }
         });
         </script>
+    
+    <div id="maintenance-container"></div>
+    <script>
+        fetch('temporary/maintenance.html')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Maintenance HTML not found');
+                }
+                return response.text();
+            })
+            .then(html => {
+                document.getElementById('maintenance-container').innerHTML = html;
+                
+                const script = document.createElement('script');
+                script.src = 'temporary/maintenance.js';
+                document.body.appendChild(script);
+            })
+            .catch(error => {
+                console.log('Maintenance notice not available:', error);
+            });
+    </script>
 
     <div id="river-height-modal" class="modal">
         <div class="modal-content">
@@ -2805,6 +2816,3 @@
     </div>
 </body>
 </html>
-
-
-
