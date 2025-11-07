@@ -1,1 +1,238 @@
+.maintenance-popup {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    z-index: 2000;
+    animation: maintenanceFadeIn 0.3s ease;
+}
 
+.maintenance-popup.show {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+@keyframes maintenanceFadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.maintenance-popup-content {
+    background: white;
+    border-radius: 8px;
+    max-width: 500px;
+    width: 100%;
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+    animation: maintenanceSlideUp 0.3s ease;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+@keyframes maintenanceSlideUp {
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.maintenance-popup-header {
+    background: linear-gradient(135deg, #1e88e5 0%, #1565c0 100%);
+    color: white;
+    padding: 1.5rem;
+    border-radius: 8px 8px 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.maintenance-popup-header h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 600;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.maintenance-close {
+    background: rgba(255, 255, 255, 0.15);
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.maintenance-close:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+.maintenance-close:active {
+    transform: scale(0.95);
+}
+
+.maintenance-popup-body {
+    padding: 1.5rem;
+    line-height: 1.6;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.maintenance-popup-body p {
+    margin: 0.75rem 0;
+    color: #495057;
+    font-size: 0.9375rem;
+}
+
+.maintenance-popup-body p:first-child {
+    margin-top: 0;
+}
+
+.maintenance-popup-body p:last-child {
+    margin-bottom: 0;
+    margin-top: 1.25rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid #f8f9fa;
+    color: #6c757d;
+}
+
+.maintenance-popup-body strong {
+    color: #212529;
+    font-weight: 600;
+}
+
+.maintenance-popup-footer {
+    padding: 1rem 1.5rem 1.5rem;
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    border-top: 1px solid #f8f9fa;
+}
+
+.maintenance-github-btn,
+.maintenance-dismiss-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 0.9375rem;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    text-decoration: none;
+}
+
+.maintenance-github-btn {
+    background: #6c757d;
+    color: white;
+}
+
+.maintenance-github-btn:hover {
+    background: #5a6268;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(108, 117, 125, 0.2);
+}
+
+.maintenance-github-btn:active {
+    transform: translateY(0);
+}
+
+.maintenance-github-btn svg {
+    width: 20px;
+    height: 20px;
+}
+
+.maintenance-dismiss-btn {
+    background: #1e88e5;
+    color: white;
+}
+
+.maintenance-dismiss-btn:hover {
+    background: #1565c0;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px rgba(30, 136, 229, 0.2);
+}
+
+.maintenance-dismiss-btn:active {
+    transform: translateY(0);
+}
+
+@media (max-width: 768px) {
+    .maintenance-popup {
+        padding: 0.5rem;
+    }
+    
+    .maintenance-popup-content {
+        margin: 0.5rem;
+        max-height: calc(100vh - 1rem);
+        border-radius: 12px;
+    }
+    
+    .maintenance-popup-header {
+        padding: 1.25rem;
+        border-radius: 12px 12px 0 0;
+    }
+    
+    .maintenance-popup-header h3 {
+        font-size: 1.125rem;
+    }
+    
+    .maintenance-popup-body {
+        padding: 1.25rem;
+        font-size: 0.9375rem;
+    }
+    
+    .maintenance-popup-footer {
+        padding: 1rem 1.25rem 1.25rem;
+        flex-direction: column;
+    }
+    
+    .maintenance-github-btn,
+    .maintenance-dismiss-btn {
+        width: 100%;
+        padding: 0.875rem 1.25rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .maintenance-popup-header h3 {
+        font-size: 1rem;
+    }
+    
+    .maintenance-popup-body {
+        font-size: 0.875rem;
+    }
+    
+    .maintenance-popup-body p {
+        font-size: 0.875rem;
+    }
+}
+
+@media print {
+    .maintenance-popup {
+        display: none !important;
+    }
+}
