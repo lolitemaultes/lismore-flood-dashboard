@@ -423,11 +423,26 @@ function updateFloodVisualizationWithLevee(floodHeight) {
     };
     
     document.getElementById('flood-stats-height').textContent = floodHeight.toFixed(1) + 'm';
-    
+
     floodProperties.forEach((property) => {
         const status = getFloodStatusWithLevee(floodHeight, property);
-        
+
         stats[status]++;
+
+        if (!property.leveeProtected) {
+            const floorAffected = property.floorLevel <= floodHeight;
+            const gateAffected = property.gateLevel <= floodHeight;
+            const roadAffected = property.roadLevel <= floodHeight;
+
+            if (floorAffected && status === 'critical') {
+                if (gateAffected) stats.warning++;
+                if (roadAffected) stats.alert++;
+            }
+            else if (gateAffected && status === 'warning') {
+                if (roadAffected) stats.alert++;
+            }
+        }
+
         if (property.leveeProtected) {
             stats.leveeProtected++;
         }
@@ -622,6 +637,28 @@ function initFloodMapWithLevee() {
     }
     
     floodMapInitialized = true;
-    
+
     floodLoadingOverlay.style.display = 'none';
+}
+
+function resetFloodMap() {
+    if (floodMap && floodMapInitialized) {
+        floodMap.setView([-28.8167, 153.2833], 14, { animate: false });
+
+        floodMap.closePopup();
+
+        if (currentlyOpenFloodMarker) {
+            currentlyOpenFloodMarker = null;
+        }
+
+        const floodHeightSlider = document.getElementById('flood-height-slider');
+        const floodHeightDisplay = document.getElementById('flood-height-display');
+
+        if (floodHeightSlider && floodHeightDisplay && currentLismoreLevel !== null) {
+            userSelectedFloodHeight = null;
+            floodHeightSlider.value = currentLismoreLevel;
+            floodHeightDisplay.textContent = currentLismoreLevel.toFixed(1) + 'm';
+            updateFloodVisualizationWithLevee(currentLismoreLevel);
+        }
+    }
 }
