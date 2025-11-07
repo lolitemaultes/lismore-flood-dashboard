@@ -2,7 +2,7 @@
 
 # Lismore Flood Dashboard
 
-![Version](https://img.shields.io/badge/version-2.6.0-red)
+![Version](https://img.shields.io/badge/version-2.7.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 [![Live Dashboard](https://img.shields.io/badge/Lismore-Flood%20Dashboard-blue)](https://flood.lolitemaultes.online)
 
