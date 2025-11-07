@@ -77,12 +77,6 @@ header {
     background: rgba(255, 255, 255, 0.15);
     border-radius: 12px;
     backdrop-filter: blur(10px);
-    transition: all 0.3s ease;
-}
-
-.header-icon:hover {
-    background: rgba(255, 255, 255, 0.25);
-    transform: translateY(-2px);
 }
 
 .header-icon svg {
