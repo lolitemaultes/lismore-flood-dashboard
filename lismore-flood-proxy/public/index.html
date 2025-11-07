@@ -37,12 +37,46 @@
 
     <header>
         <div class="header-content">
-            <div class="header-title">
-                <h1>Lismore Flood Dashboard</h1>
-            </div>
-            <div class="header-info">
-                <div id="clock" class="clock-container">Loading time...</div>
-                <div>Last updated: <span id="last-update-time">Never</span></div>
+            <div class="header-main">
+                <div class="header-title">
+                    <div class="header-icon">
+                      <svg
+                        width="32"
+                        height="32"
+                        viewBox="0 0 60.601004 60.601004"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                        aria-label="Flood icon"
+                      >
+                        <path
+                          d="m 0,0 14.551,0 c 0.061,0 0.117,-0.01 0.171,-0.027 0.198,-0.095 0.38,-0.221 0.534,-0.374 0.74,-0.732 1.424,-1.611 1.424,-3.229 0,-3.286 -3.373,-3.679 -3.373,-6.706 0,-3.026 3.373,-3.387 3.373,-6.674 0,-3.287 -3.373,-3.648 -3.373,-6.674 0,-3.027 3.373,-3.42 3.373,-6.706 0,-1.619 -0.684,-2.498 -1.424,-3.229 -0.154,-0.154 -0.336,-0.279 -0.534,-0.373 -0.054,-0.018 -0.11,-0.028 -0.171,-0.028 L 0,-34.02 0,0 Z m -3.546,-37.569 41.116,0 0,41.117 -41.116,0 0,-41.117 z"
+                          transform="matrix(0,1.25,1.25,0,51.563629,9.035501)"
+                          fill="currentColor"
+                          opacity="0.8"
+                        />
+                      </svg>
+                    </div>
+                    <div class="header-text">
+                        <h1>Lismore Flood Dashboard</h1>
+                        <p class="header-subtitle">Real-time Flood Monitoring & Information</p>
+                    </div>
+                </div>
+                <div class="header-info">
+                    <div class="info-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                        <span id="clock">Loading time...</span>
+                    </div>
+                    <div class="info-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="23 4 23 10 17 10"></polyline>
+                            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                        </svg>
+                        <span>Updated: <span id="last-update-time">Never</span></span>
+                    </div>
+                </div>
             </div>
         </div>
     </header>
@@ -910,7 +944,8 @@
         function setupTabs() {
             const tabButtons = document.querySelectorAll('.tab-button');
             const tabContents = document.querySelectorAll('.tab-content');
-            
+            let previousTabId = null;
+
             tabButtons.forEach(button => {
                 button.addEventListener('click', () => {
                     if (button.classList.contains('tab-unavailable')) {
@@ -918,29 +953,55 @@
                         showUnavailableContentPopup(button.id, reason);
                         return false;
                     }
-                    
+
+                    // Get the currently active tab before switching
+                    const currentActiveTab = document.querySelector('.tab-button.active');
+                    const currentTabId = currentActiveTab ? currentActiveTab.id : null;
+
                     tabButtons.forEach(btn => btn.classList.remove('active'));
                     tabContents.forEach(content => content.classList.remove('active'));
-                    
+
                     button.classList.add('active');
-                    
+
                     const contentId = button.id.replace('tab-', 'content-');
                     const contentElement = document.getElementById(contentId);
-                    
+
                     if (contentElement) {
                         contentElement.classList.add('active');
                     } else {
                         console.error(`Tab content element with ID "${contentId}" not found`);
                     }
-                    
+
+                    // Reset the previous tab after switching away from it
+                    if (currentTabId && currentTabId !== button.id) {
+                        setTimeout(() => {
+                            switch(currentTabId) {
+                                case 'tab-floodmap':
+                                    if (typeof resetFloodMap === 'function') {
+                                        resetFloodMap();
+                                        console.log('Flood map reset');
+                                    }
+                                    break;
+                                case 'tab-outage':
+                                    if (typeof resetOutageMap === 'function') {
+                                        resetOutageMap();
+                                        console.log('Outage map reset');
+                                    }
+                                    break;
+                            }
+                        }, 150);
+                    }
+
                     if (button.id === 'tab-floodmap') {
                         setTimeout(() => {
                             window.dispatchEvent(new Event('resize'));
-                            if (floodMap) {
+                            if (typeof floodMap !== 'undefined' && floodMap) {
                                 floodMap.invalidateSize();
                             }
                         }, 100);
                     }
+
+                    previousTabId = button.id;
                 });
             });
         }
