@@ -5,7 +5,8 @@
     padding-bottom: 55%;
     border-radius: var(--border-radius);
     overflow: hidden;
-    background-color: var(--gray-200);
+    background-color: var(--border-color);
+    transition: background-color 0.3s ease;
 }
 
 .cyclone-image {
@@ -16,7 +17,8 @@
     height: 100%;
     object-fit: contain;
     border-radius: var(--border-radius);
-    background-color: var(--gray-100);
+    background-color: var(--bg-tertiary);
+    transition: background-color 0.3s ease;
 }
 
 .cyclone-error {

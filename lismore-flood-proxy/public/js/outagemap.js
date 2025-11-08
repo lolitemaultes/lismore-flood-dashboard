@@ -376,7 +376,6 @@
         document.getElementById('outage-stat-current').textContent = counts.current || 0;
         document.getElementById('outage-stat-future').textContent = counts.future || 0;
         document.getElementById('outage-stat-cancelled').textContent = counts.cancelled || 0;
-        document.getElementById('outage-stat-customers').textContent = currentCustomers.toLocaleString();
 
         applyOutageVisibility();
 

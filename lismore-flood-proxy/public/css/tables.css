@@ -1,7 +1,9 @@
 .table-container {
     overflow-x: auto;
     border-radius: var(--border-radius);
-    border: 1px solid var(--gray-200);
+    border: 1px solid var(--border-color);
+    background-color: var(--bg-secondary);
+    transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 table {
@@ -13,25 +15,22 @@ table {
 th, td {
     padding: 0.75rem 1rem;
     text-align: left;
-    border-bottom: 1px solid var(--gray-200);
+    border-bottom: 1px solid var(--border-color);
 }
 
 th {
-    background-color: var(--gray-100);
+    background-color: var(--primary-color);
     font-weight: 600;
-    color: var(--gray-700);
+    color: #ffffff;
     position: sticky;
     top: 0;
 }
 
-tr:last-child td {
-    border-bottom: none;
+:root[data-theme="dark"] th {
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
 }
 
-.table-footer {
-    padding: 0.75rem 1rem;
-    color: var(--gray-600);
-    font-size: 0.875rem;
-    background-color: var(--gray-100);
-    border-top: 1px solid var(--gray-200);
+tr:last-child td {
+    border-bottom: none;
 }

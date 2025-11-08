@@ -1,7 +1,8 @@
 .emergency-contacts {
-    background-color: #fef2f2;
+    background-color: var(--alert-danger-bg);
     border-radius: var(--border-radius);
     overflow: hidden;
+    transition: background-color 0.3s ease;
 }
 
 .emergency-header {
@@ -18,17 +19,50 @@
     padding: 1rem;
 }
 
+.emergency-item {
+    display: flex;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background-color: var(--bg-secondary);
+    border-radius: var(--border-radius);
+    margin-bottom: 0.75rem;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.3s ease;
+    align-items: flex-start;
+}
+
+.emergency-item:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+}
+
+.emergency-item:last-child {
+    margin-bottom: 0;
+}
+
 .emergency-number {
     font-size: 1.25rem;
     font-weight: 700;
-    margin: 0.25rem 0 0.75rem;
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    color: var(--text-primary);
 }
 
 .emergency-number svg {
     flex-shrink: 0;
+    color: var(--danger-color);
+}
+
+.emergency-text {
+    flex: 1;
+}
+
+.emergency-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 0.25rem;
 }
 
 .evacuation-centers {
@@ -43,21 +77,27 @@
 .center-list li {
     padding: 0.75rem;
     border-radius: var(--border-radius);
-    background-color: var(--gray-100);
-    margin-bottom: 0.5rem;
+    background-color: var(--bg-secondary);
+    margin-bottom: 0.75rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.center-list li:last-child {
+    margin-bottom: 0;
 }
 
 .center-list strong {
     display: block;
     margin-bottom: 0.25rem;
-    color: var(--gray-800);
+    color: var(--text-primary);
 }
 
 .resources-panel {
-    background-color: #f0f7ff;
+    background-color: var(--alert-info-bg);
     border-radius: var(--border-radius);
     overflow: hidden;
     margin-top: 1.5rem;
+    transition: background-color 0.3s ease;
 }
 
 .resources-header {
@@ -84,10 +124,11 @@
     display: flex;
     gap: 0.75rem;
     padding: 0.75rem;
-    background-color: white;
+    background-color: var(--bg-secondary);
     border-radius: var(--border-radius);
     margin-bottom: 0.75rem;
     box-shadow: var(--shadow-sm);
+    transition: background-color 0.3s ease;
 }
 
 .resources-list li:last-child {
@@ -107,13 +148,13 @@
 .resource-item-content strong {
     display: block;
     margin-bottom: 0.25rem;
-    color: var(--gray-800);
+    color: var(--text-primary);
 }
 
 .resource-item-content p {
     margin: 0 0 0.5rem;
     font-size: 0.875rem;
-    color: var(--gray-600);
+    color: var(--text-tertiary);
     line-height: 1.4;
 }
 

@@ -31,13 +31,55 @@
     background-color: var(--gray-600);
 }
 
+/* Select dropdown styling - overrides secondary button styling */
 select.button {
     appearance: none;
-    padding-right: 2rem;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+    padding: 0.5rem 2.25rem 0.5rem 1rem;
+    background-color: #ffffff !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23000000'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: right 0.5rem center;
-    background-size: 1rem;
+    background-position: right 0.75rem center;
+    background-size: 1.125rem;
+    color: #000000 !important;
+    font-weight: 600;
+    min-width: 160px;
+    border: 2px solid var(--border-color);
+    transition: all 0.2s ease;
+    height: 36px;
+}
+
+:root[data-theme="dark"] select.button {
+    background-color: var(--bg-tertiary) !important;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23cbd5e1'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+    color: var(--text-primary) !important;
+    border-color: var(--border-color);
+}
+
+select.button:hover {
+    background-color: #ffffff !important;
+    border-color: var(--primary-color);
+}
+
+:root[data-theme="dark"] select.button:hover {
+    background-color: var(--bg-tertiary) !important;
+}
+
+select.button:focus {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+    border-color: var(--primary-color);
+}
+
+select.button option {
+    background-color: white;
+    color: #1e293b;
+    padding: 0.75rem;
+    font-weight: 500;
+}
+
+:root[data-theme="dark"] select.button option {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
 }
 
 .refresh-controls {
@@ -63,8 +105,8 @@ select.button {
     width: 40px;
     height: 40px;
     padding: 0;
-    background-color: #e0e0e0;
-    color: #333;
+    background-color: var(--control-btn-bg);
+    color: var(--control-btn-color);
     border: none;
     border-radius: 50%;
     cursor: pointer;
@@ -73,14 +115,14 @@ select.button {
     align-items: center;
     justify-content: center;
     transition: all 0.2s;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: var(--shadow-sm);
 }
 
 .control-buttons button:hover {
     background-color: var(--primary-color);
     color: white;
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    box-shadow: var(--shadow-md);
 }
 
 .control-buttons button:active {
@@ -88,8 +130,8 @@ select.button {
 }
 
 .control-buttons button:disabled {
-    background-color: #f0f0f0;
-    color: #aaa;
+    background-color: var(--control-btn-disabled-bg);
+    color: var(--control-btn-disabled-color);
     cursor: not-allowed;
     box-shadow: none;
     transform: none;

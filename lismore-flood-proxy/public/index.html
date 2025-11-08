@@ -72,6 +72,7 @@
     <link rel="stylesheet" href="css/notifications.css">
     <link rel="stylesheet" href="css/floodmap.css">
     <link rel="stylesheet" href="css/utilities.css">
+    <link rel="stylesheet" href="css/theme-toggle.css">
     <link rel="stylesheet" href="css/responsive.css">
     <link rel="stylesheet" href="temporary/maintenance.css">
     
@@ -325,6 +326,22 @@
                         </svg>
                         <span>Updated: <span id="last-update-time">Never</span></span>
                     </div>
+                    <button id="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode" title="Toggle dark/light mode">
+                        <svg class="theme-icon-sun" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="5"></circle>
+                            <line x1="12" y1="1" x2="12" y2="3"></line>
+                            <line x1="12" y1="21" x2="12" y2="23"></line>
+                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                            <line x1="1" y1="12" x2="3" y2="12"></line>
+                            <line x1="21" y1="12" x2="23" y2="12"></line>
+                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                        </svg>
+                        <svg class="theme-icon-moon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                        </svg>
+                    </button>
                 </div>
             </div>
         </div>
@@ -604,46 +621,38 @@
                         </div>
                         
                         <div class="flood-controls">
-                            <div class="flood-controls-inner">
-                                <div class="flood-slider-container">
-                                    <div class="flood-height-label">
-                                        <span>Flood Water Height:</span>
-                                        <span class="flood-height-value" id="flood-height-display">12.0m</span>
-                                    </div>
-                                    <input type="range" id="flood-height-slider" class="flood-slider" min="1.55" max="40.44" step="0.1" value="12.0">
+                            <div class="flood-slider-container">
+                                <div class="flood-height-label">
+                                    <span>Flood Water Height:</span>
+                                    <span class="flood-height-value" id="flood-height-display">12.0m</span>
                                 </div>
-                                
-                                <div class="flood-toggle-container">
-                                    <button id="use-current-level" class="button">
-                                        <svg xmlns="https://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M12 2v6"></path>
-                                            <path d="M12 22v-6"></path>
-                                            <path d="M4.93 4.93L9 9"></path>
-                                            <path d="M14.36 14.36L18.07 18.07"></path>
-                                            <path d="M2 12h6"></path>
-                                            <path d="M22 12h-6"></path>
-                                            <path d="M4.93 19.07L9 15"></path>
-                                            <path d="M14.36 9.64L18.07 5.93"></path>
-                                        </svg>
-                                        Use Current Level
-                                    </button>
-                                    
-                                    <div class="toggle-group">
-                                        <label class="toggle-option">
-                                            <input type="checkbox" id="flood-show-markers" checked>
-                                            <span class="toggle-label">Show Property Markers</span>
-                                        </label>
-                                    </div>
-                                </div>
+                                <input type="range" id="flood-height-slider" class="flood-slider" min="1.55" max="40.44" step="0.1" value="12.0">
+                            </div>
+
+                            <div class="flood-actions-container">
+                                <button id="use-current-level" class="button">
+                                    <svg xmlns="https://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M12 2v6"></path>
+                                        <path d="M12 22v-6"></path>
+                                        <path d="M4.93 4.93L9 9"></path>
+                                        <path d="M14.36 14.36L18.07 18.07"></path>
+                                        <path d="M2 12h6"></path>
+                                        <path d="M22 12h-6"></path>
+                                        <path d="M4.93 19.07L9 15"></path>
+                                        <path d="M14.36 9.64L18.07 5.93"></path>
+                                    </svg>
+                                    Use Current Level
+                                </button>
+
+                                <label class="toggle-option">
+                                    <input type="checkbox" id="flood-show-markers" checked>
+                                    <span class="toggle-label">Show Property Markers</span>
+                                </label>
                             </div>
                             
                             <div id="flood-stats-container" class="flood-stats-container">
                                 <div class="flood-stat-title">Impact Summary at <span id="flood-stats-height">12.0m</span></div>
                                 <div class="flood-stat-grid">
-                                    <div class="flood-stat-item">
-                                        <div class="flood-stat-label">Properties Analyzed</div>
-                                        <div class="flood-stat-value" id="flood-stat-total">0</div>
-                                    </div>
                                     <div class="flood-stat-item">
                                         <div class="flood-stat-label">Floor Level Affected</div>
                                         <div class="flood-stat-value" id="flood-stat-critical">0 <span class="category-badge category-critical">Critical</span></div>
@@ -656,10 +665,6 @@
                                         <div class="flood-stat-label">Road Level Affected</div>
                                         <div class="flood-stat-value" id="flood-stat-alert">0 <span class="category-badge category-alert">Alert</span></div>
                                     </div>
-                                    <div class="flood-stat-item">
-                                        <div class="flood-stat-label">Not Affected</div>
-                                        <div class="flood-stat-value" id="flood-stat-safe">0 <span class="category-badge category-safe">Safe</span></div>
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -669,6 +674,19 @@
                         <div class="tab-header">
                             <h2>Essential Energy Power Outages</h2>
                             <div style="display: flex; gap: 0.5rem;">
+                                <button class="button" id="outage-fit-bounds" title="Fit all outages in view">
+                                    <svg xmlns="https://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+                                    </svg>
+                                    Fit to View
+                                </button>
+                                <button class="button" id="outage-locate-me" title="Center on your location">
+                                    <svg xmlns="https://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <circle cx="12" cy="12" r="3"></circle>
+                                    </svg>
+                                    My Location
+                                </button>
                                 <button id="refresh-outages" class="button">
                                     <svg xmlns="https://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M23 4v6h-6"></path>
@@ -677,14 +695,6 @@
                                     </svg>
                                     Refresh
                                 </button>
-                                <a href="https://www.essentialenergy.com.au/outages-and-faults/power-outages" target="_blank" rel="noopener noreferrer" class="button">
-                                    <svg xmlns="https://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-                                        <polyline points="15 3 21 3 21 9"></polyline>
-                                        <line x1="10" y1="14" x2="21" y2="3"></line>
-                                    </svg>
-                                    Open Map
-                                </a>
                             </div>
                         </div>
                         <div class="outage-map-wrapper">
@@ -718,56 +728,29 @@
                                 </div>
                             </div>
                         </div>
-                        
-                        <div class="outage-controls-panel">
-                            <div class="outage-controls-inner">
-                                <div class="outage-control-group">
-                                    <button class="button" id="outage-fit-bounds" title="Fit all outages in view">
-                                        <svg xmlns="https://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
-                                        </svg>
-                                        Fit to View
-                                    </button>
-                                    <button class="button" id="outage-locate-me" title="Center on your location">
-                                        <svg xmlns="https://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <circle cx="12" cy="12" r="10"></circle>
-                                            <circle cx="12" cy="12" r="3"></circle>
-                                        </svg>
-                                        My Location
-                                    </button>
+
+                        <div class="outage-stats-container">
+                            <div class="outage-stats-title">Network Status Overview</div>
+                            <div class="outage-stats-grid">
+                                <div class="outage-stat-card">
+                                    <div class="stat-label">Current Outages</div>
+                                    <div class="stat-value">
+                                        <span id="outage-stat-current">0</span>
+                                        <span class="outage-stat-badge current">Active</span>
+                                    </div>
                                 </div>
-                            </div>
-                            
-                            <div class="outage-stats-container">
-                                <div class="outage-stats-title">Network Status Overview</div>
-                                <div class="outage-stats-grid">
-                                    <div class="outage-stat-card">
-                                        <div class="stat-label">Current Outages</div>
-                                        <div class="stat-value">
-                                            <span id="outage-stat-current">0</span>
-                                            <span class="outage-stat-badge current">Active</span>
-                                        </div>
+                                <div class="outage-stat-card">
+                                    <div class="stat-label">Planned Outages</div>
+                                    <div class="stat-value">
+                                        <span id="outage-stat-future">0</span>
+                                        <span class="outage-stat-badge future">Scheduled</span>
                                     </div>
-                                    <div class="outage-stat-card">
-                                        <div class="stat-label">Planned Outages</div>
-                                        <div class="stat-value">
-                                            <span id="outage-stat-future">0</span>
-                                            <span class="outage-stat-badge future">Scheduled</span>
-                                        </div>
-                                    </div>
-                                    <div class="outage-stat-card">
-                                        <div class="stat-label">Cancelled</div>
-                                        <div class="stat-value">
-                                            <span id="outage-stat-cancelled">0</span>
-                                            <span class="outage-stat-badge cancelled">Resolved</span>
-                                        </div>
-                                    </div>
-                                    <div class="outage-stat-card">
-                                        <div class="stat-label">Currently Affected</div>
-                                        <div class="stat-value">
-                                            <span id="outage-stat-customers">0</span>
-                                            <span style="font-size: 0.875rem; color: var(--gray-600)">customers</span>
-                                        </div>
+                                </div>
+                                <div class="outage-stat-card">
+                                    <div class="stat-label">Cancelled</div>
+                                    <div class="stat-value">
+                                        <span id="outage-stat-cancelled">0</span>
+                                        <span class="outage-stat-badge cancelled">Resolved</span>
                                     </div>
                                 </div>
                             </div>
@@ -836,9 +819,6 @@
                                 </tr>
                             </tbody>
                         </table>
-                    </div>
-                    <div class="table-footer">
-                        Data auto-refreshes based on selected interval
                     </div>
                 </div>
             </div>
@@ -1041,6 +1021,7 @@
         <p>This dashboard is for emergency use during flood events in the Lismore area.</p>
     </footer>
 
+    <script src="js/theme-switcher.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.0/papaparse.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>

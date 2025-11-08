@@ -1,9 +1,10 @@
 .panel {
-    background-color: white;
+    background-color: var(--bg-secondary);
     border-radius: var(--border-radius);
     box-shadow: var(--shadow-sm);
     margin-bottom: 1.5rem;
     overflow: hidden;
+    transition: background-color 0.3s ease;
 }
 
 .panel-header {
@@ -11,13 +12,13 @@
     justify-content: space-between;
     align-items: center;
     padding: 1rem;
-    border-bottom: 1px solid var(--gray-200);
+    border-bottom: 1px solid var(--border-color);
 }
 
 .panel-header h2 {
     font-size: 1.25rem;
     font-weight: 600;
-    color: var(--gray-800);
+    color: var(--text-primary);
 }
 
 .panel-content {
@@ -25,15 +26,16 @@
 }
 
 .panel-alert {
-    background-color: #fef2f2;
-    border: 1px solid #fee2e2;
+    background-color: var(--alert-danger-bg);
+    border: 1px solid var(--alert-danger-border);
     border-radius: var(--border-radius);
     padding: 0.75rem 1rem;
     margin-bottom: 1rem;
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    color: #991b1b;
+    color: var(--alert-danger-text);
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
 }
 
 .panel-alert svg {
@@ -48,7 +50,7 @@
     display: flex;
     justify-content: space-between;
     padding: 0.75rem 0;
-    border-bottom: 1px solid var(--gray-200);
+    border-bottom: 1px solid var(--border-color);
 }
 
 .status-item:last-child {
@@ -57,7 +59,7 @@
 
 .status-label {
     font-weight: 500;
-    color: var(--gray-700);
+    color: var(--text-secondary);
 }
 
 .status-value {
@@ -68,17 +70,17 @@
 }
 
 .status-value.online {
-    background-color: rgba(67, 160, 71, 0.1);
+    background-color: var(--status-online-bg);
     color: var(--success-color);
 }
 
 .status-value.offline {
-    background-color: rgba(229, 57, 53, 0.1);
+    background-color: var(--status-offline-bg);
     color: var(--danger-color);
 }
 
 .status-value.unknown {
-    background-color: rgba(255, 160, 0, 0.1);
+    background-color: var(--status-unknown-bg);
     color: var(--warning-color);
 }
 
