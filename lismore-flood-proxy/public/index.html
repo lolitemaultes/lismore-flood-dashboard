@@ -5,43 +5,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <!-- Primary Meta Tags -->
-    <title>Lismore Flood Dashboard - Real-time Flood Monitoring & Emergency Information | NSW</title>
-    <meta name="title" content="Lismore Flood Dashboard - Real-time Flood Monitoring & Emergency Information">
+
+    <title>Lismore Flood Dashboard</title>
+    <meta name="title" content="Lismore Flood Dashboard">
     <meta name="description" content="Live flood monitoring for Lismore, NSW. Real-time Wilsons River water levels, BOM radar imagery, traffic cameras, power outages, and emergency contacts for Northern Rivers region.">
     <meta name="keywords" content="Lismore floods, Wilsons River, flood monitoring, NSW floods, Northern Rivers floods, BOM flood data, emergency information, SES, flood warnings, real-time water levels, Lismore weather">
-    <meta name="author" content="Lismore Flood Dashboard">
+    <meta name="author" content="lolitemaultes">
     <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
     
-    <!-- Canonical URL - IMPORTANT: Update with your actual domain -->
-    <link rel="canonical" href="https://yourwebsite.com/">
+    <link rel="canonical" href="https://flood.lolitemaultes.online/">
     
-    <!-- Open Graph / Facebook Meta Tags -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://yourwebsite.com/">
-    <meta property="og:title" content="Lismore Flood Dashboard - Real-time Flood Monitoring">
-    <meta property="og:description" content="Live flood monitoring for Lismore and the Northern Rivers. Track water levels, view radar, traffic cameras, and access emergency information.">
+    <meta property="og:url" content="https://flood.lolitemaultes.online/">
+    <meta property="og:title" content="Lismore Flood Dashboard">
+    <meta property="og:description" content="Live flood monitoring for Lismore, NSW. Track water levels, view radar, traffic cameras, and access emergency information.">
+    <!-- Change Icon -->
     <meta property="og:image" content="https://yourwebsite.com/og-image.jpg">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta property="og:locale" content="en_AU">
     <meta property="og:site_name" content="Lismore Flood Dashboard">
     
-    <!-- Twitter Card Meta Tags -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:url" content="https://yourwebsite.com/">
     <meta name="twitter:title" content="Lismore Flood Dashboard - Real-time Flood Monitoring">
     <meta name="twitter:description" content="Live flood monitoring for Lismore and the Northern Rivers. Track water levels, view radar, traffic cameras, and access emergency information.">
     <meta name="twitter:image" content="https://yourwebsite.com/twitter-image.jpg">
     
-    <!-- Geographic Meta Tags -->
     <meta name="geo.region" content="AU-NSW">
     <meta name="geo.placename" content="Lismore">
     <meta name="geo.position" content="-28.8142;153.2778">
     <meta name="ICBM" content="-28.8142, 153.2778">
     
-    <!-- Mobile Meta Tags -->
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -52,19 +47,34 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     
-    <!-- Preconnect to external resources -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://www.bom.gov.au">
     <link rel="preconnect" href="https://cdnjs.cloudflare.com">
     
-    <!-- Stylesheets -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
     <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/header.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/panels.css">
+    <link rel="stylesheet" href="css/buttons.css">
+    <link rel="stylesheet" href="css/tables.css">
+    <link rel="stylesheet" href="css/tabs.css">
+    <link rel="stylesheet" href="css/webcam.css">
+    <link rel="stylesheet" href="css/cyclone.css">
+    <link rel="stylesheet" href="css/outagemap.css">
+    <link rel="stylesheet" href="css/radar.css">
+    <link rel="stylesheet" href="css/river.css">
+    <link rel="stylesheet" href="css/emergency.css">
+    <link rel="stylesheet" href="css/stats.css">
+    <link rel="stylesheet" href="css/modals.css">
+    <link rel="stylesheet" href="css/notifications.css">
+    <link rel="stylesheet" href="css/floodmap.css">
+    <link rel="stylesheet" href="css/utilities.css">
+    <link rel="stylesheet" href="css/responsive.css">
     <link rel="stylesheet" href="temporary/maintenance.css">
     
-    <!-- Structured Data - JSON-LD for WebApplication -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -96,7 +106,6 @@
     }
     </script>
     
-    <!-- Structured Data for Emergency Service -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -115,7 +124,6 @@
     }
     </script>
     
-    <!-- Structured Data for Place -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -1195,7 +1203,6 @@
                         return false;
                     }
 
-                    // Get the currently active tab before switching
                     const currentActiveTab = document.querySelector('.tab-button.active');
                     const currentTabId = currentActiveTab ? currentActiveTab.id : null;
 
@@ -1213,7 +1220,6 @@
                         console.error(`Tab content element with ID "${contentId}" not found`);
                     }
 
-                    // Reset the previous tab after switching away from it
                     if (currentTabId && currentTabId !== button.id) {
                         setTimeout(() => {
                             switch(currentTabId) {
