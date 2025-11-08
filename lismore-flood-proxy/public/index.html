@@ -673,7 +673,7 @@
                     <div id="content-outage" class="tab-content">
                         <div class="tab-header">
                             <h2>Essential Energy Power Outages</h2>
-                            <div>
+                            <div style="display: flex; gap: 0.5rem;">
                                 <button id="refresh-outages" class="button">
                                     <svg xmlns="https://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M23 4v6h-6"></path>
@@ -681,6 +681,19 @@
                                         <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
                                     </svg>
                                     Refresh
+                                </button>
+                                <button class="button" id="outage-fit-bounds" title="Fit all outages in view">
+                                    <svg xmlns="https://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+                                    </svg>
+                                    Fit to View
+                                </button>
+                                <button class="button" id="outage-locate-me" title="Center on your location">
+                                    <svg xmlns="https://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <circle cx="12" cy="12" r="3"></circle>
+                                    </svg>
+                                    My Location
                                 </button>
                             </div>
                         </div>
@@ -715,49 +728,29 @@
                                 </div>
                             </div>
                         </div>
-                        
-                        <div class="outage-controls-panel">
-                            <div class="outage-controls-inner">
-                                <div class="outage-control-group">
-                                    <button class="button" id="outage-fit-bounds" title="Fit all outages in view">
-                                        <svg xmlns="https://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
-                                        </svg>
-                                        Fit to View
-                                    </button>
-                                    <button class="button" id="outage-locate-me" title="Center on your location">
-                                        <svg xmlns="https://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                            <circle cx="12" cy="12" r="10"></circle>
-                                            <circle cx="12" cy="12" r="3"></circle>
-                                        </svg>
-                                        My Location
-                                    </button>
+
+                        <div class="outage-stats-container">
+                            <div class="outage-stats-title">Network Status Overview</div>
+                            <div class="outage-stats-grid">
+                                <div class="outage-stat-card">
+                                    <div class="stat-label">Current Outages</div>
+                                    <div class="stat-value">
+                                        <span id="outage-stat-current">0</span>
+                                        <span class="outage-stat-badge current">Active</span>
+                                    </div>
                                 </div>
-                            </div>
-                            
-                            <div class="outage-stats-container">
-                                <div class="outage-stats-title">Network Status Overview</div>
-                                <div class="outage-stats-grid">
-                                    <div class="outage-stat-card">
-                                        <div class="stat-label">Current Outages</div>
-                                        <div class="stat-value">
-                                            <span id="outage-stat-current">0</span>
-                                            <span class="outage-stat-badge current">Active</span>
-                                        </div>
+                                <div class="outage-stat-card">
+                                    <div class="stat-label">Planned Outages</div>
+                                    <div class="stat-value">
+                                        <span id="outage-stat-future">0</span>
+                                        <span class="outage-stat-badge future">Scheduled</span>
                                     </div>
-                                    <div class="outage-stat-card">
-                                        <div class="stat-label">Planned Outages</div>
-                                        <div class="stat-value">
-                                            <span id="outage-stat-future">0</span>
-                                            <span class="outage-stat-badge future">Scheduled</span>
-                                        </div>
-                                    </div>
-                                    <div class="outage-stat-card">
-                                        <div class="stat-label">Cancelled</div>
-                                        <div class="stat-value">
-                                            <span id="outage-stat-cancelled">0</span>
-                                            <span class="outage-stat-badge cancelled">Resolved</span>
-                                        </div>
+                                </div>
+                                <div class="outage-stat-card">
+                                    <div class="stat-label">Cancelled</div>
+                                    <div class="stat-value">
+                                        <span id="outage-stat-cancelled">0</span>
+                                        <span class="outage-stat-badge cancelled">Resolved</span>
                                     </div>
                                 </div>
                             </div>
