@@ -3,19 +3,19 @@
 **Flood Map Water Level Simulation**
 - ~~Realistic Flood water simulation via terrain map~~
 
-**Localised Rise & Fall Prediction**
-- The use of models trained on previous flood and forecast data to calculate the most accurate predictions possible
-
 **Dashboard Restyling for V3**
-- Overhaul of current styling
+- ~~Overhaul of current styling~~
 - ~~Restyling header~~
-- Adding completely different mobile/tablet support
+- Adding different/working mobile/tablet support
+- Change power outage icon to lightning bolt
+- Move toggles up the top on floodmap
 
 **Code Restructure / Cleaner Architecture**
-- Separation of css and js to maintain clean directory
+- Separation of js to maintain clean directory
+- ~~Separation of css to maintain clean directory~~
 
 **LOLITEMAULTES Original Weather Radar Map**
-- Implement original interactive rain radar map
+- Implement original (old BoM radar style) interactive rain radar map
 - The aggregation of multiple free radar APIs to get the most accurate result
 
 **Bug Fixes**
@@ -30,7 +30,13 @@
 **Fix Singular Outage Area Zooming**
 - ~~Fix bug where singular outage categories zoom in too far when fit to view is selected~~
 
-**Single fetch functionality**
-- Fetching live data at selected interval and startup through server.js
-- Using fetched data after fetch occurs so data is not loading at request through HTML
-- This will also fix bugs such as data "not being available" at times
+**Add Outage Map to Status Section**
+- Add the outage map status to the status section near footer in index.html
+
+**Improve SEO Information for Official Site**
+- Add more alt text
+- Create logo from svg
+- Add official information
+
+**Update Credits**
+- Credit Essential Energy in the footer
