@@ -5,11 +5,17 @@
 }
 
 .stat-item {
-    background-color: var(--bg-tertiary);
+    background-color: var(--bg-secondary);
     border-radius: var(--border-radius);
     padding: 1rem;
     text-align: center;
-    transition: background-color 0.3s ease;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.3s ease;
+}
+
+.stat-item:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
 }
 
 .stat-label {
