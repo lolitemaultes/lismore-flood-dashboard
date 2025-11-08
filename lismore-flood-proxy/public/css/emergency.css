@@ -80,12 +80,6 @@
     background-color: var(--bg-secondary);
     margin-bottom: 0.75rem;
     box-shadow: var(--shadow-sm);
-    transition: all 0.3s ease;
-}
-
-.center-list li:hover {
-    box-shadow: var(--shadow-md);
-    transform: translateY(-1px);
 }
 
 .center-list li:last-child {

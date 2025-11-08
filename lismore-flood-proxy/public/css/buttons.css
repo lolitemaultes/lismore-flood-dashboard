@@ -58,7 +58,6 @@ select.button {
 select.button:hover {
     background-color: #ffffff !important;
     border-color: var(--primary-color);
-    transform: translateY(-1px);
 }
 
 :root[data-theme="dark"] select.button:hover {
