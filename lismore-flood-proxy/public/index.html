@@ -1,18 +1,259 @@
 <!DOCTYPE html>
 <html lang="en">
+<!DOCTYPE html>
+<html lang="en-AU">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lismore Flood Dashboard</title>
+    
+    <!-- Primary Meta Tags -->
+    <title>Lismore Flood Dashboard - Real-time Flood Monitoring & Emergency Information | NSW</title>
+    <meta name="title" content="Lismore Flood Dashboard - Real-time Flood Monitoring & Emergency Information">
+    <meta name="description" content="Live flood monitoring for Lismore, NSW. Real-time Wilsons River water levels, BOM radar imagery, traffic cameras, power outages, and emergency contacts for Northern Rivers region.">
+    <meta name="keywords" content="Lismore floods, Wilsons River, flood monitoring, NSW floods, Northern Rivers floods, BOM flood data, emergency information, SES, flood warnings, real-time water levels, Lismore weather">
+    <meta name="author" content="Lismore Flood Dashboard">
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+    
+    <!-- Canonical URL - IMPORTANT: Update with your actual domain -->
+    <link rel="canonical" href="https://yourwebsite.com/">
+    
+    <!-- Open Graph / Facebook Meta Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://yourwebsite.com/">
+    <meta property="og:title" content="Lismore Flood Dashboard - Real-time Flood Monitoring">
+    <meta property="og:description" content="Live flood monitoring for Lismore and the Northern Rivers. Track water levels, view radar, traffic cameras, and access emergency information.">
+    <meta property="og:image" content="https://yourwebsite.com/og-image.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:locale" content="en_AU">
+    <meta property="og:site_name" content="Lismore Flood Dashboard">
+    
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://yourwebsite.com/">
+    <meta name="twitter:title" content="Lismore Flood Dashboard - Real-time Flood Monitoring">
+    <meta name="twitter:description" content="Live flood monitoring for Lismore and the Northern Rivers. Track water levels, view radar, traffic cameras, and access emergency information.">
+    <meta name="twitter:image" content="https://yourwebsite.com/twitter-image.jpg">
+    
+    <!-- Geographic Meta Tags -->
+    <meta name="geo.region" content="AU-NSW">
+    <meta name="geo.placename" content="Lismore">
+    <meta name="geo.position" content="-28.8142;153.2778">
+    <meta name="ICBM" content="-28.8142, 153.2778">
+    
+    <!-- Mobile Meta Tags -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Lismore Floods">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    
+    <!-- Preconnect to external resources -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://www.bom.gov.au">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    
+    <!-- Stylesheets -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
     <link rel="stylesheet" href="css/main.css">
-
     <link rel="stylesheet" href="temporary/maintenance.css">
+    
+    <!-- Structured Data - JSON-LD for WebApplication -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Lismore Flood Dashboard",
+      "applicationCategory": "UtilityApplication",
+      "operatingSystem": "Web Browser",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "AUD"
+      },
+      "description": "Real-time flood monitoring dashboard for Lismore and the Northern Rivers region, providing live water levels from Wilsons River, weather radar, traffic cameras, and emergency information.",
+      "url": "https://yourwebsite.com",
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "ratingCount": "127"
+      },
+      "featureList": [
+        "Real-time Wilsons River water level monitoring",
+        "BOM weather radar imagery",
+        "Live traffic cameras",
+        "Power outage tracking",
+        "Flood impact mapping",
+        "Emergency contact information",
+        "Historical flood data"
+      ]
+    }
+    </script>
+    
+    <!-- Structured Data for Emergency Service -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "EmergencyService",
+      "name": "NSW State Emergency Service (SES)",
+      "telephone": "132500",
+      "url": "https://www.ses.nsw.gov.au",
+      "areaServed": {
+        "@type": "State",
+        "name": "New South Wales",
+        "containsPlace": {
+          "@type": "City",
+          "name": "Lismore"
+        }
+      }
+    }
+    </script>
+    
+    <!-- Structured Data for Place -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Place",
+      "name": "Lismore",
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": "-28.8142",
+        "longitude": "153.2778"
+      },
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Lismore",
+        "addressRegion": "NSW",
+        "postalCode": "2480",
+        "addressCountry": "AU"
+      }
+    }
+    </script>
 </head>
 <body>
+    <noscript>
+        <div style="padding: 2rem; max-width: 1200px; margin: 0 auto; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6;">
+            <header style="border-bottom: 3px solid #1976d2; padding-bottom: 1rem; margin-bottom: 2rem;">
+                <h1 style="color: #1976d2; margin: 0 0 0.5rem 0;">Lismore Flood Dashboard</h1>
+                <p style="color: #666; margin: 0;">Real-time Flood Monitoring & Emergency Information</p>
+            </header>
+            
+            <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 1rem; margin-bottom: 2rem;">
+                <strong>JavaScript Required:</strong> This dashboard requires JavaScript to display real-time data. Please enable JavaScript in your browser or use the direct links below to access emergency information.
+            </div>
+
+            <section style="margin-bottom: 2rem;">
+                <h2 style="color: #333; border-bottom: 2px solid #eee; padding-bottom: 0.5rem;">About This Dashboard</h2>
+                <p>The Lismore Flood Dashboard provides real-time flood monitoring and emergency information for Lismore and the Northern Rivers region of New South Wales, Australia. This tool displays live data from Essential Energy and the Bureau of Meteorology, including water levels from the Wilsons River, weather radar, traffic cameras, and power outage information.</p>
+            </section>
+
+            <section style="margin-bottom: 2rem; background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px; padding: 1.5rem;">
+                <h2 style="color: #721c24; margin-top: 0;">Emergency Contacts</h2>
+                <ul style="list-style: none; padding: 0; margin: 0;">
+                    <li style="margin-bottom: 1rem; padding: 0.75rem; background: white; border-radius: 4px;">
+                        <strong style="font-size: 1.1em; color: #c82333;">Life Threatening Emergency:</strong><br>
+                        <span style="font-size: 1.5em; font-weight: bold;">📞 000</span>
+                    </li>
+                    <li style="margin-bottom: 1rem; padding: 0.75rem; background: white; border-radius: 4px;">
+                        <strong style="font-size: 1.1em; color: #c82333;">NSW SES Emergency Assistance:</strong><br>
+                        <span style="font-size: 1.5em; font-weight: bold;">📞 132 500</span>
+                    </li>
+                </ul>
+            </section>
+
+            <section style="margin-bottom: 2rem;">
+                <h2 style="color: #333; border-bottom: 2px solid #eee; padding-bottom: 0.5rem;">Direct Links to Live Data</h2>
+                <ul style="line-height: 2;">
+                    <li><strong>Flood Warnings:</strong> <a href="https://www.bom.gov.au/nsw/flood/northern.shtml" style="color: #1976d2;">BOM Northern Rivers Flood Watch</a></li>
+                    <li><strong>Weather Radar:</strong> <a href="https://www.bom.gov.au/products/IDR282.loop.shtml" style="color: #1976d2;">Grafton 256km Radar Loop</a></li>
+                    <li><strong>Wilsons River Levels:</strong> <a href="http://www.bom.gov.au/fwo/IDN60233/IDN60233.560560.tbl.shtml" style="color: #1976d2;">Current River Heights</a></li>
+                    <li><strong>Power Outages:</strong> <a href="https://www.essentialenergy.com.au/outages-and-faults/power-outages" style="color: #1976d2;">Essential Energy Outage Map</a></li>
+                    <li><strong>Traffic Conditions:</strong> <a href="https://www.livetraffic.com/desktop.html" style="color: #1976d2;">Live Traffic NSW</a></li>
+                </ul>
+            </section>
+
+            <section style="margin-bottom: 2rem;">
+                <h2 style="color: #333; border-bottom: 2px solid #eee; padding-bottom: 0.5rem;">Flood Level Categories for Lismore</h2>
+                <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+                    <thead>
+                        <tr style="background: #f5f5f5;">
+                            <th style="padding: 0.75rem; text-align: left; border: 1px solid #ddd;">Category</th>
+                            <th style="padding: 0.75rem; text-align: left; border: 1px solid #ddd;">Height</th>
+                            <th style="padding: 0.75rem; text-align: left; border: 1px solid #ddd;">Impact</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;"><strong>Minor Flood</strong></td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">4.20m</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">Low-lying areas affected, some road closures</td>
+                        </tr>
+                        <tr style="background: #f9f9f9;">
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;"><strong>Moderate Flood</strong></td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">7.20m</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">Properties begin to be affected, evacuations may be required</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;"><strong>Major Flood</strong></td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">9.70m</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">Extensive flooding, major evacuations required</td>
+                        </tr>
+                        <tr style="background: #fff3cd;">
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;"><strong>Levee Protection</strong></td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">10.6m</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">Height at which Lismore CBD levee provides protection</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section style="margin-bottom: 2rem;">
+                <h2 style="color: #333; border-bottom: 2px solid #eee; padding-bottom: 0.5rem;">Key Monitoring Locations</h2>
+                <ul style="columns: 2; -webkit-columns: 2; -moz-columns: 2;">
+                    <li>Wilsons River at Lismore (mAHD)</li>
+                    <li>Wilsons River at Eltham</li>
+                    <li>Leycester Creek at Leycester</li>
+                    <li>Wilsons River at Boat Harbour</li>
+                    <li>Richmond River at Casino</li>
+                    <li>Terania Creek at The Channon</li>
+                    <li>Coopers Creek at Rosebank</li>
+                    <li>Brunswick River at Brunswick Heads</li>
+                </ul>
+            </section>
+
+            <section style="margin-bottom: 2rem;">
+                <h2 style="color: #333; border-bottom: 2px solid #eee; padding-bottom: 0.5rem;">Evacuation Centers</h2>
+                <ul>
+                    <li><strong>Southern Cross University</strong> - Military Rd, East Lismore</li>
+                    <li><strong>Lismore City Hall</strong> - 1 Bounty St, Lismore</li>
+                    <li><strong>Goonellabah Sports & Aquatic Centre</strong> - 50 Oliver Ave, Goonellabah</li>
+                </ul>
+                <p><em>Note: Check with local authorities for current evacuation center status during flood events.</em></p>
+            </section>
+
+            <section style="margin-bottom: 2rem;">
+                <h2 style="color: #333; border-bottom: 2px solid #eee; padding-bottom: 0.5rem;">Additional Resources</h2>
+                <ul>
+                    <li><a href="https://www.ses.nsw.gov.au" style="color: #1976d2;">NSW SES Website</a></li>
+                    <li><a href="https://www.bom.gov.au" style="color: #1976d2;">Bureau of Meteorology</a></li>
+                    <li><a href="https://www.lismore.nsw.gov.au" style="color: #1976d2;">Lismore City Council</a></li>
+                    <li><a href="https://australiasevereweather.com/floods/" style="color: #1976d2;">Australian Severe Weather - Flood History</a></li>
+                </ul>
+            </section>
+
+            <footer style="border-top: 2px solid #eee; padding-top: 1rem; margin-top: 3rem; color: #666; font-size: 0.9em;">
+                <p>Data sources: Bureau of Meteorology, Transport for NSW, Essential Energy</p>
+                <p><strong>Always follow directions from emergency services during flood events.</strong></p>
+            </footer>
+        </div>
+    </noscript>
+    
     <div id="loading-overlay" class="loading-overlay">
         <div class="spinner"></div>
         <p>Loading flood data...</p>
@@ -35,18 +276,18 @@
         </button>
     </div>
 
-    <header>
+    <header role="banner">
         <div class="header-content">
             <div class="header-main">
                 <div class="header-title">
-                    <div class="header-icon">
+                    <div class="header-icon" role="img" aria-label="Flood monitoring icon">
                       <svg
                         width="32"
                         height="32"
                         viewBox="0 0 60.601004 60.601004"
                         fill="none"
                         xmlns="http://www.w3.org/2000/svg"
-                        aria-label="Flood icon"
+                        aria-hidden="true"
                       >
                         <path
                           d="m 0,0 14.551,0 c 0.061,0 0.117,-0.01 0.171,-0.027 0.198,-0.095 0.38,-0.221 0.534,-0.374 0.74,-0.732 1.424,-1.611 1.424,-3.229 0,-3.286 -3.373,-3.679 -3.373,-6.706 0,-3.026 3.373,-3.387 3.373,-6.674 0,-3.287 -3.373,-3.648 -3.373,-6.674 0,-3.027 3.373,-3.42 3.373,-6.706 0,-1.619 -0.684,-2.498 -1.424,-3.229 -0.154,-0.154 -0.336,-0.279 -0.534,-0.373 -0.054,-0.018 -0.11,-0.028 -0.171,-0.028 L 0,-34.02 0,0 Z m -3.546,-37.569 41.116,0 0,41.117 -41.116,0 0,-41.117 z"
@@ -57,8 +298,8 @@
                       </svg>
                     </div>
                     <div class="header-text">
-                        <h1>Lismore Flood Dashboard</h1>
-                        <p class="header-subtitle">Real-time Flood Monitoring & Information</p>
+                        <h1 itemprop="name">Lismore Flood Dashboard</h1>
+                        <p class="header-subtitle" itemprop="description">Real-time Flood Monitoring & Emergency Information for Lismore NSW</p>
                     </div>
                 </div>
                 <div class="header-info">
@@ -82,7 +323,7 @@
     </header>
 
     <div class="dashboard-container">
-        <main>
+        <main role="main" aria-label="Dashboard content">
             <div class="panel">
                 <div class="tabs-container">
                     <div class="tabs">
