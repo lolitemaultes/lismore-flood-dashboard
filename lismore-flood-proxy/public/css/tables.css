@@ -26,11 +26,6 @@ th {
     top: 0;
 }
 
-:root[data-theme="dark"] th {
-    background-color: var(--bg-tertiary);
-    color: var(--text-primary);
-}
-
 tr:last-child td {
     border-bottom: none;
 }

@@ -13,7 +13,7 @@
 }
 
 :root[data-theme="dark"] .stat-item {
-    background-color: var(--bg-tertiary);
+    background-color: #273243;
 }
 
 .stat-label {
