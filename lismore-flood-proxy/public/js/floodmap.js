@@ -502,13 +502,11 @@ function updateFloodVisualizationWithLevee(floodHeight) {
 
         floodMarkers.addLayer(marker);
     });
-    
-    document.getElementById('flood-stat-total').textContent = floodProperties.length;
+
     document.getElementById('flood-stat-critical').textContent = stats.critical;
     document.getElementById('flood-stat-warning').textContent = stats.warning;
     document.getElementById('flood-stat-alert').textContent = stats.alert;
-    document.getElementById('flood-stat-safe').textContent = stats.safe;
-    
+
     floodLoadingOverlay.style.display = 'none';
 }
 
