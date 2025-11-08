@@ -5,7 +5,7 @@
 /* --- Container & Layout --- */
 .outage-map-wrapper {
     position: relative;
-    height: 500px;
+    height: 600px;
     background-color: var(--bg-secondary);
     border-radius: var(--border-radius);
     overflow: hidden;
@@ -377,7 +377,7 @@
 /* --- Responsive Design --- */
 @media (max-width: 768px) {
     .outage-map-wrapper {
-        height: 420px;
+        height: 500px;
     }
 
     .outage-legend {
@@ -420,7 +420,7 @@
 
 @media (max-width: 576px) {
     .outage-map-wrapper {
-        height: 360px;
+        height: 420px;
     }
 
     .outage-legend {

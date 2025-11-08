@@ -11,8 +11,7 @@
 
 .flood-map-container {
     position: relative;
-    flex: 1;
-    min-height: 450px;
+    height: 600px;
     border-radius: var(--border-radius);
     overflow: hidden;
     background-color: var(--bg-tertiary);
@@ -21,7 +20,6 @@
 #flood-map {
     width: 100%;
     height: 100%;
-    min-height: 450px;
     z-index: 1;
 }
 
@@ -393,11 +391,7 @@
 /* --- Responsive Design --- */
 @media (max-width: 768px) {
     .flood-map-container {
-        min-height: 400px;
-    }
-
-    #flood-map {
-        min-height: 400px;
+        height: 500px;
     }
 
     .flood-controls {
@@ -445,11 +439,7 @@
 
 @media (max-width: 576px) {
     .flood-map-container {
-        min-height: 350px;
-    }
-
-    #flood-map {
-        min-height: 350px;
+        height: 420px;
     }
 
     .flood-controls {
