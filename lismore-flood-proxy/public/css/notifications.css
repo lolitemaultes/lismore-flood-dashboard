@@ -52,6 +52,10 @@
     background-color: var(--info-color);
 }
 
+.notification.warning {
+    background-color: var(--warning-color);
+}
+
 .notification-icon {
     flex-shrink: 0;
 }
