@@ -164,7 +164,7 @@
 
 /* --- Statistics Container --- */
 .outage-stats-container {
-    margin-top: 1.5rem;
+    margin-top: 0.75rem;
     padding: 2rem;
     background: transparent;
     border: none;
@@ -443,7 +443,7 @@
     }
 
     .outage-stats-container {
-        margin-top: 1rem;
+        margin-top: 0.5rem;
         padding: 1rem;
     }
 
