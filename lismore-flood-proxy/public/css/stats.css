@@ -5,15 +5,16 @@
 }
 
 .stat-item {
-    background-color: var(--gray-100);
+    background-color: var(--bg-tertiary);
     border-radius: var(--border-radius);
     padding: 1rem;
     text-align: center;
+    transition: background-color 0.3s ease;
 }
 
 .stat-label {
     font-size: 0.875rem;
-    color: var(--gray-600);
+    color: var(--text-tertiary);
     margin-bottom: 0.5rem;
     text-align: center;
 }
@@ -21,7 +22,7 @@
 .stat-value {
     font-size: 1.5rem;
     font-weight: 700;
-    color: var(--gray-900);
+    color: var(--text-primary);
     text-align: center;
     display: flex;
     flex-direction: column;

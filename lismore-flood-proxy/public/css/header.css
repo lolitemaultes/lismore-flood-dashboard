@@ -1,12 +1,13 @@
 header {
-    background: linear-gradient(135deg, #1e88e5 0%, #1565c0 100%);
-    color: white;
+    background: linear-gradient(135deg, var(--header-gradient-start) 0%, var(--header-gradient-end) 100%);
+    color: var(--header-text-color);
     padding: 1.5rem 1rem;
     position: sticky;
     top: 0;
     z-index: 100;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--shadow-header);
     backdrop-filter: blur(10px);
+    transition: background 0.3s ease;
 }
 
 .header-content {
@@ -34,9 +35,10 @@ header {
     justify-content: center;
     width: 48px;
     height: 48px;
-    background: rgba(255, 255, 255, 0.15);
+    background: var(--header-glass-bg);
     border-radius: 12px;
     backdrop-filter: blur(10px);
+    transition: background 0.3s ease;
 }
 
 .header-icon svg {
@@ -69,7 +71,7 @@ header {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    background: rgba(255, 255, 255, 0.15);
+    background: var(--header-glass-bg);
     padding: 0.5rem 1rem;
     border-radius: 8px;
     font-size: 0.875rem;
@@ -80,7 +82,7 @@ header {
 }
 
 .info-item:hover {
-    background: rgba(255, 255, 255, 0.25);
+    background: var(--header-glass-bg-hover);
     transform: translateY(-1px);
 }
 

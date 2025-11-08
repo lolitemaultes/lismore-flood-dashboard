@@ -63,8 +63,8 @@ select.button {
     width: 40px;
     height: 40px;
     padding: 0;
-    background-color: #e0e0e0;
-    color: #333;
+    background-color: var(--control-btn-bg);
+    color: var(--control-btn-color);
     border: none;
     border-radius: 50%;
     cursor: pointer;
@@ -73,14 +73,14 @@ select.button {
     align-items: center;
     justify-content: center;
     transition: all 0.2s;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: var(--shadow-sm);
 }
 
 .control-buttons button:hover {
     background-color: var(--primary-color);
     color: white;
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    box-shadow: var(--shadow-md);
 }
 
 .control-buttons button:active {
@@ -88,8 +88,8 @@ select.button {
 }
 
 .control-buttons button:disabled {
-    background-color: #f0f0f0;
-    color: #aaa;
+    background-color: var(--control-btn-disabled-bg);
+    color: var(--control-btn-disabled-color);
     cursor: not-allowed;
     box-shadow: none;
     transform: none;

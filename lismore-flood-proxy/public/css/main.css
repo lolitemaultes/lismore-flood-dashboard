@@ -1,13 +1,21 @@
 :root {
+    /* Primary Colors */
     --primary-color: #1e88e5;
     --primary-dark: #1565c0;
+    --primary-light: #42a5f5;
     --secondary-color: #f8f9fa;
+
+    /* Status/Semantic Colors */
     --danger-color: #e53935;
     --warning-color: #ffa000;
     --success-color: #43a047;
     --info-color: #039be5;
+
+    /* Base Colors */
     --dark-color: #212121;
     --light-color: #f8f9fa;
+
+    /* Gray Scale */
     --gray-100: #f8f9fa;
     --gray-200: #e9ecef;
     --gray-300: #dee2e6;
@@ -17,10 +25,126 @@
     --gray-700: #495057;
     --gray-800: #343a40;
     --gray-900: #212529;
+
+    /* Theme-aware colors (Light Mode defaults) */
+    --bg-primary: #f8f9fa;
+    --bg-secondary: #ffffff;
+    --bg-tertiary: #e9ecef;
+    --text-primary: #212529;
+    --text-secondary: #495057;
+    --text-tertiary: #6c757d;
+    --border-color: #e9ecef;
+    --border-color-strong: #dee2e6;
+
+    /* Alert backgrounds */
+    --alert-danger-bg: #fef2f2;
+    --alert-danger-border: #fee2e2;
+    --alert-danger-text: #991b1b;
+    --alert-warning-bg: #fffbeb;
+    --alert-warning-border: #fef3c7;
+    --alert-warning-text: #92400e;
+    --alert-success-bg: #f0fdf4;
+    --alert-success-border: #dcfce7;
+    --alert-success-text: #166534;
+    --alert-info-bg: #f0f7ff;
+    --alert-info-border: #dbeafe;
+    --alert-info-text: #1e3a8a;
+
+    /* Status badge backgrounds */
+    --status-online-bg: rgba(67, 160, 71, 0.1);
+    --status-offline-bg: rgba(229, 57, 53, 0.1);
+    --status-unknown-bg: rgba(255, 160, 0, 0.1);
+
+    /* Control button colors */
+    --control-btn-bg: #e0e0e0;
+    --control-btn-color: #333333;
+    --control-btn-disabled-bg: #f0f0f0;
+    --control-btn-disabled-color: #aaaaaa;
+
+    /* Header gradient */
+    --header-gradient-start: #1e88e5;
+    --header-gradient-end: #1565c0;
+    --header-text-color: #ffffff;
+    --header-glass-bg: rgba(255, 255, 255, 0.15);
+    --header-glass-bg-hover: rgba(255, 255, 255, 0.25);
+
+    /* Shadows */
     --border-radius: 8px;
-    --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
-    --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
-    --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+    --shadow-header: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Dark Mode Theme */
+:root[data-theme="dark"] {
+    /* Theme-aware colors (Dark Mode) */
+    --bg-primary: #0f172a;
+    --bg-secondary: #1e293b;
+    --bg-tertiary: #334155;
+    --text-primary: #f1f5f9;
+    --text-secondary: #cbd5e1;
+    --text-tertiary: #94a3b8;
+    --border-color: #334155;
+    --border-color-strong: #475569;
+
+    /* Adjust semantic colors for dark mode */
+    --danger-color: #ef4444;
+    --warning-color: #f59e0b;
+    --success-color: #22c55e;
+    --info-color: #3b82f6;
+    --primary-color: #3b82f6;
+    --primary-dark: #2563eb;
+    --primary-light: #60a5fa;
+
+    /* Gray scale inverted for dark mode */
+    --gray-100: #1e293b;
+    --gray-200: #334155;
+    --gray-300: #475569;
+    --gray-400: #64748b;
+    --gray-500: #94a3b8;
+    --gray-600: #cbd5e1;
+    --gray-700: #e2e8f0;
+    --gray-800: #f1f5f9;
+    --gray-900: #f8fafc;
+
+    /* Alert backgrounds for dark mode */
+    --alert-danger-bg: rgba(239, 68, 68, 0.1);
+    --alert-danger-border: rgba(239, 68, 68, 0.2);
+    --alert-danger-text: #fca5a5;
+    --alert-warning-bg: rgba(245, 158, 11, 0.1);
+    --alert-warning-border: rgba(245, 158, 11, 0.2);
+    --alert-warning-text: #fcd34d;
+    --alert-success-bg: rgba(34, 197, 94, 0.1);
+    --alert-success-border: rgba(34, 197, 94, 0.2);
+    --alert-success-text: #86efac;
+    --alert-info-bg: rgba(59, 130, 246, 0.1);
+    --alert-info-border: rgba(59, 130, 246, 0.2);
+    --alert-info-text: #93c5fd;
+
+    /* Status badge backgrounds for dark mode */
+    --status-online-bg: rgba(34, 197, 94, 0.15);
+    --status-offline-bg: rgba(239, 68, 68, 0.15);
+    --status-unknown-bg: rgba(245, 158, 11, 0.15);
+
+    /* Control button colors for dark mode */
+    --control-btn-bg: #334155;
+    --control-btn-color: #e2e8f0;
+    --control-btn-disabled-bg: #1e293b;
+    --control-btn-disabled-color: #64748b;
+
+    /* Header gradient for dark mode */
+    --header-gradient-start: #1e3a8a;
+    --header-gradient-end: #1e40af;
+    --header-text-color: #f1f5f9;
+    --header-glass-bg: rgba(255, 255, 255, 0.1);
+    --header-glass-bg-hover: rgba(255, 255, 255, 0.15);
+
+    /* Shadows for dark mode */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5);
+    --shadow-header: 0 4px 20px rgba(0, 0, 0, 0.6);
 }
 
 * {
@@ -31,9 +155,10 @@
 
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-    background-color: var(--gray-100);
-    color: var(--gray-800);
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }

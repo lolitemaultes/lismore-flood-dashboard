@@ -5,10 +5,15 @@
     height: 400px;
     margin: 0 auto;
     text-align: center;
-    background-color: #99ccff;
+    background-color: var(--bg-tertiary);
     border-radius: 8px;
     overflow: hidden;
-    box-shadow: var(--shadow);
+    box-shadow: var(--shadow-sm);
+    transition: background-color 0.3s ease;
+}
+
+:root[data-theme="light"] .radar-container {
+    background-color: #99ccff;
 }
 
 .radar-display {
@@ -62,7 +67,7 @@
     height: 8px;
     -webkit-appearance: none;
     appearance: none;
-    background: #e0e0e0;
+    background: var(--border-color-strong);
     outline: none;
     border-radius: 4px;
 }
@@ -103,7 +108,7 @@
 .progress-container {
     width: 100%;
     max-width: 400px;
-    background-color: #e0e0e0;
+    background-color: var(--border-color-strong);
     height: 5px;
     margin: 10px auto;
     border-radius: 5px;
@@ -126,10 +131,15 @@
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(255, 255, 255, 0.8);
+    background-color: rgba(15, 23, 42, 0.8);
+    color: var(--text-primary);
     font-weight: bold;
     z-index: 20;
     border-radius: 8px;
+}
+
+:root[data-theme="light"] .loading {
+    background-color: rgba(255, 255, 255, 0.8);
 }
 
 .spinner {
@@ -169,14 +179,14 @@
 }
 
 .error {
-    color: #cc0000;
+    color: var(--danger-color);
     font-weight: bold;
     text-align: center;
     padding: 15px;
     margin: 10px 20px;
-    background-color: #ffeeee;
+    background-color: var(--alert-danger-bg);
     border-radius: 5px;
-    border-left: 4px solid #cc0000;
+    border-left: 4px solid var(--danger-color);
 }
 
 .last-update {

@@ -1,9 +1,10 @@
 .webcam-container {
-    background-color: white;
+    background-color: var(--bg-secondary);
     border-radius: var(--border-radius);
     box-shadow: var(--shadow-sm);
     padding: 1rem;
     margin-bottom: 1rem;
+    transition: background-color 0.3s ease;
 }
 
 .webcam-header {
@@ -16,7 +17,7 @@
 .webcam-header h2 {
     font-size: 1.25rem;
     font-weight: 600;
-    color: var(--gray-800);
+    color: var(--text-primary);
 }
 
 .webcam-image-container {
@@ -24,18 +25,19 @@
     width: 100%;
     padding: 1rem;
     text-align: center;
-    background-color: var(--gray-50);
+    background-color: var(--bg-tertiary);
     border-radius: var(--border-radius);
     margin: 0.5rem 0;
+    transition: background-color 0.3s ease;
 }
 
 .webcam-image {
     max-width: 100%;
     height: auto;
     border-radius: calc(var(--border-radius) - 2px);
-    border: 1px solid var(--gray-300);
+    border: 1px solid var(--border-color);
     box-shadow: var(--shadow-sm);
-    background-color: white;
+    background-color: var(--bg-secondary);
     display: inline-block;
 }
 
@@ -58,5 +60,5 @@
     align-items: center;
     margin-top: 0.75rem;
     font-size: 0.875rem;
-    color: var(--gray-600);
+    color: var(--text-tertiary);
 }

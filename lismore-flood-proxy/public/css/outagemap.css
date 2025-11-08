@@ -1,9 +1,10 @@
 .outage-map-wrapper {
     position: relative;
     height: 500px;
-    background-color: white;
+    background-color: var(--bg-secondary);
     border-radius: var(--border-radius);
     overflow: hidden;
+    transition: background-color 0.3s ease;
 }
 
 #outage-map {
@@ -12,41 +13,42 @@
     z-index: 1;
 }
 
-.outage-legend { 
-    position: absolute; 
-    right: 10px; 
+.outage-legend {
+    position: absolute;
+    right: 10px;
     bottom: 30px;
-    z-index: 1000; 
-    background: white;
+    z-index: 1000;
+    background: var(--bg-secondary);
     border-radius: var(--border-radius);
     padding: 12px;
     box-shadow: var(--shadow-md);
     min-width: 200px;
+    transition: background-color 0.3s ease;
 }
 
 .legend-title {
     font-weight: 600;
     margin-bottom: 8px;
     font-size: 14px;
-    color: #111827;
+    color: var(--text-primary);
 }
 
-.outage-legend label { 
-    display: flex; 
-    align-items: center; 
-    gap: 8px; 
-    cursor: pointer; 
+.outage-legend label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
     margin: 6px 0;
     padding: 8px 10px;
     border-radius: 6px;
     transition: all 0.2s;
     font-size: 13px;
     border: 2px solid transparent;
-    background: var(--gray-100);
+    background: var(--bg-tertiary);
 }
 
 .outage-legend label:hover {
-    background: var(--gray-200);
+    background: var(--border-color);
 }
 
 .outage-legend input[type="radio"] {
@@ -63,7 +65,7 @@
 }
 
 .outage-legend label:has(input:checked) {
-    background: white;
+    background: var(--bg-secondary);
     border-color: var(--primary-color);
 }
 
@@ -74,12 +76,12 @@
     flex: 1;
 }
 
-.outage-dot { 
-    width: 12px; 
-    height: 12px; 
-    border-radius: 50%; 
+.outage-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
     display: inline-block;
-    border: 1px solid rgba(0,0,0,0.1);
+    border: 1px solid var(--border-color);
     transition: all 0.2s ease;
 }
 
@@ -90,15 +92,16 @@
 .legend-note {
     margin-top: 8px;
     padding-top: 8px;
-    border-top: 1px solid var(--gray-200);
+    border-top: 1px solid var(--border-color);
     font-size: 11px;
-    color: var(--gray-600);
+    color: var(--text-tertiary);
 }
 
 .outage-controls-panel {
-    background: white;
-    border-top: 1px solid var(--gray-200);
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border-color);
     padding: 1rem 1.5rem;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .outage-controls-inner {
@@ -116,15 +119,16 @@
 .outage-stats-container {
     margin-top: 1rem;
     padding: 1rem;
-    background: var(--gray-100);
+    background: var(--bg-tertiary);
     border-radius: var(--border-radius);
+    transition: background-color 0.3s ease;
 }
 
 .outage-stats-title {
     font-weight: 600;
     margin-bottom: 0.75rem;
     font-size: 0.875rem;
-    color: #111827;
+    color: var(--text-primary);
 }
 
 .outage-stats-grid {
@@ -134,11 +138,11 @@
 }
 
 .outage-stat-card {
-    background: white;
+    background: var(--bg-secondary);
     padding: 1rem;
     border-radius: var(--border-radius);
     box-shadow: var(--shadow-sm);
-    transition: all 0.2s;
+    transition: all 0.2s, background-color 0.3s ease;
 }
 
 .outage-stat-card:hover {
@@ -148,7 +152,7 @@
 
 .stat-label {
     font-size: 0.75rem;
-    color: var(--gray-600);
+    color: var(--text-tertiary);
     text-transform: uppercase;
     letter-spacing: 0.05em;
     margin-bottom: 0.5rem;
@@ -158,7 +162,7 @@
 .stat-value {
     font-size: 1.5rem;
     font-weight: 700;
-    color: #111827;
+    color: var(--text-primary);
     display: flex;
     align-items: baseline;
     gap: 0.5rem;
@@ -192,9 +196,9 @@
     font-weight: 700;
     font-size: 1rem;
     margin-bottom: 0.75rem;
-    color: #111827;
+    color: var(--text-primary);
     padding-bottom: 0.75rem;
-    border-bottom: 1px solid var(--gray-200);
+    border-bottom: 1px solid var(--border-color);
 }
 
 .outage-popup-row {
@@ -207,12 +211,12 @@
 
 .outage-popup-label {
     font-weight: 600;
-    color: var(--gray-600);
+    color: var(--text-tertiary);
     font-size: 0.8125rem;
 }
 
 .outage-popup-value {
-    color: #111827;
+    color: var(--text-primary);
     font-size: 0.875rem;
 }
 
@@ -243,16 +247,16 @@
 .outage-popup-footer {
     margin-top: 0.75rem;
     padding-top: 0.75rem;
-    border-top: 1px solid var(--gray-200);
+    border-top: 1px solid var(--border-color);
     font-size: 0.75rem;
-    color: var(--gray-600);
+    color: var(--text-tertiary);
 }
 
 .leaflet-popup-content-wrapper {
-    background: white;
+    background: var(--bg-secondary);
     border-radius: var(--border-radius);
     box-shadow: var(--shadow-lg);
-    border: 1px solid var(--gray-200);
+    border: 1px solid var(--border-color);
 }
 
 .leaflet-popup-content {
@@ -261,17 +265,18 @@
     font-size: 0.875rem;
     line-height: 1.6;
     max-width: 350px;
+    color: var(--text-primary);
 }
 
 .leaflet-popup-tip {
-    background: white;
-    border: 1px solid var(--gray-200);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
     border-top: none;
     border-right: none;
 }
 
 .leaflet-popup-close-button {
-    color: var(--gray-600) !important;
+    color: var(--text-tertiary) !important;
     font-size: 18px !important;
     padding: 4px 8px !important;
     width: 24px !important;
@@ -283,7 +288,7 @@
 }
 
 .leaflet-popup-close-button:hover {
-    background: var(--gray-100) !important;
+    background: var(--bg-tertiary) !important;
 }
 
 @media (max-width: 768px) {
