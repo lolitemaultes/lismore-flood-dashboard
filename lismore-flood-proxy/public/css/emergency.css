@@ -1,0 +1,138 @@
+.emergency-contacts {
+    background-color: #fef2f2;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+}
+
+.emergency-header {
+    background-color: var(--danger-color);
+    color: white;
+    padding: 0.75rem 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.emergency-content {
+    padding: 1rem;
+}
+
+.emergency-number {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0.25rem 0 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.emergency-number svg {
+    flex-shrink: 0;
+}
+
+.evacuation-centers {
+    margin-top: 1rem;
+}
+
+.center-list {
+    list-style-type: none;
+    margin-top: 0.5rem;
+}
+
+.center-list li {
+    padding: 0.75rem;
+    border-radius: var(--border-radius);
+    background-color: var(--gray-100);
+    margin-bottom: 0.5rem;
+}
+
+.center-list strong {
+    display: block;
+    margin-bottom: 0.25rem;
+    color: var(--gray-800);
+}
+
+.resources-panel {
+    background-color: #f0f7ff;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    margin-top: 1.5rem;
+}
+
+.resources-header {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 0.75rem 1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.resources-content {
+    padding: 1rem;
+}
+
+.resources-list {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+.resources-list li {
+    display: flex;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background-color: white;
+    border-radius: var(--border-radius);
+    margin-bottom: 0.75rem;
+    box-shadow: var(--shadow-sm);
+}
+
+.resources-list li:last-child {
+    margin-bottom: 0;
+}
+
+.resources-list li svg {
+    color: var(--primary-color);
+    flex-shrink: 0;
+    margin-top: 0.25rem;
+}
+
+.resource-item-content {
+    flex: 1;
+}
+
+.resource-item-content strong {
+    display: block;
+    margin-bottom: 0.25rem;
+    color: var(--gray-800);
+}
+
+.resource-item-content p {
+    margin: 0 0 0.5rem;
+    font-size: 0.875rem;
+    color: var(--gray-600);
+    line-height: 1.4;
+}
+
+.resource-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: var(--primary-color);
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.resource-link:hover {
+    text-decoration: underline;
+    color: var(--primary-dark);
+}
+
+.resource-link svg {
+    flex-shrink: 0;
+}

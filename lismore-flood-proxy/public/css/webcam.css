@@ -1,0 +1,62 @@
+.webcam-container {
+    background-color: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.webcam-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.webcam-header h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--gray-800);
+}
+
+.webcam-image-container {
+    position: relative;
+    width: 100%;
+    padding: 1rem;
+    text-align: center;
+    background-color: var(--gray-50);
+    border-radius: var(--border-radius);
+    margin: 0.5rem 0;
+}
+
+.webcam-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: calc(var(--border-radius) - 2px);
+    border: 1px solid var(--gray-300);
+    box-shadow: var(--shadow-sm);
+    background-color: white;
+    display: inline-block;
+}
+
+.webcam-error {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 0.75rem 1rem;
+    border-radius: var(--border-radius);
+    font-weight: 500;
+}
+
+.webcam-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.75rem;
+    font-size: 0.875rem;
+    color: var(--gray-600);
+}

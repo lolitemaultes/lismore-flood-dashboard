@@ -1,0 +1,323 @@
+.outage-map-wrapper {
+    position: relative;
+    height: 500px;
+    background-color: white;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+}
+
+#outage-map {
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+.outage-legend { 
+    position: absolute; 
+    right: 10px; 
+    bottom: 30px;
+    z-index: 1000; 
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 12px;
+    box-shadow: var(--shadow-md);
+    min-width: 200px;
+}
+
+.legend-title {
+    font-weight: 600;
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: #111827;
+}
+
+.outage-legend label { 
+    display: flex; 
+    align-items: center; 
+    gap: 8px; 
+    cursor: pointer; 
+    margin: 6px 0;
+    padding: 8px 10px;
+    border-radius: 6px;
+    transition: all 0.2s;
+    font-size: 13px;
+    border: 2px solid transparent;
+    background: var(--gray-100);
+}
+
+.outage-legend label:hover {
+    background: var(--gray-200);
+}
+
+.outage-legend input[type="radio"] {
+    display: none;
+}
+
+.outage-legend input[type="radio"]:checked + .legend-content {
+    font-weight: 600;
+}
+
+.outage-legend input[type="radio"]:checked ~ .outage-dot {
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    transform: scale(1.2);
+}
+
+.outage-legend label:has(input:checked) {
+    background: white;
+    border-color: var(--primary-color);
+}
+
+.legend-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+}
+
+.outage-dot { 
+    width: 12px; 
+    height: 12px; 
+    border-radius: 50%; 
+    display: inline-block;
+    border: 1px solid rgba(0,0,0,0.1);
+    transition: all 0.2s ease;
+}
+
+.outage-dot.cur { background: #ff4d4f; }
+.outage-dot.fut { background: #f7ba1e; }
+.outage-dot.can { background: #7aa2f7; }
+
+.legend-note {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--gray-200);
+    font-size: 11px;
+    color: var(--gray-600);
+}
+
+.outage-controls-panel {
+    background: white;
+    border-top: 1px solid var(--gray-200);
+    padding: 1rem 1.5rem;
+}
+
+.outage-controls-inner {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.outage-control-group {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.outage-stats-container {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: var(--gray-100);
+    border-radius: var(--border-radius);
+}
+
+.outage-stats-title {
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    font-size: 0.875rem;
+    color: #111827;
+}
+
+.outage-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0.75rem;
+}
+
+.outage-stat-card {
+    background: white;
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s;
+}
+
+.outage-stat-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    color: var(--gray-600);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #111827;
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+}
+
+.outage-stat-badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--border-radius);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.outage-stat-badge.current { 
+    background: rgba(255, 77, 79, 0.1); 
+    color: #ff4d4f; 
+}
+
+.outage-stat-badge.future { 
+    background: rgba(247, 186, 30, 0.1); 
+    color: #f7ba1e; 
+}
+
+.outage-stat-badge.cancelled { 
+    background: rgba(122, 162, 247, 0.1); 
+    color: #7aa2f7; 
+}
+
+.outage-popup-title {
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+    color: #111827;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.outage-popup-row {
+    margin: 0.5rem 0;
+    display: grid;
+    grid-template-columns: 130px 1fr;
+    gap: 0.5rem;
+    align-items: start;
+}
+
+.outage-popup-label {
+    font-weight: 600;
+    color: var(--gray-600);
+    font-size: 0.8125rem;
+}
+
+.outage-popup-value {
+    color: #111827;
+    font-size: 0.875rem;
+}
+
+.outage-popup-badge {
+    display: inline-block;
+    padding: 0.25rem 0.625rem;
+    border-radius: var(--border-radius);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.outage-popup-badge.current { 
+    background: rgba(255, 77, 79, 0.1); 
+    color: #ff4d4f; 
+}
+
+.outage-popup-badge.future { 
+    background: rgba(247, 186, 30, 0.1); 
+    color: #f7ba1e; 
+}
+
+.outage-popup-badge.cancelled { 
+    background: rgba(122, 162, 247, 0.1); 
+    color: #7aa2f7; 
+}
+
+.outage-popup-footer {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--gray-200);
+    font-size: 0.75rem;
+    color: var(--gray-600);
+}
+
+.leaflet-popup-content-wrapper {
+    background: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--gray-200);
+}
+
+.leaflet-popup-content {
+    margin: 1rem;
+    margin-right: 2.5rem;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    max-width: 350px;
+}
+
+.leaflet-popup-tip {
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-top: none;
+    border-right: none;
+}
+
+.leaflet-popup-close-button {
+    color: var(--gray-600) !important;
+    font-size: 18px !important;
+    padding: 4px 8px !important;
+    width: 24px !important;
+    height: 24px !important;
+    position: absolute !important;
+    top: 8px !important;
+    right: 8px !important;
+    border-radius: 4px !important;
+}
+
+.leaflet-popup-close-button:hover {
+    background: var(--gray-100) !important;
+}
+
+@media (max-width: 768px) {
+    .outage-map-wrapper {
+        height: 400px;
+    }
+    
+    .outage-legend {
+        font-size: 0.75rem;
+        min-width: 180px;
+        right: 8px;
+        bottom: 24px;
+    }
+    
+    .outage-controls-inner {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .outage-control-group {
+        flex-direction: column;
+    }
+    
+    .outage-stats-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 576px) {
+    .outage-map-wrapper {
+        height: 350px;
+    }
+    
+    .outage-stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
