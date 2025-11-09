@@ -382,6 +382,19 @@
         const total = counts.current + counts.future + counts.cancelled;
         document.getElementById('outage-last-update').textContent = new Date().toLocaleTimeString('en-AU');
 
+        // Update sidebar stats
+        const outageCountElem = document.getElementById('outage-count');
+        const outageStatusElem = document.getElementById('outage-status');
+        if (outageCountElem) {
+            outageCountElem.textContent = counts.current || 0;
+        }
+        if (outageStatusElem) {
+            const statusText = counts.current === 0 ? 'No active outages' :
+                              counts.current === 1 ? '1 active outage' :
+                              `${counts.current} active outages`;
+            outageStatusElem.textContent = statusText;
+        }
+
         if (data.errors && data.errors.length > 0) {
             const errorCategories = data.errors.map(e => e.category).join(', ');
             console.warn('Some outage categories failed to load:', data.errors);
