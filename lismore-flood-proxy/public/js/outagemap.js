@@ -45,13 +45,6 @@
         outageMapInitialized = true;
         window.outageMapInitialized = true;
 
-        // Update status display immediately
-        const outageMapStatusValue = document.getElementById('outagemap-status-value');
-        if (outageMapStatusValue) {
-            outageMapStatusValue.textContent = 'Online';
-            outageMapStatusValue.className = 'status-value online';
-        }
-
         let isProgrammaticMove = false;
         
         outageMap.getContainer().addEventListener('wheel', () => {
@@ -390,6 +383,18 @@
         const total = counts.current + counts.future + counts.cancelled;
         document.getElementById('outage-last-update').textContent = new Date().toLocaleTimeString('en-AU');
 
+        // Update Data Sources & Status section
+        const outageMapStatusValue = document.getElementById('outagemap-status-value');
+        if (outageMapStatusValue) {
+            if (total > 0 || (data.errors && data.errors.length === 0)) {
+                outageMapStatusValue.textContent = 'Online';
+                outageMapStatusValue.className = 'status-value online';
+            } else if (data.errors && data.errors.length > 0 && total === 0) {
+                outageMapStatusValue.textContent = 'Service Unavailable';
+                outageMapStatusValue.className = 'status-value offline';
+            }
+        }
+
         if (data.errors && data.errors.length > 0) {
             const errorCategories = data.errors.map(e => e.category).join(', ');
             console.warn('Some outage categories failed to load:', data.errors);
@@ -459,12 +464,19 @@
             
         } catch (error) {
             console.error('Load outage error:', error);
-            
+
             const loadingOverlay = document.getElementById('loading-overlay');
             if (loadingOverlay) {
                 loadingOverlay.style.display = 'none';
             }
-            
+
+            // Update status to show error
+            const outageMapStatusValue = document.getElementById('outagemap-status-value');
+            if (outageMapStatusValue) {
+                outageMapStatusValue.textContent = 'Connection Error';
+                outageMapStatusValue.className = 'status-value offline';
+            }
+
             showNotification('Error loading outage data: ' + error.message, 'error');
         } finally {
             if (refreshBtn) refreshBtn.disabled = false;
