@@ -41,8 +41,9 @@
         outageLayerGroups.current = L.layerGroup().addTo(outageMap);
         outageLayerGroups.future = L.layerGroup();
         outageLayerGroups.cancelled = L.layerGroup();
-        
+
         outageMapInitialized = true;
+        window.outageMapInitialized = true;
         
         let isProgrammaticMove = false;
         

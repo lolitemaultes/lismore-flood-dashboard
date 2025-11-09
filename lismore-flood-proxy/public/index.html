@@ -2004,7 +2004,7 @@
                 floodMapStatusValue.className = 'status-value unknown';
             }
 
-            if (typeof outageMapInitialized !== 'undefined' && outageMapInitialized) {
+            if (window.outageMapInitialized) {
                 outageMapStatusValue.textContent = 'Online';
                 outageMapStatusValue.className = 'status-value online';
             } else {
