@@ -1,4 +1,4 @@
-# Version 3 - 9.11.25 Upcoming Features & Changes
+# Version 3 - 10.11.25 Upcoming Features & Changes
 
 **Flood Map Water Level Simulation**
 - ~~Realistic Flood water simulation via terrain map~~
@@ -6,9 +6,10 @@
 **Dashboard Restyling for V3**
 - ~~Overhaul of current styling~~
 - ~~Restyling header~~
+- ~~Change power outage icon to lightning bolt~~
+- ~~Move toggles up the top on floodmap~~
+- Resizing buttons site-wide
 - Adding different/working mobile/tablet support
-- Change power outage icon to lightning bolt
-- Move toggles up the top on floodmap
 
 **Code Restructure / Cleaner Architecture**
 - Separation of js to maintain clean directory
@@ -16,7 +17,6 @@
 
 **LOLITEMAULTES Original Weather Radar Map**
 - Implement original (old BoM radar style) interactive rain radar map
-- The aggregation of multiple free radar APIs to get the most accurate result
 
 **Bug Fixes**
 - Fixing bugs as they show
@@ -31,7 +31,7 @@
 - ~~Fix bug where singular outage categories zoom in too far when fit to view is selected~~
 
 **Add Outage Map to Status Section**
-- Add the outage map status to the status section near footer in index.html
+- ~~Add the outage map status to the status section near footer in index.html~~
 
 **Improve SEO Information for Official Site**
 - Add more alt text
@@ -39,4 +39,4 @@
 - Add official information
 
 **Update Credits**
-- Credit Essential Energy in the footer
+- ~~Credit Essential Energy in the footer~~
