@@ -81,14 +81,56 @@
             minZoom: 4,
             maxZoom: 10,
             maxBounds: AUSTRALIA_BOUNDS,
-            maxBoundsViscosity: 0.75
+            maxBoundsViscosity: 0.75,
+            preferCanvas: true
         });
 
-        // Add OSM tile layer
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-            maxZoom: 10
-        }).addTo(radarMap);
+        // Add OSM tile layer with fallback and error handling
+        const tileUrls = [
+            'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+            'https://tiles.wmflabs.org/osm/{z}/{x}/{y}.png'
+        ];
+
+        let currentTileUrlIndex = 0;
+
+        function createTileLayer(url) {
+            const layer = L.tileLayer(url, {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+                maxZoom: 10,
+                crossOrigin: true,
+                errorTileUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='
+            });
+
+            layer.on('tileerror', function(error) {
+                console.warn('[RADAR] Tile load error:', error.tile.src);
+                // Try fallback server if available
+                if (currentTileUrlIndex < tileUrls.length - 1) {
+                    currentTileUrlIndex++;
+                    console.log('[RADAR] Switching to fallback tile server:', tileUrls[currentTileUrlIndex]);
+                    radarMap.removeLayer(layer);
+                    const newLayer = createTileLayer(tileUrls[currentTileUrlIndex]);
+                    newLayer.addTo(radarMap);
+                }
+            });
+
+            return layer;
+        }
+
+        const tileLayer = createTileLayer(tileUrls[currentTileUrlIndex]);
+        tileLayer.addTo(radarMap);
+
+        // Fix map size after initialization
+        setTimeout(() => {
+            radarMap.invalidateSize();
+        }, 100);
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            if (radarMap && radarInitialized) {
+                radarMap.invalidateSize();
+            }
+        });
 
         // Setup event listeners
         setupEventListeners();
@@ -187,7 +229,20 @@
             const imageUrl = `${API_BASE}/image/${frame.filename}`;
             const overlay = L.imageOverlay(imageUrl, RADAR_BOUNDS, {
                 opacity: 0,
-                interactive: false
+                interactive: false,
+                className: 'radar-overlay-image',
+                crossOrigin: 'anonymous'
+            });
+
+            // Add load event to improve rendering
+            overlay.on('load', function() {
+                // Disable image smoothing for crisp pixels
+                const img = this.getElement();
+                if (img) {
+                    img.style.imageRendering = 'crisp-edges';
+                    img.style.imageRendering = '-webkit-optimize-contrast';
+                    img.style.imageRendering = 'pixelated';
+                }
             });
 
             overlay.addTo(radarMap);
@@ -369,10 +424,26 @@
             setTimeout(() => {
                 if (!radarInitialized) {
                     initRadarMap();
+                } else if (radarMap) {
+                    // Fix map rendering after tab switch
+                    radarMap.invalidateSize();
+                    console.log('[RADAR] Map size invalidated after tab switch');
                 }
             }, 100);
         });
     }
+
+    // Also handle any tab switching events
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('tab-button') || e.target.closest('.tab-button')) {
+            const clickedTab = e.target.classList.contains('tab-button') ? e.target : e.target.closest('.tab-button');
+            if (clickedTab && clickedTab.id === 'tab-radar' && radarMap && radarInitialized) {
+                setTimeout(() => {
+                    radarMap.invalidateSize();
+                }, 150);
+            }
+        }
+    });
 
     // Export for status checking
     window.radarMapInitialized = false;
