@@ -2,7 +2,7 @@
 
 # Lismore Flood Dashboard
 
-![Version](https://img.shields.io/badge/version-2.7.0-blue)
+![Version](https://img.shields.io/badge/version-2.8.0-purple)
 ![License](https://img.shields.io/badge/license-MIT-green)
 [![Live Dashboard](https://img.shields.io/badge/Lismore-Flood%20Dashboard-blue)](https://flood.lolitemaultes.online)
 
@@ -11,16 +11,15 @@ A real-time emergency dashboard for monitoring flood conditions in the Lismore, 
 ## Features
 
 - **Interactive Flood Impact Map**
-- **Realistic Floodwater Simulation**
+- **Realistic Floodwater Elevation Simulation**
 - **Interactive River Height Graphs**
 - **Live River Level Information**
 - **Traffic Webcam Integration**
-- **Original BoM Rainfall Radar**
+- **Interactive BoM Rainfall Radar**
 - **Live Power Outage Map**
 - **Emergency Information**
 - **Basic Flood Statistics**
 - **Responsive Design**
-- **Basic Offline Capability**
 
 ## Technical Architecture
 
