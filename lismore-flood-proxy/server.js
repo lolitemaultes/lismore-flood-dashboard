@@ -8,16 +8,6 @@ const NodeCache = require('node-cache');
 const { XMLParser } = require('fast-xml-parser');
 const rainViewerService = require('./rainViewerService');
 
-const AUSTRALIA_RADAR_BOUNDS = Object.freeze({
-    minLat: -47.0,
-    maxLat: -8.0,
-    minLon: 108.0,
-    maxLon: 158.0
-});
-
-const RADAR_MIN_ZOOM = 5;
-const RADAR_MAX_ZOOM = 10;
-
 const app = express();
 const PORT = process.env.PORT || 3000;
 const VERBOSE_LOGGING = process.env.VERBOSE_LOGGING === 'true' || false;
@@ -1002,90 +992,10 @@ function getFromRadarTileCache(key) {
     return cached.data;
 }
 
-function lonToTileX(lon, zoom) {
-    return Math.floor(((lon + 180) / 360) * Math.pow(2, zoom));
-}
-
-function latToTileY(lat, zoom) {
-    const rad = (lat * Math.PI) / 180;
-    const projection = Math.log(Math.tan(rad) + 1 / Math.cos(rad));
-    return Math.floor(((1 - projection / Math.PI) / 2) * Math.pow(2, zoom));
-}
-
-const radarTileBoundsCache = new Map();
-
-function getRadarTileRange(zoom) {
-    if (radarTileBoundsCache.has(zoom)) {
-        return radarTileBoundsCache.get(zoom);
-    }
-
-    const minX = lonToTileX(AUSTRALIA_RADAR_BOUNDS.minLon, zoom);
-    const maxX = lonToTileX(AUSTRALIA_RADAR_BOUNDS.maxLon, zoom);
-    const minY = latToTileY(AUSTRALIA_RADAR_BOUNDS.maxLat, zoom);
-    const maxY = latToTileY(AUSTRALIA_RADAR_BOUNDS.minLat, zoom);
-
-    const range = {
-        minX: Math.min(minX, maxX),
-        maxX: Math.max(minX, maxX),
-        minY: Math.min(minY, maxY),
-        maxY: Math.max(minY, maxY)
-    };
-
-    radarTileBoundsCache.set(zoom, range);
-    return range;
-}
-
-function isRadarTileInAustralia(x, y, zoom) {
-    const range = getRadarTileRange(zoom);
-    return (
-        x >= range.minX &&
-        x <= range.maxX &&
-        y >= range.minY &&
-        y <= range.maxY
-    );
-}
-
 // RainViewer tile proxy (server-side fetch to avoid CORS) with aggressive caching
 app.get('/api/radar/tile/:timestamp/:z/:x/:y', async (req, res) => {
     const { timestamp, z, x, y } = req.params;
-
-    if (!/^\d+$/.test(timestamp)) {
-        return res.status(400).json({
-            success: false,
-            message: 'Invalid radar timestamp'
-        });
-    }
-
-    const zoom = Number.parseInt(z, 10);
-    const tileX = Number.parseInt(x, 10);
-    const tileY = Number.parseInt(y, 10);
-
-    if (![zoom, tileX, tileY].every(Number.isInteger)) {
-        return res.status(400).json({
-            success: false,
-            message: 'Invalid radar tile coordinates'
-        });
-    }
-
-    if (zoom < RADAR_MIN_ZOOM || zoom > RADAR_MAX_ZOOM) {
-        return res.status(403).json({
-            success: false,
-            message: `Radar tiles restricted to zoom levels ${RADAR_MIN_ZOOM}-${RADAR_MAX_ZOOM}`
-        });
-    }
-
-    if (!isRadarTileInAustralia(tileX, tileY, zoom)) {
-        Logger.verbose(`[RADAR TILE] Blocked request outside Australia bounds: ${zoom}/${tileX}/${tileY}`);
-
-        res.setHeader('Content-Type', 'image/png');
-        res.setHeader('Cache-Control', 'public, max-age=300');
-        res.setHeader('Access-Control-Allow-Origin', '*');
-        res.setHeader('X-Radar-Filtered', 'true');
-        res.status(200);
-        return res.send(TRANSPARENT_PNG_1x1);
-    }
-
-    const cacheKey = getRadarTileCacheKey(timestamp, zoom, tileX, tileY);
+    const cacheKey = getRadarTileCacheKey(timestamp, z, x, y);
 
     // Check in-memory cache first
     const cachedTile = getFromRadarTileCache(cacheKey);
@@ -1102,10 +1012,10 @@ app.get('/api/radar/tile/:timestamp/:z/:x/:y', async (req, res) => {
     // color: 0 = original, 1-8 = various color schemes (we'll use 2 for similar to BoM colors)
     // smooth: 0 = no smoothing, 1 = smooth
     // snow: 0 = ignore snow, 1 = show snow
-    const rainViewerUrl = `https://tilecache.rainviewer.com/v2/radar/${timestamp}/256/${zoom}/${tileX}/${tileY}/2/1_1.png`;
+    const rainViewerUrl = `https://tilecache.rainviewer.com/v2/radar/${timestamp}/256/${z}/${x}/${y}/2/1_1.png`;
 
     try {
-        Logger.verbose(`[RADAR TILE] Cache MISS - Fetching ${zoom}/${tileX}/${tileY} for timestamp ${timestamp}`);
+        Logger.verbose(`[RADAR TILE] Cache MISS - Fetching ${z}/${x}/${y} for timestamp ${timestamp}`);
 
         const response = await axios.get(rainViewerUrl, {
             responseType: 'arraybuffer',
@@ -1129,26 +1039,26 @@ app.get('/api/radar/tile/:timestamp/:z/:x/:y', async (req, res) => {
 
         // Send the image buffer
         res.send(response.data);
-        Logger.verbose(`[RADAR TILE] Success ${zoom}/${tileX}/${tileY} - Cached for future requests`);
+        Logger.verbose(`[RADAR TILE] Success ${z}/${x}/${y} - Cached for future requests`);
 
     } catch (error) {
         // Log error details (throttled, but suppress expected 403s at high zoom)
         // RainViewer radar tiles are limited to zoom 10, so 403s at zoom 11+ are expected
-        const isExpectedZoomError = error.response && error.response.status === 403 && zoom >= 11;
+        const isExpectedZoomError = error.response && error.response.status === 403 && parseInt(z) >= 11;
 
         if (error.code === 'ECONNREFUSED') {
-            Logger.error(`[RADAR TILE] Connection refused to RainViewer for tile ${zoom}/${tileX}/${tileY}`);
+            Logger.error(`[RADAR TILE] Connection refused to RainViewer for tile ${z}/${x}/${y}`);
         } else if (error.code === 'ETIMEDOUT' || error.message.includes('timeout')) {
-            Logger.warn(`[RADAR TILE] Timeout fetching tile ${zoom}/${tileX}/${tileY}`);
+            Logger.warn(`[RADAR TILE] Timeout fetching tile ${z}/${x}/${y}`);
         } else if (error.response) {
             if (isExpectedZoomError) {
                 // Only log once as verbose, not error - this is expected behavior
-                Logger.verbose(`[RADAR TILE] Tile not available at zoom ${zoom} (RainViewer limit is zoom 10)`);
+                Logger.verbose(`[RADAR TILE] Tile not available at zoom ${z} (RainViewer limit is zoom 10)`);
             } else {
-                Logger.error(`[RADAR TILE] HTTP ${error.response.status} for tile ${zoom}/${tileX}/${tileY} - URL: ${rainViewerUrl}`);
+                Logger.error(`[RADAR TILE] HTTP ${error.response.status} for tile ${z}/${x}/${y} - URL: ${rainViewerUrl}`);
             }
         } else {
-            Logger.error(`[RADAR TILE] Error for tile ${zoom}/${tileX}/${tileY}: ${error.message}`);
+            Logger.error(`[RADAR TILE] Error for tile ${z}/${x}/${y}: ${error.message}`);
         }
 
         // IMPORTANT: Return a transparent PNG instead of JSON
