@@ -44,7 +44,14 @@
 
         outageMapInitialized = true;
         window.outageMapInitialized = true;
-        
+
+        // Update status display immediately
+        const outageMapStatusValue = document.getElementById('outagemap-status-value');
+        if (outageMapStatusValue) {
+            outageMapStatusValue.textContent = 'Online';
+            outageMapStatusValue.className = 'status-value online';
+        }
+
         let isProgrammaticMove = false;
         
         outageMap.getContainer().addEventListener('wheel', () => {
