@@ -917,11 +917,13 @@ app.get('/api/outages/clear-cache', (req, res) => {
 // New BoM Radar endpoints (FTP-based interactive map)
 app.get('/api/radar/frames', (req, res) => {
     try {
-        const frames = bomRadarService.getFrames();
+        const framesData = bomRadarService.getFrames();
         const status = bomRadarService.getStatus();
         res.json({
             success: true,
-            frames,
+            timestamps: framesData.timestamps,
+            radars: framesData.radars,
+            radarConfig: framesData.radarConfig,
             status,
             timestamp: new Date().toISOString()
         });
