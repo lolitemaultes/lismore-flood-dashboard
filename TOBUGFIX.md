@@ -12,14 +12,16 @@
 - Adding different/working mobile/tablet support
 
 **Code Restructure / Cleaner Architecture**
-- Separation of js to maintain clean directory
 - ~~Separation of css to maintain clean directory~~
+- Separation of js to maintain clean directory
 
 **LOLITEMAULTES Original Weather Radar Map**
-- Implement original (old BoM radar style) interactive rain radar map
+- ~~Implement original (old BoM radar style) interactive rain radar map~~
+- Improve BoM-esk styling of radar
 
-**Bug Fixes**
-- Fixing bugs as they show
+**Improve SEO Information for Official Site**
+- Add more alt text
+- Create logo from svg
 
 **Reset Maps on Tab Switch**
 - ~~Resetting map view and element when the tab is unfocused~~
@@ -32,11 +34,6 @@
 
 **Add Outage Map to Status Section**
 - ~~Add the outage map status to the status section near footer in index.html~~
-
-**Improve SEO Information for Official Site**
-- Add more alt text
-- Create logo from svg
-- Add official information
 
 **Update Credits**
 - ~~Credit Essential Energy in the footer~~
