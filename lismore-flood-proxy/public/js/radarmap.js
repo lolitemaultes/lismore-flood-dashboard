@@ -1,3 +1,23 @@
+// Wait for BomRadarColorMapper to be available
+if (typeof window.BomRadarColorMapper === 'undefined') {
+    console.log('[RADAR] Waiting for BomRadarColorMapper to load...');
+    let attempts = 0;
+    const waitForColorMapper = setInterval(() => {
+        attempts++;
+        if (typeof window.BomRadarColorMapper !== 'undefined') {
+            clearInterval(waitForColorMapper);
+            console.log('[RADAR] BomRadarColorMapper loaded, initializing radar map...');
+            initializeRadarMapModule();
+        } else if (attempts > 50) { // 5 seconds timeout
+            clearInterval(waitForColorMapper);
+            console.error('[RADAR] BomRadarColorMapper failed to load after 5 seconds');
+        }
+    }, 100);
+} else {
+    initializeRadarMapModule();
+}
+
+function initializeRadarMapModule() {
 (function() {
     // Configuration
     const REFRESH_INTERVAL = 10 * 60 * 1000; // 10 minutes
@@ -8,12 +28,12 @@
         fast: 250
     };
 
-    // Australia bounds for map restriction (optimized for coverage and performance)
+    // Australia bounds for map restriction (expanded for better coverage)
     const AUSTRALIA_BOUNDS = [
-        [-47.0, 108.0], // Southwest (expanded for better coverage)
-        [-8.0, 158.0]   // Northeast (includes full continent + buffer)
+        [-48.0, 105.0], // Southwest (includes southern ocean view)
+        [-7.0, 160.0]   // Northeast (includes coral sea and islands)
     ];
-
+    
     // Australia initial view
     const AUSTRALIA_CENTER = [-25.0, 133.0];
     const AUSTRALIA_ZOOM = 5;
@@ -142,7 +162,7 @@
         radarMap.on('zoomstart', function() {
             // Clear tiles from all inactive radar layers before zoom
             radarLayers.forEach((layer, i) => {
-                if (i !== currentFrameIndex && layer._map) {
+                if (i !== currentFrameIndex && layer._map && layer.setActive) {
                     layer.setActive(false); // Clear tiles from inactive frames
                 }
             });
@@ -392,26 +412,28 @@
         for (let i = 0; i < framesToLoad.length; i++) {
             const frame = framesToLoad[i];
             const isActive = false; // All start inactive - will activate on first frame switch
-
+        
             const layer = window.BomRadarColorMapper.createColorMappedLayer(frame.tileUrl, {
                 opacity: 0,
                 pane: 'radarPane',
                 attribution: '&copy; <a href="https://www.rainviewer.com">RainViewer</a>',
                 tileSize: 256,
                 minZoom: 5,
-                maxZoom: 10,                    // RainViewer radar data limit (prevents 403 errors)
+                maxZoom: 10,                    // RainViewer radar data limit
                 maxNativeZoom: 10,              // Native tile availability limit
                 className: 'rainviewer-layer',
-                updateWhenIdle: true,          // Only load when map is idle
-                updateWhenZooming: false,       // Don't load during zoom
-                keepBuffer: 0,                  // ZERO buffer - only visible tiles
+                updateWhenIdle: false,          // Load immediately, don't wait
+                updateWhenZooming: true,        // Continue loading during zoom
+                keepBuffer: 2,                  // Keep 2 tile buffer for smooth panning
+                updateInterval: 50,             // Faster tile updates (50ms)
+                tms: false,                     // Standard tile numbering
                 noWrap: true,                   // Prevent world wrapping
                 bounds: AUSTRALIA_BOUNDS,       // Leaflet bounds hint
                 australiaBounds: AUSTRALIA_BOUNDS, // Strict filtering in _isValidTile
                 isActive: isActive,             // LAZY LOADING: Inactive frames don't load tiles
                 skipColorMapping: true
             });
-
+        
             // Add to map but keep invisible and inactive
             layer.addTo(radarMap);
             radarLayers.push(layer);
@@ -502,44 +524,70 @@
 
     function setFrame(index) {
         if (index < 0 || index >= frames.length) return;
-
+    
         const previousIndex = currentFrameIndex;
-
-        // LAZY LOADING: Deactivate all layers except the new one
+    
+        // INSTANT SWITCHING: Hide all layers immediately
         radarLayers.forEach((layer, i) => {
             if (i !== index) {
+                // Use display:none for instant hiding
+                if (layer._container) {
+                    layer._container.style.display = 'none';
+                }
                 layer.setOpacity(0);
                 if (i === previousIndex && layer.setActive) {
-                    // Deactivate previous frame and clear its tiles
                     layer.setActive(false);
                 }
             }
         });
-
-        // Activate and show ONLY the current frame
+    
+        // INSTANT SWITCHING: Show current frame immediately
         if (radarLayers[index]) {
             if (radarLayers[index].setActive) {
-                radarLayers[index].setActive(true);  // LAZY LOADING: Enable tile loading
+                radarLayers[index].setActive(true);
             }
-            radarLayers[index].setOpacity(0.90); // High opacity for strong BoM-style visibility
-
-            // Force immediate tile load for active frame
+            
+            // Show container instantly
+            if (radarLayers[index]._container) {
+                radarLayers[index]._container.style.display = 'block';
+            }
+            radarLayers[index].setOpacity(0.90);
+    
+            // Force immediate tile update
             if (radarLayers[index]._map) {
-                setTimeout(() => {
+                radarLayers[index]._update();
+                
+                // Try multiple methods to force redraw, checking if each exists
+                if (typeof radarLayers[index]._reset === 'function') {
+                    radarLayers[index]._reset();
                     radarLayers[index]._update();
-                }, 50);
+                } else if (typeof radarLayers[index].redraw === 'function') {
+                    // Try redraw method if available
+                    radarLayers[index].redraw();
+                } else if (typeof radarLayers[index]._tileContainer !== 'undefined') {
+                    // Force update through tile container manipulation
+                    const container = radarLayers[index]._tileContainer;
+                    if (container && container.style) {
+                        // Force a repaint by toggling display
+                        const originalDisplay = container.style.display;
+                        container.style.display = 'none';
+                        container.offsetHeight; // Force reflow
+                        container.style.display = originalDisplay;
+                    }
+                } else {
+                    // Fallback: just call update multiple times
+                    radarLayers[index]._update();
+                    setTimeout(() => {
+                        if (radarLayers[index] && radarLayers[index]._map) {
+                            radarLayers[index]._update();
+                        }
+                    }, 10);
+                }
             }
         }
-
+    
         currentFrameIndex = index;
-
-        // Update UI
         updateFrameUI();
-
-        // Log frame switch (throttled to avoid spam during animation)
-        if (!isPlaying || index === frames.length - 1 || index === 0) {
-            console.log(`[RADAR] Switched to frame ${index + 1}/${frames.length} - Only this frame loads tiles`);
-        }
     }
 
     function updateFrameUI() {
@@ -795,3 +843,4 @@
     };
 
 })();
+} // End of initializeRadarMapModule

@@ -8,23 +8,23 @@
  * - R = 1-127 maps to -31 to 95 dBZ
  */
 
-// EXACT BoM dBZ color scale - THE AUTHORITATIVE SOURCE
+// EXACT BoM dBZ color scale - OFFICIAL COLORS
 const BOM_DBZ_COLORS = [
-    { min: 12, max: 23, r: 245, g: 245, b: 254, hex: '#f5f5fe', name: 'Light' },
-    { min: 23, max: 28, r: 180, g: 181, b: 255, hex: '#b4b5ff', name: 'Light' },
-    { min: 28, max: 31, r: 121, g: 121, b: 254, hex: '#7979fe', name: 'Light' },
-    { min: 31, max: 34, r: 20, g: 21, b: 254, hex: '#1415fe', name: 'Moderate' },
-    { min: 34, max: 37, r: 0, g: 216, b: 194, hex: '#00d8c2', name: 'Moderate' },
-    { min: 37, max: 40, r: 1, g: 151, b: 145, hex: '#019791', name: 'Moderate' },
-    { min: 40, max: 43, r: 0, g: 103, b: 102, hex: '#006766', name: 'Moderate' },
-    { min: 43, max: 46, r: 255, g: 255, b: 0, hex: '#ffff00', name: 'Heavy' },
-    { min: 46, max: 49, r: 255, g: 200, b: 0, hex: '#ffc800', name: 'Heavy' },
-    { min: 49, max: 52, r: 255, g: 150, b: 1, hex: '#ff9601', name: 'Heavy' },
-    { min: 52, max: 55, r: 254, g: 101, b: 0, hex: '#fe6500', name: 'Heavy' },
-    { min: 55, max: 58, r: 255, g: 0, b: 1, hex: '#ff0001', name: 'Very Heavy' },
-    { min: 58, max: 61, r: 201, g: 0, b: 0, hex: '#c90000', name: 'Very Heavy' },
-    { min: 61, max: 64, r: 120, g: 1, b: 1, hex: '#780101', name: 'Extreme' },
-    { min: 64, max: 999, r: 40, g: 0, b: 0, hex: '#280000', name: 'Extreme' }
+    { min: 12, max: 23, r: 242, g: 242, b: 242, hex: '#f2f2f2', name: 'Very Light' },
+    { min: 23, max: 28, r: 207, g: 211, b: 255, hex: '#cfd3ff', name: 'Light' },
+    { min: 28, max: 31, r: 170, g: 180, b: 255, hex: '#aab4ff', name: 'Light' },
+    { min: 31, max: 34, r: 0,   g: 51,  b: 255, hex: '#0033ff', name: 'Light-Moderate' },
+    { min: 34, max: 37, r: 31,  g: 107, b: 255, hex: '#1f6bff', name: 'Moderate' },
+    { min: 37, max: 40, r: 47,  g: 227, b: 227, hex: '#2fe3e3', name: 'Moderate' },
+    { min: 40, max: 43, r: 18,  g: 127, b: 127, hex: '#127f7f', name: 'Moderate-Heavy' },
+    { min: 43, max: 46, r: 47,  g: 160, b: 95,  hex: '#2fa05f', name: 'Heavy' },
+    { min: 46, max: 49, r: 255, g: 255, b: 102, hex: '#ffff66', name: 'Heavy' },
+    { min: 49, max: 52, r: 255, g: 210, b: 26,  hex: '#ffd21a', name: 'Heavy' },
+    { min: 52, max: 55, r: 255, g: 163, b: 26,  hex: '#ffa31a', name: 'Very Heavy' },
+    { min: 55, max: 58, r: 255, g: 127, b: 26,  hex: '#ff7f1a', name: 'Very Heavy' },
+    { min: 58, max: 61, r: 255, g: 77,  b: 26,  hex: '#ff4d1a', name: 'Extreme' },
+    { min: 61, max: 64, r: 255, g: 0,   b: 0,   hex: '#ff0000', name: 'Extreme' },
+    { min: 64, max: 999, r: 91,  g: 0,   b: 0,   hex: '#5b0000', name: 'Extreme' }
 ];
 
 /**
@@ -93,16 +93,34 @@ L.TileLayer.BomColorMapped = L.TileLayer.extend({
 
     // Override getTileUrl to BLOCK URL generation for out-of-bounds tiles
     getTileUrl: function(coords) {
-        // CRITICAL: Check bounds BEFORE generating URL
-        if (!this._tileIsInAustraliaBounds(coords)) {
-            // Log blocked tiles for debugging (throttled to avoid spam)
+        // EXPANDED AUSTRALIA BOUNDS CHECK (includes maritime zones)
+        // Slightly larger bounds for better coverage
+        const STRICT_AUSTRALIA_LAT_MIN = -46.0;  // Southern Ocean
+        const STRICT_AUSTRALIA_LAT_MAX = -8.0;   // Papua New Guinea border
+        const STRICT_AUSTRALIA_LON_MIN = 110.0;  // Indian Ocean
+        const STRICT_AUSTRALIA_LON_MAX = 156.0;  // Pacific Ocean
+        
+        // Convert tile coordinates to lat/lng bounds
+        const tileBounds = this._tileCoordsToBounds(coords);
+        const north = tileBounds.getNorth();
+        const south = tileBounds.getSouth();
+        const west = tileBounds.getWest();
+        const east = tileBounds.getEast();
+        
+        // Check if tile is completely outside Australia
+        if (north < STRICT_AUSTRALIA_LAT_MIN || south > STRICT_AUSTRALIA_LAT_MAX ||
+            east < STRICT_AUSTRALIA_LON_MIN || west > STRICT_AUSTRALIA_LON_MAX) {
+            
             if (!this._blockedTileCount) this._blockedTileCount = 0;
             this._blockedTileCount++;
-            if (this._blockedTileCount <= 5) {
-                console.warn(`[RADAR] BLOCKED radar tile outside Australia: zoom ${coords.z}, x ${coords.x}, y ${coords.y}`);
-            } else if (this._blockedTileCount === 6) {
-                console.warn(`[RADAR] Additional radar tiles blocked (logging suppressed to prevent spam)`);
+            if (this._blockedTileCount <= 3) {
+                console.log(`[RADAR] Blocked tile outside Australia: ${coords.z}/${coords.x}/${coords.y}`);
             }
+            return ''; // Return empty string - no request will be made
+        }
+        
+        // Additional check using the configured bounds
+        if (!this._tileIsInAustraliaBounds(coords)) {
             return ''; // Return empty string - no request will be made
         }
 
@@ -143,48 +161,52 @@ L.TileLayer.BomColorMapped = L.TileLayer.extend({
         // Double-check validity before creating tile
         if (!this._isValidTile(coords)) {
             const emptyTile = document.createElement('canvas');
-            emptyTile.width = this.options.tileSize;
-            emptyTile.height = this.options.tileSize;
+            emptyTile.width = this.options.tileSize || 256;
+            emptyTile.height = this.options.tileSize || 256;
             done(null, emptyTile);
             return emptyTile;
         }
-
+    
         const tile = document.createElement('canvas');
-        tile.width = this.options.tileSize;
-        tile.height = this.options.tileSize;
-
-        const ctx = tile.getContext('2d', { willReadFrequently: true });
+        tile.width = this.options.tileSize || 256;
+        tile.height = this.options.tileSize || 256;
+    
+        const ctx = tile.getContext('2d', { 
+            willReadFrequently: true,
+            imageSmoothingEnabled: false  // Disable smoothing for crisp pixels
+        });
+        
         const img = new Image();
         img.crossOrigin = 'anonymous';
-
+    
         img.onload = () => {
             try {
                 // Draw tile to canvas
                 ctx.drawImage(img, 0, 0);
-
+    
                 // If skipColorMapping is true, tiles are already colored by RainViewer
                 // Just apply the canvas as-is with appropriate opacity
                 if (this._skipColorMapping) {
                     done(null, tile);
                     return;
                 }
-
+    
                 // LEGACY: Color mapping for raw dBZ data (if using Rainbow API)
                 // This code path is kept for backward compatibility
                 const imageData = ctx.getImageData(0, 0, tile.width, tile.height);
                 const data = imageData.data;
-
+    
                 // Process each pixel: Read R channel → Get dBZ → Apply EXACT BoM color
                 for (let i = 0; i < data.length; i += 4) {
                     const r = data[i];
-
+    
                     // Get dBZ directly from red channel
                     const dbz = getDbzFromPixel(r);
-
+    
                     if (dbz >= 12) {
                         // Get EXACT BoM color for this dBZ value
                         const bomColor = getBomColorForDbz(dbz);
-
+    
                         if (bomColor) {
                             // Replace with exact BoM color
                             data[i] = bomColor.r;
@@ -201,23 +223,23 @@ L.TileLayer.BomColorMapped = L.TileLayer.extend({
                         data[i + 3] = 0;
                     }
                 }
-
+    
                 // Put remapped pixels back to canvas
                 ctx.putImageData(imageData, 0, 0);
                 done(null, tile);
-
+    
             } catch (e) {
                 console.error('[RADAR] Color mapping error:', e);
                 done(e, tile);
             }
         };
-
+    
         img.onerror = (err) => {
-            this._tileErrorCount++;
+            this._tileErrorCount = (this._tileErrorCount || 0) + 1;
             const now = Date.now();
-
+    
             // Throttle error logging to prevent console spam
-            if (now - this._lastErrorTime > this._errorThrottleMs) {
+            if (!this._lastErrorTime || now - this._lastErrorTime > this._errorThrottleMs) {
                 // Check if this is a zoom level issue (403 errors typically mean tile doesn't exist)
                 const zoom = coords.z;
                 if (zoom > 10) {
@@ -234,14 +256,14 @@ L.TileLayer.BomColorMapped = L.TileLayer.extend({
                 }
                 this._lastErrorTime = now;
             }
-
+    
             // Return a blank tile instead of erroring
             done(null, tile);
         };
-
+    
         // Load the tile from proxy
         img.src = this.getTileUrl(coords);
-
+    
         return tile;
     }
 });
