@@ -41,9 +41,10 @@
         outageLayerGroups.current = L.layerGroup().addTo(outageMap);
         outageLayerGroups.future = L.layerGroup();
         outageLayerGroups.cancelled = L.layerGroup();
-        
+
         outageMapInitialized = true;
-        
+        window.outageMapInitialized = true;
+
         let isProgrammaticMove = false;
         
         outageMap.getContainer().addEventListener('wheel', () => {
@@ -442,6 +443,21 @@
 
             cachedOutageData = data;
 
+            // Update Data Sources & Status section based on fetch success
+            const outageMapStatusValue = document.getElementById('outagemap-status-value');
+            if (outageMapStatusValue) {
+                const hasErrors = data.errors && data.errors.length > 0;
+                const totalOutages = (data.features && data.features.length) || 0;
+
+                if (totalOutages > 0 || !hasErrors) {
+                    outageMapStatusValue.textContent = 'Online';
+                    outageMapStatusValue.className = 'status-value online';
+                } else if (hasErrors && totalOutages === 0) {
+                    outageMapStatusValue.textContent = 'Service Unavailable';
+                    outageMapStatusValue.className = 'status-value offline';
+                }
+            }
+
             if (!outageMapInitialized) {
                 console.log('Outage data fetched and cached. Map not yet initialized.');
                 return;
@@ -451,12 +467,19 @@
             
         } catch (error) {
             console.error('Load outage error:', error);
-            
+
             const loadingOverlay = document.getElementById('loading-overlay');
             if (loadingOverlay) {
                 loadingOverlay.style.display = 'none';
             }
-            
+
+            // Update status to show error
+            const outageMapStatusValue = document.getElementById('outagemap-status-value');
+            if (outageMapStatusValue) {
+                outageMapStatusValue.textContent = 'Connection Error';
+                outageMapStatusValue.className = 'status-value offline';
+            }
+
             showNotification('Error loading outage data: ' + error.message, 'error');
         } finally {
             if (refreshBtn) refreshBtn.disabled = false;

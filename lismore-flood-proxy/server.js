@@ -6,6 +6,7 @@ const path = require('path');
 const fs = require('fs');
 const NodeCache = require('node-cache');
 const { XMLParser } = require('fast-xml-parser');
+const bomRadarService = require('./radarService');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -906,13 +907,79 @@ app.get('/api/outages', async (req, res) => {
 app.get('/api/outages/clear-cache', (req, res) => {
     outageCache.flushAll();
     Logger.info('Outage cache cleared via API');
-    res.json({ 
-        success: true, 
+    res.json({
+        success: true,
         message: 'Outage cache cleared',
         timestamp: new Date().toISOString()
     });
 });
 
+// New BoM Radar endpoints (FTP-based interactive map)
+app.get('/api/radar/frames', (req, res) => {
+    try {
+        const framesData = bomRadarService.getFrames();
+        const status = bomRadarService.getStatus();
+        res.json({
+            success: true,
+            timestamps: framesData.timestamps,
+            radars: framesData.radars,
+            radarConfig: framesData.radarConfig,
+            status,
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        Logger.error('Error getting radar frames:', error.message);
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
+app.get('/api/radar/image/:filename', async (req, res) => {
+    try {
+        const { filename } = req.params;
+
+        // Validate filename format
+        if (!/^IDR\d+\.T\.\d{12}\.png$/.test(filename)) {
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid filename format'
+            });
+        }
+
+        const imageData = await bomRadarService.getFrameData(filename);
+
+        res.set('Content-Type', 'image/png');
+        res.set('Cache-Control', 'public, max-age=600'); // Cache for 10 minutes
+        res.set('Access-Control-Allow-Origin', '*');
+        res.send(imageData);
+    } catch (error) {
+        Logger.error('Error serving radar image:', error.message);
+        res.status(404).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
+app.get('/api/radar/status', (req, res) => {
+    try {
+        const status = bomRadarService.getStatus();
+        res.json({
+            success: true,
+            ...status,
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
+// Old radar endpoint (keep for backwards compatibility, will be deprecated)
 app.get('/api/radar/:radarId', async (req, res) => {
     try {
         await FileUtils.cleanupRadarImages();

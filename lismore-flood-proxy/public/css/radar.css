@@ -1,78 +1,132 @@
-.radar-container {
+/* Radar Map Wrapper */
+.radar-map-wrapper {
     position: relative;
     width: 100%;
-    max-width: 512px;
-    height: 400px;
-    margin: 0 auto;
-    text-align: center;
-    background-color: var(--bg-tertiary);
-    border-radius: 8px;
+    height: 600px;
+    background-color: var(--bg-secondary);
+    border-radius: var(--border-radius);
     overflow: hidden;
-    box-shadow: var(--shadow-sm);
-    transition: background-color 0.3s ease;
 }
 
-:root[data-theme="light"] .radar-container {
-    background-color: #99ccff;
-}
-
-.radar-display {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: flex-start;
-    gap: 20px;
+/* Radar Map Container */
+.radar-map {
     width: 100%;
+    height: 100%;
+    z-index: 1;
 }
 
-.legend-container {
-    width: 100%;
-    text-align: center;
-    margin: 15px auto;
-}
-
-.legend-image {
-    width: 350px;
-    border-radius: 8px;
-    box-shadow: var(--shadow-sm);
-    display: inline-block;
-}
-
-@media screen and (max-width: 768px) {
-    .legend-image {
-        width: 300px;
-    }
-}
-
-.radar-image, .map-layer {
+/* Loading Overlay */
+.radar-loading-overlay {
     position: absolute;
-    top: -50px;
+    top: 0;
     left: 0;
-    width: 100%;
-    height: calc(100% + 50px);
-    object-fit: cover;
-}
-
-.speed-controls {
-    margin: 15px 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
-    gap: 10px;
+    justify-content: center;
+    z-index: 1000;
+    color: white;
 }
 
-.speed-slider {
-    flex-grow: 1;
-    max-width: 180px;
-    height: 8px;
-    -webkit-appearance: none;
-    appearance: none;
-    background: var(--border-color-strong);
-    outline: none;
+.radar-loading-overlay .spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.radar-loading-overlay p {
+    margin-top: 1rem;
+    font-size: 1rem;
+}
+
+/* Error State */
+.radar-error {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--bg-secondary);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    color: var(--text-secondary);
+}
+
+.radar-error svg {
+    margin-bottom: 1rem;
+    color: var(--error-color);
+}
+
+.radar-error p {
+    font-size: 1rem;
+    margin: 0;
+}
+
+/* Radar Controls Panel */
+.radar-controls {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-primary);
+    border-radius: var(--border-radius);
+    padding: 0.75rem;
+    box-shadow: var(--shadow-lg);
+    z-index: 1001;
+    min-width: 350px;
+    max-width: 90%;
+}
+
+:root[data-theme="dark"] .radar-controls {
+    background: rgba(30, 41, 59, 0.95);
+    backdrop-filter: blur(10px);
+}
+
+.radar-controls-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.radar-timestamp {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.radar-frame-info {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    background: var(--bg-tertiary);
+    padding: 0.25rem 0.5rem;
     border-radius: 4px;
 }
 
-.speed-slider::-webkit-slider-thumb {
+/* Slider */
+.radar-slider-container {
+    margin-bottom: 0.75rem;
+}
+
+.radar-slider {
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--bg-tertiary);
+    outline: none;
+    -webkit-appearance: none;
+}
+
+.radar-slider::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
     width: 18px;
@@ -80,133 +134,196 @@
     border-radius: 50%;
     background: var(--primary-color);
     cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s;
 }
 
-.speed-slider::-moz-range-thumb {
+.radar-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+    background: var(--primary-dark);
+}
+
+.radar-slider::-moz-range-thumb {
     width: 18px;
     height: 18px;
     border-radius: 50%;
     background: var(--primary-color);
     cursor: pointer;
     border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s;
 }
 
-#timestamp {
-    font-weight: 600;
-    text-align: center;
-    margin: 15px 0 5px 0;
-    font-size: 1.1em;
+.radar-slider::-moz-range-thumb:hover {
+    transform: scale(1.1);
+    background: var(--primary-dark);
 }
 
-.frame-counter {
-    font-size: 0.85em;
-    color: var(--text-light);
-    text-align: center;
-    margin-bottom: 10px;
-}
-
-.progress-container {
-    width: 100%;
-    max-width: 400px;
-    background-color: var(--border-color-strong);
-    height: 5px;
-    margin: 10px auto;
-    border-radius: 5px;
-    overflow: hidden;
-}
-
-.progress-bar {
-    height: 100%;
-    background-color: var(--primary-color);
-    width: 0%;
-    transition: width 0.2s;
-}
-
-.loading {
+/* Control Buttons */
+.radar-control-buttons {
     display: flex;
     justify-content: center;
     align-items: center;
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(15, 23, 42, 0.8);
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.radar-btn {
+    background: var(--bg-tertiary);
+    border: none;
+    border-radius: var(--border-radius);
+    padding: 0.5rem;
+    cursor: pointer;
     color: var(--text-primary);
-    font-weight: bold;
-    z-index: 20;
-    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
 }
 
-:root[data-theme="light"] .loading {
-    background-color: rgba(255, 255, 255, 0.8);
+.radar-btn:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: translateY(-2px);
 }
 
-.spinner {
-    border: 4px solid rgba(0, 0, 0, 0.1);
+.radar-btn:active {
+    transform: translateY(0);
+}
+
+.radar-btn svg {
+    display: block;
+}
+
+/* Play/Pause buttons - larger */
+#radar-btn-play,
+#radar-btn-pause {
+    width: 42px;
+    height: 42px;
+}
+
+/* Other control buttons */
+.radar-btn:not(#radar-btn-play):not(#radar-btn-pause) {
     width: 36px;
     height: 36px;
-    border-radius: 50%;
-    border-left-color: var(--primary-color);
-    animation: spin 1s linear infinite;
-    display: inline-block;
-    margin-right: 10px;
 }
 
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-.layer-controls {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 15px;
-    margin: 15px 0;
-    padding: 0 20px;
-}
-
-.layer-toggle {
+/* Speed Control */
+.radar-speed-control {
     display: flex;
     align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.radar-speed-control label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-right: 0.25rem;
+}
+
+.radar-speed-btn {
+    background: var(--bg-tertiary);
+    border: 2px solid transparent;
+    border-radius: var(--border-radius);
+    padding: 0.375rem 0.75rem;
     cursor: pointer;
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s;
 }
 
-.layer-toggle input[type="checkbox"] {
-    margin-right: 5px;
-    cursor: pointer;
+.radar-speed-btn:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
 }
 
-.error {
-    color: var(--danger-color);
-    font-weight: bold;
-    text-align: center;
-    padding: 15px;
-    margin: 10px 20px;
-    background-color: var(--alert-danger-bg);
-    border-radius: 5px;
-    border-left: 4px solid var(--danger-color);
+.radar-speed-btn.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
 }
 
-.last-update {
-    text-align: center;
-    font-size: 0.85em;
-    color: var(--text-light);
-    margin-bottom: 10px;
+/* Leaflet Overrides for Dark Mode */
+:root[data-theme="dark"] .leaflet-tile-pane {
+    filter: brightness(0.8) contrast(1.1);
 }
 
-@media screen and (max-width: 768px) {
-    .radar-display {
-        flex-direction: column;
-        align-items: center;
+:root[data-theme="dark"] .leaflet-control-zoom a {
+    background-color: rgba(30, 41, 59, 0.9);
+    color: var(--text-primary);
+}
+
+:root[data-theme="dark"] .leaflet-control-zoom a:hover {
+    background-color: var(--primary-color);
+}
+
+:root[data-theme="dark"] .leaflet-control-attribution {
+    background-color: rgba(30, 41, 59, 0.8);
+    color: var(--text-secondary);
+}
+
+:root[data-theme="dark"] .leaflet-control-attribution a {
+    color: var(--primary-color);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .radar-map-wrapper {
+        height: 400px;
     }
-    
-    .legend-container {
-        margin: 10px auto;
+
+    .radar-controls {
+        min-width: 280px;
+        padding: 0.65rem;
+        bottom: 10px;
     }
-    
-    .control-buttons {
+
+    .radar-control-buttons {
+        gap: 0.35rem;
+    }
+
+    .radar-btn:not(#radar-btn-play):not(#radar-btn-pause) {
+        width: 34px;
+        height: 34px;
+    }
+
+    #radar-btn-play,
+    #radar-btn-pause {
+        width: 40px;
+        height: 40px;
+    }
+
+    .radar-speed-control {
         flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 480px) {
+    .radar-map-wrapper {
+        height: 300px;
+    }
+
+    .radar-controls {
+        min-width: 260px;
+        padding: 0.5rem;
+    }
+
+    .radar-controls-header {
+        flex-direction: column;
+        gap: 0.25rem;
+        align-items: flex-start;
+    }
+
+    .radar-timestamp {
+        font-size: 0.75rem;
+    }
+}
+
+/* Animation */
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
     }
 }

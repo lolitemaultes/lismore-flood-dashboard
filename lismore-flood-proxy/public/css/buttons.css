@@ -146,3 +146,57 @@ select.button option {
 #btn-first, #btn-last {
     font-size: 14px;
 }
+
+/* Toggle button styles */
+.button.toggle-button {
+    transition: all 0.2s ease;
+}
+
+/* Active state (toggled on) - filled blue */
+.button.toggle-button.active {
+    background-color: var(--primary-color);
+    color: white;
+    border: 2px solid var(--primary-color);
+}
+
+.button.toggle-button.active:hover {
+    background-color: var(--primary-dark);
+    border-color: var(--primary-dark);
+}
+
+/* Inactive state (toggled off) - blue outline */
+.button.toggle-button:not(.active) {
+    background-color: transparent;
+    color: var(--primary-color);
+    border: 2px solid var(--primary-color);
+}
+
+.button.toggle-button:not(.active):hover {
+    background-color: rgba(25, 118, 210, 0.08);
+    border-color: var(--primary-dark);
+    color: var(--primary-dark);
+}
+
+/* Dark mode styles */
+:root[data-theme="dark"] .button.toggle-button.active {
+    background-color: #3b82f6;
+    color: white;
+    border-color: #3b82f6;
+}
+
+:root[data-theme="dark"] .button.toggle-button.active:hover {
+    background-color: #2563eb;
+    border-color: #2563eb;
+}
+
+:root[data-theme="dark"] .button.toggle-button:not(.active) {
+    background-color: transparent;
+    color: #60a5fa;
+    border-color: #60a5fa;
+}
+
+:root[data-theme="dark"] .button.toggle-button:not(.active):hover {
+    background-color: rgba(96, 165, 250, 0.12);
+    border-color: #3b82f6;
+    color: #3b82f6;
+}
