@@ -13,7 +13,6 @@
     font-weight: 500;
     transition: background-color 0.2s, transform 0.1s;
     white-space: nowrap;
-    box-sizing: border-box;
 }
 
 .button:hover {
@@ -151,7 +150,6 @@ select.button option {
 /* Toggle button styles */
 .button.toggle-button {
     transition: all 0.2s ease;
-    padding: calc(0.5rem - 2px) 1rem;
 }
 
 /* Active state (toggled on) - filled blue */

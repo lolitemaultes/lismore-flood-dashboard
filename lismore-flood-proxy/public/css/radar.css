@@ -15,14 +15,6 @@
     z-index: 1;
 }
 
-/* Ensure radar frames switch instantly without Leaflet fade animation */
-#radar-map .leaflet-pane.leaflet-radarPane-pane .leaflet-layer,
-#radar-map .leaflet-pane.leaflet-radarPane-pane .leaflet-tile,
-#radar-map .leaflet-pane.leaflet-radarPane-pane canvas {
-    transition: none !important;
-    animation: none !important;
-}
-
 /* Loading Overlay */
 .radar-loading-overlay {
     position: absolute;
@@ -276,10 +268,351 @@
     color: var(--primary-color);
 }
 
+/* RainViewer Tile Layer Styling - BoM Style */
+.rainviewer-layer {
+    pointer-events: none;
+    /* NO transitions - INSTANT frame changes like BoM */
+    transition: none !important;
+    -webkit-transition: none !important;
+    -moz-transition: none !important;
+    -o-transition: none !important;
+}
+
+/* Force instant opacity changes on radar layers - NO FADING */
+.rainviewer-layer,
+.rainviewer-layer *,
+.rainviewer-layer img,
+.rainviewer-layer canvas {
+    transition: none !important;
+    -webkit-transition: none !important;
+    -moz-transition: none !important;
+    -o-transition: none !important;
+}
+
+/* Crisp, sharp rendering for radar tiles - Keep blocky/pixelated */
+.rainviewer-layer img {
+    image-rendering: -moz-crisp-edges;          /* Firefox */
+    image-rendering: -webkit-crisp-edges;       /* Webkit (non-standard) */
+    image-rendering: pixelated;                 /* Chrome, Opera, Safari - BLOCKY */
+    image-rendering: crisp-edges;               /* Standard */
+    -ms-interpolation-mode: nearest-neighbor;   /* IE */
+}
+
+/* BoM dBZ Color Mapping - Pixel-perfect color remapping via Canvas API */
+.rainviewer-layer.leaflet-layer img,
+.rainviewer-layer.bom-color-mapped canvas {
+    /* Keep crisp/blocky rendering - NO smoothing */
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+    image-rendering: pixelated;
+    /* Color mapping handled by radarColorMapper.js - exact hex code matching */
+}
+
+/* Z-Index Layering - STRICT ENFORCEMENT (bottom to top):
+   100 - Base map tiles (.leaflet-tile-pane)
+   200 - Map overlays
+   300 - Radar imagery (.leaflet-radar-pane / radarPane)
+   400 - City/town/state labels and markers (.leaflet-overlay-pane, .leaflet-shadow-pane)
+   500+ - Controls and UI elements
+*/
+
+/* Base map tiles at bottom */
+.leaflet-tile-pane,
+#radar-map .leaflet-tile-pane {
+    z-index: 100 !important;
+}
+
+/* Custom radar pane - BELOW labels */
+.leaflet-radar-pane,
+#radar-map .leaflet-radar-pane,
+#radar-map .leaflet-pane[style*="z-index: 300"] {
+    z-index: 300 !important;
+    pointer-events: none !important;
+}
+
+.rainviewer-layer,
+.rainviewer-layer.leaflet-layer {
+    z-index: 300 !important;
+}
+
+/* LABELS ON TOP - City/town/state names ABOVE radar */
+.leaflet-overlay-pane,
+#radar-map .leaflet-overlay-pane,
+.leaflet-overlay-pane * {
+    z-index: 400 !important;
+    pointer-events: auto !important;
+}
+
+.leaflet-shadow-pane,
+#radar-map .leaflet-shadow-pane {
+    z-index: 500 !important;
+}
+
+.leaflet-marker-pane,
+#radar-map .leaflet-marker-pane {
+    z-index: 600 !important;
+}
+
+.leaflet-tooltip-pane,
+#radar-map .leaflet-tooltip-pane {
+    z-index: 650 !important;
+}
+
+.leaflet-popup-pane,
+#radar-map .leaflet-popup-pane {
+    z-index: 700 !important;
+}
+
+/* Control pane for map controls */
+.leaflet-control-container,
+.leaflet-top,
+.leaflet-bottom {
+    z-index: 800 !important;
+}
+
+/* Remove any Leaflet default image smoothing */
+.leaflet-tile-container img {
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+    image-rendering: pixelated;
+}
+
+/* Ensure canvas elements are also crisp */
+.radar-map canvas,
+.leaflet-zoom-animated {
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+    image-rendering: pixelated;
+}
+
+/* Force crisp rendering on all radar map images */
+#radar-map img {
+    image-rendering: -moz-crisp-edges !important;
+    image-rendering: crisp-edges !important;
+    image-rendering: pixelated !important;
+}
+
+/* Radar Legend Toggle Button */
+.radar-legend-toggle {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 36px;
+    height: 36px;
+    background: rgba(255, 255, 255, 0.95);
+    border: none;
+    border-radius: 4px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1001;
+    transition: all 0.2s ease;
+}
+
+.radar-legend-toggle:hover {
+    background: rgba(255, 255, 255, 1);
+    transform: scale(1.05);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
+}
+
+.radar-legend-toggle:active {
+    transform: scale(0.95);
+}
+
+.radar-legend-toggle svg {
+    color: #333;
+}
+
+:root[data-theme="dark"] .radar-legend-toggle {
+    background: rgba(30, 41, 59, 0.95);
+}
+
+:root[data-theme="dark"] .radar-legend-toggle:hover {
+    background: rgba(30, 41, 59, 1);
+}
+
+:root[data-theme="dark"] .radar-legend-toggle svg {
+    color: var(--text-primary);
+}
+
+/* Radar Base Layer Toggle Button (Map/Satellite) */
+.radar-baselayer-toggle {
+    position: absolute;
+    top: 56px;
+    right: 10px;
+    width: 36px;
+    height: 36px;
+    background: rgba(255, 255, 255, 0.95);
+    border: none;
+    border-radius: 4px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1001;
+    transition: all 0.2s ease;
+}
+
+.radar-baselayer-toggle:hover {
+    background: rgba(255, 255, 255, 1);
+    transform: scale(1.05);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
+}
+
+.radar-baselayer-toggle:active {
+    transform: scale(0.95);
+}
+
+.radar-baselayer-toggle svg {
+    color: #333;
+}
+
+.radar-baselayer-toggle.satellite {
+    background: var(--primary-color);
+}
+
+.radar-baselayer-toggle.satellite svg {
+    color: white;
+}
+
+:root[data-theme="dark"] .radar-baselayer-toggle {
+    background: rgba(30, 41, 59, 0.95);
+}
+
+:root[data-theme="dark"] .radar-baselayer-toggle:hover {
+    background: rgba(30, 41, 59, 1);
+}
+
+:root[data-theme="dark"] .radar-baselayer-toggle svg {
+    color: var(--text-primary);
+}
+
+:root[data-theme="dark"] .radar-baselayer-toggle.satellite {
+    background: var(--primary-color);
+}
+
+:root[data-theme="dark"] .radar-baselayer-toggle.satellite svg {
+    color: white;
+}
+
+/* BoM-Style Radar Legend */
+.radar-legend {
+    position: absolute;
+    top: 10px;
+    right: 56px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 6px;
+    padding: 8px 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    font-size: 11px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+    min-width: 140px;
+}
+
+:root[data-theme="dark"] .radar-legend {
+    background: rgba(30, 41, 59, 0.95);
+    color: var(--text-primary);
+}
+
+.radar-legend-header {
+    font-weight: 600;
+    font-size: 12px;
+    margin-bottom: 6px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    color: #333;
+}
+
+:root[data-theme="dark"] .radar-legend-header {
+    color: var(--text-primary);
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+.radar-legend-items {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.radar-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 1px 0;
+}
+
+.radar-legend-color {
+    width: 24px;
+    height: 14px;
+    border-radius: 2px;
+    flex-shrink: 0;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.radar-legend-label {
+    font-size: 11px;
+    color: #333;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+:root[data-theme="dark"] .radar-legend-label {
+    color: var(--text-primary);
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .radar-map-wrapper {
         height: 400px;
+    }
+
+    .radar-legend-toggle {
+        top: 5px;
+        right: 5px;
+        width: 32px;
+        height: 32px;
+    }
+
+    .radar-legend-toggle svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    .radar-baselayer-toggle {
+        top: 47px;
+        right: 5px;
+        width: 32px;
+        height: 32px;
+    }
+
+    .radar-baselayer-toggle svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    .radar-legend {
+        top: 5px;
+        right: 42px;
+        padding: 6px 8px;
+        font-size: 10px;
+        min-width: 120px;
+    }
+
+    .radar-legend-header {
+        font-size: 11px;
+    }
+
+    .radar-legend-color {
+        width: 20px;
+        height: 12px;
+    }
+
+    .radar-legend-label {
+        font-size: 10px;
     }
 
     .radar-controls {
