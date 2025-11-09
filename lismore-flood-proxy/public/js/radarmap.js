@@ -8,10 +8,16 @@
         fast: 250
     };
 
-    // Expanded Australia bounds with more rubber - allows zooming to edges
+    // Australia bounds for map restriction
     const AUSTRALIA_BOUNDS = [
-        [-50.0, 108.0], // Southwest (expanded)
-        [-8.0, 160.0]   // Northeast (expanded)
+        [-44.0, 113.0], // Southwest
+        [-10.0, 154.0]  // Northeast
+    ];
+
+    // National radar bounds (approximate georeferencing for IDR00004)
+    const RADAR_BOUNDS = [
+        [-44.5, 112.5], // Southwest
+        [-9.5, 154.5]   // Northeast
     ];
 
     // NSW initial view
@@ -20,16 +26,14 @@
 
     // State
     let radarMap = null;
-    let radarOverlayGroups = {}; // Organized by radar ID, then timestamp index
-    let radarConfigs = []; // Radar configurations from server
-    let timestamps = [];
+    let radarOverlays = [];
+    let frames = [];
     let currentFrameIndex = 0;
     let isPlaying = false;
     let animationInterval = null;
     let currentSpeed = 'normal';
     let radarInitialized = false;
     let refreshTimer = null;
-    let isPausingOnLastFrame = false;
 
     // DOM Elements
     let mapContainer, loadingOverlay, errorContainer, controlsPanel;
@@ -70,14 +74,14 @@
             return;
         }
 
-        // Initialize Leaflet map with expanded bounds
+        // Initialize Leaflet map
         radarMap = L.map('radar-map', {
             center: NSW_CENTER,
             zoom: NSW_ZOOM,
             minZoom: 4,
             maxZoom: 10,
             maxBounds: AUSTRALIA_BOUNDS,
-            maxBoundsViscosity: 0.3, // More flexible boundaries
+            maxBoundsViscosity: 0.75,
             preferCanvas: true
         });
 
@@ -151,7 +155,7 @@
         btnPlay.addEventListener('click', play);
         btnPause.addEventListener('click', pause);
         btnNext.addEventListener('click', nextFrame);
-        btnLast.addEventListener('click', () => setFrame(timestamps.length - 1));
+        btnLast.addEventListener('click', () => setFrame(frames.length - 1));
 
         // Frame slider
         frameSlider.addEventListener('input', (e) => {
@@ -182,23 +186,21 @@
 
             const data = await response.json();
 
-            if (!data.success || !data.timestamps || data.timestamps.length === 0) {
+            if (!data.success || !data.frames || data.frames.length === 0) {
                 throw new Error('No radar frames available');
             }
 
-            timestamps = data.timestamps;
-            radarConfigs = data.radarConfig || [];
-            const radarFrames = data.radars || {};
+            frames = data.frames.sort((a, b) => a.time - b.time); // Sort oldest to newest
 
-            console.log(`[RADAR] Loaded ${timestamps.length} timestamps across ${radarConfigs.length} radars`);
+            console.log(`[RADAR] Loaded ${frames.length} frames`);
 
-            await loadFrameOverlays(radarFrames);
+            await loadFrameOverlays();
 
             hideLoading();
             showControls();
 
             // Start on the most recent frame
-            setFrame(timestamps.length - 1);
+            setFrame(frames.length - 1);
 
             if (force) {
                 showNotification('Radar data refreshed', 'success');
@@ -213,87 +215,55 @@
         }
     }
 
-    async function loadFrameOverlays(radarFrames) {
+    async function loadFrameOverlays() {
         // Clear existing overlays
-        for (const radarId in radarOverlayGroups) {
-            for (const overlays of radarOverlayGroups[radarId]) {
-                if (overlays && radarMap.hasLayer(overlays)) {
-                    radarMap.removeLayer(overlays);
-                }
+        radarOverlays.forEach(overlay => {
+            if (radarMap.hasLayer(overlay)) {
+                radarMap.removeLayer(overlay);
             }
-        }
-        radarOverlayGroups = {};
+        });
+        radarOverlays = [];
 
-        // Create overlays for each radar at each timestamp
-        let totalOverlays = 0;
-        for (const radarConfig of radarConfigs) {
-            const radarId = radarConfig.id;
-            const radarData = radarFrames[radarId] || [];
+        // Create image overlays for each frame
+        for (const frame of frames) {
+            const imageUrl = `${API_BASE}/image/${frame.filename}`;
+            const overlay = L.imageOverlay(imageUrl, RADAR_BOUNDS, {
+                opacity: 0,
+                interactive: false,
+                className: 'radar-overlay-image',
+                crossOrigin: 'anonymous'
+            });
 
-            radarOverlayGroups[radarId] = [];
-
-            // For each timestamp, find the matching frame for this radar
-            for (let timestampIndex = 0; timestampIndex < timestamps.length; timestampIndex++) {
-                const timestamp = timestamps[timestampIndex];
-                const frameData = radarData.find(f => f.timestamp === timestamp);
-
-                if (frameData) {
-                    const imageUrl = `${API_BASE}/image/${frameData.filename}`;
-                    const bounds = radarConfig.bounds; // Use radar-specific bounds
-
-                    const overlay = L.imageOverlay(imageUrl, bounds, {
-                        opacity: 0,
-                        interactive: false,
-                        className: 'radar-overlay-image',
-                        crossOrigin: 'anonymous'
-                    });
-
-                    // Add load event to improve rendering
-                    overlay.on('load', function() {
-                        const img = this.getElement();
-                        if (img) {
-                            img.style.imageRendering = 'crisp-edges';
-                            img.style.imageRendering = '-webkit-optimize-contrast';
-                            img.style.imageRendering = 'pixelated';
-                        }
-                    });
-
-                    overlay.addTo(radarMap);
-                    radarOverlayGroups[radarId][timestampIndex] = overlay;
-                    totalOverlays++;
-                } else {
-                    // No data for this radar at this timestamp
-                    radarOverlayGroups[radarId][timestampIndex] = null;
+            // Add load event to improve rendering
+            overlay.on('load', function() {
+                // Disable image smoothing for crisp pixels
+                const img = this.getElement();
+                if (img) {
+                    img.style.imageRendering = 'crisp-edges';
+                    img.style.imageRendering = '-webkit-optimize-contrast';
+                    img.style.imageRendering = 'pixelated';
                 }
-            }
+            });
+
+            overlay.addTo(radarMap);
+            radarOverlays.push(overlay);
         }
 
-        console.log(`[RADAR] Created ${totalOverlays} overlays across ${radarConfigs.length} radars`);
+        console.log(`[RADAR] Created ${radarOverlays.length} overlays`);
 
         // Update slider max
-        frameSlider.max = timestamps.length - 1;
-        frameTotalEl.textContent = timestamps.length;
+        frameSlider.max = frames.length - 1;
+        frameTotalEl.textContent = frames.length;
     }
 
     function setFrame(index) {
-        if (index < 0 || index >= timestamps.length) return;
+        if (index < 0 || index >= frames.length) return;
 
-        // Hide all overlays from all radars
-        for (const radarId in radarOverlayGroups) {
-            for (const overlay of radarOverlayGroups[radarId]) {
-                if (overlay) {
-                    overlay.setOpacity(0);
-                }
-            }
-        }
+        // Hide all overlays
+        radarOverlays.forEach(overlay => overlay.setOpacity(0));
 
-        // Show all radar overlays for current timestamp
-        for (const radarId in radarOverlayGroups) {
-            const overlay = radarOverlayGroups[radarId][index];
-            if (overlay) {
-                overlay.setOpacity(0.7);
-            }
-        }
+        // Show current frame
+        radarOverlays[index].setOpacity(0.7);
 
         currentFrameIndex = index;
 
@@ -302,20 +272,11 @@
     }
 
     function updateFrameUI() {
-        if (currentFrameIndex < 0 || currentFrameIndex >= timestamps.length) return;
-
-        const timestamp = timestamps[currentFrameIndex];
-
-        // Parse timestamp: YYYYMMDDHHmm
-        const year = timestamp.substring(0, 4);
-        const month = timestamp.substring(4, 6);
-        const day = timestamp.substring(6, 8);
-        const hour = timestamp.substring(8, 10);
-        const minute = timestamp.substring(10, 12);
-
-        const date = new Date(`${year}-${month}-${day}T${hour}:${minute}:00+10:00`);
+        const frame = frames[currentFrameIndex];
+        if (!frame) return;
 
         // Update timestamp
+        const date = new Date(frame.date);
         timestampEl.textContent = date.toLocaleString('en-AU', {
             month: 'short',
             day: 'numeric',
@@ -332,21 +293,10 @@
     }
 
     function nextFrame() {
-        if (currentFrameIndex < timestamps.length - 1) {
+        if (currentFrameIndex < frames.length - 1) {
             setFrame(currentFrameIndex + 1);
         } else {
-            // On last frame - pause before looping
-            if (isPlaying && !isPausingOnLastFrame) {
-                isPausingOnLastFrame = true;
-                setTimeout(() => {
-                    if (isPlaying) {
-                        setFrame(0); // Loop back to start
-                        isPausingOnLastFrame = false;
-                    }
-                }, ANIMATION_SPEEDS[currentSpeed]); // Pause for one frame duration
-            } else if (!isPlaying) {
-                setFrame(0); // Manual navigation just loops
-            }
+            setFrame(0); // Loop back to start
         }
     }
 
@@ -354,7 +304,7 @@
         if (currentFrameIndex > 0) {
             setFrame(currentFrameIndex - 1);
         } else {
-            setFrame(timestamps.length - 1); // Loop to end
+            setFrame(frames.length - 1); // Loop to end
         }
     }
 
@@ -362,7 +312,6 @@
         if (isPlaying) return;
 
         isPlaying = true;
-        isPausingOnLastFrame = false;
         btnPlay.style.display = 'none';
         btnPause.style.display = 'flex';
 
@@ -373,7 +322,6 @@
         if (!isPlaying) return;
 
         isPlaying = false;
-        isPausingOnLastFrame = false;
         btnPlay.style.display = 'flex';
         btnPause.style.display = 'none';
 
@@ -389,7 +337,7 @@
         }
 
         animationInterval = setInterval(() => {
-            if (!isPlaying || isPausingOnLastFrame) return;
+            if (!isPlaying) return;
             nextFrame();
         }, ANIMATION_SPEEDS[currentSpeed]);
     }
@@ -408,7 +356,6 @@
 
         // Restart animation if playing
         if (isPlaying) {
-            isPausingOnLastFrame = false;
             animate();
         }
     }
@@ -469,35 +416,6 @@
         }
     }
 
-    function resetRadarView() {
-        // Stop any playing animation
-        if (isPlaying) {
-            pause();
-        }
-
-        // Reset to initial view
-        if (radarMap) {
-            radarMap.setView(NSW_CENTER, NSW_ZOOM);
-        }
-
-        // Reset to most recent frame
-        if (timestamps.length > 0) {
-            setFrame(timestamps.length - 1);
-        }
-
-        // Reset speed to normal
-        setSpeed('normal');
-
-        // Fix map size
-        setTimeout(() => {
-            if (radarMap) {
-                radarMap.invalidateSize();
-            }
-        }, 100);
-
-        console.log('[RADAR] View reset to initial state');
-    }
-
     // Initialize when radar tab is clicked
     const radarTab = document.getElementById('tab-radar');
     if (radarTab) {
@@ -506,13 +424,26 @@
             setTimeout(() => {
                 if (!radarInitialized) {
                     initRadarMap();
-                } else {
-                    // Reset view when returning to radar tab
-                    resetRadarView();
+                } else if (radarMap) {
+                    // Fix map rendering after tab switch
+                    radarMap.invalidateSize();
+                    console.log('[RADAR] Map size invalidated after tab switch');
                 }
             }, 100);
         });
     }
+
+    // Also handle any tab switching events
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('tab-button') || e.target.closest('.tab-button')) {
+            const clickedTab = e.target.classList.contains('tab-button') ? e.target : e.target.closest('.tab-button');
+            if (clickedTab && clickedTab.id === 'tab-radar' && radarMap && radarInitialized) {
+                setTimeout(() => {
+                    radarMap.invalidateSize();
+                }, 150);
+            }
+        }
+    });
 
     // Export for status checking
     window.radarMapInitialized = false;
