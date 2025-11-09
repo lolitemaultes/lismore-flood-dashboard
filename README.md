@@ -1,8 +1,9 @@
-![Lismore Flood Dashboard](https://github.com/user-attachments/assets/406417d6-c64b-4671-b318-690e95b34e34)
+
+<img width="4052" height="904" alt="LismoreFloodDashboard-Banner" src="https://github.com/user-attachments/assets/d522c1c1-d64d-49b3-af96-fd2edb93e87d" />
 
 # Lismore Flood Dashboard
 
-![Version](https://img.shields.io/badge/version-2.8.0-purple)
+![Version](https://img.shields.io/badge/version-2.8.0-orange)
 ![License](https://img.shields.io/badge/license-MIT-green)
 [![Live Dashboard](https://img.shields.io/badge/Lismore-Flood%20Dashboard-blue)](https://flood.lolitemaultes.online)
 
