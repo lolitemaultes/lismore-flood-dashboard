@@ -2004,13 +2004,8 @@
                 floodMapStatusValue.className = 'status-value unknown';
             }
 
-            if (window.outageMapInitialized) {
-                outageMapStatusValue.textContent = 'Online';
-                outageMapStatusValue.className = 'status-value online';
-            } else {
-                outageMapStatusValue.textContent = 'Initializing...';
-                outageMapStatusValue.className = 'status-value unknown';
-            }
+            // Outage Map status is managed by loadOutageData() in outagemap.js
+            // Don't override it here - it reflects actual API data availability
         }
 
         function updateRefreshInterval() {
