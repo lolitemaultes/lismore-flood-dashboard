@@ -15,6 +15,14 @@
     z-index: 1;
 }
 
+/* Ensure radar frames switch instantly without Leaflet fade animation */
+#radar-map .leaflet-pane.leaflet-radarPane-pane .leaflet-layer,
+#radar-map .leaflet-pane.leaflet-radarPane-pane .leaflet-tile,
+#radar-map .leaflet-pane.leaflet-radarPane-pane canvas {
+    transition: none !important;
+    animation: none !important;
+}
+
 /* Loading Overlay */
 .radar-loading-overlay {
     position: absolute;
