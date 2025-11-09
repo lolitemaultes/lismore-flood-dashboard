@@ -426,9 +426,9 @@
                     
                     <div id="content-radar" class="tab-content">
                         <div class="tab-header">
-                            <h2>Grafton 256km Radar</h2>
+                            <h2>Australian Rain Radar</h2>
                             <div>
-                                <button id="refresh-btn" class="button">
+                                <button id="radar-refresh" class="button">
                                     <svg xmlns="https://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M23 4v6h-6"></path>
                                         <path d="M1 20v-6h6"></path>
@@ -438,99 +438,88 @@
                                 </button>
                             </div>
                         </div>
-                        
-                        <div id="error" class="error" style="display: none;"></div>
-                        
-                        <div class="radar-wrapper">
-                            <div class="radar-display">
-                                <div class="radar-container">
-                                    <img id="background-layer" class="map-layer" src="" alt="Background Map" style="z-index: 1;">
-                                    <img id="topography-layer" class="map-layer" src="" alt="Topography" style="z-index: 2;">
-                                    <img id="radar-image" class="radar-image" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" alt="Radar Image" style="z-index: 3;">
-                                    <img id="locations-layer" class="map-layer" src="" alt="Locations" style="z-index: 4;">
-                                    
-                                    <div id="loading" class="loading">
-                                        <div class="spinner"></div>
-                                        Loading radar images...
+
+
+                        <div class="radar-map-wrapper">
+                            <div id="radar-map" class="radar-map"></div>
+
+                            <div class="radar-loading-overlay" id="radar-loading" style="display: none;">
+                                <div class="spinner"></div>
+                                <p>Loading radar data...</p>
+                            </div>
+
+                            <div class="radar-error" id="radar-error" style="display: none;">
+                                <svg xmlns="https://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                </svg>
+                                <p id="radar-error-message">Unable to load radar data</p>
+                            </div>
+
+                            <div class="radar-controls" id="radar-controls" style="display: none;">
+                                <div class="radar-controls-header">
+                                    <span id="radar-timestamp" class="radar-timestamp">--:--</span>
+                                    <div class="radar-frame-info">
+                                        <span id="radar-frame-current">0</span>/<span id="radar-frame-total">0</span>
                                     </div>
                                 </div>
-                            </div>
-                            
-                            <div class="legend-container">
-                                <img src="/resources/Rain Radar/Legend.png" alt="Radar Legend" class="legend-image">
-                            </div>
-                            
-                            <div id="timestamp">No data loaded</div>
-                            <div id="frame-counter" class="frame-counter"></div>
-                            
-                            <div class="progress-container">
-                                <div id="progress-bar" class="progress-bar"></div>
-                            </div>
-                            
-                            <div class="controls">
-                                <div class="control-buttons">
-                                    <button id="btn-first" disabled title="First frame">
+
+                                <div class="radar-slider-container">
+                                    <input type="range" id="radar-frame-slider" class="radar-slider" min="0" max="11" value="11" step="1">
+                                </div>
+
+                                <div class="radar-control-buttons">
+                                    <button id="radar-btn-first" class="radar-btn" title="First frame">
                                         <svg xmlns="https://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                                             <path d="M18.41 16.59L13.82 12l4.59-4.59L17 6l-6 6 6 6zM6 6h2v12H6z"></path>
                                         </svg>
                                     </button>
-                                    <button id="btn-prev" disabled title="Previous frame">
+                                    <button id="radar-btn-prev" class="radar-btn" title="Previous frame">
                                         <svg xmlns="https://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                                             <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"></path>
                                         </svg>
                                     </button>
-                                    <button id="btn-play" disabled title="Play">
-                                        <svg xmlns="https://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                    <button id="radar-btn-play" class="radar-btn" title="Play">
+                                        <svg xmlns="https://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                                             <path d="M8 5v14l11-7z"></path>
                                         </svg>
                                     </button>
-                                    <button id="btn-pause" disabled title="Pause">
-                                        <svg xmlns="https://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                    <button id="radar-btn-pause" class="radar-btn" title="Pause" style="display: none;">
+                                        <svg xmlns="https://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                                             <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path>
                                         </svg>
                                     </button>
-                                    <button id="btn-next" disabled title="Next frame">
+                                    <button id="radar-btn-next" class="radar-btn" title="Next frame">
                                         <svg xmlns="https://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                                             <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path>
                                         </svg>
                                     </button>
-                                    <button id="btn-last" disabled title="Last frame">
+                                    <button id="radar-btn-last" class="radar-btn" title="Last frame">
                                         <svg xmlns="https://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                                             <path d="M5.59 7.41L10.18 12l-4.59 4.59L7 18l6-6-6-6zM16 6h2v12h-2z"></path>
                                         </svg>
                                     </button>
                                 </div>
-                                
-                                <div class="speed-controls">
-                                    <label for="speed">Speed:</label>
-                                    <input type="range" id="speed" class="speed-slider" min="1" max="10" value="5">
-                                    <span id="speed-value">500ms</span>
+
+                                <div class="radar-speed-control">
+                                    <label for="radar-speed">Speed:</label>
+                                    <button id="radar-speed-slow" class="radar-speed-btn">0.5x</button>
+                                    <button id="radar-speed-normal" class="radar-speed-btn active">1x</button>
+                                    <button id="radar-speed-fast" class="radar-speed-btn">2x</button>
                                 </div>
                             </div>
-                            
-                            <div class="layer-controls">
-                                <label class="layer-toggle">
-                                    <input type="checkbox" id="topography-toggle" checked>
-                                    Topography
-                                </label>
-                                <label class="layer-toggle">
-                                    <input type="checkbox" id="locations-toggle" checked>
-                                    Locations
-                                </label>
-                            </div>
-                            
-                            <div id="last-update" class="last-update"></div>
                         </div>
-                        
+
                         <div class="tab-footer">
-                            <span>Data source: Bureau of Meteorology, Australia</span>
-                            <a href="https://www.bom.gov.au/products/IDR282.loop.shtml" target="_blank" rel="noopener noreferrer" class="tab-link">
+                            <span>Data source: Bureau of Meteorology, Australia (National Radar Composite)</span>
+                            <a href="https://www.bom.gov.au/australia/radar/" target="_blank" rel="noopener noreferrer" class="tab-link">
                                 <svg xmlns="https://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
                                     <polyline points="15 3 21 3 21 9"></polyline>
                                     <line x1="10" y1="14" x2="21" y2="3"></line>
                                 </svg>
-                                View BOM original
+                                View on BOM
                             </a>
                         </div>
                     </div>
@@ -1027,7 +1016,8 @@
 
     <script src="js/floodmap.js"></script>
     <script src="js/outagemap.js"></script>
-    
+    <script src="js/radarmap.js"></script>
+
     <script>
         async function loadFloodData() {
             try {
@@ -2006,6 +1996,24 @@
 
             // Outage Map status is managed by loadOutageData() in outagemap.js
             // Don't override it here - it reflects actual API data availability
+
+            // Radar Map status - check API availability
+            fetch('/api/radar/status')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.available) {
+                        radarStatusValue.textContent = 'Online';
+                        radarStatusValue.className = 'status-value online';
+                    } else {
+                        radarStatusValue.textContent = 'No Data';
+                        radarStatusValue.className = 'status-value offline';
+                    }
+                })
+                .catch(error => {
+                    radarStatusValue.textContent = 'Connection Error';
+                    radarStatusValue.className = 'status-value offline';
+                    console.error('Radar status check failed:', error);
+                });
         }
 
         function updateRefreshInterval() {
