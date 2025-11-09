@@ -135,8 +135,7 @@
             zoomControl: true,
             attributionControl: true,
             worldCopyJump: false,    // Disable world wrapping
-            noWrap: true,            // Prevent tile wrapping
-            fadeAnimation: false     // Disable tile fade transitions for instant radar frame changes
+            noWrap: true             // Prevent tile wrapping
         });
 
         // Add event listeners for aggressive tile management
