@@ -25,6 +25,9 @@
         HIGH_DETAIL: 10     // Above this: full quality
     };
 
+    const LISMORE_COORDS = [-28.806, 153.277];
+    const LISMORE_VIEW_ZOOM = 10;
+
     // State
     let radarMap = null;
     let radarLayers = [];
@@ -39,6 +42,9 @@
     let currentSpeed = 'normal';
     let radarInitialized = false;
     let refreshTimer = null;
+    let lismoreMarker = null;
+    let lismoreMarkerVisible = true;
+    let radarOpacity = 0.9;
 
     // DOM Elements
     let mapContainer, loadingOverlay, errorContainer, controlsPanel;
@@ -46,6 +52,7 @@
     let btnFirst, btnPrev, btnPlay, btnPause, btnNext, btnLast;
     let btnSpeedSlow, btnSpeedNormal, btnSpeedFast;
     let btnRefresh;
+    let btnViewNational, btnViewLismore, btnToggleLismore, opacitySlider;
 
     async function checkServerConnectivity() {
         try {
@@ -94,10 +101,20 @@
         btnSpeedFast = document.getElementById('radar-speed-fast');
 
         btnRefresh = document.getElementById('radar-refresh');
+        btnViewNational = document.getElementById('radar-view-national');
+        btnViewLismore = document.getElementById('radar-view-lismore');
+        btnToggleLismore = document.getElementById('radar-toggle-lismore');
+        opacitySlider = document.getElementById('radar-opacity-slider');
 
         if (!mapContainer) {
             console.error('Radar map container not found');
             return;
+        }
+
+        if (opacitySlider) {
+            const initialOpacity = Math.round(radarOpacity * 100);
+            opacitySlider.value = initialOpacity;
+            opacitySlider.setAttribute('aria-valuenow', String(initialOpacity));
         }
 
         // Check server connectivity before initializing
@@ -138,6 +155,11 @@
             noWrap: true,            // Prevent tile wrapping
             fadeAnimation: false     // Disable tile fade transitions for instant radar frame changes
         });
+
+        L.control.scale({
+            position: 'bottomleft',
+            imperial: false
+        }).addTo(radarMap);
 
         // Add event listeners for aggressive tile management
         radarMap.on('zoomstart', function() {
@@ -225,6 +247,25 @@
         mapBaseLayer.addTo(radarMap);
         currentBaseLayer = 'map';
 
+        // Add Lismore focus marker by default
+        lismoreMarker = L.circleMarker(LISMORE_COORDS, {
+            radius: 6,
+            color: '#ff5722',
+            weight: 2,
+            fillColor: '#ff7043',
+            fillOpacity: 0.85,
+            pane: 'markerPane'
+        }).addTo(radarMap);
+        lismoreMarker.bindTooltip('Lismore', {
+            permanent: true,
+            direction: 'top',
+            offset: [0, -10],
+            className: 'radar-lismore-tooltip'
+        });
+        lismoreMarker.bringToFront();
+        lismoreMarkerVisible = true;
+        setActiveViewButton('national');
+
         // Fix map size after initialization
         setTimeout(() => {
             radarMap.invalidateSize();
@@ -293,6 +334,33 @@
         if (baseLayerToggle) {
             baseLayerToggle.addEventListener('click', toggleBaseLayer);
         }
+
+        if (btnViewNational) {
+            btnViewNational.addEventListener('click', () => {
+                resetToNationalView();
+                setActiveViewButton('national');
+            });
+        }
+
+        if (btnViewLismore) {
+            btnViewLismore.addEventListener('click', () => {
+                focusOnLismore();
+                setActiveViewButton('lismore');
+            });
+        }
+
+        if (btnToggleLismore) {
+            btnToggleLismore.addEventListener('click', toggleLismoreMarkerVisibility);
+        }
+
+        if (opacitySlider) {
+            const updateOpacity = () => {
+                const value = parseInt(opacitySlider.value, 10);
+                setRadarOpacity(value);
+            };
+            opacitySlider.addEventListener('input', updateOpacity);
+            opacitySlider.addEventListener('change', updateOpacity);
+        }
     }
 
     function toggleBaseLayer() {
@@ -320,6 +388,68 @@
         if (labelLayer && radarMap.hasLayer(labelLayer)) {
             labelLayer.bringToFront();
         }
+
+        if (lismoreMarker && lismoreMarkerVisible) {
+            lismoreMarker.bringToFront();
+        }
+    }
+
+    function resetToNationalView() {
+        if (!radarMap) return;
+        radarMap.setView(AUSTRALIA_CENTER, AUSTRALIA_ZOOM);
+    }
+
+    function focusOnLismore() {
+        if (!radarMap) return;
+        radarMap.setView(LISMORE_COORDS, LISMORE_VIEW_ZOOM);
+    }
+
+    function setActiveViewButton(mode) {
+        if (!btnViewNational || !btnViewLismore) return;
+        btnViewNational.classList.toggle('active', mode === 'national');
+        btnViewLismore.classList.toggle('active', mode === 'lismore');
+        btnViewNational.setAttribute('aria-pressed', String(mode === 'national'));
+        btnViewLismore.setAttribute('aria-pressed', String(mode === 'lismore'));
+    }
+
+    function toggleLismoreMarkerVisibility() {
+        if (!radarMap || !lismoreMarker) return;
+
+        if (lismoreMarkerVisible) {
+            radarMap.removeLayer(lismoreMarker);
+        } else {
+            lismoreMarker.addTo(radarMap);
+            lismoreMarker.bringToFront();
+        }
+
+        lismoreMarkerVisible = !lismoreMarkerVisible;
+
+        if (btnToggleLismore) {
+            btnToggleLismore.classList.toggle('active', lismoreMarkerVisible);
+            btnToggleLismore.setAttribute('aria-pressed', String(lismoreMarkerVisible));
+        }
+    }
+
+    function setRadarOpacity(valuePercent) {
+        const numericValue = Number.isFinite(valuePercent) ? valuePercent : radarOpacity * 100;
+        const clamped = Math.max(0, Math.min(100, numericValue));
+        const normalized = Math.round(clamped) / 100;
+        radarOpacity = Math.max(normalized, 0.3); // Keep overlay at least 30% visible
+
+        if (opacitySlider) {
+            opacitySlider.value = String(Math.round(radarOpacity * 100));
+            opacitySlider.setAttribute('aria-valuenow', opacitySlider.value);
+        }
+
+        applyRadarOpacityToLayers();
+    }
+
+    function applyRadarOpacityToLayers() {
+        radarLayers.forEach((layer, index) => {
+            if (!layer.setOpacity) return;
+            const targetOpacity = index === currentFrameIndex ? radarOpacity : 0;
+            layer.setOpacity(targetOpacity);
+        });
     }
 
     async function loadRadarData(force = false) {
@@ -509,7 +639,9 @@
         // LAZY LOADING: Deactivate all layers except the new one
         radarLayers.forEach((layer, i) => {
             if (i !== index) {
-                layer.setOpacity(0);
+                if (layer.setOpacity) {
+                    layer.setOpacity(0);
+                }
                 if (i === previousIndex && layer.setActive) {
                     // Deactivate previous frame and clear its tiles
                     layer.setActive(false);
@@ -522,7 +654,6 @@
             if (radarLayers[index].setActive) {
                 radarLayers[index].setActive(true);  // LAZY LOADING: Enable tile loading
             }
-            radarLayers[index].setOpacity(0.90); // High opacity for strong BoM-style visibility
 
             // Force immediate tile load for active frame
             if (radarLayers[index]._map) {
@@ -533,6 +664,8 @@
         }
 
         currentFrameIndex = index;
+
+        applyRadarOpacityToLayers();
 
         // Update UI
         updateFrameUI();

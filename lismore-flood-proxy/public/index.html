@@ -444,6 +444,24 @@
                         <div class="radar-map-wrapper">
                             <div id="radar-map" class="radar-map"></div>
 
+                            <div class="radar-map-tools" aria-label="Radar map tools">
+                                <div class="radar-map-buttons">
+                                    <button id="radar-view-national" class="radar-tool-button" type="button" aria-pressed="true">
+                                        National View
+                                    </button>
+                                    <button id="radar-view-lismore" class="radar-tool-button" type="button" aria-pressed="false">
+                                        Lismore Focus
+                                    </button>
+                                    <button id="radar-toggle-lismore" class="radar-tool-button active" type="button" aria-pressed="true">
+                                        Lismore Marker
+                                    </button>
+                                </div>
+                                <label for="radar-opacity-slider" class="radar-opacity-control">
+                                    <span>Radar Opacity</span>
+                                    <input id="radar-opacity-slider" class="radar-opacity-slider" type="range" min="30" max="100" step="5" value="90" aria-valuemin="30" aria-valuemax="100" aria-valuenow="90" aria-label="Radar opacity">
+                                </label>
+                            </div>
+
                             <!-- Radar Legend Toggle Button -->
                             <button id="radar-legend-toggle" class="radar-legend-toggle" title="Show/hide rainfall intensity legend" aria-label="Toggle legend">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -465,63 +483,63 @@
                                 <div class="radar-legend-header">Rainfall Intensity (dBZ)</div>
                                 <div class="radar-legend-items">
                                     <div class="radar-legend-item">
-                                        <span class="radar-legend-color" style="background: #f5f5fe; border: 1px solid #ccc;"></span>
-                                        <span class="radar-legend-label">12–23</span>
+                                        <span class="radar-legend-color" style="background: #f2f2f2; border: 1px solid #ccc;"></span>
+                                        <span class="radar-legend-label">-12–23</span>
                                     </div>
                                     <div class="radar-legend-item">
-                                        <span class="radar-legend-color" style="background: #b4b5ff;"></span>
+                                        <span class="radar-legend-color" style="background: #cfd3ff;"></span>
                                         <span class="radar-legend-label">23–28</span>
                                     </div>
                                     <div class="radar-legend-item">
-                                        <span class="radar-legend-color" style="background: #7979fe;"></span>
+                                        <span class="radar-legend-color" style="background: #aab4ff;"></span>
                                         <span class="radar-legend-label">28–31</span>
                                     </div>
                                     <div class="radar-legend-item">
-                                        <span class="radar-legend-color" style="background: #1415fe;"></span>
+                                        <span class="radar-legend-color" style="background: #0033ff;"></span>
                                         <span class="radar-legend-label">31–34</span>
                                     </div>
                                     <div class="radar-legend-item">
-                                        <span class="radar-legend-color" style="background: #00d8c2;"></span>
+                                        <span class="radar-legend-color" style="background: #1f6bff;"></span>
                                         <span class="radar-legend-label">34–37</span>
                                     </div>
                                     <div class="radar-legend-item">
-                                        <span class="radar-legend-color" style="background: #019791;"></span>
+                                        <span class="radar-legend-color" style="background: #2fe3e3;"></span>
                                         <span class="radar-legend-label">37–40</span>
                                     </div>
                                     <div class="radar-legend-item">
-                                        <span class="radar-legend-color" style="background: #006766;"></span>
+                                        <span class="radar-legend-color" style="background: #127f7f;"></span>
                                         <span class="radar-legend-label">40–43</span>
                                     </div>
                                     <div class="radar-legend-item">
-                                        <span class="radar-legend-color" style="background: #ffff00;"></span>
+                                        <span class="radar-legend-color" style="background: #2fa05f;"></span>
                                         <span class="radar-legend-label">43–46</span>
                                     </div>
                                     <div class="radar-legend-item">
-                                        <span class="radar-legend-color" style="background: #ffc800;"></span>
+                                        <span class="radar-legend-color" style="background: #ffff66;"></span>
                                         <span class="radar-legend-label">46–49</span>
                                     </div>
                                     <div class="radar-legend-item">
-                                        <span class="radar-legend-color" style="background: #ff9601;"></span>
+                                        <span class="radar-legend-color" style="background: #ffd21a;"></span>
                                         <span class="radar-legend-label">49–52</span>
                                     </div>
                                     <div class="radar-legend-item">
-                                        <span class="radar-legend-color" style="background: #fe6500;"></span>
+                                        <span class="radar-legend-color" style="background: #ffa31a;"></span>
                                         <span class="radar-legend-label">52–55</span>
                                     </div>
                                     <div class="radar-legend-item">
-                                        <span class="radar-legend-color" style="background: #ff0001;"></span>
+                                        <span class="radar-legend-color" style="background: #ff7f1a;"></span>
                                         <span class="radar-legend-label">55–58</span>
                                     </div>
                                     <div class="radar-legend-item">
-                                        <span class="radar-legend-color" style="background: #c90000;"></span>
+                                        <span class="radar-legend-color" style="background: #ff4d1a;"></span>
                                         <span class="radar-legend-label">58–61</span>
                                     </div>
                                     <div class="radar-legend-item">
-                                        <span class="radar-legend-color" style="background: #780101;"></span>
+                                        <span class="radar-legend-color" style="background: #ff0000;"></span>
                                         <span class="radar-legend-label">61–64</span>
                                     </div>
                                     <div class="radar-legend-item">
-                                        <span class="radar-legend-color" style="background: #280000;"></span>
+                                        <span class="radar-legend-color" style="background: #5b0000;"></span>
                                         <span class="radar-legend-label">≥64</span>
                                     </div>
                                 </div>

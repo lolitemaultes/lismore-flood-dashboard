@@ -10,21 +10,21 @@
 
 // EXACT BoM dBZ color scale - THE AUTHORITATIVE SOURCE
 const BOM_DBZ_COLORS = [
-    { min: 12, max: 23, r: 245, g: 245, b: 254, hex: '#f5f5fe', name: 'Light' },
-    { min: 23, max: 28, r: 180, g: 181, b: 255, hex: '#b4b5ff', name: 'Light' },
-    { min: 28, max: 31, r: 121, g: 121, b: 254, hex: '#7979fe', name: 'Light' },
-    { min: 31, max: 34, r: 20, g: 21, b: 254, hex: '#1415fe', name: 'Moderate' },
-    { min: 34, max: 37, r: 0, g: 216, b: 194, hex: '#00d8c2', name: 'Moderate' },
-    { min: 37, max: 40, r: 1, g: 151, b: 145, hex: '#019791', name: 'Moderate' },
-    { min: 40, max: 43, r: 0, g: 103, b: 102, hex: '#006766', name: 'Moderate' },
-    { min: 43, max: 46, r: 255, g: 255, b: 0, hex: '#ffff00', name: 'Heavy' },
-    { min: 46, max: 49, r: 255, g: 200, b: 0, hex: '#ffc800', name: 'Heavy' },
-    { min: 49, max: 52, r: 255, g: 150, b: 1, hex: '#ff9601', name: 'Heavy' },
-    { min: 52, max: 55, r: 254, g: 101, b: 0, hex: '#fe6500', name: 'Heavy' },
-    { min: 55, max: 58, r: 255, g: 0, b: 1, hex: '#ff0001', name: 'Very Heavy' },
-    { min: 58, max: 61, r: 201, g: 0, b: 0, hex: '#c90000', name: 'Very Heavy' },
-    { min: 61, max: 64, r: 120, g: 1, b: 1, hex: '#780101', name: 'Extreme' },
-    { min: 64, max: 999, r: 40, g: 0, b: 0, hex: '#280000', name: 'Extreme' }
+    { min: -12, max: 23, r: 242, g: 242, b: 242, hex: '#f2f2f2', name: 'Very Light' },
+    { min: 23, max: 28, r: 207, g: 211, b: 255, hex: '#cfd3ff', name: 'Very Light' },
+    { min: 28, max: 31, r: 170, g: 180, b: 255, hex: '#aab4ff', name: 'Light' },
+    { min: 31, max: 34, r: 0, g: 51, b: 255, hex: '#0033ff', name: 'Moderate' },
+    { min: 34, max: 37, r: 31, g: 107, b: 255, hex: '#1f6bff', name: 'Moderate' },
+    { min: 37, max: 40, r: 47, g: 227, b: 227, hex: '#2fe3e3', name: 'Moderate' },
+    { min: 40, max: 43, r: 18, g: 127, b: 127, hex: '#127f7f', name: 'Moderate' },
+    { min: 43, max: 46, r: 47, g: 160, b: 95, hex: '#2fa05f', name: 'Heavy' },
+    { min: 46, max: 49, r: 255, g: 255, b: 102, hex: '#ffff66', name: 'Heavy' },
+    { min: 49, max: 52, r: 255, g: 210, b: 26, hex: '#ffd21a', name: 'Heavy' },
+    { min: 52, max: 55, r: 255, g: 163, b: 26, hex: '#ffa31a', name: 'Very Heavy' },
+    { min: 55, max: 58, r: 255, g: 127, b: 26, hex: '#ff7f1a', name: 'Very Heavy' },
+    { min: 58, max: 61, r: 255, g: 77, b: 26, hex: '#ff4d1a', name: 'Intense' },
+    { min: 61, max: 64, r: 255, g: 0, b: 0, hex: '#ff0000', name: 'Extreme' },
+    { min: 64, max: 999, r: 91, g: 0, b: 0, hex: '#5b0000', name: 'Extreme' }
 ];
 
 /**
@@ -49,8 +49,8 @@ function getDbzFromPixel(r) {
  * @returns {Object|null} - RGB object {r, g, b} or null if below threshold
  */
 function getBomColorForDbz(dbz) {
-    // Below minimum threshold (12 dBZ) - no significant precipitation
-    if (dbz < 12) return null;
+    // Below minimum threshold (-12 dBZ) - treat as no significant precipitation
+    if (dbz < BOM_DBZ_COLORS[0].min) return null;
 
     // Find matching bin
     for (const range of BOM_DBZ_COLORS) {
@@ -181,7 +181,7 @@ L.TileLayer.BomColorMapped = L.TileLayer.extend({
                     // Get dBZ directly from red channel
                     const dbz = getDbzFromPixel(r);
 
-                    if (dbz >= 12) {
+                    if (dbz >= BOM_DBZ_COLORS[0].min) {
                         // Get EXACT BoM color for this dBZ value
                         const bomColor = getBomColorForDbz(dbz);
 

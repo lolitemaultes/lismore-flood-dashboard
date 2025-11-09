@@ -15,6 +15,88 @@
     z-index: 1;
 }
 
+/* Map tools overlay */
+.radar-map-tools {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    z-index: 1001;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    border-radius: var(--border-radius);
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: var(--shadow-md);
+}
+
+:root[data-theme="dark"] .radar-map-tools {
+    background: rgba(30, 41, 59, 0.92);
+    color: var(--text-primary);
+    backdrop-filter: blur(8px);
+}
+
+.radar-map-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.radar-tool-button {
+    font-size: 0.75rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease, color 0.2s ease;
+}
+
+.radar-tool-button:hover,
+.radar-tool-button:focus {
+    background: var(--primary-color);
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+.radar-tool-button.active {
+    background: var(--primary-color);
+    color: #fff;
+    border-color: var(--primary-color);
+}
+
+.radar-opacity-control {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.radar-opacity-slider {
+    width: 140px;
+    accent-color: var(--primary-color);
+}
+
+.radar-opacity-slider::-webkit-slider-thumb {
+    cursor: pointer;
+}
+
+.radar-opacity-slider::-moz-range-thumb {
+    cursor: pointer;
+}
+
+.radar-lismore-tooltip {
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: rgba(0, 0, 0, 0.75);
+    color: #fff;
+    border-radius: 4px;
+    padding: 0.25rem 0.5rem;
+    border: none;
+}
+
 /* Ensure radar frames switch instantly without Leaflet fade animation */
 #radar-map .leaflet-pane.leaflet-radarPane-pane .leaflet-layer,
 #radar-map .leaflet-pane.leaflet-radarPane-pane .leaflet-tile,
@@ -197,6 +279,50 @@
 
 .radar-btn:active {
     transform: translateY(0);
+}
+
+@media (max-width: 1024px) {
+    .radar-map-tools {
+        top: 12px;
+        left: 12px;
+        padding: 0.6rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .radar-map-tools {
+        gap: 0.5rem;
+    }
+
+    .radar-map-buttons {
+        gap: 0.35rem;
+    }
+
+    .radar-opacity-slider {
+        width: 120px;
+    }
+}
+
+@media (max-width: 640px) {
+    .radar-map-tools {
+        left: 50%;
+        transform: translateX(-50%);
+        width: calc(100% - 2rem);
+    }
+
+    .radar-map-buttons {
+        justify-content: center;
+    }
+
+    .radar-opacity-control {
+        justify-content: center;
+        flex-wrap: wrap;
+        text-align: center;
+    }
+
+    .radar-opacity-slider {
+        width: 100%;
+    }
 }
 
 .radar-btn svg {
