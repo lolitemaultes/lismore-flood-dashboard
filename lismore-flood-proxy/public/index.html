@@ -256,6 +256,17 @@
                 </ul>
             </section>
 
+            <section style="margin-bottom: 2rem; background: #e8f4fd; border: 1px solid #b3d9f2; border-radius: 4px; padding: 1.5rem;">
+                <h2 style="color: #0c5460; margin-top: 0;">Live Status Information</h2>
+                <p style="margin: 0.5rem 0;">This dashboard provides real-time monitoring of:</p>
+                <ul style="margin: 0.5rem 0;">
+                    <li><strong>Flood Levels:</strong> Current water levels and trends from Bureau of Meteorology river gauges</li>
+                    <li><strong>Weather Radar:</strong> Live radar imagery showing precipitation patterns</li>
+                    <li><strong>Power Outages:</strong> Essential Energy outage map showing current and planned power interruptions</li>
+                    <li><strong>Traffic Cameras:</strong> Live traffic camera feeds from Transport for NSW</li>
+                </ul>
+            </section>
+
             <footer style="border-top: 2px solid #eee; padding-top: 1rem; margin-top: 3rem; color: #666; font-size: 0.9em;">
                 <p>Data sources: Bureau of Meteorology, Transport for NSW, Essential Energy</p>
                 <p><strong>Always follow directions from emergency services during flood events.</strong></p>
@@ -566,14 +577,6 @@
                         <div class="tab-header">
                             <h2>Lismore Flood Impact Map</h2>
                             <div style="display: flex; gap: 0.5rem; align-items: center;">
-                                <button id="refresh-floodmap" class="button">
-                                    <svg xmlns="https://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M23 4v6h-6"></path>
-                                        <path d="M1 20v-6h6"></path>
-                                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
-                                    </svg>
-                                    Refresh
-                                </button>
                                 <button id="use-current-level" class="button">
                                     <svg xmlns="https://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M12 2v6"></path>
@@ -587,10 +590,21 @@
                                     </svg>
                                     Use Current Level
                                 </button>
-                                <label class="toggle-option" style="margin: 0;">
-                                    <input type="checkbox" id="flood-show-markers" checked>
-                                    <span class="toggle-label">Show Property Markers</span>
-                                </label>
+                                <button id="flood-show-markers" class="button toggle-button active">
+                                    <svg xmlns="https://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                        <circle cx="12" cy="10" r="3"></circle>
+                                    </svg>
+                                    Toggle Property Markers
+                                </button>
+                                <button id="refresh-floodmap" class="button">
+                                    <svg xmlns="https://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M23 4v6h-6"></path>
+                                        <path d="M1 20v-6h6"></path>
+                                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                                    </svg>
+                                    Refresh
+                                </button>
                             </div>
                         </div>
                         
@@ -864,11 +878,6 @@
                         <div class="stat-item">
                             <div class="stat-label">Falling Locations</div>
                             <div id="falling-count" class="stat-value">-</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-label">Power Outages</div>
-                            <div id="outage-count" class="stat-value">-</div>
-                            <div id="outage-status" class="stat-footer">Loading...</div>
                         </div>
                     </div>
                 </div>

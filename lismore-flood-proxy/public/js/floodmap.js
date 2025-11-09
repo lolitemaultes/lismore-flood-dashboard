@@ -623,8 +623,9 @@ function initFloodMapWithLevee() {
     
     const showMarkersToggle = document.getElementById('flood-show-markers');
     if (showMarkersToggle) {
-        showMarkersToggle.addEventListener('change', function() {
-            if (this.checked) {
+        showMarkersToggle.addEventListener('click', function() {
+            this.classList.toggle('active');
+            if (this.classList.contains('active')) {
                 floodMap.addLayer(floodMarkers);
                 console.log('Property markers shown');
             } else {
