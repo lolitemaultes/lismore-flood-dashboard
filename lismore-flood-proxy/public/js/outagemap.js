@@ -383,18 +383,6 @@
         const total = counts.current + counts.future + counts.cancelled;
         document.getElementById('outage-last-update').textContent = new Date().toLocaleTimeString('en-AU');
 
-        // Update Data Sources & Status section
-        const outageMapStatusValue = document.getElementById('outagemap-status-value');
-        if (outageMapStatusValue) {
-            if (total > 0 || (data.errors && data.errors.length === 0)) {
-                outageMapStatusValue.textContent = 'Online';
-                outageMapStatusValue.className = 'status-value online';
-            } else if (data.errors && data.errors.length > 0 && total === 0) {
-                outageMapStatusValue.textContent = 'Service Unavailable';
-                outageMapStatusValue.className = 'status-value offline';
-            }
-        }
-
         if (data.errors && data.errors.length > 0) {
             const errorCategories = data.errors.map(e => e.category).join(', ');
             console.warn('Some outage categories failed to load:', data.errors);
@@ -454,6 +442,21 @@
             const data = await res.json();
 
             cachedOutageData = data;
+
+            // Update Data Sources & Status section based on fetch success
+            const outageMapStatusValue = document.getElementById('outagemap-status-value');
+            if (outageMapStatusValue) {
+                const hasErrors = data.errors && data.errors.length > 0;
+                const totalOutages = (data.features && data.features.length) || 0;
+
+                if (totalOutages > 0 || !hasErrors) {
+                    outageMapStatusValue.textContent = 'Online';
+                    outageMapStatusValue.className = 'status-value online';
+                } else if (hasErrors && totalOutages === 0) {
+                    outageMapStatusValue.textContent = 'Service Unavailable';
+                    outageMapStatusValue.className = 'status-value offline';
+                }
+            }
 
             if (!outageMapInitialized) {
                 console.log('Outage data fetched and cached. Map not yet initialized.');
