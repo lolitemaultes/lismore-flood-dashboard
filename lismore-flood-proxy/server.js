@@ -6,7 +6,7 @@ const path = require('path');
 const fs = require('fs');
 const NodeCache = require('node-cache');
 const { XMLParser } = require('fast-xml-parser');
-const bomRadarService = require('./radarService');
+const rainViewerService = require('./rainViewerService');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -914,15 +914,17 @@ app.get('/api/outages/clear-cache', (req, res) => {
     });
 });
 
-// New BoM Radar endpoints (FTP-based interactive map)
+// RainViewer Radar endpoints
 app.get('/api/radar/frames', (req, res) => {
     try {
-        const frames = bomRadarService.getFrames();
-        const status = bomRadarService.getStatus();
+        const frames = rainViewerService.getFrames();
+        const status = rainViewerService.getStatus();
+        const config = rainViewerService.getConfig();
         res.json({
             success: true,
             frames,
             status,
+            config,
             timestamp: new Date().toISOString()
         });
     } catch (error) {
@@ -934,36 +936,9 @@ app.get('/api/radar/frames', (req, res) => {
     }
 });
 
-app.get('/api/radar/image/:filename', async (req, res) => {
-    try {
-        const { filename } = req.params;
-
-        // Validate filename format
-        if (!/^IDR\d+\.T\.\d{12}\.png$/.test(filename)) {
-            return res.status(400).json({
-                success: false,
-                error: 'Invalid filename format'
-            });
-        }
-
-        const imageData = await bomRadarService.getFrameData(filename);
-
-        res.set('Content-Type', 'image/png');
-        res.set('Cache-Control', 'public, max-age=600'); // Cache for 10 minutes
-        res.set('Access-Control-Allow-Origin', '*');
-        res.send(imageData);
-    } catch (error) {
-        Logger.error('Error serving radar image:', error.message);
-        res.status(404).json({
-            success: false,
-            error: error.message
-        });
-    }
-});
-
 app.get('/api/radar/status', (req, res) => {
     try {
-        const status = bomRadarService.getStatus();
+        const status = rainViewerService.getStatus();
         res.json({
             success: true,
             ...status,
@@ -974,6 +949,125 @@ app.get('/api/radar/status', (req, res) => {
             success: false,
             error: error.message
         });
+    }
+});
+
+// Create transparent PNG for failed tiles
+const TRANSPARENT_PNG_1x1 = Buffer.from(
+    'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
+    'base64'
+);
+
+// In-memory radar tile cache for performance (stores last 500 tiles)
+const radarTileCache = new Map();
+const MAX_RADAR_TILE_CACHE_SIZE = 500;
+const RADAR_TILE_CACHE_DURATION = 3600000; // 1 hour in milliseconds
+
+function getRadarTileCacheKey(timestamp, z, x, y) {
+    return `${timestamp}_${z}_${x}_${y}`;
+}
+
+function addToRadarTileCache(key, data) {
+    // Implement LRU cache - remove oldest if cache is full
+    if (radarTileCache.size >= MAX_RADAR_TILE_CACHE_SIZE) {
+        const firstKey = radarTileCache.keys().next().value;
+        radarTileCache.delete(firstKey);
+    }
+    radarTileCache.set(key, {
+        data: data,
+        timestamp: Date.now()
+    });
+}
+
+function getFromRadarTileCache(key) {
+    const cached = radarTileCache.get(key);
+    if (!cached) return null;
+
+    // Check if cache is still valid
+    if (Date.now() - cached.timestamp > RADAR_TILE_CACHE_DURATION) {
+        radarTileCache.delete(key);
+        return null;
+    }
+
+    return cached.data;
+}
+
+// RainViewer tile proxy (server-side fetch to avoid CORS) with aggressive caching
+app.get('/api/radar/tile/:timestamp/:z/:x/:y', async (req, res) => {
+    const { timestamp, z, x, y } = req.params;
+    const cacheKey = getRadarTileCacheKey(timestamp, z, x, y);
+
+    // Check in-memory cache first
+    const cachedTile = getFromRadarTileCache(cacheKey);
+    if (cachedTile) {
+        res.setHeader('Content-Type', 'image/png');
+        res.setHeader('Cache-Control', 'public, max-age=3600');
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('X-Cache', 'HIT');
+        return res.send(cachedTile);
+    }
+
+    // RainViewer tile URL format:
+    // https://tilecache.rainviewer.com/v2/radar/{timestamp}/{tileSize}/{z}/{x}/{y}/{color}/{smooth}_{snow}.png
+    // color: 0 = original, 1-8 = various color schemes (we'll use 2 for similar to BoM colors)
+    // smooth: 0 = no smoothing, 1 = smooth
+    // snow: 0 = ignore snow, 1 = show snow
+    const rainViewerUrl = `https://tilecache.rainviewer.com/v2/radar/${timestamp}/256/${z}/${x}/${y}/2/1_1.png`;
+
+    try {
+        Logger.verbose(`[RADAR TILE] Cache MISS - Fetching ${z}/${x}/${y} for timestamp ${timestamp}`);
+
+        const response = await axios.get(rainViewerUrl, {
+            responseType: 'arraybuffer',
+            timeout: 5000,
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                'Accept': 'image/png,image/*',
+                'Referer': 'https://www.rainviewer.com/'
+            },
+            validateStatus: (status) => status === 200
+        });
+
+        // Cache the tile in memory for faster subsequent requests
+        addToRadarTileCache(cacheKey, response.data);
+
+        // Set headers
+        res.setHeader('Content-Type', 'image/png');
+        res.setHeader('Cache-Control', 'public, max-age=3600'); // Cache for 1 hour
+        res.setHeader('Access-Control-Allow-Origin', '*'); // Allow CORS
+        res.setHeader('X-Cache', 'MISS');
+
+        // Send the image buffer
+        res.send(response.data);
+        Logger.verbose(`[RADAR TILE] Success ${z}/${x}/${y} - Cached for future requests`);
+
+    } catch (error) {
+        // Log error details (throttled, but suppress expected 403s at high zoom)
+        // RainViewer radar tiles are limited to zoom 10, so 403s at zoom 11+ are expected
+        const isExpectedZoomError = error.response && error.response.status === 403 && parseInt(z) >= 11;
+
+        if (error.code === 'ECONNREFUSED') {
+            Logger.error(`[RADAR TILE] Connection refused to RainViewer for tile ${z}/${x}/${y}`);
+        } else if (error.code === 'ETIMEDOUT' || error.message.includes('timeout')) {
+            Logger.warn(`[RADAR TILE] Timeout fetching tile ${z}/${x}/${y}`);
+        } else if (error.response) {
+            if (isExpectedZoomError) {
+                // Only log once as verbose, not error - this is expected behavior
+                Logger.verbose(`[RADAR TILE] Tile not available at zoom ${z} (RainViewer limit is zoom 10)`);
+            } else {
+                Logger.error(`[RADAR TILE] HTTP ${error.response.status} for tile ${z}/${x}/${y} - URL: ${rainViewerUrl}`);
+            }
+        } else {
+            Logger.error(`[RADAR TILE] Error for tile ${z}/${x}/${y}: ${error.message}`);
+        }
+
+        // IMPORTANT: Return a transparent PNG instead of JSON
+        // This prevents browser errors and allows map to render
+        res.setHeader('Content-Type', 'image/png');
+        res.setHeader('Cache-Control', 'public, max-age=60'); // Short cache for errors
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.status(200); // Return 200 with transparent tile, not an error status
+        res.send(TRANSPARENT_PNG_1x1);
     }
 });
 
@@ -1436,26 +1530,59 @@ async function initializeServer() {
         }, CLEANUP_INTERVAL);
         Logger.info('Periodic cleanup scheduled (every 5 minutes)');
 
-        app.listen(PORT, () => {
+        const server = app.listen(PORT, () => {
             console.log('');
             Logger.success(`Server running on port ${PORT}`);
             Logger.info(`Dashboard: http://localhost:${PORT}`);
             Logger.info(`API Base: http://localhost:${PORT}/api`);
             console.log('');
+            Logger.success(`✓ IMPORTANT: Open http://localhost:${PORT} in your browser`);
+            Logger.warn(`  Do NOT open the HTML files directly from the file system`);
+            console.log('');
             Logger.table([
                 { Endpoint: '/api/outages', Description: 'Power outage data' },
-                { Endpoint: '/api/radar/:id', Description: 'Weather radar data' },
+                { Endpoint: '/api/radar/frames', Description: 'Radar animation frames' },
+                { Endpoint: '/api/radar/tile/...', Description: 'Radar tile proxy' },
                 { Endpoint: '/flood-data', Description: 'Current flood levels' },
                 { Endpoint: '/river-data', Description: 'River height history' },
-                { Endpoint: '/status', Description: 'Server status' }
+                { Endpoint: '/status', Description: 'Server health check' }
             ]);
             console.log('');
             Logger.info('Server initialization complete');
+            Logger.info('Press Ctrl+C to stop the server');
             console.log(`${colors.gray}${'─'.repeat(60)}${colors.reset}\n`);
+        });
+
+        // Handle port binding errors
+        server.on('error', (error) => {
+            if (error.code === 'EADDRINUSE') {
+                Logger.error(`Port ${PORT} is already in use!`);
+                Logger.info('Solutions:');
+                Logger.info(`  1. Stop the process using port ${PORT}`);
+                Logger.info('  2. Or use a different port: set PORT=3001 && node server.js');
+                console.log('');
+                Logger.info('To find what\'s using the port:');
+                Logger.info(`  Windows: netstat -ano | findstr :${PORT}`);
+                Logger.info('  Then use Task Manager to stop that process');
+            } else {
+                Logger.error('Server error:', error.message);
+            }
+            process.exit(1);
+        });
+
+        // Graceful shutdown
+        process.on('SIGINT', () => {
+            console.log('');
+            Logger.info('Shutting down server...');
+            server.close(() => {
+                Logger.success('Server stopped');
+                process.exit(0);
+            });
         });
 
     } catch (error) {
         Logger.error('Failed to initialize server:', error.message);
+        Logger.error('Stack trace:', error.stack);
         process.exit(1);
     }
 }
