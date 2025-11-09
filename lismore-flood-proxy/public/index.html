@@ -2927,7 +2927,11 @@
           const gradient = ctx.createLinearGradient(0, 0, 0, 400);
           gradient.addColorStop(0, 'rgba(30, 136, 229, 0.2)');
           gradient.addColorStop(1, 'rgba(30, 136, 229, 0)');
-          
+
+          const isDarkMode = document.documentElement.getAttribute('data-theme') === 'dark';
+          const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.03)';
+          const tickColor = isDarkMode ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)';
+
           riverChartInstance = new Chart(ctx, {
             type: 'line',
             data: {
@@ -2989,7 +2993,8 @@
                     maxRotation: 45,
                     minRotation: 45,
                     autoSkip: true,
-                    maxTicksLimit: 8
+                    maxTicksLimit: 8,
+                    color: tickColor
                   }
                 },
                 y: {
@@ -3000,9 +3005,10 @@
                     return maxHeight * 1.2;
                   }(),
                   grid: {
-                    color: 'rgba(0, 0, 0, 0.03)',
+                    color: gridColor,
                   },
                   ticks: {
+                    color: tickColor,
                     callback: function(value) {
                       return value.toFixed(2) + 'm';
                     }
