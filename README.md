@@ -16,7 +16,7 @@ A real-time emergency dashboard for monitoring flood conditions in the Lismore, 
 - **Interactive River Height Graphs**
 - **Live River Level Information**
 - **Traffic Webcam Integration**
-- **Interactive BoM Rainfall Radar**
+- **Interactive Rainfall Radar**
 - **Live Power Outage Map**
 - **Emergency Information**
 - **Basic Flood Statistics**
@@ -144,7 +144,7 @@ To add new data sources, modify the `server.js` file to include additional endpo
 The dashboard aggregates data from multiple authoritative sources:
 
 - **Bureau of Meteorology (BoM)**: Real-time river gauge data
-- **BoM Radar**: Official rainfall radar imagery
+- **RainViewer**: Rainfall radar data
 - **Transport for NSW**: Live traffic camera feeds from Bruxner Highway
 - **Essential Energy**: Power outage information for the region
 - **Lismore City Council**: Floor height data for flood impact mapping
