@@ -1261,14 +1261,17 @@
             webcamStatusValue.textContent = 'Checking...';
             webcamStatusValue.className = 'status-value';
             
-            const radarStatusValue = document.getElementById('radar-status-value') || 
+            const radarStatusValue = document.getElementById('radar-status-value') ||
                                     createStatusElement('radar-status', 'Radar Image');
-            
-            const cycloneStatusValue = document.getElementById('cyclone-status-value') || 
+
+            const cycloneStatusValue = document.getElementById('cyclone-status-value') ||
                                       createStatusElement('cyclone-status', 'Cyclone Map');
-            
-            const floodMapStatusValue = document.getElementById('floodmap-status-value') || 
+
+            const floodMapStatusValue = document.getElementById('floodmap-status-value') ||
                                       createStatusElement('floodmap-status', 'Flood Map');
+
+            const outageMapStatusValue = document.getElementById('outagemap-status-value') ||
+                                        createStatusElement('outagemap-status', 'Outage Map');
             
             fetch(PROXY_URL, { method: 'HEAD' })
                 .then(response => {
@@ -1999,6 +2002,14 @@
             } else {
                 floodMapStatusValue.textContent = 'Initializing...';
                 floodMapStatusValue.className = 'status-value unknown';
+            }
+
+            if (typeof outageMapInitialized !== 'undefined' && outageMapInitialized) {
+                outageMapStatusValue.textContent = 'Online';
+                outageMapStatusValue.className = 'status-value online';
+            } else {
+                outageMapStatusValue.textContent = 'Initializing...';
+                outageMapStatusValue.className = 'status-value unknown';
             }
         }
 
