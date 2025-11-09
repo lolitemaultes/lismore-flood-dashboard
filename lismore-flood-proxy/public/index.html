@@ -439,9 +439,93 @@
                             </div>
                         </div>
 
+                        <!-- BoM dBZ Color Mapping now handled by radarColorMapper.js -->
 
                         <div class="radar-map-wrapper">
                             <div id="radar-map" class="radar-map"></div>
+
+                            <!-- Radar Legend Toggle Button -->
+                            <button id="radar-legend-toggle" class="radar-legend-toggle" title="Show/hide rainfall intensity legend" aria-label="Toggle legend">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                                </svg>
+                            </button>
+
+                            <!-- Map/Satellite Toggle Button -->
+                            <button id="radar-baselayer-toggle" class="radar-baselayer-toggle" title="Switch to satellite view" aria-label="Toggle base layer">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M17.4 10L21 12L17.4 14M17.4 10L12 13L6.6 10M17.4 10L21 8L12 3L3 8L6.6 10M6.6 10L3 12L6.6 14M17.4 14L21 16L12 21L3 16L6.6 14M17.4 14L12 17L6.6 14"></path>
+                                </svg>
+                            </button>
+
+                            <!-- BoM-style Radar Legend (initially hidden) -->
+                            <div id="radar-legend" class="radar-legend" style="display: none;">
+                                <div class="radar-legend-header">Rainfall Intensity (dBZ)</div>
+                                <div class="radar-legend-items">
+                                    <div class="radar-legend-item">
+                                        <span class="radar-legend-color" style="background: #f5f5fe; border: 1px solid #ccc;"></span>
+                                        <span class="radar-legend-label">12–23</span>
+                                    </div>
+                                    <div class="radar-legend-item">
+                                        <span class="radar-legend-color" style="background: #b4b5ff;"></span>
+                                        <span class="radar-legend-label">23–28</span>
+                                    </div>
+                                    <div class="radar-legend-item">
+                                        <span class="radar-legend-color" style="background: #7979fe;"></span>
+                                        <span class="radar-legend-label">28–31</span>
+                                    </div>
+                                    <div class="radar-legend-item">
+                                        <span class="radar-legend-color" style="background: #1415fe;"></span>
+                                        <span class="radar-legend-label">31–34</span>
+                                    </div>
+                                    <div class="radar-legend-item">
+                                        <span class="radar-legend-color" style="background: #00d8c2;"></span>
+                                        <span class="radar-legend-label">34–37</span>
+                                    </div>
+                                    <div class="radar-legend-item">
+                                        <span class="radar-legend-color" style="background: #019791;"></span>
+                                        <span class="radar-legend-label">37–40</span>
+                                    </div>
+                                    <div class="radar-legend-item">
+                                        <span class="radar-legend-color" style="background: #006766;"></span>
+                                        <span class="radar-legend-label">40–43</span>
+                                    </div>
+                                    <div class="radar-legend-item">
+                                        <span class="radar-legend-color" style="background: #ffff00;"></span>
+                                        <span class="radar-legend-label">43–46</span>
+                                    </div>
+                                    <div class="radar-legend-item">
+                                        <span class="radar-legend-color" style="background: #ffc800;"></span>
+                                        <span class="radar-legend-label">46–49</span>
+                                    </div>
+                                    <div class="radar-legend-item">
+                                        <span class="radar-legend-color" style="background: #ff9601;"></span>
+                                        <span class="radar-legend-label">49–52</span>
+                                    </div>
+                                    <div class="radar-legend-item">
+                                        <span class="radar-legend-color" style="background: #fe6500;"></span>
+                                        <span class="radar-legend-label">52–55</span>
+                                    </div>
+                                    <div class="radar-legend-item">
+                                        <span class="radar-legend-color" style="background: #ff0001;"></span>
+                                        <span class="radar-legend-label">55–58</span>
+                                    </div>
+                                    <div class="radar-legend-item">
+                                        <span class="radar-legend-color" style="background: #c90000;"></span>
+                                        <span class="radar-legend-label">58–61</span>
+                                    </div>
+                                    <div class="radar-legend-item">
+                                        <span class="radar-legend-color" style="background: #780101;"></span>
+                                        <span class="radar-legend-label">61–64</span>
+                                    </div>
+                                    <div class="radar-legend-item">
+                                        <span class="radar-legend-color" style="background: #280000;"></span>
+                                        <span class="radar-legend-label">≥64</span>
+                                    </div>
+                                </div>
+                            </div>
 
                             <div class="radar-loading-overlay" id="radar-loading" style="display: none;">
                                 <div class="spinner"></div>
@@ -512,14 +596,14 @@
                         </div>
 
                         <div class="tab-footer">
-                            <span>Data source: Bureau of Meteorology, Australia (National Radar Composite)</span>
-                            <a href="https://www.bom.gov.au/australia/radar/" target="_blank" rel="noopener noreferrer" class="tab-link">
+                            <span>Radar data: RainViewer | Color-mapped to BoM dBZ scale</span>
+                            <a href="https://www.rainviewer.com" target="_blank" rel="noopener noreferrer" class="tab-link">
                                 <svg xmlns="https://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
                                     <polyline points="15 3 21 3 21 9"></polyline>
                                     <line x1="10" y1="14" x2="21" y2="3"></line>
                                 </svg>
-                                View on BOM
+                                RainViewer
                             </a>
                         </div>
                     </div>
@@ -1016,6 +1100,7 @@
 
     <script src="js/floodmap.js"></script>
     <script src="js/outagemap.js"></script>
+    <script src="js/radarColorMapper.js"></script>
     <script src="js/radarmap.js"></script>
 
     <script>
@@ -1193,6 +1278,12 @@
                     if (currentTabId && currentTabId !== button.id) {
                         setTimeout(() => {
                             switch(currentTabId) {
+                                case 'tab-radar':
+                                    if (typeof resetRadarMap === 'function') {
+                                        resetRadarMap();
+                                        console.log('Radar map reset');
+                                    }
+                                    break;
                                 case 'tab-floodmap':
                                     if (typeof resetFloodMap === 'function') {
                                         resetFloodMap();
@@ -1320,6 +1411,9 @@
             };
 
             function initializeRadar() {
+                // OLD RADAR CODE - DISABLED (using radarmap.js instead)
+                return;
+
                 if (window.radarGlobalState.radarInitialized) {
                     console.warn('Radar already initialized');
                     return;
