@@ -514,12 +514,22 @@ function initializeRadarMapModule() {
             if (typeof nextLayer.bringToFront === 'function') {
                 nextLayer.bringToFront();
             }
-            if (previousLayer && radarMap && radarMap.hasLayer(previousLayer)) {
-                previousLayer.setOpacity(0);
-            }
             if (labelLayer && radarMap && radarMap.hasLayer(labelLayer) && typeof labelLayer.bringToFront === 'function') {
                 labelLayer.bringToFront();
             }
+
+            const hidePrevious = () => {
+                if (previousLayer && radarMap && radarMap.hasLayer(previousLayer)) {
+                    previousLayer.setOpacity(0);
+                }
+            };
+
+            if (typeof window !== 'undefined' && typeof window.requestAnimationFrame === 'function') {
+                window.requestAnimationFrame(hidePrevious);
+            } else {
+                hidePrevious();
+            }
+
             setTimeout(logStatus, 250);
         };
 
@@ -530,36 +540,50 @@ function initializeRadarMapModule() {
 
         nextLayer.setOpacity(0);
 
-        if (nextLayer._radarFirstTileReady) {
+        if (nextLayer._radarReady) {
             revealNextLayer();
             return;
         }
 
         let revealed = false;
-        const cleanupAndReveal = () => {
+        let firstTileSeen = nextLayer._radarFirstTileReady === true;
+
+        const finalizeReveal = () => {
             if (revealed) return;
             revealed = true;
-            nextLayer.off('tileload', onFirstTileLoaded);
+            nextLayer.off('tileload', onTileLoad);
+            nextLayer.off('tileerror', onTileError);
             nextLayer.off('load', onLayerLoaded);
+            clearTimeout(safetyTimer);
+            clearTimeout(maxWaitTimer);
             revealNextLayer();
         };
 
-        const onFirstTileLoaded = () => {
-            cleanupAndReveal();
+        const onTileLoad = () => {
+            firstTileSeen = true;
+        };
+
+        const onTileError = () => {
+            firstTileSeen = true;
         };
 
         const onLayerLoaded = () => {
-            cleanupAndReveal();
+            finalizeReveal();
         };
 
-        nextLayer.on('tileload', onFirstTileLoaded);
+        nextLayer.on('tileload', onTileLoad);
+        nextLayer.on('tileerror', onTileError);
         nextLayer.on('load', onLayerLoaded);
 
-        setTimeout(() => {
-            if (!revealed && nextLayer._radarFirstTileReady) {
-                cleanupAndReveal();
+        const safetyTimer = setTimeout(() => {
+            if (firstTileSeen) {
+                finalizeReveal();
             }
-        }, 500);
+        }, 900);
+
+        const maxWaitTimer = setTimeout(() => {
+            finalizeReveal();
+        }, 1800);
     }
 
     function updateFrameUI() {

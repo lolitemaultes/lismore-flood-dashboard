@@ -9,19 +9,6 @@
     flex-direction: column;
 }
 
-#content-floodmap .tab-header > div > .button {
-    box-sizing: border-box;
-    height: 32px;
-    padding: 0.375rem 1rem;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-#content-floodmap .tab-header > div > .button svg {
-    width: 16px;
-    height: 16px;
-}
-
 .flood-map-container {
     position: relative;
     height: 600px;
