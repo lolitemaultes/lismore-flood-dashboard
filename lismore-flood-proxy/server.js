@@ -112,67 +112,119 @@ class Logger {
 // Component Status Manager for clean logging
 class StatusManager {
     constructor() {
+        const now = new Date();
         this.components = {
-            'Proxy Server': { status: 'Connected', lastUpdate: new Date() },
-            'BOM Data': { status: 'Checking...', lastUpdate: new Date() },
-            'Traffic Camera': { status: 'Checking...', lastUpdate: new Date() },
-            'Radar Map': { status: 'Checking...', lastUpdate: new Date() },
-            'Cyclone Map': { status: 'Checking...', lastUpdate: new Date() },
-            'Flood Map': { status: 'Connected', lastUpdate: new Date() },
-            'Outage Map': { status: 'Connected', lastUpdate: new Date() }
+            'Proxy Server': { status: 'Connected', detail: '', lastUpdate: now },
+            'BOM Data': { status: 'Checking...', detail: '', lastUpdate: now },
+            'Traffic Camera': { status: 'Checking...', detail: '', lastUpdate: now },
+            'Radar Map': { status: 'Checking...', detail: '', lastUpdate: now },
+            'Cyclone Map': { status: 'Checking...', detail: '', lastUpdate: now },
+            'Flood Map': { status: 'Connected', detail: '', lastUpdate: now },
+            'Outage Map': { status: 'Connected', detail: '', lastUpdate: now }
         };
-        this.errorCounts = {};
-        this.lastStatusDisplay = 0;
+        this.serverInfo = { endpoints: [] };
+        this.lastSnapshot = '';
+        this.lastRender = 0;
     }
 
-    updateComponent(name, status) {
-        if (this.components[name]) {
+    setServerInfo(info = {}) {
+        if (!info) return;
+        const merged = { ...this.serverInfo, ...info };
+        if (Array.isArray(info.endpoints)) {
+            merged.endpoints = info.endpoints;
+        }
+        this.serverInfo = merged;
+        this.renderBoard(true);
+    }
+
+    updateComponent(name, status, detail = '') {
+        if (!this.components[name]) {
+            this.components[name] = { status, detail: detail || '', lastUpdate: new Date() };
+        } else {
             this.components[name].status = status;
+            this.components[name].detail = detail || '';
             this.components[name].lastUpdate = new Date();
         }
-    }
 
-    incrementError(component) {
-        this.errorCounts[component] = (this.errorCounts[component] || 0) + 1;
-    }
-
-    resetErrors(component) {
-        this.errorCounts[component] = 0;
+        this.renderBoard();
     }
 
     formatTime(date) {
         return date.toISOString().replace('T', ' ').substring(0, 19);
     }
 
-    displayStatus() {
+    renderBoard(force = false) {
         const now = Date.now();
-        // Only display every 30 seconds
-        if (now - this.lastStatusDisplay < 30000) return;
-        this.lastStatusDisplay = now;
-
-        console.log('\n' + colors.cyan + '═'.repeat(80) + colors.reset);
-        console.log(colors.bright + 'System Status' + colors.reset + colors.gray + ' [' + this.formatTime(new Date()) + ']' + colors.reset);
-        console.log(colors.cyan + '─'.repeat(80) + colors.reset);
-
-        Object.entries(this.components).forEach(([name, info]) => {
-            const statusColor = info.status.includes('Online') || info.status.includes('Connected')
-                ? colors.green
-                : info.status.includes('Not Online') || info.status.includes('Offline')
-                ? colors.red
-                : colors.yellow;
-
-            const statusPadded = name.padEnd(20);
-            const statusValue = info.status.padEnd(15);
-            const timeFormatted = this.formatTime(info.lastUpdate);
-
-            console.log(
-                `${colors.bright}${statusPadded}${colors.reset} ` +
-                `${statusColor}${statusValue}${colors.reset} ` +
-                `${colors.gray}[Updated: ${timeFormatted}]${colors.reset}`
-            );
+        const snapshot = JSON.stringify(this.components, (key, value) => {
+            if (value instanceof Date) {
+                return value.toISOString();
+            }
+            return value;
         });
 
-        console.log(colors.cyan + '═'.repeat(80) + colors.reset + '\n');
+        if (!force && snapshot === this.lastSnapshot && now - this.lastRender < 5000) {
+            return;
+        }
+
+        this.lastSnapshot = snapshot;
+        this.lastRender = now;
+
+        process.stdout.write('\x1b[2J\x1b[0f');
+
+        const headerLine = colors.cyan + '═'.repeat(80) + colors.reset;
+        const dividerLine = colors.cyan + '─'.repeat(80) + colors.reset;
+
+        console.log(headerLine);
+        console.log(
+            colors.bright + 'System Status' + colors.reset +
+            colors.gray + ' [' + this.formatTime(new Date()) + ']' + colors.reset
+        );
+        console.log(dividerLine);
+
+        if (this.serverInfo) {
+            if (this.serverInfo.port) {
+                console.log(`${colors.gray}Server Port:${colors.reset} ${this.serverInfo.port}`);
+            }
+            if (this.serverInfo.dashboardUrl) {
+                console.log(`${colors.gray}Dashboard:${colors.reset} ${this.serverInfo.dashboardUrl}`);
+            }
+            if (this.serverInfo.apiBase) {
+                console.log(`${colors.gray}API Base:${colors.reset} ${this.serverInfo.apiBase}`);
+            }
+            if (this.serverInfo.notice) {
+                console.log(`${colors.green}Note:${colors.reset} ${this.serverInfo.notice}`);
+            }
+            if (this.serverInfo.warning) {
+                console.log(`${colors.yellow}Warning:${colors.reset} ${this.serverInfo.warning}`);
+            }
+            if (this.serverInfo.endpoints && this.serverInfo.endpoints.length > 0) {
+                console.log('');
+                console.log(`${colors.gray}Endpoints:${colors.reset}`);
+                this.serverInfo.endpoints.forEach(endpoint => {
+                    console.log(`  ${endpoint.path.padEnd(24)} ${endpoint.description}`);
+                });
+            }
+            console.log('');
+        }
+
+        Object.entries(this.components).forEach(([name, info]) => {
+            const statusLower = info.status.toLowerCase();
+            let statusColor = colors.yellow;
+            if (statusLower.includes('online') || statusLower.includes('connected')) {
+                statusColor = colors.green;
+            } else if (statusLower.includes('offline') || statusLower.includes('not online')) {
+                statusColor = colors.red;
+            }
+
+            const label = `${colors.bright}${name.padEnd(18)}${colors.reset}`;
+            const statusText = `${statusColor}${info.status.padEnd(14)}${colors.reset}`;
+            const updatedText = `${colors.gray}[Updated: ${this.formatTime(info.lastUpdate)}]${colors.reset}`;
+            const detailText = info.detail ? ` ${colors.gray}(${info.detail})${colors.reset}` : '';
+
+            console.log(`${label} ${statusText} ${updatedText}${detailText}`);
+        });
+
+        console.log(headerLine);
     }
 }
 
@@ -180,7 +232,7 @@ const statusManager = new StatusManager();
 
 // Start periodic status reporting
 setInterval(() => {
-    statusManager.displayStatus();
+    statusManager.renderBoard();
 }, 30000); // Every 30 seconds
 
 app.use(cors());
@@ -208,18 +260,44 @@ app.use((req, res, next) => {
         }
 
         // Update status manager based on endpoint
+        const httpDetail = `HTTP ${res.statusCode}`;
+
         if (req.path.includes('/proxy/webcam')) {
-            statusManager.updateComponent('Traffic Camera', res.statusCode === 200 ? 'Online' : 'Offline');
-        } else if (req.path.includes('/api/radar')) {
-            statusManager.updateComponent('Radar Map', res.statusCode === 200 ? 'Online' : 'Offline');
+            statusManager.updateComponent(
+                'Traffic Camera',
+                res.statusCode === 200 ? 'Online' : 'Offline',
+                httpDetail
+            );
+        } else if (req.path.startsWith('/api/radar/frames') || req.path.startsWith('/api/radar/status')) {
+            statusManager.updateComponent(
+                'Radar Map',
+                res.statusCode === 200 ? 'Online' : 'Offline',
+                httpDetail
+            );
         } else if (req.path.includes('/proxy/cyclone')) {
-            statusManager.updateComponent('Cyclone Map', res.statusCode === 200 ? 'Online' : 'Not Online');
+            statusManager.updateComponent(
+                'Cyclone Map',
+                res.statusCode === 200 ? 'Online' : 'Offline',
+                httpDetail
+            );
         } else if (req.path.includes('/flood-data') || req.path.includes('/api/flood')) {
-            statusManager.updateComponent('Flood Map', res.statusCode === 200 ? 'Online' : 'Offline');
+            statusManager.updateComponent(
+                'Flood Map',
+                res.statusCode === 200 ? 'Online' : 'Offline',
+                httpDetail
+            );
         } else if (req.path.includes('/api/outages')) {
-            statusManager.updateComponent('Outage Map', res.statusCode === 200 ? 'Online' : 'Offline');
+            statusManager.updateComponent(
+                'Outage Map',
+                res.statusCode === 200 ? 'Online' : 'Offline',
+                httpDetail
+            );
         } else if (req.path.includes('/api/bom-connectivity')) {
-            statusManager.updateComponent('BOM Data', res.statusCode === 200 ? 'Connected' : 'Disconnected');
+            statusManager.updateComponent(
+                'BOM Data',
+                res.statusCode === 200 ? 'Online' : 'Offline',
+                httpDetail
+            );
         }
     });
 
@@ -1018,11 +1096,31 @@ app.get('/api/outages/clear-cache', (req, res) => {
 });
 
 // RainViewer Radar endpoints
-app.get('/api/radar/frames', (req, res) => {
+app.get('/api/radar/frames', async (req, res) => {
     try {
+        const shouldRefresh = req.query.refresh === '1' || req.query.refresh === 'true';
+        if (shouldRefresh) {
+            await rainViewerService.updateFrames();
+        }
+
         const frames = rainViewerService.getFrames();
         const status = rainViewerService.getStatus();
         const config = rainViewerService.getConfig();
+
+        const detailParts = [];
+        if (status.frameCount) {
+            detailParts.push(`Frames: ${status.frameCount}`);
+        }
+        if (status.mode === 'fallback') {
+            detailParts.push('Fallback data');
+        }
+
+        statusManager.updateComponent(
+            'Radar Map',
+            status.available ? (status.mode === 'fallback' ? 'Fallback' : 'Online') : 'Offline',
+            detailParts.join(' · ')
+        );
+
         res.json({
             success: true,
             frames,
@@ -1032,6 +1130,7 @@ app.get('/api/radar/frames', (req, res) => {
         });
     } catch (error) {
         Logger.error('Error getting radar frames:', error.message);
+        statusManager.updateComponent('Radar Map', 'Offline', error.message);
         res.status(500).json({
             success: false,
             error: error.message
@@ -1042,12 +1141,30 @@ app.get('/api/radar/frames', (req, res) => {
 app.get('/api/radar/status', (req, res) => {
     try {
         const status = rainViewerService.getStatus();
+        const detailParts = [];
+        if (status.frameCount) {
+            detailParts.push(`Frames: ${status.frameCount}`);
+        }
+        if (status.lastUpdate) {
+            detailParts.push(`Updated ${new Date(status.lastUpdate).toLocaleTimeString('en-AU')}`);
+        }
+        if (status.mode === 'fallback') {
+            detailParts.push('Fallback data');
+        }
+
+        statusManager.updateComponent(
+            'Radar Map',
+            status.available ? (status.mode === 'fallback' ? 'Fallback' : 'Online') : 'Offline',
+            detailParts.join(' · ')
+        );
+
         res.json({
             success: true,
             ...status,
             timestamp: new Date().toISOString()
         });
     } catch (error) {
+        statusManager.updateComponent('Radar Map', 'Offline', error.message);
         res.status(500).json({
             success: false,
             error: error.message
@@ -1099,102 +1216,147 @@ function getFromRadarTileCache(key) {
 app.get('/api/radar/tile/:timestamp/:z/:x/:y', async (req, res) => {
     const { timestamp, z, x, y } = req.params;
 
-    // Get quality parameter from query (default based on zoom level)
     const zoomLevel = parseInt(z);
-    let quality = parseInt(req.query.quality);
+    const requestedQuality = parseInt(req.query.quality);
 
-    // Auto-determine quality if not specified
-    if (isNaN(quality) || quality < 0 || quality > 2) {
-        if (zoomLevel <= 6) {
-            quality = 0; // Smoothed - lowest quality, fastest loading
-        } else if (zoomLevel <= 8) {
-            quality = 1; // Universal - medium quality
-        } else {
-            quality = 2; // High quality - maximum detail
+    const normalizeQuality = (value) => {
+        if (Number.isNaN(value)) {
+            return 0;
+        }
+
+        const clamped = Math.max(0, Math.min(2, value));
+        return clamped >= 2 ? 1 : clamped;
+    };
+
+    let qualityCandidates;
+    if (!Number.isNaN(requestedQuality)) {
+        const preferred = normalizeQuality(requestedQuality);
+        qualityCandidates = [preferred];
+
+        if (preferred === 1) {
+            qualityCandidates.push(0);
+        } else if (preferred === 0) {
+            qualityCandidates.push(1);
+        }
+    } else if (zoomLevel >= 9) {
+        // Prefer crisp raw tiles when zoomed in.
+        qualityCandidates = [1, 0];
+    } else {
+        // Lower zooms can start with lighter smoothed tiles but fall back to detail when available.
+        qualityCandidates = [0, 1];
+    }
+
+    const seenQualities = new Set();
+    qualityCandidates = qualityCandidates.filter((quality) => {
+        if (seenQualities.has(quality)) {
+            return false;
+        }
+        seenQualities.add(quality);
+        return true;
+    });
+
+    let selectedQuality = null;
+    let tileBuffer = null;
+    let cacheHit = false;
+    let lastError = null;
+
+    for (const candidateQuality of qualityCandidates) {
+        const cacheKey = getRadarTileCacheKey(timestamp, z, x, y, candidateQuality);
+        const cachedTile = getFromRadarTileCache(cacheKey);
+        if (cachedTile) {
+            selectedQuality = candidateQuality;
+            tileBuffer = cachedTile;
+            cacheHit = true;
+            break;
+        }
+
+        const rainViewerUrl = `https://tilecache.rainviewer.com/v2/radar/${timestamp}/256/${z}/${x}/${y}/0/${candidateQuality}_0.png`;
+
+        try {
+            Logger.verbose(`[RADAR TILE] Cache MISS - Fetching ${z}/${x}/${y} quality=${candidateQuality} for timestamp ${timestamp}`);
+
+            const response = await axios.get(rainViewerUrl, {
+                responseType: 'arraybuffer',
+                timeout: 5000,
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                    'Accept': 'image/png,image/*',
+                    'Accept-Encoding': 'gzip, deflate',
+                    'Referer': 'https://www.rainviewer.com/',
+                    'Connection': 'keep-alive'
+                },
+                validateStatus: (status) => status === 200,
+                decompress: true
+            });
+
+            addToRadarTileCache(cacheKey, response.data);
+            selectedQuality = candidateQuality;
+            tileBuffer = response.data;
+            break;
+        } catch (error) {
+            const isExpectedZoomError = error.response && error.response.status === 403 && zoomLevel >= 11;
+
+            if (error.code === 'ECONNREFUSED') {
+                Logger.error(`[RADAR TILE] Connection refused to RainViewer for tile ${z}/${x}/${y}`);
+                lastError = error;
+                break;
+            } else if (error.code === 'ETIMEDOUT' || error.message.includes('timeout')) {
+                Logger.warn(`[RADAR TILE] Timeout fetching tile ${z}/${x}/${y}`);
+                lastError = error;
+                break;
+            } else if (error.response) {
+                if (error.response.status === 404) {
+                    Logger.warn(`[RADAR TILE] Quality ${candidateQuality} unavailable for ${z}/${x}/${y} - trying fallback`);
+                    lastError = error;
+                    continue;
+                }
+
+                if (isExpectedZoomError) {
+                    Logger.verbose(`[RADAR TILE] Tile not available at zoom ${z} (RainViewer limit is zoom 10)`);
+                    lastError = error;
+                    continue;
+                }
+
+                Logger.error(`[RADAR TILE] HTTP ${error.response.status} for tile ${z}/${x}/${y} - URL: ${rainViewerUrl}`);
+                lastError = error;
+                break;
+            } else {
+                Logger.error(`[RADAR TILE] Error for tile ${z}/${x}/${y}: ${error.message}`);
+                lastError = error;
+                break;
+            }
         }
     }
 
-    const cacheKey = getRadarTileCacheKey(timestamp, z, x, y, quality);
+    if (tileBuffer && selectedQuality !== null) {
+        const cacheHeader = cacheHit ? 'HIT' : 'MISS';
+        const requestedHeader = qualityCandidates.length > 0 ? qualityCandidates[0] : selectedQuality;
 
-    // Check in-memory cache first
-    const cachedTile = getFromRadarTileCache(cacheKey);
-    if (cachedTile) {
         res.setHeader('Content-Type', 'image/png');
         res.setHeader('Cache-Control', 'public, max-age=21600, immutable');
         res.setHeader('Access-Control-Allow-Origin', '*');
-        res.setHeader('X-Cache', 'HIT');
-        res.setHeader('X-Quality', quality.toString());
-        return res.send(cachedTile);
-    }
+        res.setHeader('X-Cache', cacheHeader);
+        res.setHeader('X-Quality', selectedQuality.toString());
+        res.setHeader('X-Quality-Requested', requestedHeader.toString());
 
-    // RainViewer tile URL format for raw dBZ data:
-    // https://tilecache.rainviewer.com/v2/radar/{timestamp}/{tileSize}/{z}/{x}/{y}/{color}/{smooth}_{snow}.png
-    // color: 0 = Original (raw encoded dBZ data - most reliable)
-    //        All tiles encode: dBZ = (R & 127) - 32, where R is red channel
-    // smooth: quality parameter (0 = smoothed/low detail, 1 = universal, 2 = high quality)
-    // snow: 0 = don't show snow marker (we extract dBZ regardless)
-    // Using color=0 to get raw reliable data, then apply custom BoM colors client-side
-    const rainViewerUrl = `https://tilecache.rainviewer.com/v2/radar/${timestamp}/256/${z}/${x}/${y}/0/${quality}_0.png`;
-
-    try {
-        Logger.verbose(`[RADAR TILE] Cache MISS - Fetching ${z}/${x}/${y} for timestamp ${timestamp}`);
-
-        const response = await axios.get(rainViewerUrl, {
-            responseType: 'arraybuffer',
-            timeout: 5000,
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-                'Accept': 'image/png,image/*',
-                'Accept-Encoding': 'gzip, deflate',
-                'Referer': 'https://www.rainviewer.com/',
-                'Connection': 'keep-alive'
-            },
-            validateStatus: (status) => status === 200,
-            decompress: true  // Automatically decompress gzip responses
-        });
-
-        // Cache the tile in memory for faster subsequent requests
-        addToRadarTileCache(cacheKey, response.data);
-
-        // Set headers
-        res.setHeader('Content-Type', 'image/png');
-        res.setHeader('Cache-Control', 'public, max-age=21600, immutable'); // Cache for 6 hours, immutable
-        res.setHeader('Access-Control-Allow-Origin', '*'); // Allow CORS
-        res.setHeader('X-Cache', 'MISS');
-        res.setHeader('X-Quality', quality.toString());
-
-        // Send the image buffer
-        res.send(response.data);
-        Logger.verbose(`[RADAR TILE] ✓ ${z}/${x}/${y} quality=${quality}`);
-
-    } catch (error) {
-        // Log error details (throttled, but suppress expected 403s at high zoom)
-        // RainViewer radar tiles are limited to zoom 10, so 403s at zoom 11+ are expected
-        const isExpectedZoomError = error.response && error.response.status === 403 && parseInt(z) >= 11;
-
-        if (error.code === 'ECONNREFUSED') {
-            Logger.error(`[RADAR TILE] Connection refused to RainViewer for tile ${z}/${x}/${y}`);
-        } else if (error.code === 'ETIMEDOUT' || error.message.includes('timeout')) {
-            Logger.warn(`[RADAR TILE] Timeout fetching tile ${z}/${x}/${y}`);
-        } else if (error.response) {
-            if (isExpectedZoomError) {
-                // Only log once as verbose, not error - this is expected behavior
-                Logger.verbose(`[RADAR TILE] Tile not available at zoom ${z} (RainViewer limit is zoom 10)`);
-            } else {
-                Logger.error(`[RADAR TILE] HTTP ${error.response.status} for tile ${z}/${x}/${y} - URL: ${rainViewerUrl}`);
-            }
-        } else {
-            Logger.error(`[RADAR TILE] Error for tile ${z}/${x}/${y}: ${error.message}`);
+        if (!cacheHit && selectedQuality !== requestedHeader) {
+            Logger.verbose(`[RADAR TILE] Fallback quality ${selectedQuality} served for ${z}/${x}/${y}`);
+        } else if (!cacheHit) {
+            Logger.verbose(`[RADAR TILE] ✓ ${z}/${x}/${y} quality=${selectedQuality}`);
         }
 
-        // IMPORTANT: Return a transparent PNG instead of JSON
-        // This prevents browser errors and allows map to render
-        res.setHeader('Content-Type', 'image/png');
-        res.setHeader('Cache-Control', 'public, max-age=60'); // Short cache for errors
-        res.setHeader('Access-Control-Allow-Origin', '*');
-        res.status(200); // Return 200 with transparent tile, not an error status
-        res.send(TRANSPARENT_PNG_1x1);
+        return res.send(tileBuffer);
     }
+
+    if (lastError && lastError.response && lastError.response.status === 404 && qualityCandidates.length > 1) {
+        Logger.warn(`[RADAR TILE] Exhausted quality fallbacks for ${z}/${x}/${y}, returning transparent tile`);
+    }
+
+    res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Cache-Control', 'public, max-age=60');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.status(200);
+    res.send(TRANSPARENT_PNG_1x1);
 });
 
 // Old radar endpoint (keep for backwards compatibility, will be deprecated)
@@ -1302,9 +1464,11 @@ app.get('/flood-data', async (req, res) => {
     try {
         await FileUtils.cleanupRadarImages();
         const floodData = await FloodService.fetchBomFloodData();
+        statusManager.updateComponent('BOM Data', 'Online', 'Flood data refreshed');
         res.json(floodData);
     } catch (error) {
         Logger.error('Error in flood-data endpoint:', error.message);
+        statusManager.updateComponent('BOM Data', 'Offline', error.message);
         res.status(500).json({
             success: false,
             error: error.message,
@@ -1324,9 +1488,11 @@ app.get('/river-data', async (req, res) => {
         }
         
         const riverHeightData = await FloodService.fetchRiverHeightData(location);
+        statusManager.updateComponent('BOM Data', 'Online', `River data for ${location}`);
         res.json(riverHeightData);
     } catch (error) {
         Logger.error('Error in river-data endpoint:', error.message);
+        statusManager.updateComponent('BOM Data', 'Offline', error.message);
         res.status(500).json({
             success: false,
             error: error.message
@@ -1481,6 +1647,12 @@ app.get('/api/check-cyclone', async (req, res) => {
             Logger.verbose(`Cyclone image ${available ? 'available' : 'not available'} (HTTP ${response.status})`);
         }
 
+        statusManager.updateComponent(
+            'Cyclone Map',
+            available ? 'Online' : 'Offline',
+            `HTTP ${response.status}`
+        );
+
         res.json({
             available,
             status: response.status,
@@ -1488,6 +1660,7 @@ app.get('/api/check-cyclone', async (req, res) => {
         });
     } catch (error) {
         Logger.verbose('Cyclone image not available (connection error)');
+        statusManager.updateComponent('Cyclone Map', 'Offline', error.message);
         res.json({
             available: false,
             error: error.message,
@@ -1686,6 +1859,22 @@ async function initializeServer() {
             Logger.info('Server initialization complete');
             Logger.info('Press Ctrl+C to stop the server');
             console.log(`${colors.gray}${'─'.repeat(60)}${colors.reset}\n`);
+
+            statusManager.setServerInfo({
+                port: PORT,
+                dashboardUrl: `http://localhost:${PORT}`,
+                apiBase: `http://localhost:${PORT}/api`,
+                notice: `Open http://localhost:${PORT} in your browser`,
+                warning: 'Do NOT open the HTML files directly from the file system',
+                endpoints: [
+                    { path: '/api/outages', description: 'Power outage data' },
+                    { path: '/api/radar/frames', description: 'Radar animation frames' },
+                    { path: '/api/radar/tile/...', description: 'Radar tile proxy' },
+                    { path: '/flood-data', description: 'Current flood levels' },
+                    { path: '/river-data', description: 'River height history' },
+                    { path: '/status', description: 'Server health check' }
+                ]
+            });
         });
 
         // Handle port binding errors
