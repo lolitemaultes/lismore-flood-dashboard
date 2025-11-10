@@ -109,17 +109,120 @@ class Logger {
     }
 }
 
+// Component Status Manager for clean logging
+class StatusManager {
+    constructor() {
+        this.components = {
+            'Proxy Server': { status: 'Connected', lastUpdate: new Date() },
+            'BOM Data': { status: 'Checking...', lastUpdate: new Date() },
+            'Traffic Camera': { status: 'Checking...', lastUpdate: new Date() },
+            'Radar Map': { status: 'Checking...', lastUpdate: new Date() },
+            'Cyclone Map': { status: 'Checking...', lastUpdate: new Date() },
+            'Flood Map': { status: 'Connected', lastUpdate: new Date() },
+            'Outage Map': { status: 'Connected', lastUpdate: new Date() }
+        };
+        this.errorCounts = {};
+        this.lastStatusDisplay = 0;
+    }
+
+    updateComponent(name, status) {
+        if (this.components[name]) {
+            this.components[name].status = status;
+            this.components[name].lastUpdate = new Date();
+        }
+    }
+
+    incrementError(component) {
+        this.errorCounts[component] = (this.errorCounts[component] || 0) + 1;
+    }
+
+    resetErrors(component) {
+        this.errorCounts[component] = 0;
+    }
+
+    formatTime(date) {
+        return date.toISOString().replace('T', ' ').substring(0, 19);
+    }
+
+    displayStatus() {
+        const now = Date.now();
+        // Only display every 30 seconds
+        if (now - this.lastStatusDisplay < 30000) return;
+        this.lastStatusDisplay = now;
+
+        console.log('\n' + colors.cyan + '═'.repeat(80) + colors.reset);
+        console.log(colors.bright + 'System Status' + colors.reset + colors.gray + ' [' + this.formatTime(new Date()) + ']' + colors.reset);
+        console.log(colors.cyan + '─'.repeat(80) + colors.reset);
+
+        Object.entries(this.components).forEach(([name, info]) => {
+            const statusColor = info.status.includes('Online') || info.status.includes('Connected')
+                ? colors.green
+                : info.status.includes('Not Online') || info.status.includes('Offline')
+                ? colors.red
+                : colors.yellow;
+
+            const statusPadded = name.padEnd(20);
+            const statusValue = info.status.padEnd(15);
+            const timeFormatted = this.formatTime(info.lastUpdate);
+
+            console.log(
+                `${colors.bright}${statusPadded}${colors.reset} ` +
+                `${statusColor}${statusValue}${colors.reset} ` +
+                `${colors.gray}[Updated: ${timeFormatted}]${colors.reset}`
+            );
+        });
+
+        console.log(colors.cyan + '═'.repeat(80) + colors.reset + '\n');
+    }
+}
+
+const statusManager = new StatusManager();
+
+// Start periodic status reporting
+setInterval(() => {
+    statusManager.displayStatus();
+}, 30000); // Every 30 seconds
+
 app.use(cors());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Silent middleware - only log errors, not every request
 app.use((req, res, next) => {
     const startTime = Date.now();
-    
+
     res.on('finish', () => {
         const duration = Date.now() - startTime;
-        Logger.api(req.method, req.path, res.statusCode, duration);
+
+        // Ignore expected 404s (Chrome devtools, cyclone images when no cyclone)
+        const isExpected404 = res.statusCode === 404 && (
+            req.path.includes('.well-known') ||
+            req.path.includes('devtools') ||
+            req.path.includes('cyclone-image')
+        );
+
+        // Only log errors or very slow requests
+        if (res.statusCode >= 400 && !isExpected404) {
+            Logger.error(`${req.method} ${req.path} ${res.statusCode} ${duration}ms`);
+        } else if (duration > 2000) {
+            Logger.warn(`Slow request: ${req.method} ${req.path} ${duration}ms`);
+        }
+
+        // Update status manager based on endpoint
+        if (req.path.includes('/proxy/webcam')) {
+            statusManager.updateComponent('Traffic Camera', res.statusCode === 200 ? 'Online' : 'Offline');
+        } else if (req.path.includes('/api/radar')) {
+            statusManager.updateComponent('Radar Map', res.statusCode === 200 ? 'Online' : 'Offline');
+        } else if (req.path.includes('/proxy/cyclone')) {
+            statusManager.updateComponent('Cyclone Map', res.statusCode === 200 ? 'Online' : 'Not Online');
+        } else if (req.path.includes('/flood-data') || req.path.includes('/api/flood')) {
+            statusManager.updateComponent('Flood Map', res.statusCode === 200 ? 'Online' : 'Offline');
+        } else if (req.path.includes('/api/outages')) {
+            statusManager.updateComponent('Outage Map', res.statusCode === 200 ? 'Online' : 'Offline');
+        } else if (req.path.includes('/api/bom-connectivity')) {
+            statusManager.updateComponent('BOM Data', res.statusCode === 200 ? 'Connected' : 'Disconnected');
+        }
     });
-    
+
     next();
 });
 
@@ -958,13 +1061,13 @@ const TRANSPARENT_PNG_1x1 = Buffer.from(
     'base64'
 );
 
-// In-memory radar tile cache for performance (stores last 500 tiles)
+// In-memory radar tile cache for performance
 const radarTileCache = new Map();
-const MAX_RADAR_TILE_CACHE_SIZE = 500;
-const RADAR_TILE_CACHE_DURATION = 3600000; // 1 hour in milliseconds
+const MAX_RADAR_TILE_CACHE_SIZE = 2000; // Large cache for faster repeat loads
+const RADAR_TILE_CACHE_DURATION = 21600000; // 6 hours in milliseconds
 
-function getRadarTileCacheKey(timestamp, z, x, y) {
-    return `${timestamp}_${z}_${x}_${y}`;
+function getRadarTileCacheKey(timestamp, z, x, y, quality) {
+    return `${timestamp}_${z}_${x}_${y}_q${quality}`;
 }
 
 function addToRadarTileCache(key, data) {
@@ -992,27 +1095,46 @@ function getFromRadarTileCache(key) {
     return cached.data;
 }
 
-// RainViewer tile proxy (server-side fetch to avoid CORS) with aggressive caching
+// RainViewer tile proxy with dynamic quality based on zoom level
 app.get('/api/radar/tile/:timestamp/:z/:x/:y', async (req, res) => {
     const { timestamp, z, x, y } = req.params;
-    const cacheKey = getRadarTileCacheKey(timestamp, z, x, y);
+
+    // Get quality parameter from query (default based on zoom level)
+    const zoomLevel = parseInt(z);
+    let quality = parseInt(req.query.quality);
+
+    // Auto-determine quality if not specified
+    if (isNaN(quality) || quality < 0 || quality > 2) {
+        if (zoomLevel <= 6) {
+            quality = 0; // Smoothed - lowest quality, fastest loading
+        } else if (zoomLevel <= 8) {
+            quality = 1; // Universal - medium quality
+        } else {
+            quality = 2; // High quality - maximum detail
+        }
+    }
+
+    const cacheKey = getRadarTileCacheKey(timestamp, z, x, y, quality);
 
     // Check in-memory cache first
     const cachedTile = getFromRadarTileCache(cacheKey);
     if (cachedTile) {
         res.setHeader('Content-Type', 'image/png');
-        res.setHeader('Cache-Control', 'public, max-age=3600');
+        res.setHeader('Cache-Control', 'public, max-age=21600, immutable');
         res.setHeader('Access-Control-Allow-Origin', '*');
         res.setHeader('X-Cache', 'HIT');
+        res.setHeader('X-Quality', quality.toString());
         return res.send(cachedTile);
     }
 
-    // RainViewer tile URL format:
+    // RainViewer tile URL format for raw dBZ data:
     // https://tilecache.rainviewer.com/v2/radar/{timestamp}/{tileSize}/{z}/{x}/{y}/{color}/{smooth}_{snow}.png
-    // color: 0 = original, 1-8 = various color schemes (we'll use 2 for similar to BoM colors)
-    // smooth: 0 = no smoothing, 1 = smooth
-    // snow: 0 = ignore snow, 1 = show snow
-    const rainViewerUrl = `https://tilecache.rainviewer.com/v2/radar/${timestamp}/256/${z}/${x}/${y}/2/1_1.png`;
+    // color: 0 = Original (raw encoded dBZ data - most reliable)
+    //        All tiles encode: dBZ = (R & 127) - 32, where R is red channel
+    // smooth: quality parameter (0 = smoothed/low detail, 1 = universal, 2 = high quality)
+    // snow: 0 = don't show snow marker (we extract dBZ regardless)
+    // Using color=0 to get raw reliable data, then apply custom BoM colors client-side
+    const rainViewerUrl = `https://tilecache.rainviewer.com/v2/radar/${timestamp}/256/${z}/${x}/${y}/0/${quality}_0.png`;
 
     try {
         Logger.verbose(`[RADAR TILE] Cache MISS - Fetching ${z}/${x}/${y} for timestamp ${timestamp}`);
@@ -1023,9 +1145,12 @@ app.get('/api/radar/tile/:timestamp/:z/:x/:y', async (req, res) => {
             headers: {
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
                 'Accept': 'image/png,image/*',
-                'Referer': 'https://www.rainviewer.com/'
+                'Accept-Encoding': 'gzip, deflate',
+                'Referer': 'https://www.rainviewer.com/',
+                'Connection': 'keep-alive'
             },
-            validateStatus: (status) => status === 200
+            validateStatus: (status) => status === 200,
+            decompress: true  // Automatically decompress gzip responses
         });
 
         // Cache the tile in memory for faster subsequent requests
@@ -1033,13 +1158,14 @@ app.get('/api/radar/tile/:timestamp/:z/:x/:y', async (req, res) => {
 
         // Set headers
         res.setHeader('Content-Type', 'image/png');
-        res.setHeader('Cache-Control', 'public, max-age=3600'); // Cache for 1 hour
+        res.setHeader('Cache-Control', 'public, max-age=21600, immutable'); // Cache for 6 hours, immutable
         res.setHeader('Access-Control-Allow-Origin', '*'); // Allow CORS
         res.setHeader('X-Cache', 'MISS');
+        res.setHeader('X-Quality', quality.toString());
 
         // Send the image buffer
         res.send(response.data);
-        Logger.verbose(`[RADAR TILE] Success ${z}/${x}/${y} - Cached for future requests`);
+        Logger.verbose(`[RADAR TILE] ✓ ${z}/${x}/${y} quality=${quality}`);
 
     } catch (error) {
         // Log error details (throttled, but suppress expected 403s at high zoom)
@@ -1341,7 +1467,6 @@ app.get('/api/flood-properties', (req, res) => {
 
 app.get('/api/check-cyclone', async (req, res) => {
     try {
-        Logger.info('Checking cyclone image availability...');
         const imageUrl = 'https://www.bom.gov.au/fwo/IDQ65001.png';
 
         const response = await axios.head(imageUrl, {
@@ -1351,7 +1476,10 @@ app.get('/api/check-cyclone', async (req, res) => {
         });
 
         const available = response.status === 200;
-        Logger.info(`Cyclone image ${available ? 'available' : 'not available'} (HTTP ${response.status})`);
+        // Only log if status changed or if verbose logging is enabled
+        if (VERBOSE_LOGGING || available) {
+            Logger.verbose(`Cyclone image ${available ? 'available' : 'not available'} (HTTP ${response.status})`);
+        }
 
         res.json({
             available,
@@ -1359,7 +1487,7 @@ app.get('/api/check-cyclone', async (req, res) => {
             timestamp: new Date().toISOString()
         });
     } catch (error) {
-        Logger.info('Cyclone image not available (connection error)');
+        Logger.verbose('Cyclone image not available (connection error)');
         res.json({
             available: false,
             error: error.message,
@@ -1409,6 +1537,10 @@ app.get('/proxy/cyclone-image', async (req, res) => {
         });
 
         if (response.status !== 200) {
+            // 404 is expected when no active cyclone - don't log as error
+            if (response.status === 404) {
+                return res.status(404).send('No cyclone image available');
+            }
             return res.status(response.status).send(`Error: ${response.status}`);
         }
 
@@ -1416,8 +1548,11 @@ app.get('/proxy/cyclone-image', async (req, res) => {
         res.set('Cache-Control', 'public, max-age=60');
         res.send(response.data);
     } catch (error) {
-        Logger.error('Error fetching cyclone image:', error.message);
-        res.status(500).send('Error fetching cyclone image');
+        // Only log if not a 404
+        if (error.response && error.response.status !== 404) {
+            Logger.error('Error fetching cyclone image:', error.message);
+        }
+        res.status(error.response ? error.response.status : 500).send('Error fetching cyclone image');
     }
 });
 

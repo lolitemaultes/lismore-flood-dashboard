@@ -1,4 +1,4 @@
-const https = require('https');
+const axios = require('axios');
 
 // Logger utility for consistent formatting
 class RadarLogger {
@@ -32,13 +32,18 @@ class RadarLogger {
 
 class RainViewerService {
     constructor() {
-        this.API_URL = 'https://api.rainviewer.com/public/weather-maps.json';
+        this.API_URLS = [
+            'https://api.rainviewer.com/public/weather-maps.json',
+            'https://tilecache.rainviewer.com/api/maps.json'
+        ];
         this.TILE_BASE_URL = 'https://tilecache.rainviewer.com'; // RainViewer tile cache
         this.TILE_SIZE = 256;
         this.REFRESH_INTERVAL = 10 * 60 * 1000; // 10 minutes
+        this.FRAME_INTERVAL = 10 * 60; // 10 minutes in seconds
         this.frames = [];
         this.lastUpdate = null;
         this.isUpdating = false;
+        this.useFallbackMode = false;
 
         this.initializeService();
     }
@@ -64,26 +69,62 @@ class RainViewerService {
         }
     }
 
-    fetchJSON(url) {
-        return new Promise((resolve, reject) => {
-            https.get(url, (res) => {
-                let data = '';
-
-                res.on('data', (chunk) => {
-                    data += chunk;
-                });
-
-                res.on('end', () => {
-                    try {
-                        resolve(JSON.parse(data));
-                    } catch (e) {
-                        reject(new Error('Failed to parse JSON'));
-                    }
-                });
-            }).on('error', (err) => {
-                reject(err);
+    async fetchJSON(url) {
+        try {
+            const response = await axios.get(url, {
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+                    'Accept': 'application/json, text/plain, */*',
+                    'Accept-Language': 'en-US,en;q=0.9',
+                    'Referer': 'https://www.rainviewer.com/',
+                    'Origin': 'https://www.rainviewer.com'
+                },
+                timeout: 10000,
+                maxRedirects: 5,
+                validateStatus: (status) => status === 200
             });
-        });
+
+            return response.data;
+        } catch (error) {
+            if (error.response) {
+                // Log the actual response for debugging
+                const responseText = typeof error.response.data === 'string'
+                    ? error.response.data.substring(0, 200)
+                    : JSON.stringify(error.response.data).substring(0, 200);
+                RadarLogger.error('FETCH', `HTTP ${error.response.status}: ${responseText}`);
+                throw new Error(`HTTP ${error.response.status}: ${error.response.statusText}`);
+            } else if (error.request) {
+                RadarLogger.error('FETCH', 'No response received from RainViewer API');
+                throw new Error('No response from RainViewer API');
+            } else {
+                RadarLogger.error('FETCH', error.message);
+                throw error;
+            }
+        }
+    }
+
+    /**
+     * Generate fallback frames based on current time when API is unavailable
+     */
+    generateFallbackFrames() {
+        const now = Math.floor(Date.now() / 1000);
+        const roundedNow = Math.floor(now / this.FRAME_INTERVAL) * this.FRAME_INTERVAL;
+        const frames = [];
+
+        // Generate last 12 frames (2 hours of data at 10 min intervals)
+        for (let i = 11; i >= 0; i--) {
+            const timestamp = roundedNow - (i * this.FRAME_INTERVAL);
+            frames.push({
+                path: `/v2/radar/${timestamp}/256/{z}/{x}/{y}/2/1_1.png`,
+                time: timestamp * 1000,
+                timestamp: timestamp,
+                date: new Date(timestamp * 1000),
+                tileUrl: this.getTileUrl(timestamp),
+                isPrediction: false
+            });
+        }
+
+        return frames;
     }
 
     async updateFrames() {
@@ -97,20 +138,49 @@ class RainViewerService {
 
         try {
             RadarLogger.log('FETCH', 'Fetching frame list');
-            const fetchStart = Date.now();
 
-            const apiData = await this.fetchJSON(this.API_URL);
-            const fetchDuration = Date.now() - fetchStart;
+            // Try each API URL
+            let apiData = null;
+            let lastError = null;
 
+            for (const apiUrl of this.API_URLS) {
+                try {
+                    apiData = await this.fetchJSON(apiUrl);
+                    if (apiData && apiData.radar && apiData.radar.past) {
+                        this.useFallbackMode = false;
+                        break;
+                    }
+                } catch (error) {
+                    lastError = error;
+                    continue;
+                }
+            }
+
+            // If API failed, use fallback timestamp generation
             if (!apiData || !apiData.radar || !apiData.radar.past) {
-                throw new Error('Invalid API response structure');
+                RadarLogger.log('FETCH', 'API unavailable, using fallback');
+                this.useFallbackMode = true;
+                this.frames = this.generateFallbackFrames();
+                this.lastUpdate = new Date();
+
+                const totalDuration = Date.now() - startTime;
+                RadarLogger.log('UPDATE', `${this.frames.length} frames (fallback)`, '200', totalDuration);
+                return;
             }
 
             // Get past radar frames ONLY (exclude forecast/nowcast)
             const pastFrames = apiData.radar.past || [];
 
             if (pastFrames.length === 0) {
-                throw new Error('No radar frames available');
+                // Use fallback if no frames from API
+                RadarLogger.log('FETCH', 'No API frames, using fallback');
+                this.useFallbackMode = true;
+                this.frames = this.generateFallbackFrames();
+                this.lastUpdate = new Date();
+
+                const totalDuration = Date.now() - startTime;
+                RadarLogger.log('UPDATE', `${this.frames.length} frames (fallback)`, '200', totalDuration);
+                return;
             }
 
             // Process frames (past only, no predictions)
@@ -130,7 +200,11 @@ class RainViewerService {
 
         } catch (error) {
             RadarLogger.error('UPDATE', error.message);
-            throw error;
+            // Use fallback on any error
+            RadarLogger.log('FETCH', 'Error, using fallback mode');
+            this.useFallbackMode = true;
+            this.frames = this.generateFallbackFrames();
+            this.lastUpdate = new Date();
         } finally {
             this.isUpdating = false;
         }
@@ -159,7 +233,8 @@ class RainViewerService {
             frameCount: this.frames.length,
             lastUpdate: this.lastUpdate ? this.lastUpdate.toISOString() : null,
             isUpdating: this.isUpdating,
-            service: 'RainViewer'
+            service: 'RainViewer',
+            mode: this.useFallbackMode ? 'fallback' : 'api'
         };
     }
 
