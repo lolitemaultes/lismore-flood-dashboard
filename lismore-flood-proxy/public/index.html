@@ -1153,13 +1153,55 @@
         const WEBCAM_REFRESH_INTERVAL = 1000;
         const DEFAULT_REFRESH_INTERVAL = 300000;
         const CRITICAL_THRESHOLD = 3.00;
-        
+
         const BOM_URL = 'https://www.bom.gov.au/nsw/flood/northern.shtml';
 
         let floodData = [];
         let refreshTimer = null;
         let webcamRefreshTimer = null;
         let lastFetchTime = null;
+
+        function resetStatusValue(element) {
+            if (!element) return;
+            element.className = 'status-value';
+            element.textContent = 'Checking...';
+            element.title = 'Checking...';
+            element.removeAttribute('data-detail');
+        }
+
+        function setStatusValue(element, { text, state = '', detail = '' } = {}) {
+            if (!element || !text) return;
+            const classes = ['status-value'];
+            if (state) {
+                classes.push(state);
+            }
+            element.className = classes.join(' ');
+            element.textContent = text;
+
+            if (detail) {
+                element.title = `${text} — ${detail}`;
+                element.setAttribute('data-detail', detail);
+            } else {
+                element.title = text;
+                element.removeAttribute('data-detail');
+            }
+        }
+
+        function formatStatusTimestamp(value) {
+            if (!value) return '';
+            const parsed = value instanceof Date ? value : new Date(value);
+            if (Number.isNaN(parsed.getTime())) {
+                return '';
+            }
+
+            return parsed.toLocaleString('en-AU', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true,
+                timeZoneName: 'short'
+            });
+        }
 
         initializeDashboard();
 
@@ -1335,13 +1377,10 @@
         }
 
         function checkDataSources() {
-            proxyStatusValue.textContent = 'Checking...';
-            proxyStatusValue.className = 'status-value';
-            bomStatusValue.textContent = 'Checking...';
-            bomStatusValue.className = 'status-value';
-            webcamStatusValue.textContent = 'Checking...';
-            webcamStatusValue.className = 'status-value';
-            
+            resetStatusValue(proxyStatusValue);
+            resetStatusValue(bomStatusValue);
+            resetStatusValue(webcamStatusValue);
+
             const radarStatusValue = document.getElementById('radar-status-value') ||
                                     createStatusElement('radar-status', 'Radar Map');
 
@@ -1353,52 +1392,81 @@
 
             const outageMapStatusValue = document.getElementById('outagemap-status-value') ||
                                         createStatusElement('outagemap-status', 'Outage Map');
-            
+
+            resetStatusValue(radarStatusValue);
+            resetStatusValue(cycloneStatusValue);
+
             fetch(PROXY_URL, { method: 'HEAD' })
                 .then(response => {
                     if (response.ok) {
-                        proxyStatusValue.textContent = 'Online';
-                        proxyStatusValue.className = 'status-value online';
+                        setStatusValue(proxyStatusValue, {
+                            text: 'Online',
+                            state: 'online'
+                        });
                     } else {
-                        proxyStatusValue.textContent = 'Error: ' + response.status;
-                        proxyStatusValue.className = 'status-value offline';
+                        setStatusValue(proxyStatusValue, {
+                            text: 'Offline',
+                            state: 'offline',
+                            detail: `HTTP ${response.status}`
+                        });
                     }
                 })
                 .catch(error => {
-                    proxyStatusValue.textContent = 'Offline';
-                    proxyStatusValue.className = 'status-value offline';
+                    setStatusValue(proxyStatusValue, {
+                        text: 'Offline',
+                        state: 'offline',
+                        detail: error.message || 'Connection error'
+                    });
                     console.error('Proxy server check failed:', error);
                 });
-            
+
             fetch(PROXY_URL)
                 .then(response => response.json())
                 .then(data => {
                     if (data.success && data.data && data.data.length > 0) {
-                        bomStatusValue.textContent = 'Updated: ' + new Date(data.timestamp).toLocaleTimeString('en-AU');
-                        bomStatusValue.className = 'status-value online';
+                        const formatted = formatStatusTimestamp(data.timestamp);
+                        setStatusValue(bomStatusValue, {
+                            text: 'Online',
+                            state: 'online',
+                            detail: formatted ? `Last updated ${formatted}` : ''
+                        });
                     } else {
-                        bomStatusValue.textContent = 'No Data Available';
-                        bomStatusValue.className = 'status-value offline';
+                        setStatusValue(bomStatusValue, {
+                            text: 'Offline',
+                            state: 'offline',
+                            detail: 'No BOM data available'
+                        });
                     }
                 })
                 .catch(error => {
-                    bomStatusValue.textContent = 'Connection Error';
-                    bomStatusValue.className = 'status-value offline';
+                    setStatusValue(bomStatusValue, {
+                        text: 'Offline',
+                        state: 'offline',
+                        detail: error.message || 'Connection error'
+                    });
                     console.error('BOM data check failed:', error);
                 });
-            
+
             const img = new Image();
             img.onload = function() {
-                webcamStatusValue.textContent = 'Online';
-                webcamStatusValue.className = 'status-value online';
+                setStatusValue(webcamStatusValue, {
+                    text: 'Online',
+                    state: 'online'
+                });
             };
             img.onerror = function() {
-                webcamStatusValue.textContent = 'Offline';
-                webcamStatusValue.className = 'status-value offline';
+                setStatusValue(webcamStatusValue, {
+                    text: 'Offline',
+                    state: 'offline',
+                    detail: 'Unable to load traffic camera feed'
+                });
             };
             img.src = '/proxy/webcam?' + new Date().getTime();
 
             checkRadarAvailability();
+            if (typeof checkCycloneAvailability === 'function') {
+                checkCycloneAvailability();
+            }
 
             window.radarGlobalState = window.radarGlobalState || {
                 currentAnimationSessionId: 0,
@@ -2069,25 +2137,35 @@
             
             const cycloneTab = document.getElementById('tab-cyclone');
             if (cycloneTab && cycloneTab.classList.contains('tab-unavailable')) {
-                cycloneStatusValue.textContent = 'No Active Cyclone';
-                cycloneStatusValue.className = 'status-value offline';
+                setStatusValue(cycloneStatusValue, {
+                    text: 'No Cyclone',
+                    state: 'offline',
+                    detail: 'No active cyclone bulletins'
+                });
             } else {
                 const cycloneImage = document.getElementById('cyclone-image');
                 if (cycloneImage && cycloneImage.complete && cycloneImage.naturalHeight !== 0) {
-                    cycloneStatusValue.textContent = 'Online';
-                    cycloneStatusValue.className = 'status-value online';
+                    setStatusValue(cycloneStatusValue, {
+                        text: 'Online',
+                        state: 'online',
+                        detail: 'Cyclone imagery loaded'
+                    });
                 } else {
-                    cycloneStatusValue.textContent = 'Checking...';
-                    cycloneStatusValue.className = 'status-value unknown';
+                    resetStatusValue(cycloneStatusValue);
                 }
             }
             
             if (floodMapInitialized) {
-                floodMapStatusValue.textContent = 'Online';
-                floodMapStatusValue.className = 'status-value online';
+                setStatusValue(floodMapStatusValue, {
+                    text: 'Online',
+                    state: 'online',
+                    detail: 'Flood layers ready'
+                });
             } else {
-                floodMapStatusValue.textContent = 'Initializing...';
-                floodMapStatusValue.className = 'status-value unknown';
+                setStatusValue(floodMapStatusValue, {
+                    text: 'Initializing...',
+                    state: 'unknown'
+                });
             }
 
             // Outage Map status is managed by loadOutageData() in outagemap.js
@@ -2098,16 +2176,17 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success && data.available) {
-                        radarStatusValue.textContent = 'Online';
-                        radarStatusValue.className = 'status-value online';
+                        const formatted = formatStatusTimestamp(data.lastUpdate);
+                        updateRadarStatusRow(
+                            data.mode === 'fallback' ? 'Fallback' : 'Online',
+                            formatted ? `Updated ${formatted}` : ''
+                        );
                     } else {
-                        radarStatusValue.textContent = 'No Data';
-                        radarStatusValue.className = 'status-value offline';
+                        updateRadarStatusRow('Offline', 'No radar frames');
                     }
                 })
                 .catch(error => {
-                    radarStatusValue.textContent = 'Connection Error';
-                    radarStatusValue.className = 'status-value offline';
+                    updateRadarStatusRow('Offline', 'Connection error');
                     console.error('Radar status check failed:', error);
                 });
         }
@@ -2562,11 +2641,27 @@
                 return;
             }
 
-            const isOnline = status === 'Online';
-            const suffix = detail ? ` — ${detail}` : '';
-            statusValue.textContent = `${status}${suffix}`;
-            statusValue.className = `status-value ${isOnline ? 'online' : 'offline'}`;
-            statusValue.title = detail ? `${status} • ${detail}` : status;
+            let displayText = status;
+            let detailText = detail || '';
+            let state = '';
+
+            if (status === 'Online') {
+                state = 'online';
+            } else if (status === 'Fallback') {
+                displayText = 'Online';
+                state = 'online';
+                detailText = detail ? `${detail} · Fallback mode` : 'Fallback mode';
+            } else if (status === 'Offline') {
+                state = 'offline';
+            } else {
+                state = 'unknown';
+            }
+
+            setStatusValue(statusValue, {
+                text: displayText,
+                state,
+                detail: detailText
+            });
         }
 
         async function checkRadarAvailability() {
@@ -2618,7 +2713,8 @@
                     detailParts.push('Fallback data');
                 }
 
-                updateRadarStatusRow('Online', detailParts.join(' · '));
+                const statusLabel = data.mode === 'fallback' ? 'Fallback' : 'Online';
+                updateRadarStatusRow(statusLabel, detailParts.join(' · '));
             } catch (error) {
                 const message = error.name === 'AbortError'
                     ? 'Request timed out'
@@ -2636,6 +2732,8 @@
             const cycloneImage = document.getElementById('cyclone-image');
             const cycloneError = document.getElementById('cyclone-error');
             const cycloneTimestamp = document.getElementById('cyclone-timestamp');
+            const cycloneStatusValue = document.getElementById('cyclone-status-value') ||
+                createStatusElement('cyclone-status', 'Cyclone Map');
 
             try {
                 const checkResponse = await fetch('/api/check-cyclone');
@@ -2646,19 +2744,49 @@
                     cycloneImage.src = `/proxy/cyclone-image?t=${timestamp}`;
                     cycloneTimestamp.textContent = `Last updated: ${new Date().toLocaleTimeString('en-AU')}`;
 
+                    setStatusValue(cycloneStatusValue, {
+                        text: 'Online',
+                        state: 'online',
+                        detail: 'Cyclone imagery updating'
+                    });
+
                     cycloneImage.onload = function() {
                         markTabAvailable('tab-cyclone');
                         cycloneError.style.display = 'none';
+                        const detail = formatStatusTimestamp(new Date());
+                        setStatusValue(cycloneStatusValue, {
+                            text: 'Online',
+                            state: 'online',
+                            detail: detail ? `Last updated ${detail}` : ''
+                        });
+                    };
+
+                    cycloneImage.onerror = function() {
+                        setStatusValue(cycloneStatusValue, {
+                            text: 'Offline',
+                            state: 'offline',
+                            detail: 'Cyclone imagery failed to load'
+                        });
                     };
                 } else {
                     markTabUnavailable('tab-cyclone', 'No current cyclone warnings or bulletins for this area.');
                     cycloneError.style.display = 'block';
                     cycloneError.textContent = 'No current cyclone warnings for this area';
+                    setStatusValue(cycloneStatusValue, {
+                        text: 'No Cyclone',
+                        state: 'offline',
+                        detail: 'No active cyclone bulletins'
+                    });
                 }
             } catch (error) {
                 markTabUnavailable('tab-cyclone', 'Unable to check cyclone status.');
                 cycloneError.style.display = 'block';
                 cycloneError.textContent = 'Unable to check cyclone status';
+                setStatusValue(cycloneStatusValue, {
+                    text: 'Offline',
+                    state: 'offline',
+                    detail: error.message || 'Unable to check cyclone status'
+                });
             }
         }
 
@@ -2763,6 +2891,9 @@
                 const checkResponse = await fetch('/api/check-cyclone');
                 const checkData = await checkResponse.json();
 
+                const cycloneStatusValue = document.getElementById('cyclone-status-value') ||
+                    createStatusElement('cyclone-status', 'Cyclone Map');
+
                 if (checkData.available) {
                     markTabAvailable('tab-cyclone');
                     const errorEl = document.getElementById('cyclone-error');
@@ -2777,6 +2908,13 @@
                             cycloneTimestamp.textContent = `Last updated: ${new Date().toLocaleTimeString('en-AU')}`;
                         }
                     }
+
+                    const detail = formatStatusTimestamp(checkData.timestamp);
+                    setStatusValue(cycloneStatusValue, {
+                        text: 'Online',
+                        state: 'online',
+                        detail: detail ? `Checked ${detail}` : ''
+                    });
                 } else {
                     markTabUnavailable('tab-cyclone', 'No current cyclone warnings or bulletins for this area.');
                     const errorEl = document.getElementById('cyclone-error');
@@ -2784,8 +2922,21 @@
                         errorEl.style.display = 'block';
                         errorEl.textContent = 'No current cyclone warnings for this area';
                     }
+
+                    setStatusValue(cycloneStatusValue, {
+                        text: 'No Cyclone',
+                        state: 'offline',
+                        detail: 'No active cyclone bulletins'
+                    });
                 }
             } catch (error) {
+                const cycloneStatusValue = document.getElementById('cyclone-status-value') ||
+                    createStatusElement('cyclone-status', 'Cyclone Map');
+                setStatusValue(cycloneStatusValue, {
+                    text: 'Offline',
+                    state: 'offline',
+                    detail: error.message || 'Cyclone status check failed'
+                });
             }
         }
         

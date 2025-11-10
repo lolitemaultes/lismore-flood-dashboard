@@ -17,6 +17,21 @@
     background-color: rgba(255, 255, 255, 0.8);
 }
 
+.loading-overlay .spinner {
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 50%;
+    border: 4px solid rgba(255, 255, 255, 0.25);
+    border-top-color: var(--accent-color, #38bdf8);
+    animation: spin 0.85s linear infinite;
+    margin-bottom: 1rem;
+}
+
+:root[data-theme="light"] .loading-overlay .spinner {
+    border-color: rgba(15, 23, 42, 0.15);
+    border-top-color: var(--primary-color, #2563eb);
+}
+
 .notification {
     position: fixed;
     bottom: 1rem;
