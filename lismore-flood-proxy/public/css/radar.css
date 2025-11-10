@@ -268,19 +268,25 @@
     color: var(--primary-color);
 }
 
-/* RainViewer Tile Layer Styling - BoM Style */
+/* RainViewer Tile Layer Styling - Smooth transitions */
 .rainviewer-layer {
     pointer-events: none;
-    /* NO transitions - INSTANT frame changes like BoM */
-    transition: none !important;
-    -webkit-transition: none !important;
-    -moz-transition: none !important;
-    -o-transition: none !important;
+    /* SMOOTH opacity transitions for frame changes */
+    transition: opacity 0.3s ease-in-out !important;
+    -webkit-transition: opacity 0.3s ease-in-out !important;
+    -moz-transition: opacity 0.3s ease-in-out !important;
+    -o-transition: opacity 0.3s ease-in-out !important;
 }
 
-/* Force instant opacity changes on radar layers - NO FADING */
-.rainviewer-layer,
-.rainviewer-layer *,
+/* Smooth opacity transitions on radar layer containers */
+.rainviewer-layer.leaflet-layer {
+    transition: opacity 0.3s ease-in-out !important;
+    -webkit-transition: opacity 0.3s ease-in-out !important;
+    -moz-transition: opacity 0.3s ease-in-out !important;
+    -o-transition: opacity 0.3s ease-in-out !important;
+}
+
+/* No transitions on individual tiles - only on the layer container */
 .rainviewer-layer img,
 .rainviewer-layer canvas {
     transition: none !important;
@@ -390,6 +396,17 @@
     image-rendering: -moz-crisp-edges !important;
     image-rendering: crisp-edges !important;
     image-rendering: pixelated !important;
+}
+
+/* BoM-style crisp radar rendering - blocky pixels, no smoothing */
+.bom-radar-crisp,
+.bom-radar-crisp canvas,
+.bom-radar-crisp img {
+    image-rendering: -moz-crisp-edges !important;
+    image-rendering: -webkit-optimize-contrast !important;
+    image-rendering: crisp-edges !important;
+    image-rendering: pixelated !important;
+    -ms-interpolation-mode: nearest-neighbor !important;
 }
 
 /* Radar Legend Toggle Button */
