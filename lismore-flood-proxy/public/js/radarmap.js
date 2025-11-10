@@ -8,7 +8,7 @@ if (typeof window.BomRadarColorMapper === 'undefined') {
             clearInterval(waitForColorMapper);
             console.log('[RADAR] BomRadarColorMapper loaded, initializing radar map...');
             initializeRadarMapModule();
-        } else if (attempts > 50) { // 5 seconds timeout
+        } else if (attempts > 50) {
             clearInterval(waitForColorMapper);
             console.error('[RADAR] BomRadarColorMapper failed to load after 5 seconds');
         }
@@ -19,8 +19,7 @@ if (typeof window.BomRadarColorMapper === 'undefined') {
 
 function initializeRadarMapModule() {
 (function() {
-    // Configuration
-    const REFRESH_INTERVAL = 10 * 60 * 1000; // 10 minutes
+    const REFRESH_INTERVAL = 10 * 60 * 1000;
     const API_BASE = '/api/radar';
     const ANIMATION_SPEEDS = {
         slow: 1000,
@@ -28,26 +27,18 @@ function initializeRadarMapModule() {
         fast: 250
     };
 
-    // Australia bounds for map restriction (expanded for better coverage)
     const AUSTRALIA_BOUNDS = [
-        [-48.0, 105.0], // Southwest (includes southern ocean view)
-        [-7.0, 160.0]   // Northeast (includes coral sea and islands)
+        [-48.0, 105.0],
+        [-7.0, 160.0]
     ];
-    
-    // Australia initial view
+
     const AUSTRALIA_CENTER = [-25.0, 133.0];
     const AUSTRALIA_ZOOM = 5;
-
-    // Zoom-based optimization thresholds
-    const ZOOM_THRESHOLDS = {
-        LOW_DETAIL: 6,      // Below this: minimal tiles
-        MEDIUM_DETAIL: 8,   // Below this: reduced quality
-        HIGH_DETAIL: 10     // Above this: full quality
-    };
 
     // State
     let radarMap = null;
     let radarLayers = [];
+    let currentLayer = null;
     let labelLayer = null;
     let mapBaseLayer = null;
     let satelliteBaseLayer = null;
@@ -59,6 +50,8 @@ function initializeRadarMapModule() {
     let currentSpeed = 'normal';
     let radarInitialized = false;
     let refreshTimer = null;
+    let tileLoadCount = 0;
+    let tileErrorCount = 0;
 
     // DOM Elements
     let mapContainer, loadingOverlay, errorContainer, controlsPanel;
@@ -72,7 +65,7 @@ function initializeRadarMapModule() {
             const response = await fetch('/status', {
                 method: 'GET',
                 cache: 'no-cache',
-                signal: AbortSignal.timeout(5000) // 5 second timeout
+                signal: AbortSignal.timeout(5000)
             });
 
             if (response.ok) {
@@ -91,7 +84,6 @@ function initializeRadarMapModule() {
     async function initRadarMap() {
         if (radarInitialized) return;
 
-        // Get DOM elements
         mapContainer = document.getElementById('radar-map');
         loadingOverlay = document.getElementById('radar-loading');
         errorContainer = document.getElementById('radar-error');
@@ -120,161 +112,147 @@ function initializeRadarMapModule() {
             return;
         }
 
-        // Check server connectivity before initializing
         showLoading();
         const serverOnline = await checkServerConnectivity();
 
         if (!serverOnline) {
             hideLoading();
-            const currentURL = window.location.href;
-            let errorMsg = 'Cannot connect to server. ';
-
-            if (currentURL.startsWith('file://')) {
-                errorMsg += 'You are opening the file directly. Please start the server with "node server.js" and access via http://localhost:3000';
-            } else {
-                errorMsg += 'Please ensure the Node.js server is running on port 3000. Run "node server.js" in the lismore-flood-proxy folder.';
-            }
-
-            showError(errorMsg);
+            showError('Cannot connect to server. Please ensure the Node.js server is running on port 3000.');
             updateRadarStatus('Server Offline');
-            console.error('[RADAR] Initialization aborted - server not accessible');
-            console.error('[RADAR] Current URL:', currentURL);
-            console.error('[RADAR] Expected URL: http://localhost:3000');
             return;
         }
 
-        // Initialize Leaflet map with elastic Australia bounds
         radarMap = L.map('radar-map', {
             center: AUSTRALIA_CENTER,
             zoom: AUSTRALIA_ZOOM,
-            minZoom: 5,              // Increased min zoom for performance
-            maxZoom: 10,             // Limited by RainViewer radar data availability
+            minZoom: 5,
+            maxZoom: 10,
             maxBounds: AUSTRALIA_BOUNDS,
-            maxBoundsViscosity: 0.6, // Elastic boundary (rubber band effect)
+            maxBoundsViscosity: 0.6,
             preferCanvas: true,
             zoomControl: true,
             attributionControl: true,
-            worldCopyJump: false,    // Disable world wrapping
-            noWrap: true             // Prevent tile wrapping
+            worldCopyJump: false,
+            noWrap: true,
+            zoomAnimation: true,
+            zoomAnimationThreshold: 10,
+            fadeAnimation: true,
+            markerZoomAnimation: true,
+            wheelPxPerZoomLevel: 120,
+            zoomSnap: 1,  // INTEGER zoom only - no 7.5, 8.5
+            zoomDelta: 1  // Jump by whole zoom levels
         });
 
-        // Add event listeners for aggressive tile management
+        let zoomTimeout;
+        let moveTimeout;
+        let isZooming = false;
+
         radarMap.on('zoomstart', function() {
-            // Clear tiles from all inactive radar layers before zoom
-            radarLayers.forEach((layer, i) => {
-                if (i !== currentFrameIndex && layer._map && layer.setActive) {
-                    layer.setActive(false); // Clear tiles from inactive frames
-                }
-            });
+            isZooming = true;
+            clearTimeout(zoomTimeout);
         });
 
         radarMap.on('zoomend', function() {
             const currentZoom = radarMap.getZoom();
 
-            // Notify user when they reach radar zoom limit
-            if (currentZoom >= 10 && radarLayers.length > 0) {
-                console.log('[RADAR] Maximum radar detail reached (zoom 10) - Base map continues to zoom');
-            }
+            clearTimeout(zoomTimeout);
+            zoomTimeout = setTimeout(() => {
+                isZooming = false;
 
-            // After zoom, prune tiles aggressively
-            pruneTilesAggressively();
+                // Update base map and labels
+                const activeBaseLayer = currentBaseLayer === 'map' ? mapBaseLayer : satelliteBaseLayer;
+                if (activeBaseLayer && activeBaseLayer._map) {
+                    activeBaseLayer._update();
+                }
+                if (labelLayer && labelLayer._map) {
+                    labelLayer._update();
+                }
 
-            // Update only the active radar frame
-            const activeLayer = radarLayers[currentFrameIndex];
-            if (activeLayer && activeLayer._map) {
-                activeLayer._update();
-            }
+                // Update current layer - Leaflet requests tiles at current zoom naturally
+                if (currentLayer && currentLayer._map) {
+                    currentLayer._update();
+                }
+            }, 50);
         });
 
-        // Aggressive tile management during pan
-        let moveTimeout;
         radarMap.on('movestart', function() {
             clearTimeout(moveTimeout);
         });
 
         radarMap.on('moveend', function() {
-            // Small delay after pan before loading tiles
+            if (isZooming) return;
+
             clearTimeout(moveTimeout);
             moveTimeout = setTimeout(() => {
-                // Only update the active radar frame
-                const activeLayer = radarLayers[currentFrameIndex];
-                if (activeLayer && activeLayer._map) {
-                    activeLayer._update();
+                const activeBaseLayer = currentBaseLayer === 'map' ? mapBaseLayer : satelliteBaseLayer;
+                if (activeBaseLayer && activeBaseLayer._map) {
+                    activeBaseLayer._update();
+                }
+                if (labelLayer && labelLayer._map) {
+                    labelLayer._update();
                 }
 
-                // Prune tiles from all layers
-                pruneTilesAggressively();
-            }, 100);
+                if (currentLayer && currentLayer._map) {
+                    currentLayer._update();
+                }
+            }, 50);
         });
 
-        // Create custom pane for radar overlay (below labels, above tiles)
+        // Create custom pane for radar overlay
         radarMap.createPane('radarPane');
-        const radarPane = radarMap.getPane('radarPane');
-        radarPane.style.zIndex = 300; // Below overlayPane (400), above tilePane (200)
-        radarPane.style.pointerEvents = 'none'; // Allow click-through to base map
+        radarMap.getPane('radarPane').style.zIndex = 300;
+        radarMap.getPane('radarPane').style.pointerEvents = 'none';
 
-        // Create map base layer (CartoDB Voyager WITHOUT labels) - OPTIMIZED with strict filtering
+        // Create base layers
         mapBaseLayer = window.BomRadarColorMapper.createFilteredLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
             subdomains: 'abcd',
             minZoom: 5,
-            maxZoom: 18,                    // Base map can zoom further than radar
-            bounds: AUSTRALIA_BOUNDS,       // Leaflet bounds hint
-            australiaBounds: AUSTRALIA_BOUNDS, // Strict filtering in _isValidTile
-            updateWhenIdle: true,
-            keepBuffer: 0,                  // Zero buffer - only load visible tiles
+            maxZoom: 18,
+            bounds: AUSTRALIA_BOUNDS,
+            australiaBounds: AUSTRALIA_BOUNDS,
+            updateWhenIdle: false,
+            updateWhenZooming: true,
+            keepBuffer: 2,
             noWrap: true,
             pane: 'tilePane'
         });
 
-        // Create satellite base layer (ESRI World Imagery) - OPTIMIZED with strict filtering
         satelliteBaseLayer = window.BomRadarColorMapper.createFilteredLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
             attribution: '&copy; <a href="https://www.esri.com/">Esri</a>, Maxar, Earthstar Geographics',
             minZoom: 5,
-            maxZoom: 18,                    // Base map can zoom further than radar
-            bounds: AUSTRALIA_BOUNDS,       // Leaflet bounds hint
-            australiaBounds: AUSTRALIA_BOUNDS, // Strict filtering in _isValidTile
-            updateWhenIdle: true,
-            keepBuffer: 0,                  // Zero buffer - only load visible tiles
+            maxZoom: 18,
+            bounds: AUSTRALIA_BOUNDS,
+            australiaBounds: AUSTRALIA_BOUNDS,
+            updateWhenIdle: false,
+            updateWhenZooming: true,
+            keepBuffer: 2,
             noWrap: true,
             pane: 'tilePane'
         });
 
-        // Add map layer by default
         mapBaseLayer.addTo(radarMap);
         currentBaseLayer = 'map';
 
-        // Fix map size after initialization
-        setTimeout(() => {
-            radarMap.invalidateSize();
-        }, 100);
+        setTimeout(() => radarMap.invalidateSize(), 100);
 
-        // Handle window resize
         window.addEventListener('resize', () => {
             if (radarMap && radarInitialized) {
                 radarMap.invalidateSize();
             }
         });
 
-        // Setup event listeners
         setupEventListeners();
 
         radarInitialized = true;
-        console.log('[RADAR] Map initialized with Australia bounds:', AUSTRALIA_BOUNDS);
-        console.log('[RADAR] Map configured: maxZoom=10, maxBoundsViscosity=0.6 (elastic), noWrap=true');
+        console.log('[RADAR] ✓ Map initialized');
 
-        // Load initial radar data
         loadRadarData();
-
-        // Setup auto-refresh
         setupAutoRefresh();
-
-        // Update status
         updateRadarStatus('Online');
     }
 
     function setupEventListeners() {
-        // Control buttons
         btnFirst.addEventListener('click', () => setFrame(0));
         btnPrev.addEventListener('click', previousFrame);
         btnPlay.addEventListener('click', play);
@@ -282,32 +260,26 @@ function initializeRadarMapModule() {
         btnNext.addEventListener('click', nextFrame);
         btnLast.addEventListener('click', () => setFrame(frames.length - 1));
 
-        // Frame slider
         frameSlider.addEventListener('input', (e) => {
             setFrame(parseInt(e.target.value));
         });
 
-        // Speed controls
         btnSpeedSlow.addEventListener('click', () => setSpeed('slow'));
         btnSpeedNormal.addEventListener('click', () => setSpeed('normal'));
         btnSpeedFast.addEventListener('click', () => setSpeed('fast'));
 
-        // Refresh button
         if (btnRefresh) {
             btnRefresh.addEventListener('click', () => loadRadarData(true));
         }
 
-        // Legend toggle button
         const legendToggle = document.getElementById('radar-legend-toggle');
         const legend = document.getElementById('radar-legend');
         if (legendToggle && legend) {
             legendToggle.addEventListener('click', () => {
-                const isVisible = legend.style.display !== 'none';
-                legend.style.display = isVisible ? 'none' : 'block';
+                legend.style.display = legend.style.display !== 'none' ? 'none' : 'block';
             });
         }
 
-        // Base layer toggle button (Map/Satellite)
         const baseLayerToggle = document.getElementById('radar-baselayer-toggle');
         if (baseLayerToggle) {
             baseLayerToggle.addEventListener('click', toggleBaseLayer);
@@ -318,24 +290,19 @@ function initializeRadarMapModule() {
         const toggleBtn = document.getElementById('radar-baselayer-toggle');
 
         if (currentBaseLayer === 'map') {
-            // Switch to satellite
             radarMap.removeLayer(mapBaseLayer);
             satelliteBaseLayer.addTo(radarMap);
             currentBaseLayer = 'satellite';
             toggleBtn.classList.add('satellite');
             toggleBtn.title = 'Switch to map view';
-            console.log('[RADAR] Switched to satellite view');
         } else {
-            // Switch to map
             radarMap.removeLayer(satelliteBaseLayer);
             mapBaseLayer.addTo(radarMap);
             currentBaseLayer = 'map';
             toggleBtn.classList.remove('satellite');
             toggleBtn.title = 'Switch to satellite view';
-            console.log('[RADAR] Switched to map view');
         }
 
-        // Ensure label layer stays on top
         if (labelLayer && radarMap.hasLayer(labelLayer)) {
             labelLayer.bringToFront();
         }
@@ -358,16 +325,15 @@ function initializeRadarMapModule() {
                 throw new Error('No radar frames available');
             }
 
-            frames = data.frames.sort((a, b) => a.time - b.time); // Sort oldest to newest
+            frames = data.frames.sort((a, b) => a.time - b.time);
 
-            console.log(`[RADAR] Loaded ${frames.length} frames from RainViewer`);
+            console.log(`[RADAR] ✓ Loaded ${frames.length} frames`);
 
             await loadRadarLayers();
 
             hideLoading();
             showControls();
 
-            // Start on the most recent frame (this will activate tile loading for that frame)
             setFrame(frames.length - 1);
 
             if (force) {
@@ -376,216 +342,129 @@ function initializeRadarMapModule() {
 
             updateRadarStatus('Online');
 
-            console.log('[RADAR] Initial frame loaded - Lazy loading active');
-
         } catch (error) {
             console.error('[RADAR] Error loading radar data:', error);
-
-            let errorMessage = 'Unable to load radar data';
-            if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-                errorMessage = 'Cannot connect to server. Please ensure the server is running on port 3000 and access the dashboard via http://localhost:3000';
-            } else {
-                errorMessage += ': ' + error.message;
-            }
-
-            showError(errorMessage);
+            showError('Unable to load radar data: ' + error.message);
             updateRadarStatus('Connection Error');
         }
     }
 
-    function loadRadarLayers() {
-        // Clear existing layers
-        radarLayers.forEach(layer => {
-            if (radarMap.hasLayer(layer)) {
-                radarMap.removeLayer(layer);
-            }
-        });
+    async function loadRadarLayers() {
+        // Remove current layer
+        if (currentLayer && radarMap.hasLayer(currentLayer)) {
+            radarMap.removeLayer(currentLayer);
+        }
+        currentLayer = null;
         radarLayers = [];
+        tileLoadCount = 0;
+        tileErrorCount = 0;
 
-        // PERFORMANCE: Only load last 8 frames (2 hours of data) instead of all frames
-        const framesToLoad = frames.slice(-8);
-        console.log(`[RADAR] Loading ${framesToLoad.length} frames (last 2 hours) for better performance`);
+        // Load last 6 frames (reduced for faster loading)
+        const framesToLoad = frames.slice(-6);
 
-        // Create tile layers for each frame with LAZY LOADING
-        // Only the active frame will load tiles, all others stay dormant
-        // Using RainViewer's pre-colored tiles (skipColorMapping: true)
+        console.log(`[RADAR] Creating ${framesToLoad.length} frames`);
+
+        // Create layer objects
         for (let i = 0; i < framesToLoad.length; i++) {
             const frame = framesToLoad[i];
-            const isActive = false; // All start inactive - will activate on first frame switch
-        
+
             const layer = window.BomRadarColorMapper.createColorMappedLayer(frame.tileUrl, {
-                opacity: 0,
+                opacity: 0.85,
                 pane: 'radarPane',
                 attribution: '&copy; <a href="https://www.rainviewer.com">RainViewer</a>',
                 tileSize: 256,
                 minZoom: 5,
-                maxZoom: 10,                    // RainViewer radar data limit
-                maxNativeZoom: 10,              // Native tile availability limit
-                className: 'rainviewer-layer',
-                updateWhenIdle: false,          // Load immediately, don't wait
-                updateWhenZooming: true,        // Continue loading during zoom
-                keepBuffer: 2,                  // Keep 2 tile buffer for smooth panning
-                updateInterval: 50,             // Faster tile updates (50ms)
-                tms: false,                     // Standard tile numbering
-                noWrap: true,                   // Prevent world wrapping
-                bounds: AUSTRALIA_BOUNDS,       // Leaflet bounds hint
-                australiaBounds: AUSTRALIA_BOUNDS, // Strict filtering in _isValidTile
-                isActive: isActive,             // LAZY LOADING: Inactive frames don't load tiles
-                skipColorMapping: true
+                maxZoom: 10,
+                maxNativeZoom: 10,
+                className: 'rainviewer-layer bom-radar-crisp',
+                updateWhenIdle: false,
+                updateWhenZooming: true,
+                keepBuffer: 2,  // Only preload 2 tile buffers - reduces initial load
+                updateInterval: 50,
+                tms: false,
+                noWrap: true,
+                bounds: AUSTRALIA_BOUNDS,
+                australiaBounds: AUSTRALIA_BOUNDS,
+                skipColorMapping: false  // Enable custom BoM color mapping from raw dBZ data
             });
-        
-            // Add to map but keep invisible and inactive
-            layer.addTo(radarMap);
+
+            // Add tile load event listeners
+            layer.on('tileload', function(e) {
+                tileLoadCount++;
+                if (tileLoadCount === 1) {
+                    console.log(`[RADAR] ✓ First tile loaded successfully!`);
+                }
+            });
+
+            layer.on('tileerror', function(e) {
+                tileErrorCount++;
+            });
+
             radarLayers.push(layer);
         }
 
-        // Update frames reference to match loaded frames
         frames = framesToLoad;
 
-        console.log(`[RADAR] Created ${radarLayers.length} radar layers with LAZY LOADING - only active frame loads tiles`);
-        console.log('[RADAR] STRICT tile filtering: getTileUrl override blocks ALL tiles outside Australia bounds');
-        console.log('[RADAR] Zero buffer, aggressive pruning, no transitions - INSTANT frame switching');
-        console.log('[RADAR] Radar zoom limited to 10 (RainViewer limitation) - Base map continues beyond');
-
-        // Add label layer ON TOP of radar (z-index 400)
-        if (labelLayer) {
-            radarMap.removeLayer(labelLayer);
-        }
-
-        // Create label pane if it doesn't exist
+        // Create label pane
         if (!radarMap.getPane('labelPane')) {
             radarMap.createPane('labelPane');
-            radarMap.getPane('labelPane').style.zIndex = 400; // Above radar (300)
+            radarMap.getPane('labelPane').style.zIndex = 400;
             radarMap.getPane('labelPane').style.pointerEvents = 'none';
+        }
+
+        // Add label layer
+        if (labelLayer) {
+            radarMap.removeLayer(labelLayer);
         }
 
         labelLayer = window.BomRadarColorMapper.createFilteredLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png', {
             attribution: '',
             subdomains: 'abcd',
             minZoom: 5,
-            maxZoom: 18,                    // Labels can zoom with base map
-            bounds: AUSTRALIA_BOUNDS,       // Leaflet bounds hint
-            australiaBounds: AUSTRALIA_BOUNDS, // Strict filtering in _isValidTile
-            updateWhenIdle: true,
-            keepBuffer: 0,                  // Zero buffer - only load visible tiles
+            maxZoom: 18,
+            bounds: AUSTRALIA_BOUNDS,
+            australiaBounds: AUSTRALIA_BOUNDS,
+            updateWhenIdle: false,
+            updateWhenZooming: true,
+            keepBuffer: 2,
             noWrap: true,
             pane: 'labelPane'
         });
         labelLayer.addTo(radarMap);
 
-        console.log('[RADAR] Label layer added on top');
-
-        // Update slider max
         frameSlider.max = frames.length - 1;
         frameTotalEl.textContent = frames.length;
-    }
 
-    /**
-     * Aggressively prune tiles from all layers to free memory
-     * Only keeps tiles in current view + minimal buffer
-     */
-    function pruneTilesAggressively() {
-        if (!radarMap) return;
-
-        const allLayers = [mapBaseLayer, satelliteBaseLayer, labelLayer, ...radarLayers].filter(Boolean);
-
-        allLayers.forEach(layer => {
-            if (layer && layer._map && layer._tiles) {
-                const tileKeys = Object.keys(layer._tiles);
-
-                // Get current tile range
-                const tileRange = layer._pxBoundsToTileRange ?
-                    layer._pxBoundsToTileRange(layer._map.getPixelBounds()) : null;
-
-                tileKeys.forEach(key => {
-                    const tile = layer._tiles[key];
-                    if (!tile) return;
-
-                    // If we have a tile range, check if tile is outside it
-                    if (tileRange && tile.coords) {
-                        const isInRange =
-                            tile.coords.x >= tileRange.min.x &&
-                            tile.coords.x <= tileRange.max.x &&
-                            tile.coords.y >= tileRange.min.y &&
-                            tile.coords.y <= tileRange.max.y &&
-                            tile.coords.z === layer._tileZoom;
-
-                        // Remove tiles outside current view
-                        if (!isInRange) {
-                            layer._removeTile(key);
-                        }
-                    }
-                });
-            }
-        });
-
-        console.log('[RADAR] Aggressively pruned tiles outside current view');
+        console.log('[RADAR] ✓ Layers created');
     }
 
     function setFrame(index) {
         if (index < 0 || index >= frames.length) return;
-    
-        const previousIndex = currentFrameIndex;
-    
-        // INSTANT SWITCHING: Hide all layers immediately
-        radarLayers.forEach((layer, i) => {
-            if (i !== index) {
-                // Use display:none for instant hiding
-                if (layer._container) {
-                    layer._container.style.display = 'none';
-                }
-                layer.setOpacity(0);
-                if (i === previousIndex && layer.setActive) {
-                    layer.setActive(false);
-                }
-            }
-        });
-    
-        // INSTANT SWITCHING: Show current frame immediately
-        if (radarLayers[index]) {
-            if (radarLayers[index].setActive) {
-                radarLayers[index].setActive(true);
-            }
-            
-            // Show container instantly
-            if (radarLayers[index]._container) {
-                radarLayers[index]._container.style.display = 'block';
-            }
-            radarLayers[index].setOpacity(0.90);
-    
-            // Force immediate tile update
-            if (radarLayers[index]._map) {
-                radarLayers[index]._update();
-                
-                // Try multiple methods to force redraw, checking if each exists
-                if (typeof radarLayers[index]._reset === 'function') {
-                    radarLayers[index]._reset();
-                    radarLayers[index]._update();
-                } else if (typeof radarLayers[index].redraw === 'function') {
-                    // Try redraw method if available
-                    radarLayers[index].redraw();
-                } else if (typeof radarLayers[index]._tileContainer !== 'undefined') {
-                    // Force update through tile container manipulation
-                    const container = radarLayers[index]._tileContainer;
-                    if (container && container.style) {
-                        // Force a repaint by toggling display
-                        const originalDisplay = container.style.display;
-                        container.style.display = 'none';
-                        container.offsetHeight; // Force reflow
-                        container.style.display = originalDisplay;
-                    }
-                } else {
-                    // Fallback: just call update multiple times
-                    radarLayers[index]._update();
-                    setTimeout(() => {
-                        if (radarLayers[index] && radarLayers[index]._map) {
-                            radarLayers[index]._update();
-                        }
-                    }, 10);
-                }
-            }
+
+        // Remove current layer
+        if (currentLayer && radarMap.hasLayer(currentLayer)) {
+            radarMap.removeLayer(currentLayer);
         }
-    
+
+        // Add new layer to map
+        currentLayer = radarLayers[index];
+        if (currentLayer) {
+            currentLayer.addTo(radarMap);
+
+            // Immediately update to load tiles
+            currentLayer._update();
+
+            // Log status after brief delay
+            setTimeout(() => {
+                const tileCount = currentLayer._tiles ? Object.keys(currentLayer._tiles).length : 0;
+                console.log(`[RADAR] Frame ${index + 1}/${frames.length} - ${tileCount} tiles, ${tileLoadCount} loaded, ${tileErrorCount} errors`);
+
+                if (tileCount === 0 && tileErrorCount > 10) {
+                    console.warn(`[RADAR] ⚠️ No tiles loading - may be no rain data in current area`);
+                }
+            }, 500);
+        }
+
         currentFrameIndex = index;
         updateFrameUI();
     }
@@ -594,10 +473,7 @@ function initializeRadarMapModule() {
         const frame = frames[currentFrameIndex];
         if (!frame) return;
 
-        // Update timestamp
         const date = new Date(frame.date);
-        const isPrediction = frame.isPrediction;
-
         let timeString = date.toLocaleString('en-AU', {
             month: 'short',
             day: 'numeric',
@@ -606,16 +482,12 @@ function initializeRadarMapModule() {
             timeZoneName: 'short'
         });
 
-        if (isPrediction) {
+        if (frame.isPrediction) {
             timeString += ' (Forecast)';
         }
 
         timestampEl.textContent = timeString;
-
-        // Update frame counter
         frameCurrentEl.textContent = currentFrameIndex + 1;
-
-        // Update slider
         frameSlider.value = currentFrameIndex;
     }
 
@@ -623,22 +495,19 @@ function initializeRadarMapModule() {
         if (currentFrameIndex < frames.length - 1) {
             setFrame(currentFrameIndex + 1);
         } else {
-            // On last frame, pause for one frame duration before looping
             if (isPlaying) {
-                // Pause the interval temporarily
                 if (animationInterval) {
                     clearInterval(animationInterval);
                     animationInterval = null;
                 }
-                // Wait one frame duration, then loop back and restart
                 setTimeout(() => {
                     if (isPlaying) {
-                        setFrame(0); // Loop back to start
-                        animate(); // Restart animation
+                        setFrame(0);
+                        animate();
                     }
                 }, ANIMATION_SPEEDS[currentSpeed]);
             } else {
-                setFrame(0); // Loop back to start
+                setFrame(0);
             }
         }
     }
@@ -647,7 +516,7 @@ function initializeRadarMapModule() {
         if (currentFrameIndex > 0) {
             setFrame(currentFrameIndex - 1);
         } else {
-            setFrame(frames.length - 1); // Loop to end
+            setFrame(frames.length - 1);
         }
     }
 
@@ -682,18 +551,12 @@ function initializeRadarMapModule() {
         animationInterval = setInterval(() => {
             if (!isPlaying) return;
             nextFrame();
-
-            // Periodic cleanup every 10 frames during animation
-            if (currentFrameIndex % 10 === 0) {
-                setTimeout(() => pruneTilesAggressively(), 500);
-            }
         }, ANIMATION_SPEEDS[currentSpeed]);
     }
 
     function setSpeed(speed) {
         currentSpeed = speed;
 
-        // Update button states
         btnSpeedSlow.classList.remove('active');
         btnSpeedNormal.classList.remove('active');
         btnSpeedFast.classList.remove('active');
@@ -702,7 +565,6 @@ function initializeRadarMapModule() {
         if (speed === 'normal') btnSpeedNormal.classList.add('active');
         if (speed === 'fast') btnSpeedFast.classList.add('active');
 
-        // Restart animation if playing
         if (isPlaying) {
             animate();
         }
@@ -756,7 +618,6 @@ function initializeRadarMapModule() {
     }
 
     function showNotification(message, type) {
-        // Use existing notification system if available
         if (typeof window.showNotification === 'function') {
             window.showNotification(message, type);
         } else {
@@ -767,21 +628,14 @@ function initializeRadarMapModule() {
     function resetRadarMap() {
         if (!radarInitialized || !radarMap) return;
 
-        // Stop animation if playing
         pause();
-
-        // Reset map view to initial state
         radarMap.setView(AUSTRALIA_CENTER, AUSTRALIA_ZOOM);
-
-        // Reset speed to normal
         setSpeed('normal');
 
-        // Reset to most recent frame if frames are loaded
         if (frames.length > 0) {
             setFrame(frames.length - 1);
         }
 
-        // Reset to map view if currently on satellite
         if (currentBaseLayer === 'satellite') {
             const toggleBtn = document.getElementById('radar-baselayer-toggle');
             if (radarMap.hasLayer(satelliteBaseLayer)) {
@@ -800,42 +654,32 @@ function initializeRadarMapModule() {
         console.log('[RADAR] Map reset to initial state');
     }
 
-    // Export resetRadarMap for tab switching
     window.resetRadarMap = resetRadarMap;
 
-    // Initialize when radar tab is clicked
     const radarTab = document.getElementById('tab-radar');
     if (radarTab) {
         radarTab.addEventListener('click', function() {
-            // Small delay to ensure tab content is visible
             setTimeout(() => {
                 if (!radarInitialized) {
                     initRadarMap();
                 } else if (radarMap) {
-                    // Fix map rendering after tab switch
                     radarMap.invalidateSize();
-                    console.log('[RADAR] Map size invalidated after tab switch');
                 }
             }, 100);
         });
     }
 
-    // Also handle any tab switching events
     document.addEventListener('click', function(e) {
         if (e.target.classList.contains('tab-button') || e.target.closest('.tab-button')) {
             const clickedTab = e.target.classList.contains('tab-button') ? e.target : e.target.closest('.tab-button');
             if (clickedTab && clickedTab.id === 'tab-radar' && radarMap && radarInitialized) {
-                setTimeout(() => {
-                    radarMap.invalidateSize();
-                }, 150);
+                setTimeout(() => radarMap.invalidateSize(), 150);
             }
         }
     });
 
-    // Export for status checking
     window.radarMapInitialized = false;
 
-    // Update global flag when initialized
     const originalInit = initRadarMap;
     initRadarMap = function() {
         originalInit();
@@ -843,4 +687,4 @@ function initializeRadarMapModule() {
     };
 
 })();
-} // End of initializeRadarMapModule
+}
