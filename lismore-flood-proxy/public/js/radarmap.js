@@ -360,26 +360,29 @@ function initializeRadarMapModule() {
     }
 
     async function loadRadarLayers() {
-        // Remove current layer
-        if (currentLayer && radarMap.hasLayer(currentLayer)) {
-            radarMap.removeLayer(currentLayer);
-        }
+        const previousLayers = radarLayers.slice();
+        previousLayers.forEach(layer => {
+            if (!layer) return;
+            if (radarMap && radarMap.hasLayer(layer)) {
+                radarMap.removeLayer(layer);
+            }
+            if (typeof layer.off === 'function') {
+                layer.off();
+            }
+        });
+
         currentLayer = null;
         radarLayers = [];
         tileLoadCount = 0;
         tileErrorCount = 0;
 
-        // Load last 6 frames (reduced for faster loading)
         const framesToLoad = frames.slice(-6);
 
         console.log(`[RADAR] Creating ${framesToLoad.length} frames`);
 
-        // Create layer objects
-        for (let i = 0; i < framesToLoad.length; i++) {
-            const frame = framesToLoad[i];
-
+        framesToLoad.forEach((frame) => {
             const layer = window.BomRadarColorMapper.createColorMappedLayer(frame.tileUrl, {
-                opacity: 1,
+                opacity: 0,
                 pane: 'radarPane',
                 attribution: '&copy; <a href="https://www.rainviewer.com">RainViewer</a>',
                 tileSize: 256,
@@ -389,31 +392,59 @@ function initializeRadarMapModule() {
                 className: 'rainviewer-layer bom-radar-crisp',
                 updateWhenIdle: false,
                 updateWhenZooming: true,
-                keepBuffer: 2,  // Only preload 2 tile buffers - reduces initial load
+                keepBuffer: 2,
                 updateInterval: 50,
                 tms: false,
                 noWrap: true,
                 bounds: AUSTRALIA_BOUNDS,
                 australiaBounds: AUSTRALIA_BOUNDS,
-                skipColorMapping: false  // Enable custom BoM color mapping from raw dBZ data
+                skipColorMapping: false
             });
 
-            // Add tile load event listeners
-            layer.on('tileload', function(e) {
+            layer._radarReady = false;
+            layer._radarFirstTileReady = false;
+            layer._radarTileLoads = 0;
+
+            layer.on('loading', function() {
+                layer._radarReady = false;
+                layer._radarFirstTileReady = false;
+            });
+
+            layer.on('tileload', function() {
                 tileLoadCount++;
+                layer._radarTileLoads += 1;
+
+                if (!layer._radarFirstTileReady) {
+                    layer._radarFirstTileReady = true;
+                }
+
                 if (tileLoadCount === 1) {
                     console.log(`[RADAR] ✓ First tile loaded successfully!`);
                 }
             });
 
-            layer.on('tileerror', function(e) {
+            layer.on('tileerror', function() {
                 tileErrorCount++;
             });
 
+            layer.on('load', function() {
+                layer._radarReady = true;
+            });
+
             radarLayers.push(layer);
-        }
+        });
 
         frames = framesToLoad;
+
+        radarLayers.forEach(layer => {
+            if (radarMap && !radarMap.hasLayer(layer)) {
+                layer.addTo(radarMap);
+            }
+            layer.setOpacity(0);
+            if (typeof layer._update === 'function') {
+                layer._update();
+            }
+        });
 
         // Create label pane
         if (!radarMap.getPane('labelPane')) {
@@ -451,32 +482,84 @@ function initializeRadarMapModule() {
     function setFrame(index) {
         if (index < 0 || index >= frames.length) return;
 
-        // Remove current layer
-        if (currentLayer && radarMap.hasLayer(currentLayer)) {
-            radarMap.removeLayer(currentLayer);
-        }
+        const nextLayer = radarLayers[index];
+        if (!nextLayer) return;
 
-        // Add new layer to map
-        currentLayer = radarLayers[index];
-        if (currentLayer) {
-            currentLayer.addTo(radarMap);
+        const previousLayer = currentLayer && currentLayer !== nextLayer ? currentLayer : null;
 
-            // Immediately update to load tiles
-            currentLayer._update();
-
-            // Log status after brief delay
-            setTimeout(() => {
-                const tileCount = currentLayer._tiles ? Object.keys(currentLayer._tiles).length : 0;
-                console.log(`[RADAR] Frame ${index + 1}/${frames.length} - ${tileCount} tiles, ${tileLoadCount} loaded, ${tileErrorCount} errors`);
-
-                if (tileCount === 0 && tileErrorCount > 10) {
-                    console.warn(`[RADAR] ⚠️ No tiles loading - may be no rain data in current area`);
-                }
-            }, 500);
-        }
-
+        currentLayer = nextLayer;
         currentFrameIndex = index;
         updateFrameUI();
+
+        if (radarMap && !radarMap.hasLayer(nextLayer)) {
+            nextLayer.addTo(radarMap);
+        }
+
+        if (typeof nextLayer._update === 'function') {
+            nextLayer._update();
+        }
+
+        const logStatus = () => {
+            const tileCount = nextLayer._tiles ? Object.keys(nextLayer._tiles).length : 0;
+            const loads = typeof nextLayer._radarTileLoads === 'number' ? nextLayer._radarTileLoads : tileLoadCount;
+            console.log(`[RADAR] Frame ${index + 1}/${frames.length} - ${tileCount} tiles, ${loads} loaded, ${tileErrorCount} errors`);
+
+            if (tileCount === 0 && tileErrorCount > 10) {
+                console.warn('[RADAR] ⚠️ No tiles loading - may be no rain data in current area');
+            }
+        };
+
+        const revealNextLayer = () => {
+            nextLayer.setOpacity(1);
+            if (typeof nextLayer.bringToFront === 'function') {
+                nextLayer.bringToFront();
+            }
+            if (previousLayer && radarMap && radarMap.hasLayer(previousLayer)) {
+                previousLayer.setOpacity(0);
+            }
+            if (labelLayer && radarMap && radarMap.hasLayer(labelLayer) && typeof labelLayer.bringToFront === 'function') {
+                labelLayer.bringToFront();
+            }
+            setTimeout(logStatus, 250);
+        };
+
+        if (!previousLayer) {
+            revealNextLayer();
+            return;
+        }
+
+        nextLayer.setOpacity(0);
+
+        if (nextLayer._radarFirstTileReady) {
+            revealNextLayer();
+            return;
+        }
+
+        let revealed = false;
+        const cleanupAndReveal = () => {
+            if (revealed) return;
+            revealed = true;
+            nextLayer.off('tileload', onFirstTileLoaded);
+            nextLayer.off('load', onLayerLoaded);
+            revealNextLayer();
+        };
+
+        const onFirstTileLoaded = () => {
+            cleanupAndReveal();
+        };
+
+        const onLayerLoaded = () => {
+            cleanupAndReveal();
+        };
+
+        nextLayer.on('tileload', onFirstTileLoaded);
+        nextLayer.on('load', onLayerLoaded);
+
+        setTimeout(() => {
+            if (!revealed && nextLayer._radarFirstTileReady) {
+                cleanupAndReveal();
+            }
+        }, 500);
     }
 
     function updateFrameUI() {
