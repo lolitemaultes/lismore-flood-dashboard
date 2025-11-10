@@ -8,7 +8,7 @@
 - ~~Restyling header~~
 - ~~Change power outage icon to lightning bolt~~
 - ~~Move toggles up the top on floodmap~~
-- Resizing buttons site-wide
+- ~~Resizing buttons site-wide~~
 - Adding different/working mobile/tablet support
 
 **Code Restructure / Cleaner Architecture**
@@ -17,7 +17,7 @@
 
 **LOLITEMAULTES Original Weather Radar Map**
 - ~~Implement original (old BoM radar style) interactive rain radar map~~
-- Improve BoM-esk styling of radar
+- Improve BoM-ish styling of radar
 
 **Improve SEO Information for Official Site**
 - Add more alt text
