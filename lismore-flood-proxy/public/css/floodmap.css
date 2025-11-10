@@ -10,8 +10,8 @@
 }
 
 #content-floodmap .tab-header > div > .button {
-    min-height: 44px;
-    padding: 0.65rem 1.35rem;
+    height: 36px;
+    padding: 0.5rem 1.25rem;
     align-items: center;
     gap: 0.5rem;
 }

@@ -1104,100 +1104,141 @@ function getFromRadarTileCache(key) {
 app.get('/api/radar/tile/:timestamp/:z/:x/:y', async (req, res) => {
     const { timestamp, z, x, y } = req.params;
 
-    // Get quality parameter from query (default based on zoom level)
     const zoomLevel = parseInt(z);
-    let quality = parseInt(req.query.quality);
+    const requestedQuality = parseInt(req.query.quality);
 
-    // Auto-determine quality if not specified
-    if (isNaN(quality) || quality < 0 || quality > 2) {
-        if (zoomLevel >= 9) {
-            quality = 2; // High quality - maximum detail for close zoom
-        } else {
-            quality = 1; // Default to raw/universal detail (no smoothing)
+    const clampQuality = (value) => Math.max(0, Math.min(2, value));
+
+    let qualityCandidates;
+    if (!Number.isNaN(requestedQuality)) {
+        qualityCandidates = [clampQuality(requestedQuality)];
+
+        // Provide sensible fallbacks when a specific quality was requested.
+        if (qualityCandidates[0] === 2) {
+            qualityCandidates.push(1, 0);
+        } else if (qualityCandidates[0] === 1) {
+            qualityCandidates.push(0);
+        }
+    } else if (zoomLevel >= 9) {
+        // Prefer raw, unsmoothed tiles when zoomed in. RainViewer does not provide
+        // a "2" smooth level for the raw (color=0) tiles, so we fall back to the
+        // universal smoothing if required.
+        qualityCandidates = [0, 1];
+    } else {
+        qualityCandidates = [1, 0];
+    }
+
+    const seenQualities = new Set();
+    qualityCandidates = qualityCandidates.filter((quality) => {
+        if (seenQualities.has(quality)) {
+            return false;
+        }
+        seenQualities.add(quality);
+        return true;
+    });
+
+    let selectedQuality = null;
+    let tileBuffer = null;
+    let cacheHit = false;
+    let lastError = null;
+
+    for (const candidateQuality of qualityCandidates) {
+        const cacheKey = getRadarTileCacheKey(timestamp, z, x, y, candidateQuality);
+        const cachedTile = getFromRadarTileCache(cacheKey);
+        if (cachedTile) {
+            selectedQuality = candidateQuality;
+            tileBuffer = cachedTile;
+            cacheHit = true;
+            break;
+        }
+
+        const rainViewerUrl = `https://tilecache.rainviewer.com/v2/radar/${timestamp}/256/${z}/${x}/${y}/0/${candidateQuality}_0.png`;
+
+        try {
+            Logger.verbose(`[RADAR TILE] Cache MISS - Fetching ${z}/${x}/${y} quality=${candidateQuality} for timestamp ${timestamp}`);
+
+            const response = await axios.get(rainViewerUrl, {
+                responseType: 'arraybuffer',
+                timeout: 5000,
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                    'Accept': 'image/png,image/*',
+                    'Accept-Encoding': 'gzip, deflate',
+                    'Referer': 'https://www.rainviewer.com/',
+                    'Connection': 'keep-alive'
+                },
+                validateStatus: (status) => status === 200,
+                decompress: true
+            });
+
+            addToRadarTileCache(cacheKey, response.data);
+            selectedQuality = candidateQuality;
+            tileBuffer = response.data;
+            break;
+        } catch (error) {
+            const isExpectedZoomError = error.response && error.response.status === 403 && zoomLevel >= 11;
+
+            if (error.code === 'ECONNREFUSED') {
+                Logger.error(`[RADAR TILE] Connection refused to RainViewer for tile ${z}/${x}/${y}`);
+                lastError = error;
+                break;
+            } else if (error.code === 'ETIMEDOUT' || error.message.includes('timeout')) {
+                Logger.warn(`[RADAR TILE] Timeout fetching tile ${z}/${x}/${y}`);
+                lastError = error;
+                break;
+            } else if (error.response) {
+                if (error.response.status === 404) {
+                    Logger.warn(`[RADAR TILE] Quality ${candidateQuality} unavailable for ${z}/${x}/${y} - trying fallback`);
+                    lastError = error;
+                    continue;
+                }
+
+                if (isExpectedZoomError) {
+                    Logger.verbose(`[RADAR TILE] Tile not available at zoom ${z} (RainViewer limit is zoom 10)`);
+                    lastError = error;
+                    continue;
+                }
+
+                Logger.error(`[RADAR TILE] HTTP ${error.response.status} for tile ${z}/${x}/${y} - URL: ${rainViewerUrl}`);
+                lastError = error;
+                break;
+            } else {
+                Logger.error(`[RADAR TILE] Error for tile ${z}/${x}/${y}: ${error.message}`);
+                lastError = error;
+                break;
+            }
         }
     }
 
-    const cacheKey = getRadarTileCacheKey(timestamp, z, x, y, quality);
+    if (tileBuffer && selectedQuality !== null) {
+        const cacheHeader = cacheHit ? 'HIT' : 'MISS';
+        const requestedHeader = qualityCandidates.length > 0 ? qualityCandidates[0] : selectedQuality;
 
-    // Check in-memory cache first
-    const cachedTile = getFromRadarTileCache(cacheKey);
-    if (cachedTile) {
         res.setHeader('Content-Type', 'image/png');
         res.setHeader('Cache-Control', 'public, max-age=21600, immutable');
         res.setHeader('Access-Control-Allow-Origin', '*');
-        res.setHeader('X-Cache', 'HIT');
-        res.setHeader('X-Quality', quality.toString());
-        return res.send(cachedTile);
-    }
+        res.setHeader('X-Cache', cacheHeader);
+        res.setHeader('X-Quality', selectedQuality.toString());
+        res.setHeader('X-Quality-Requested', requestedHeader.toString());
 
-    // RainViewer tile URL format for raw dBZ data:
-    // https://tilecache.rainviewer.com/v2/radar/{timestamp}/{tileSize}/{z}/{x}/{y}/{color}/{smooth}_{snow}.png
-    // color: 0 = Original (raw encoded dBZ data - most reliable)
-    //        All tiles encode: dBZ = (R & 127) - 32, where R is red channel
-    // smooth: quality parameter (0 = smoothed/low detail, 1 = universal, 2 = high quality)
-    // snow: 0 = don't show snow marker (we extract dBZ regardless)
-    // Using color=0 to get raw reliable data, then apply custom BoM colors client-side
-    const rainViewerUrl = `https://tilecache.rainviewer.com/v2/radar/${timestamp}/256/${z}/${x}/${y}/0/${quality}_0.png`;
-
-    try {
-        Logger.verbose(`[RADAR TILE] Cache MISS - Fetching ${z}/${x}/${y} for timestamp ${timestamp}`);
-
-        const response = await axios.get(rainViewerUrl, {
-            responseType: 'arraybuffer',
-            timeout: 5000,
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-                'Accept': 'image/png,image/*',
-                'Accept-Encoding': 'gzip, deflate',
-                'Referer': 'https://www.rainviewer.com/',
-                'Connection': 'keep-alive'
-            },
-            validateStatus: (status) => status === 200,
-            decompress: true  // Automatically decompress gzip responses
-        });
-
-        // Cache the tile in memory for faster subsequent requests
-        addToRadarTileCache(cacheKey, response.data);
-
-        // Set headers
-        res.setHeader('Content-Type', 'image/png');
-        res.setHeader('Cache-Control', 'public, max-age=21600, immutable'); // Cache for 6 hours, immutable
-        res.setHeader('Access-Control-Allow-Origin', '*'); // Allow CORS
-        res.setHeader('X-Cache', 'MISS');
-        res.setHeader('X-Quality', quality.toString());
-
-        // Send the image buffer
-        res.send(response.data);
-        Logger.verbose(`[RADAR TILE] ✓ ${z}/${x}/${y} quality=${quality}`);
-
-    } catch (error) {
-        // Log error details (throttled, but suppress expected 403s at high zoom)
-        // RainViewer radar tiles are limited to zoom 10, so 403s at zoom 11+ are expected
-        const isExpectedZoomError = error.response && error.response.status === 403 && parseInt(z) >= 11;
-
-        if (error.code === 'ECONNREFUSED') {
-            Logger.error(`[RADAR TILE] Connection refused to RainViewer for tile ${z}/${x}/${y}`);
-        } else if (error.code === 'ETIMEDOUT' || error.message.includes('timeout')) {
-            Logger.warn(`[RADAR TILE] Timeout fetching tile ${z}/${x}/${y}`);
-        } else if (error.response) {
-            if (isExpectedZoomError) {
-                // Only log once as verbose, not error - this is expected behavior
-                Logger.verbose(`[RADAR TILE] Tile not available at zoom ${z} (RainViewer limit is zoom 10)`);
-            } else {
-                Logger.error(`[RADAR TILE] HTTP ${error.response.status} for tile ${z}/${x}/${y} - URL: ${rainViewerUrl}`);
-            }
-        } else {
-            Logger.error(`[RADAR TILE] Error for tile ${z}/${x}/${y}: ${error.message}`);
+        if (!cacheHit && selectedQuality !== requestedHeader) {
+            Logger.verbose(`[RADAR TILE] Fallback quality ${selectedQuality} served for ${z}/${x}/${y}`);
+        } else if (!cacheHit) {
+            Logger.verbose(`[RADAR TILE] ✓ ${z}/${x}/${y} quality=${selectedQuality}`);
         }
 
-        // IMPORTANT: Return a transparent PNG instead of JSON
-        // This prevents browser errors and allows map to render
-        res.setHeader('Content-Type', 'image/png');
-        res.setHeader('Cache-Control', 'public, max-age=60'); // Short cache for errors
-        res.setHeader('Access-Control-Allow-Origin', '*');
-        res.status(200); // Return 200 with transparent tile, not an error status
-        res.send(TRANSPARENT_PNG_1x1);
+        return res.send(tileBuffer);
     }
+
+    if (lastError && lastError.response && lastError.response.status === 404 && qualityCandidates.length > 1) {
+        Logger.warn(`[RADAR TILE] Exhausted quality fallbacks for ${z}/${x}/${y}, returning transparent tile`);
+    }
+
+    res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Cache-Control', 'public, max-age=60');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.status(200);
+    res.send(TRANSPARENT_PNG_1x1);
 });
 
 // Old radar endpoint (keep for backwards compatibility, will be deprecated)
