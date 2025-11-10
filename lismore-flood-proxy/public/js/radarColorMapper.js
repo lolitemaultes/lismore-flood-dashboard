@@ -151,19 +151,19 @@ L.TileLayer.BomColorMapped = L.TileLayer.extend({
 
         // Determine quality based on zoom level (not from options)
         // RainViewer quality: 0=smoothed, 1=universal, 2=high detail
-        // Quality 2 NOT reliably available - causes 404s even at zoom 10
-        // Use quality 1 (universal) - best compatibility with no errors
+        // Force the highest detail possible for close zoom levels while
+        // avoiding the smoothed low-quality tiles entirely.
         let quality;
-        if (coords.z < 7) {
-            quality = 0; // LOW quality for distant view
+        if (coords.z >= 9) {
+            quality = 2; // High detail tiles when zoomed in close
         } else {
-            quality = 1; // UNIVERSAL quality - works everywhere, no 404s
+            quality = 1; // Preserve raw detail without RainViewer smoothing
         }
 
-        // Add quality parameter to URL
+        // Add quality parameter to URL and request unsmoothed output explicitly
         if (url) {
             const separator = url.includes('?') ? '&' : '?';
-            url += `${separator}quality=${quality}`;
+            url += `${separator}quality=${quality}&smooth=0`;
         }
 
         return url;

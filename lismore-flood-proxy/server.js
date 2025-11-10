@@ -1018,8 +1018,13 @@ app.get('/api/outages/clear-cache', (req, res) => {
 });
 
 // RainViewer Radar endpoints
-app.get('/api/radar/frames', (req, res) => {
+app.get('/api/radar/frames', async (req, res) => {
     try {
+        const shouldRefresh = req.query.refresh === '1' || req.query.refresh === 'true';
+        if (shouldRefresh) {
+            await rainViewerService.updateFrames();
+        }
+
         const frames = rainViewerService.getFrames();
         const status = rainViewerService.getStatus();
         const config = rainViewerService.getConfig();
@@ -1105,12 +1110,10 @@ app.get('/api/radar/tile/:timestamp/:z/:x/:y', async (req, res) => {
 
     // Auto-determine quality if not specified
     if (isNaN(quality) || quality < 0 || quality > 2) {
-        if (zoomLevel <= 6) {
-            quality = 0; // Smoothed - lowest quality, fastest loading
-        } else if (zoomLevel <= 8) {
-            quality = 1; // Universal - medium quality
+        if (zoomLevel >= 9) {
+            quality = 2; // High quality - maximum detail for close zoom
         } else {
-            quality = 2; // High quality - maximum detail
+            quality = 1; // Default to raw/universal detail (no smoothing)
         }
     }
 

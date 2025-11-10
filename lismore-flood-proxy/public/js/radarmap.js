@@ -136,7 +136,7 @@ function initializeRadarMapModule() {
             noWrap: true,
             zoomAnimation: true,
             zoomAnimationThreshold: 10,
-            fadeAnimation: true,
+            fadeAnimation: false,
             markerZoomAnimation: true,
             wheelPxPerZoomLevel: 120,
             zoomSnap: 1,  // INTEGER zoom only - no 7.5, 8.5
@@ -340,12 +340,22 @@ function initializeRadarMapModule() {
                 showNotification('Radar data refreshed', 'success');
             }
 
-            updateRadarStatus('Online');
+            const latestFrame = frames[frames.length - 1];
+            let detailText = null;
+            if (latestFrame && latestFrame.date) {
+                detailText = `Updated ${formatRadarTimestamp(latestFrame.date)}`;
+            }
+
+            updateRadarStatus('Online', detailText);
+
+            if (typeof window.checkRadarAvailability === 'function') {
+                window.checkRadarAvailability();
+            }
 
         } catch (error) {
             console.error('[RADAR] Error loading radar data:', error);
             showError('Unable to load radar data: ' + error.message);
-            updateRadarStatus('Connection Error');
+            updateRadarStatus('Offline', 'Connection error');
         }
     }
 
@@ -369,7 +379,7 @@ function initializeRadarMapModule() {
             const frame = framesToLoad[i];
 
             const layer = window.BomRadarColorMapper.createColorMappedLayer(frame.tileUrl, {
-                opacity: 0.85,
+                opacity: 1,
                 pane: 'radarPane',
                 attribution: '&copy; <a href="https://www.rainviewer.com">RainViewer</a>',
                 tileSize: 256,
@@ -577,7 +587,10 @@ function initializeRadarMapModule() {
 
         refreshTimer = setInterval(() => {
             console.log('[RADAR] Auto-refreshing data...');
-            loadRadarData(false);
+            loadRadarData(true);
+            if (typeof window.checkRadarAvailability === 'function') {
+                window.checkRadarAvailability();
+            }
         }, REFRESH_INTERVAL);
     }
 
@@ -602,18 +615,31 @@ function initializeRadarMapModule() {
             const errorMsg = document.getElementById('radar-error-message');
             if (errorMsg) errorMsg.textContent = message;
         }
+        updateRadarStatus('Offline', message);
     }
 
-    function updateRadarStatus(status) {
+    function formatRadarTimestamp(dateString) {
+        try {
+            const date = new Date(dateString);
+            return date.toLocaleString('en-AU', {
+                hour: '2-digit',
+                minute: '2-digit',
+                timeZoneName: 'short'
+            });
+        } catch (error) {
+            console.error('[RADAR] Failed to format timestamp:', error);
+            return null;
+        }
+    }
+
+    function updateRadarStatus(status, detailText = null) {
         const radarStatusValue = document.getElementById('radar-status-value');
         if (radarStatusValue) {
-            if (status === 'Online') {
-                radarStatusValue.textContent = 'Online';
-                radarStatusValue.className = 'status-value online';
-            } else {
-                radarStatusValue.textContent = status;
-                radarStatusValue.className = 'status-value offline';
-            }
+            const isOnline = status === 'Online';
+            const detail = detailText ? ` — ${detailText}` : '';
+            radarStatusValue.textContent = `${status}${detail}`;
+            radarStatusValue.className = `status-value ${isOnline ? 'online' : 'offline'}`;
+            radarStatusValue.title = detailText ? `${status} • ${detailText}` : status;
         }
     }
 
@@ -655,6 +681,10 @@ function initializeRadarMapModule() {
     }
 
     window.resetRadarMap = resetRadarMap;
+    window.setRadarStatusIndicator = updateRadarStatus;
+    window.triggerRadarRefresh = function() {
+        loadRadarData(true);
+    };
 
     const radarTab = document.getElementById('tab-radar');
     if (radarTab) {

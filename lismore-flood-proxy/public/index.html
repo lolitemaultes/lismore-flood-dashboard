@@ -1343,7 +1343,7 @@
             webcamStatusValue.className = 'status-value';
             
             const radarStatusValue = document.getElementById('radar-status-value') ||
-                                    createStatusElement('radar-status', 'Radar Image');
+                                    createStatusElement('radar-status', 'Radar Map');
 
             const cycloneStatusValue = document.getElementById('cyclone-status-value') ||
                                       createStatusElement('cyclone-status', 'Cyclone Map');
@@ -1397,7 +1397,9 @@
                 webcamStatusValue.className = 'status-value offline';
             };
             img.src = '/proxy/webcam?' + new Date().getTime();
-            
+
+            checkRadarAvailability();
+
             window.radarGlobalState = window.radarGlobalState || {
                 currentAnimationSessionId: 0,
                 lastRefreshTime: 0,
@@ -2455,7 +2457,23 @@
         }
         
         function createStatusElement(id, label) {
+            const existingItem = document.getElementById(id);
+            if (existingItem) {
+                const existingLabel = existingItem.querySelector('.status-label');
+                if (existingLabel) {
+                    existingLabel.textContent = `${label}:`;
+                }
+                const existingValue = document.getElementById(`${id}-value`);
+                if (existingValue) {
+                    return existingValue;
+                }
+            }
+
             const statusPanel = document.querySelector('.status-panel');
+
+            if (!statusPanel) {
+                return null;
+            }
 
             const statusItem = document.createElement('div');
             statusItem.id = id;
@@ -2520,62 +2538,99 @@
             webcamError.style.display = 'none';
         });
         
-            function refreshRadar() {
-                if (window.initializeRadar) {
-                    const refreshBtn = document.getElementById('refresh-btn');
-                    if (refreshBtn) {
-                        refreshBtn.click();
-                    }
+        function refreshRadar() {
+            if (typeof window.triggerRadarRefresh === 'function') {
+                window.triggerRadarRefresh();
+                return;
+            }
+
+            if (typeof window.resetRadarMap === 'function') {
+                window.resetRadarMap();
+            }
+        }
+
+        function updateRadarStatusRow(status, detail) {
+            if (typeof window.setRadarStatusIndicator === 'function') {
+                window.setRadarStatusIndicator(status, detail);
+                return;
+            }
+
+            const statusValue = document.getElementById('radar-status-value') ||
+                                 createStatusElement('radar-status', 'Radar Map');
+
+            if (!statusValue) {
+                return;
+            }
+
+            const isOnline = status === 'Online';
+            const suffix = detail ? ` — ${detail}` : '';
+            statusValue.textContent = `${status}${suffix}`;
+            statusValue.className = `status-value ${isOnline ? 'online' : 'offline'}`;
+            statusValue.title = detail ? `${status} • ${detail}` : status;
+        }
+
+        async function checkRadarAvailability() {
+            const statusValue = document.getElementById('radar-status-value') ||
+                                 createStatusElement('radar-status', 'Radar Map');
+
+            if (!statusValue) {
+                return;
+            }
+
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+            const setOffline = (detail) => {
+                updateRadarStatusRow('Offline', detail);
+            };
+
+            try {
+                const response = await fetch('/api/radar/status', {
+                    cache: 'no-store',
+                    signal: controller.signal
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+                if (!data.success) {
+                    throw new Error(data.error || 'Status request failed');
+                }
+
+                if (!data.available || !data.frameCount) {
+                    setOffline('No radar frames');
                     return;
                 }
 
-                const radarImage = document.getElementById('radar-image');
-                const radarError = document.getElementById('radar-error');
-                const radarTimestamp = document.getElementById('radar-timestamp');
-
-                if (radarImage) {
-                    const timestamp = new Date().getTime();
-                    radarImage.src = `/proxy/radar-image?t=${timestamp}`;
-                    
-                    if (radarTimestamp) {
-                        radarTimestamp.textContent = `Last updated: ${new Date().toLocaleTimeString('en-AU')}`;
-                    }
-                    
-                    if (radarError) {
-                        radarImage.onerror = function() {
-                            radarError.style.display = 'block';
-                        };
-                        
-                        radarImg.onload = function() {
-                            if (document.getElementById('radar-error')) {
-                                document.getElementById('radar-error').style.display = 'none';
-                            }
-                        };
-                    }
+                const detailParts = [];
+                if (data.lastUpdate) {
+                    const formatted = new Date(data.lastUpdate).toLocaleString('en-AU', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        timeZoneName: 'short'
+                    });
+                    detailParts.push(`Updated ${formatted}`);
                 }
+
+                if (data.mode === 'fallback') {
+                    detailParts.push('Fallback data');
+                }
+
+                updateRadarStatusRow('Online', detailParts.join(' · '));
+            } catch (error) {
+                const message = error.name === 'AbortError'
+                    ? 'Request timed out'
+                    : 'Connection error';
+                console.error('Radar status check failed:', error);
+                setOffline(message);
+            } finally {
+                clearTimeout(timeoutId);
             }
-        
-        function checkRadarStatus() {
-            const radarImg = document.getElementById('radar-image');
-            const radarError = document.getElementById('radar-error');
-            const radarStatusValue = document.getElementById('radar-status-value');
-            
-            const radarTestImg = new Image();
-            
-            radarTestImg.onload = function() {
-                if (radarStatusValue) radarStatusValue.textContent = 'Online';
-                if (radarStatusValue) radarStatusValue.className = 'status-value online';
-                if (radarError) radarError.style.display = 'none';
-            };
-            
-            radarTestImg.onerror = function() {
-                if (radarStatusValue) radarStatusValue.textContent = 'Offline';
-                if (radarStatusValue) radarStatusValue.className = 'status-value offline';
-                if (radarError) radarError.style.display = 'block';
-            };
-            
-            radarTestImg.src = `/proxy/radar-image?t=${new Date().getTime()}`;
         }
+
+        window.checkRadarAvailability = checkRadarAvailability;
 
         async function refreshCycloneMap() {
             const cycloneImage = document.getElementById('cyclone-image');
@@ -2673,8 +2728,8 @@
                 linkUrl = "https://www.bom.gov.au/cyclone/";
             } 
             else if (tabId === 'tab-radar') {
-                title = "Radar Image Unavailable";
-                message = "The latest radar image could not be fetched.";
+                title = "Radar Map Unavailable";
+                message = "The live radar map could not be fetched.";
                 linkText = "View latest forecast for Lismore";
                 linkUrl = "https://beta.bom.gov.au/poi-location/australia/new-south-wales/northern-rivers/nsw_pt079-lismore";
             }
@@ -2734,103 +2789,6 @@
             }
         }
         
-        function fixRadarStatusCheck() {
-            const originalCheckRadarAvailability = window.checkRadarAvailability || function(){};
-            
-            window.checkRadarAvailability = function() {
-                const safelySetStyle = (element, property, value) => {
-                    if (element && element.style) {
-                        element.style[property] = value;
-                    }
-                };
-                
-                const radarErrorElements = [
-                    document.getElementById('radar-error'),
-                    document.querySelector('.radar-error')
-                ];
-                
-                const radarImg = new Image();
-                
-                radarImg.onload = function() {
-                    radarErrorElements.forEach(el => safelySetStyle(el, 'display', 'none'));
-                    
-                    const statusElement = document.getElementById('radar-status-value');
-                    if (statusElement) {
-                        statusElement.textContent = 'Online';
-                        statusElement.className = 'status-value online';
-                    }
-                    
-                    if (typeof originalCheckRadarAvailability === 'function') {
-                        try {
-                            originalCheckRadarAvailability();
-                        } catch (e) {
-                            console.error('Error in original radar status check:', e);
-                        }
-                    }
-                };
-                
-                radarImg.onerror = function() {
-                    radarErrorElements.forEach(el => safelySetStyle(el, 'display', 'block'));
-                    
-                    const statusElement = document.getElementById('radar-status-value');
-                    if (statusElement) {
-                        statusElement.textContent = 'Offline';
-                        statusElement.className = 'status-value offline';
-                    }
-                };
-                
-                radarImg.src = `/proxy/radar-image?t=${new Date().getTime()}`;
-            };
-            
-            const originalRefreshRadar = window.refreshRadar || function(){};
-
-            window.refreshRadar = function() {
-                const radarImage = document.getElementById('radar-image');
-                const radarError = document.getElementById('radar-error');
-                const radarTimestamp = document.getElementById('radar-timestamp');
-
-                if (radarImage) {
-                    const timestamp = new Date().getTime();
-                    radarImage.src = `/proxy/radar-image?t=${timestamp}`;
-
-                    if (radarTimestamp) {
-                        radarTimestamp.textContent = `Last updated: ${new Date().toLocaleTimeString('en-AU')}`;
-                    }
-                    
-                    if (radarError) {
-                        radarImage.onerror = function() {
-                            if (radarError && radarError.style) {
-                                radarError.style.display = 'block';
-                            }
-                        };
-                        
-                        radarImage.onload = function() {
-                            if (radarError && radarError.style) {
-                                radarError.style.display = 'none';
-                            }
-                        };
-                    }
-                }
-                
-                const refreshBtn = document.getElementById('refresh-btn');
-                if (refreshBtn) {
-                    try {
-                        refreshBtn.click();
-                    } catch (e) {
-                        console.error('Error clicking refresh button:', e);
-                    }
-                }
-            };
-            
-            console.log('Radar functions fixed for compatibility');
-        }
-        
-        document.addEventListener('DOMContentLoaded', fixRadarStatusCheck);
-        
-        if (document.readyState === 'complete' || document.readyState === 'interactive') {
-            fixRadarStatusCheck();
-        }
-        
         function addUnavailableTabStyles() {
             const styleElement = document.createElement('style');
             styleElement.textContent = `
@@ -2869,10 +2827,10 @@
         
         function initializeAvailabilityChecks() {
             addUnavailableTabStyles();
-            
+
             checkCycloneAvailability();
-            checkRadarStatus();
-            
+            checkRadarAvailability();
+
             setInterval(checkCycloneAvailability, 60000);
             setInterval(checkRadarAvailability, 60000);
         }

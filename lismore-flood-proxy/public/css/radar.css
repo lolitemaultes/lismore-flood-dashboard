@@ -268,25 +268,22 @@
     color: var(--primary-color);
 }
 
-/* RainViewer Tile Layer Styling - Smooth transitions */
+/* RainViewer Tile Layer Styling - immediate frame swaps (no fade) */
 .rainviewer-layer {
     pointer-events: none;
-    /* SMOOTH opacity transitions for frame changes */
-    transition: opacity 0.3s ease-in-out !important;
-    -webkit-transition: opacity 0.3s ease-in-out !important;
-    -moz-transition: opacity 0.3s ease-in-out !important;
-    -o-transition: opacity 0.3s ease-in-out !important;
+    transition: none !important;
+    -webkit-transition: none !important;
+    -moz-transition: none !important;
+    -o-transition: none !important;
 }
 
-/* Smooth opacity transitions on radar layer containers */
 .rainviewer-layer.leaflet-layer {
-    transition: opacity 0.3s ease-in-out !important;
-    -webkit-transition: opacity 0.3s ease-in-out !important;
-    -moz-transition: opacity 0.3s ease-in-out !important;
-    -o-transition: opacity 0.3s ease-in-out !important;
+    transition: none !important;
+    -webkit-transition: none !important;
+    -moz-transition: none !important;
+    -o-transition: none !important;
 }
 
-/* No transitions on individual tiles - only on the layer container */
 .rainviewer-layer img,
 .rainviewer-layer canvas {
     transition: none !important;

@@ -9,6 +9,18 @@
     flex-direction: column;
 }
 
+#content-floodmap .tab-header > div > .button {
+    min-height: 44px;
+    padding: 0.65rem 1.35rem;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+#content-floodmap .tab-header > div > .button svg {
+    width: 18px;
+    height: 18px;
+}
+
 .flood-map-container {
     position: relative;
     height: 600px;
