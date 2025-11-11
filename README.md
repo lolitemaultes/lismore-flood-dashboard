@@ -148,7 +148,7 @@ To add new data sources, modify the `server.js` file to include additional endpo
 The dashboard aggregates data from multiple authoritative sources:
 
 - **Bureau of Meteorology (BoM)**: Real-time river gauge data
-- **RainViewer**: Rainfall radar data
+- **BoM**: Rainfall radar data
 - **Transport for NSW**: Live traffic camera feeds from Bruxner Highway
 - **Essential Energy**: Power outage information for the region
 - **Lismore City Council**: Floor height data for flood impact mapping
