@@ -425,16 +425,31 @@
 
         try {
             const url = force ? OUTAGE_API + '?refresh=1' : OUTAGE_API;
-            const res = await fetch(url);
+            const controller = new AbortController();
+            const timeout = setTimeout(() => controller.abort(), 120000); // 2 minute timeout
+
+            const res = await fetch(url, {
+                signal: controller.signal
+            });
+
+            clearTimeout(timeout);
 
             if (!res.ok) {
                 const text = await res.text();
                 let errorMsg = 'Failed to load outages';
+                let hint = '';
+
                 try {
                     const json = JSON.parse(text);
-                    errorMsg = json.error || json.hint || errorMsg;
+                    errorMsg = json.error || errorMsg;
+                    hint = json.hint || '';
                 } catch {
                     errorMsg = text.slice(0, 200);
+                }
+
+                // Show hint if available
+                if (hint) {
+                    throw new Error(`${errorMsg}. ${hint}`);
                 }
                 throw new Error(errorMsg);
             }
@@ -476,11 +491,20 @@
             // Update status to show error
             const outageMapStatusValue = document.getElementById('outagemap-status-value');
             if (outageMapStatusValue) {
-                outageMapStatusValue.textContent = 'Connection Error';
-                outageMapStatusValue.className = 'status-value offline';
+                if (error.name === 'AbortError') {
+                    outageMapStatusValue.textContent = 'Request Timeout';
+                    outageMapStatusValue.className = 'status-value offline';
+                } else {
+                    outageMapStatusValue.textContent = 'Connection Error';
+                    outageMapStatusValue.className = 'status-value offline';
+                }
             }
 
-            showNotification('Error loading outage data: ' + error.message, 'error');
+            const errorMessage = error.name === 'AbortError'
+                ? 'Request timed out after 2 minutes. Essential Energy service may be slow or unavailable.'
+                : 'Error loading outage data: ' + error.message;
+
+            showNotification(errorMessage, 'error');
         } finally {
             if (refreshBtn) refreshBtn.disabled = false;
         }

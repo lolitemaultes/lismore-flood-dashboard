@@ -1,65 +1,54 @@
-// Wait for BomRadarColorMapper to be available
-if (typeof window.BomRadarColorMapper === 'undefined') {
-    console.log('[RADAR] Waiting for BomRadarColorMapper to load...');
-    let attempts = 0;
-    const waitForColorMapper = setInterval(() => {
-        attempts++;
-        if (typeof window.BomRadarColorMapper !== 'undefined') {
-            clearInterval(waitForColorMapper);
-            console.log('[RADAR] BomRadarColorMapper loaded, initializing radar map...');
-            initializeRadarMapModule();
-        } else if (attempts > 50) {
-            clearInterval(waitForColorMapper);
-            console.error('[RADAR] BomRadarColorMapper failed to load after 5 seconds');
-        }
-    }, 100);
-} else {
-    initializeRadarMapModule();
-}
+/**
+ * Weather Chaser Radar Map Controller
+ * Manages multiple radar overlays with animation
+ */
 
-function initializeRadarMapModule() {
 (function() {
-    const REFRESH_INTERVAL = 10 * 60 * 1000;
-    const API_BASE = '/api/radar';
+    'use strict';
+
+    // Configuration
+    const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes
+    const API_BASE = '/api/radar/weatherchaser';
     const ANIMATION_SPEEDS = {
-        slow: 1000,
-        normal: 500,
-        fast: 250
+        slow: 1500,
+        normal: 800,
+        fast: 400,
+        veryfast: 200
     };
 
-    const AUSTRALIA_BOUNDS = [
-        [-48.0, 105.0],
-        [-7.0, 160.0]
-    ];
-
+    // Australia - show entire continent
     const AUSTRALIA_CENTER = [-25.0, 133.0];
     const AUSTRALIA_ZOOM = 5;
+    const AUSTRALIA_BOUNDS = [[-48.0, 105.0], [-7.0, 160.0]]; // All of Australia
 
     // State
     let radarMap = null;
-    let radarLayers = [];
-    let currentLayer = null;
-    let labelLayer = null;
-    let mapBaseLayer = null;
-    let satelliteBaseLayer = null;
-    let currentBaseLayer = 'map';
+    let radarOverlays = {}; // { radarId: { frameIndex: overlay } }
     let frames = [];
+    let radars = [];
     let currentFrameIndex = 0;
     let isPlaying = false;
     let animationInterval = null;
     let currentSpeed = 'normal';
     let radarInitialized = false;
     let refreshTimer = null;
-    let tileLoadCount = 0;
-    let tileErrorCount = 0;
+    let currentBaseLayer = 'map';
+    let mapBaseLayer = null;
+    let satelliteBaseLayer = null;
+    let labelLayer = null;
+    let visibleOverlays = []; // Track currently visible overlays for fast switching
 
     // DOM Elements
     let mapContainer, loadingOverlay, errorContainer, controlsPanel;
     let timestampEl, frameCurrentEl, frameTotalEl, frameSlider;
     let btnFirst, btnPrev, btnPlay, btnPause, btnNext, btnLast;
-    let btnSpeedSlow, btnSpeedNormal, btnSpeedFast;
-    let btnRefresh;
+    let btnSpeedSlow, btnSpeedNormal, btnSpeedFast, btnSpeedVeryFast;
+    let btnRefresh, btnToggleBase, btnToggleLegend;
+    let legendEl;
 
+    /**
+     * Check server connectivity
+     */
     async function checkServerConnectivity() {
         try {
             const response = await fetch('/status', {
@@ -81,9 +70,15 @@ function initializeRadarMapModule() {
         }
     }
 
+    /**
+     * Initialize radar map
+     */
     async function initRadarMap() {
         if (radarInitialized) return;
 
+        console.log('[RADAR] Initializing Weather Chaser radar map...');
+
+        // Get DOM elements
         mapContainer = document.getElementById('radar-map');
         loadingOverlay = document.getElementById('radar-loading');
         errorContainer = document.getElementById('radar-error');
@@ -104,11 +99,15 @@ function initializeRadarMapModule() {
         btnSpeedSlow = document.getElementById('radar-speed-slow');
         btnSpeedNormal = document.getElementById('radar-speed-normal');
         btnSpeedFast = document.getElementById('radar-speed-fast');
+        btnSpeedVeryFast = document.getElementById('radar-speed-veryfast');
 
         btnRefresh = document.getElementById('radar-refresh');
+        btnToggleBase = document.getElementById('radar-baselayer-toggle');
+        btnToggleLegend = document.getElementById('radar-legend-toggle');
+        legendEl = document.getElementById('radar-legend');
 
         if (!mapContainer) {
-            console.error('Radar map container not found');
+            console.error('[RADAR] Radar map container not found');
             return;
         }
 
@@ -122,706 +121,598 @@ function initializeRadarMapModule() {
             return;
         }
 
+        // Create Leaflet map with performance optimizations
         radarMap = L.map('radar-map', {
             center: AUSTRALIA_CENTER,
             zoom: AUSTRALIA_ZOOM,
-            minZoom: 5,
+            minZoom: 4,
             maxZoom: 10,
             maxBounds: AUSTRALIA_BOUNDS,
             maxBoundsViscosity: 0.6,
-            preferCanvas: true,
+            preferCanvas: true, // Use canvas renderer for better performance
             zoomControl: true,
             attributionControl: true,
             worldCopyJump: false,
             noWrap: true,
             zoomAnimation: true,
-            zoomAnimationThreshold: 10,
             fadeAnimation: false,
-            markerZoomAnimation: true,
-            wheelPxPerZoomLevel: 120,
-            zoomSnap: 1,  // INTEGER zoom only - no 7.5, 8.5
-            zoomDelta: 1  // Jump by whole zoom levels
+            markerZoomAnimation: false,
+            zoomAnimationThreshold: 4
         });
 
-        let zoomTimeout;
-        let moveTimeout;
-        let isZooming = false;
-
-        radarMap.on('zoomstart', function() {
-            isZooming = true;
-            clearTimeout(zoomTimeout);
-        });
-
-        radarMap.on('zoomend', function() {
-            const currentZoom = radarMap.getZoom();
-
-            clearTimeout(zoomTimeout);
-            zoomTimeout = setTimeout(() => {
-                isZooming = false;
-
-                // Update base map and labels
-                const activeBaseLayer = currentBaseLayer === 'map' ? mapBaseLayer : satelliteBaseLayer;
-                if (activeBaseLayer && activeBaseLayer._map) {
-                    activeBaseLayer._update();
-                }
-                if (labelLayer && labelLayer._map) {
-                    labelLayer._update();
-                }
-
-                // Update current layer - Leaflet requests tiles at current zoom naturally
-                if (currentLayer && currentLayer._map) {
-                    currentLayer._update();
-                }
-            }, 50);
-        });
-
-        radarMap.on('movestart', function() {
-            clearTimeout(moveTimeout);
-        });
-
-        radarMap.on('moveend', function() {
-            if (isZooming) return;
-
-            clearTimeout(moveTimeout);
-            moveTimeout = setTimeout(() => {
-                const activeBaseLayer = currentBaseLayer === 'map' ? mapBaseLayer : satelliteBaseLayer;
-                if (activeBaseLayer && activeBaseLayer._map) {
-                    activeBaseLayer._update();
-                }
-                if (labelLayer && labelLayer._map) {
-                    labelLayer._update();
-                }
-
-                if (currentLayer && currentLayer._map) {
-                    currentLayer._update();
-                }
-            }, 50);
-        });
-
-        // Create custom pane for radar overlay
-        radarMap.createPane('radarPane');
-        radarMap.getPane('radarPane').style.zIndex = 300;
-        radarMap.getPane('radarPane').style.pointerEvents = 'none';
+        // Create custom panes
+        window.ensureRadarPane(radarMap);
 
         // Create base layers
-        mapBaseLayer = window.BomRadarColorMapper.createFilteredLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png', {
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        mapBaseLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
             subdomains: 'abcd',
-            minZoom: 5,
-            maxZoom: 18,
-            bounds: AUSTRALIA_BOUNDS,
-            australiaBounds: AUSTRALIA_BOUNDS,
-            updateWhenIdle: false,
-            updateWhenZooming: true,
-            keepBuffer: 2,
-            noWrap: true,
-            pane: 'tilePane'
+            maxZoom: 20,
+            minZoom: 0
         });
 
-        satelliteBaseLayer = window.BomRadarColorMapper.createFilteredLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-            attribution: '&copy; <a href="https://www.esri.com/">Esri</a>, Maxar, Earthstar Geographics',
-            minZoom: 5,
-            maxZoom: 18,
-            bounds: AUSTRALIA_BOUNDS,
-            australiaBounds: AUSTRALIA_BOUNDS,
-            updateWhenIdle: false,
-            updateWhenZooming: true,
-            keepBuffer: 2,
-            noWrap: true,
-            pane: 'tilePane'
+        satelliteBaseLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+            attribution: '&copy; <a href="https://www.esri.com/">Esri</a>',
+            maxZoom: 19,
+            minZoom: 0
         });
 
+        // Add default base layer
         mapBaseLayer.addTo(radarMap);
-        currentBaseLayer = 'map';
 
-        setTimeout(() => radarMap.invalidateSize(), 100);
+        // Create label layer (always on top)
+        labelLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png', {
+            attribution: '',
+            subdomains: 'abcd',
+            maxZoom: 20,
+            minZoom: 0,
+            pane: 'labelPane'
+        }).addTo(radarMap);
 
-        window.addEventListener('resize', () => {
-            if (radarMap && radarInitialized) {
-                radarMap.invalidateSize();
-            }
-        });
+        // Setup controls
+        setupControls();
 
-        setupEventListeners();
+        // Initialize button states
+        updatePlayPauseButtons();
+        updateSpeedButtons();
+
+        // Load radar data
+        await loadRadarData(false);
+
+        // Setup auto-refresh (every 5 minutes)
+        refreshTimer = setInterval(() => {
+            console.log('[RADAR] Auto-refreshing data...');
+            loadRadarData(true);
+        }, REFRESH_INTERVAL);
 
         radarInitialized = true;
-        console.log('[RADAR] ✓ Map initialized');
-
-        loadRadarData();
-        setupAutoRefresh();
-        updateRadarStatus('Online');
+        console.log('[RADAR] Initialization complete');
     }
 
-    function setupEventListeners() {
-        btnFirst.addEventListener('click', () => setFrame(0));
-        btnPrev.addEventListener('click', previousFrame);
-        btnPlay.addEventListener('click', play);
-        btnPause.addEventListener('click', pause);
-        btnNext.addEventListener('click', nextFrame);
-        btnLast.addEventListener('click', () => setFrame(frames.length - 1));
-
-        frameSlider.addEventListener('input', (e) => {
-            setFrame(parseInt(e.target.value));
-        });
-
-        btnSpeedSlow.addEventListener('click', () => setSpeed('slow'));
-        btnSpeedNormal.addEventListener('click', () => setSpeed('normal'));
-        btnSpeedFast.addEventListener('click', () => setSpeed('fast'));
-
-        if (btnRefresh) {
-            btnRefresh.addEventListener('click', () => loadRadarData(true));
-        }
-
-        const legendToggle = document.getElementById('radar-legend-toggle');
-        const legend = document.getElementById('radar-legend');
-        if (legendToggle && legend) {
-            legendToggle.addEventListener('click', () => {
-                legend.style.display = legend.style.display !== 'none' ? 'none' : 'block';
+    /**
+     * Setup control button event listeners
+     */
+    function setupControls() {
+        if (btnFirst) {
+            btnFirst.addEventListener('click', () => {
+                stopAnimation();
+                showFrame(0);
             });
         }
 
-        const baseLayerToggle = document.getElementById('radar-baselayer-toggle');
-        if (baseLayerToggle) {
-            baseLayerToggle.addEventListener('click', toggleBaseLayer);
+        if (btnPrev) {
+            btnPrev.addEventListener('click', () => {
+                stopAnimation();
+                showFrame(currentFrameIndex - 1);
+            });
+        }
+
+        if (btnPlay) {
+            btnPlay.addEventListener('click', () => {
+                startAnimation();
+            });
+        }
+
+        if (btnPause) {
+            btnPause.addEventListener('click', () => {
+                stopAnimation();
+            });
+        }
+
+        if (btnNext) {
+            btnNext.addEventListener('click', () => {
+                stopAnimation();
+                showFrame(currentFrameIndex + 1);
+            });
+        }
+
+        if (btnLast) {
+            btnLast.addEventListener('click', () => {
+                stopAnimation();
+                showFrame(frames.length - 1);
+            });
+        }
+
+        if (btnSpeedSlow) {
+            btnSpeedSlow.addEventListener('click', () => setSpeed('slow'));
+        }
+
+        if (btnSpeedNormal) {
+            btnSpeedNormal.addEventListener('click', () => setSpeed('normal'));
+        }
+
+        if (btnSpeedFast) {
+            btnSpeedFast.addEventListener('click', () => setSpeed('fast'));
+        }
+
+        if (btnSpeedVeryFast) {
+            btnSpeedVeryFast.addEventListener('click', () => setSpeed('veryfast'));
+        }
+
+        if (btnRefresh) {
+            btnRefresh.addEventListener('click', () => {
+                console.log('[RADAR] Manual refresh triggered');
+                loadRadarData(true);
+            });
+        }
+
+        if (btnToggleBase) {
+            btnToggleBase.addEventListener('click', toggleBaseLayer);
+        }
+
+        if (btnToggleLegend) {
+            btnToggleLegend.addEventListener('click', toggleLegend);
+        }
+
+        if (frameSlider) {
+            frameSlider.addEventListener('input', (e) => {
+                stopAnimation();
+                showFrame(parseInt(e.target.value));
+            });
         }
     }
 
-    function toggleBaseLayer() {
-        const toggleBtn = document.getElementById('radar-baselayer-toggle');
-
-        if (currentBaseLayer === 'map') {
-            radarMap.removeLayer(mapBaseLayer);
-            satelliteBaseLayer.addTo(radarMap);
-            currentBaseLayer = 'satellite';
-            toggleBtn.classList.add('satellite');
-            toggleBtn.title = 'Switch to map view';
-        } else {
-            radarMap.removeLayer(satelliteBaseLayer);
-            mapBaseLayer.addTo(radarMap);
-            currentBaseLayer = 'map';
-            toggleBtn.classList.remove('satellite');
-            toggleBtn.title = 'Switch to satellite view';
-        }
-
-        if (labelLayer && radarMap.hasLayer(labelLayer)) {
-            labelLayer.bringToFront();
-        }
-    }
-
-    async function loadRadarData(force = false) {
-        showLoading();
-
+    /**
+     * Load radar data from server
+     */
+    async function loadRadarData(isRefresh = false) {
         try {
-            const url = force ? `${API_BASE}/frames?refresh=1` : `${API_BASE}/frames`;
-            const response = await fetch(url);
+            showLoading();
+            console.log(`[RADAR] ${isRefresh ? 'Refreshing' : 'Loading'} radar data...`);
+
+            const url = `${API_BASE}/frames${isRefresh ? '?refresh=1' : ''}`;
+            const response = await fetch(url, {
+                method: 'GET',
+                cache: 'no-cache'
+            });
 
             if (!response.ok) {
-                throw new Error(`HTTP ${response.status}`);
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
 
             const data = await response.json();
 
-            if (!data.success || !data.frames || data.frames.length === 0) {
+            if (!data.success) {
+                throw new Error(data.error || 'Failed to load radar data');
+            }
+
+            frames = data.frames || [];
+            radars = data.radars || [];
+
+            console.log(`[RADAR] Loaded ${frames.length} frames for ${radars.length} radars`);
+
+            if (frames.length === 0) {
                 throw new Error('No radar frames available');
             }
 
-            frames = data.frames.sort((a, b) => a.time - b.time);
-
-            console.log(`[RADAR] ✓ Loaded ${frames.length} frames`);
-
-            await loadRadarLayers();
-
-            hideLoading();
-            showControls();
-
-            setFrame(frames.length - 1);
-
-            if (force) {
-                showNotification('Radar data refreshed', 'success');
+            // Clear old overlays if refreshing
+            if (isRefresh) {
+                clearAllOverlays();
             }
 
-            const latestFrame = frames[frames.length - 1];
-            let detailText = null;
-            if (latestFrame && latestFrame.date) {
-                detailText = `Updated ${formatRadarTimestamp(latestFrame.date)}`;
-            }
+            // Create overlays for all radars and frames
+            createRadarOverlays();
 
-            updateRadarStatus('Online', detailText);
+            // Update UI
+            updateFrameControls();
 
-            if (typeof window.checkRadarAvailability === 'function') {
-                window.checkRadarAvailability();
-            }
+            // Show most recent frame
+            showFrame(frames.length - 1);
+
+            // Keep loading overlay visible briefly while images load from cache
+            updateRadarStatus('Online');
+
+            setTimeout(() => {
+                hideLoading();
+                hideError();
+                showControls();
+            }, 500); // Brief delay to ensure smooth transition
 
         } catch (error) {
             console.error('[RADAR] Error loading radar data:', error);
-            showError('Unable to load radar data: ' + error.message);
-            updateRadarStatus('Offline', 'Connection error');
+            hideLoading();
+            hideControls();
+            showError(`Failed to load radar data: ${error.message}<br><br>Please ensure the server is running and try refreshing the page.`);
+            updateRadarStatus('Error');
         }
     }
 
-    async function loadRadarLayers() {
-        const previousLayers = radarLayers.slice();
-        previousLayers.forEach(layer => {
-            if (!layer) return;
-            if (radarMap && radarMap.hasLayer(layer)) {
-                radarMap.removeLayer(layer);
-            }
-            if (typeof layer.off === 'function') {
-                layer.off();
-            }
+    /**
+     * Create image overlays for all radars and frames
+     */
+    function createRadarOverlays() {
+        radarOverlays = {};
+
+        radars.forEach((radar, radarIndex) => {
+            radarOverlays[radar.id] = {};
+
+            frames.forEach((frame, frameIndex) => {
+                const overlay = window.createRadarImageOverlay(
+                    radar.id,
+                    radar.lat,
+                    radar.lon,
+                    frame.timestamp
+                );
+
+                // Store metadata for debugging
+                overlay.radarIndex = radarIndex;
+
+                radarOverlays[radar.id][frameIndex] = overlay;
+            });
         });
 
-        currentLayer = null;
-        radarLayers = [];
-        tileLoadCount = 0;
-        tileErrorCount = 0;
-
-        const framesToLoad = frames.slice(-6);
-
-        console.log(`[RADAR] Creating ${framesToLoad.length} frames`);
-
-        framesToLoad.forEach((frame) => {
-            const layer = window.BomRadarColorMapper.createColorMappedLayer(frame.tileUrl, {
-                opacity: 0,
-                pane: 'radarPane',
-                attribution: '&copy; <a href="https://www.rainviewer.com">RainViewer</a>',
-                tileSize: 256,
-                minZoom: 5,
-                maxZoom: 10,
-                maxNativeZoom: 10,
-                className: 'rainviewer-layer bom-radar-crisp',
-                updateWhenIdle: false,
-                updateWhenZooming: true,
-                keepBuffer: 2,
-                updateInterval: 50,
-                tms: false,
-                noWrap: true,
-                bounds: AUSTRALIA_BOUNDS,
-                australiaBounds: AUSTRALIA_BOUNDS,
-                skipColorMapping: false
-            });
-
-            layer._radarReady = false;
-            layer._radarFirstTileReady = false;
-            layer._radarTileLoads = 0;
-
-            layer.on('loading', function() {
-                layer._radarReady = false;
-                layer._radarFirstTileReady = false;
-            });
-
-            layer.on('tileload', function() {
-                tileLoadCount++;
-                layer._radarTileLoads += 1;
-
-                if (!layer._radarFirstTileReady) {
-                    layer._radarFirstTileReady = true;
-                }
-
-                if (tileLoadCount === 1) {
-                    console.log(`[RADAR] ✓ First tile loaded successfully!`);
-                }
-            });
-
-            layer.on('tileerror', function() {
-                tileErrorCount++;
-            });
-
-            layer.on('load', function() {
-                layer._radarReady = true;
-            });
-
-            radarLayers.push(layer);
-        });
-
-        frames = framesToLoad;
-
-        radarLayers.forEach(layer => {
-            if (radarMap && !radarMap.hasLayer(layer)) {
-                layer.addTo(radarMap);
-            }
-            layer.setOpacity(0);
-            if (typeof layer._update === 'function') {
-                layer._update();
-            }
-        });
-
-        // Create label pane
-        if (!radarMap.getPane('labelPane')) {
-            radarMap.createPane('labelPane');
-            radarMap.getPane('labelPane').style.zIndex = 400;
-            radarMap.getPane('labelPane').style.pointerEvents = 'none';
-        }
-
-        // Add label layer
-        if (labelLayer) {
-            radarMap.removeLayer(labelLayer);
-        }
-
-        labelLayer = window.BomRadarColorMapper.createFilteredLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png', {
-            attribution: '',
-            subdomains: 'abcd',
-            minZoom: 5,
-            maxZoom: 18,
-            bounds: AUSTRALIA_BOUNDS,
-            australiaBounds: AUSTRALIA_BOUNDS,
-            updateWhenIdle: false,
-            updateWhenZooming: true,
-            keepBuffer: 2,
-            noWrap: true,
-            pane: 'labelPane'
-        });
-        labelLayer.addTo(radarMap);
-
-        frameSlider.max = frames.length - 1;
-        frameTotalEl.textContent = frames.length;
-
-        console.log('[RADAR] ✓ Layers created');
+        console.log(`[RADAR] Created ${radars.length} radar overlays with ${frames.length} frames each`);
     }
 
-    function setFrame(index) {
-        if (index < 0 || index >= frames.length) return;
-
-        const nextLayer = radarLayers[index];
-        if (!nextLayer) return;
-
-        const previousLayer = currentLayer && currentLayer !== nextLayer ? currentLayer : null;
-
-        currentLayer = nextLayer;
-        currentFrameIndex = index;
-        updateFrameUI();
-
-        if (radarMap && !radarMap.hasLayer(nextLayer)) {
-            nextLayer.addTo(radarMap);
-        }
-
-        if (typeof nextLayer._update === 'function') {
-            nextLayer._update();
-        }
-
-        const logStatus = () => {
-            const tileCount = nextLayer._tiles ? Object.keys(nextLayer._tiles).length : 0;
-            const loads = typeof nextLayer._radarTileLoads === 'number' ? nextLayer._radarTileLoads : tileLoadCount;
-            console.log(`[RADAR] Frame ${index + 1}/${frames.length} - ${tileCount} tiles, ${loads} loaded, ${tileErrorCount} errors`);
-
-            if (tileCount === 0 && tileErrorCount > 10) {
-                console.warn('[RADAR] ⚠️ No tiles loading - may be no rain data in current area');
-            }
-        };
-
-        const revealNextLayer = () => {
-            nextLayer.setOpacity(1);
-            if (typeof nextLayer.bringToFront === 'function') {
-                nextLayer.bringToFront();
-            }
-            if (labelLayer && radarMap && radarMap.hasLayer(labelLayer) && typeof labelLayer.bringToFront === 'function') {
-                labelLayer.bringToFront();
-            }
-
-            const hidePrevious = () => {
-                if (previousLayer && radarMap && radarMap.hasLayer(previousLayer)) {
-                    previousLayer.setOpacity(0);
-                }
-            };
-
-            if (typeof window !== 'undefined' && typeof window.requestAnimationFrame === 'function') {
-                window.requestAnimationFrame(hidePrevious);
-            } else {
-                hidePrevious();
-            }
-
-            setTimeout(logStatus, 250);
-        };
-
-        if (!previousLayer) {
-            revealNextLayer();
+    /**
+     * Show specific frame across all radars
+     * Optimized: only removes/adds overlays that changed
+     */
+    function showFrame(frameIndex) {
+        if (frameIndex < 0 || frameIndex >= frames.length) {
             return;
         }
 
-        nextLayer.setOpacity(0);
+        currentFrameIndex = frameIndex;
 
-        if (nextLayer._radarReady) {
-            revealNextLayer();
-            return;
-        }
-
-        let revealed = false;
-        let firstTileSeen = nextLayer._radarFirstTileReady === true;
-
-        const finalizeReveal = () => {
-            if (revealed) return;
-            revealed = true;
-            nextLayer.off('tileload', onTileLoad);
-            nextLayer.off('tileerror', onTileError);
-            nextLayer.off('load', onLayerLoaded);
-            clearTimeout(safetyTimer);
-            clearTimeout(maxWaitTimer);
-            revealNextLayer();
-        };
-
-        const onTileLoad = () => {
-            firstTileSeen = true;
-        };
-
-        const onTileError = () => {
-            firstTileSeen = true;
-        };
-
-        const onLayerLoaded = () => {
-            finalizeReveal();
-        };
-
-        nextLayer.on('tileload', onTileLoad);
-        nextLayer.on('tileerror', onTileError);
-        nextLayer.on('load', onLayerLoaded);
-
-        const safetyTimer = setTimeout(() => {
-            if (firstTileSeen) {
-                finalizeReveal();
+        // Fast path: hide currently visible overlays
+        visibleOverlays.forEach(overlay => {
+            if (radarMap.hasLayer(overlay)) {
+                radarMap.removeLayer(overlay);
             }
-        }, 900);
+        });
+        visibleOverlays = [];
 
-        const maxWaitTimer = setTimeout(() => {
-            finalizeReveal();
-        }, 1800);
+        // Show current frame for all radars
+        radars.forEach(radar => {
+            const overlay = radarOverlays[radar.id][frameIndex];
+            if (overlay) {
+                overlay.addTo(radarMap);
+                visibleOverlays.push(overlay);
+            }
+        });
+
+        // Update UI
+        updateFrameDisplay();
     }
 
-    function updateFrameUI() {
+    /**
+     * Update frame counter and slider
+     */
+    function updateFrameDisplay() {
         const frame = frames[currentFrameIndex];
-        if (!frame) return;
 
-        const date = new Date(frame.date);
-        let timeString = date.toLocaleString('en-AU', {
-            month: 'short',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-            timeZoneName: 'short'
-        });
-
-        if (frame.isPrediction) {
-            timeString += ' (Forecast)';
+        if (frameCurrentEl) {
+            frameCurrentEl.textContent = currentFrameIndex + 1;
         }
 
-        timestampEl.textContent = timeString;
-        frameCurrentEl.textContent = currentFrameIndex + 1;
-        frameSlider.value = currentFrameIndex;
-    }
+        if (frameTotalEl) {
+            frameTotalEl.textContent = frames.length;
+        }
 
-    function nextFrame() {
-        if (currentFrameIndex < frames.length - 1) {
-            setFrame(currentFrameIndex + 1);
-        } else {
-            if (isPlaying) {
-                if (animationInterval) {
-                    clearInterval(animationInterval);
-                    animationInterval = null;
-                }
-                setTimeout(() => {
-                    if (isPlaying) {
-                        setFrame(0);
-                        animate();
-                    }
-                }, ANIMATION_SPEEDS[currentSpeed]);
-            } else {
-                setFrame(0);
-            }
+        if (frameSlider) {
+            frameSlider.value = currentFrameIndex;
+        }
+
+        if (timestampEl && frame) {
+            const formatted = window.formatRadarTimestamp(frame.timestamp);
+            const timeAgo = window.getTimeAgo(frame.timestamp);
+            timestampEl.textContent = `${formatted.fullDate} (${timeAgo})`;
         }
     }
 
-    function previousFrame() {
-        if (currentFrameIndex > 0) {
-            setFrame(currentFrameIndex - 1);
-        } else {
-            setFrame(frames.length - 1);
+    /**
+     * Update frame controls (slider max, etc.)
+     */
+    function updateFrameControls() {
+        if (frameSlider) {
+            frameSlider.max = frames.length - 1;
+            frameSlider.value = currentFrameIndex;
+        }
+
+        if (frameTotalEl) {
+            frameTotalEl.textContent = frames.length;
         }
     }
 
-    function play() {
+    /**
+     * Start animation
+     */
+    function startAnimation() {
         if (isPlaying) return;
 
         isPlaying = true;
-        btnPlay.style.display = 'none';
-        btnPause.style.display = 'flex';
+        updatePlayPauseButtons();
 
-        animate();
+        animationInterval = setInterval(() => {
+            let nextIndex = currentFrameIndex + 1;
+            if (nextIndex >= frames.length) {
+                nextIndex = 0; // Loop back to start
+            }
+            showFrame(nextIndex);
+        }, ANIMATION_SPEEDS[currentSpeed]);
+
+        console.log(`[RADAR] Animation started (${currentSpeed} speed)`);
     }
 
-    function pause() {
+    /**
+     * Stop animation
+     */
+    function stopAnimation() {
         if (!isPlaying) return;
 
         isPlaying = false;
-        btnPlay.style.display = 'flex';
-        btnPause.style.display = 'none';
+        updatePlayPauseButtons();
 
         if (animationInterval) {
             clearInterval(animationInterval);
             animationInterval = null;
         }
+
+        console.log('[RADAR] Animation stopped');
     }
 
-    function animate() {
-        if (animationInterval) {
-            clearInterval(animationInterval);
-        }
-
-        animationInterval = setInterval(() => {
-            if (!isPlaying) return;
-            nextFrame();
-        }, ANIMATION_SPEEDS[currentSpeed]);
-    }
-
+    /**
+     * Set animation speed
+     */
     function setSpeed(speed) {
         currentSpeed = speed;
+        updateSpeedButtons();
 
-        btnSpeedSlow.classList.remove('active');
-        btnSpeedNormal.classList.remove('active');
-        btnSpeedFast.classList.remove('active');
-
-        if (speed === 'slow') btnSpeedSlow.classList.add('active');
-        if (speed === 'normal') btnSpeedNormal.classList.add('active');
-        if (speed === 'fast') btnSpeedFast.classList.add('active');
-
+        // Restart animation with new speed if playing
         if (isPlaying) {
-            animate();
+            stopAnimation();
+            startAnimation();
+        }
+
+        console.log(`[RADAR] Speed set to ${speed}`);
+    }
+
+    /**
+     * Update play/pause button visibility
+     */
+    function updatePlayPauseButtons() {
+        if (btnPlay) {
+            btnPlay.style.display = isPlaying ? 'none' : 'inline-block';
+        }
+        if (btnPause) {
+            btnPause.style.display = isPlaying ? 'inline-block' : 'none';
         }
     }
 
-    function setupAutoRefresh() {
+    /**
+     * Update speed button active states
+     */
+    function updateSpeedButtons() {
+        if (btnSpeedSlow) {
+            btnSpeedSlow.classList.toggle('active', currentSpeed === 'slow');
+        }
+        if (btnSpeedNormal) {
+            btnSpeedNormal.classList.toggle('active', currentSpeed === 'normal');
+        }
+        if (btnSpeedFast) {
+            btnSpeedFast.classList.toggle('active', currentSpeed === 'fast');
+        }
+        if (btnSpeedVeryFast) {
+            btnSpeedVeryFast.classList.toggle('active', currentSpeed === 'veryfast');
+        }
+    }
+
+    /**
+     * Toggle between map and satellite base layers
+     */
+    function toggleBaseLayer() {
+        if (currentBaseLayer === 'map') {
+            radarMap.removeLayer(mapBaseLayer);
+            satelliteBaseLayer.addTo(radarMap);
+            currentBaseLayer = 'satellite';
+            if (btnToggleBase) {
+                btnToggleBase.classList.add('active');
+                btnToggleBase.title = 'Switch to map view';
+            }
+        } else {
+            radarMap.removeLayer(satelliteBaseLayer);
+            mapBaseLayer.addTo(radarMap);
+            currentBaseLayer = 'map';
+            if (btnToggleBase) {
+                btnToggleBase.classList.remove('active');
+                btnToggleBase.title = 'Switch to satellite view';
+            }
+        }
+        console.log(`[RADAR] Switched to ${currentBaseLayer} view`);
+    }
+
+    /**
+     * Toggle the radar legend visibility
+     */
+    function toggleLegend() {
+        if (!legendEl) {
+            console.warn('[RADAR] Legend element not found');
+            return;
+        }
+
+        const isHidden = legendEl.style.display === 'none' || !legendEl.style.display;
+        legendEl.style.display = isHidden ? 'block' : 'none';
+
+        if (btnToggleLegend) {
+            btnToggleLegend.title = isHidden ? 'Hide rainfall legend' : 'Show rainfall legend';
+        }
+
+        console.log(`[RADAR] Legend ${isHidden ? 'shown' : 'hidden'}`);
+    }
+
+    /**
+     * Clear all radar overlays from map
+     */
+    function clearAllOverlays() {
+        // Fast clear using tracked visible overlays
+        visibleOverlays.forEach(overlay => {
+            if (overlay && radarMap.hasLayer(overlay)) {
+                radarMap.removeLayer(overlay);
+            }
+        });
+
+        radarOverlays = {};
+        visibleOverlays = [];
+    }
+
+    /**
+     * Show loading overlay
+     */
+    function showLoading() {
+        if (loadingOverlay) {
+            loadingOverlay.style.display = 'flex';
+        }
+    }
+
+    /**
+     * Hide loading overlay
+     */
+    function hideLoading() {
+        if (loadingOverlay) {
+            loadingOverlay.style.display = 'none';
+        }
+    }
+
+    /**
+     * Show error message
+     */
+    function showError(message) {
+        if (errorContainer) {
+            errorContainer.innerHTML = message;
+            errorContainer.style.display = 'block';
+        }
+    }
+
+    /**
+     * Hide error message
+     */
+    function hideError() {
+        if (errorContainer) {
+            errorContainer.style.display = 'none';
+        }
+    }
+
+    /**
+     * Show controls panel
+     */
+    function showControls() {
+        if (controlsPanel) {
+            controlsPanel.style.display = 'block';
+        }
+    }
+
+    /**
+     * Hide controls panel
+     */
+    function hideControls() {
+        if (controlsPanel) {
+            controlsPanel.style.display = 'none';
+        }
+    }
+
+    /**
+     * Update radar status in UI
+     */
+    function updateRadarStatus(status) {
+        const statusEl = document.getElementById('radar-status-value');
+        if (statusEl) {
+            statusEl.textContent = status;
+
+            // Update CSS class based on status
+            if (status === 'Online') {
+                statusEl.className = 'status-value online';
+            } else if (status === 'Error' || status === 'Server Offline') {
+                statusEl.className = 'status-value offline';
+            } else {
+                statusEl.className = 'status-value';
+            }
+        }
+    }
+
+    /**
+     * Reset radar map view to default
+     */
+    function resetRadarView() {
+        if (radarMap && radarInitialized) {
+            // Stop any animation
+            if (isPlaying) {
+                stopAnimation();
+            }
+
+            // Reset to default Australia view
+            radarMap.setView(AUSTRALIA_CENTER, AUSTRALIA_ZOOM, { animate: true });
+
+            // Close any open popups
+            radarMap.closePopup();
+        }
+    }
+
+    /**
+     * Initialize on tab show
+     */
+    function initOnTabShow() {
+        const radarTab = document.getElementById('tab-radar');
+        if (radarTab) {
+            radarTab.addEventListener('click', () => {
+                setTimeout(() => {
+                    if (!radarInitialized) {
+                        initRadarMap();
+                    } else if (radarMap) {
+                        radarMap.invalidateSize();
+                        // Reset view when switching back to radar tab
+                        resetRadarView();
+                    }
+                }, 100);
+            });
+        }
+
+        // Also check if radar tab is already active
+        const radarContent = document.getElementById('content-radar');
+        if (radarContent && radarContent.classList.contains('active')) {
+            setTimeout(() => {
+                initRadarMap();
+            }, 100);
+        }
+    }
+
+    // Expose reset function globally
+    window.resetRadarView = resetRadarView;
+
+    /**
+     * Cleanup on page unload
+     */
+    window.addEventListener('beforeunload', () => {
         if (refreshTimer) {
             clearInterval(refreshTimer);
         }
-
-        refreshTimer = setInterval(() => {
-            console.log('[RADAR] Auto-refreshing data...');
-            loadRadarData(true);
-            if (typeof window.checkRadarAvailability === 'function') {
-                window.checkRadarAvailability();
-            }
-        }, REFRESH_INTERVAL);
-    }
-
-    function showLoading() {
-        if (loadingOverlay) loadingOverlay.style.display = 'flex';
-        if (errorContainer) errorContainer.style.display = 'none';
-        if (controlsPanel) controlsPanel.style.display = 'none';
-    }
-
-    function hideLoading() {
-        if (loadingOverlay) loadingOverlay.style.display = 'none';
-    }
-
-    function showControls() {
-        if (controlsPanel) controlsPanel.style.display = 'block';
-    }
-
-    function showError(message) {
-        hideLoading();
-        if (errorContainer) {
-            errorContainer.style.display = 'flex';
-            const errorMsg = document.getElementById('radar-error-message');
-            if (errorMsg) errorMsg.textContent = message;
-        }
-        updateRadarStatus('Offline', message);
-    }
-
-    function formatRadarTimestamp(dateString) {
-        try {
-            const date = new Date(dateString);
-            return date.toLocaleString('en-AU', {
-                hour: '2-digit',
-                minute: '2-digit',
-                timeZoneName: 'short'
-            });
-        } catch (error) {
-            console.error('[RADAR] Failed to format timestamp:', error);
-            return null;
-        }
-    }
-
-    function updateRadarStatus(status, detailText = null) {
-        const radarStatusValue = document.getElementById('radar-status-value');
-        if (radarStatusValue) {
-            const isOnline = status === 'Online';
-            const detail = detailText ? ` — ${detailText}` : '';
-            radarStatusValue.textContent = `${status}${detail}`;
-            radarStatusValue.className = `status-value ${isOnline ? 'online' : 'offline'}`;
-            radarStatusValue.title = detailText ? `${status} • ${detailText}` : status;
-        }
-    }
-
-    function showNotification(message, type) {
-        if (typeof window.showNotification === 'function') {
-            window.showNotification(message, type);
-        } else {
-            console.log(`[RADAR] ${type.toUpperCase()}: ${message}`);
-        }
-    }
-
-    function resetRadarMap() {
-        if (!radarInitialized || !radarMap) return;
-
-        pause();
-        radarMap.setView(AUSTRALIA_CENTER, AUSTRALIA_ZOOM);
-        setSpeed('normal');
-
-        if (frames.length > 0) {
-            setFrame(frames.length - 1);
-        }
-
-        if (currentBaseLayer === 'satellite') {
-            const toggleBtn = document.getElementById('radar-baselayer-toggle');
-            if (radarMap.hasLayer(satelliteBaseLayer)) {
-                radarMap.removeLayer(satelliteBaseLayer);
-            }
-            if (!radarMap.hasLayer(mapBaseLayer)) {
-                mapBaseLayer.addTo(radarMap);
-            }
-            currentBaseLayer = 'map';
-            if (toggleBtn) {
-                toggleBtn.classList.remove('satellite');
-                toggleBtn.title = 'Switch to satellite view';
-            }
-        }
-
-        console.log('[RADAR] Map reset to initial state');
-    }
-
-    window.resetRadarMap = resetRadarMap;
-    window.setRadarStatusIndicator = updateRadarStatus;
-    window.triggerRadarRefresh = function() {
-        loadRadarData(true);
-    };
-
-    const radarTab = document.getElementById('tab-radar');
-    if (radarTab) {
-        radarTab.addEventListener('click', function() {
-            setTimeout(() => {
-                if (!radarInitialized) {
-                    initRadarMap();
-                } else if (radarMap) {
-                    radarMap.invalidateSize();
-                }
-            }, 100);
-        });
-    }
-
-    document.addEventListener('click', function(e) {
-        if (e.target.classList.contains('tab-button') || e.target.closest('.tab-button')) {
-            const clickedTab = e.target.classList.contains('tab-button') ? e.target : e.target.closest('.tab-button');
-            if (clickedTab && clickedTab.id === 'tab-radar' && radarMap && radarInitialized) {
-                setTimeout(() => radarMap.invalidateSize(), 150);
-            }
-        }
+        stopAnimation();
     });
 
-    window.radarMapInitialized = false;
-
-    const originalInit = initRadarMap;
-    initRadarMap = function() {
-        originalInit();
-        window.radarMapInitialized = true;
-    };
-
+    // Initialize when DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initOnTabShow);
+    } else {
+        initOnTabShow();
+    }
 })();
-}
