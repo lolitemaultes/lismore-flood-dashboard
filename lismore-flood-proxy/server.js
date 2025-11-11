@@ -6,7 +6,7 @@ const path = require('path');
 const fs = require('fs');
 const NodeCache = require('node-cache');
 const { XMLParser } = require('fast-xml-parser');
-const rainViewerService = require('./rainViewerService');
+const weatherChaserService = require('./weatherChaserService');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -39,73 +39,77 @@ const colors = {
 };
 
 class Logger {
+    static logBuffer = [];
+    static maxBufferSize = 10;
+    static statusManager = null;
+
+    static setStatusManager(manager) {
+        this.statusManager = manager;
+    }
+
     static timestamp() {
         return new Date().toISOString().replace('T', ' ').substring(0, 19);
     }
-    
-    static info(message, ...args) {
-        console.log(
-            `${colors.gray}[${this.timestamp()}]${colors.reset} ${colors.blue}INFO${colors.reset}  ${message}`,
-            ...args
-        );
-    }
-    
-    static success(message, ...args) {
-        console.log(
-            `${colors.gray}[${this.timestamp()}]${colors.reset} ${colors.green}OK${colors.reset}    ${message}`,
-            ...args
-        );
-    }
-    
-    static warn(message, ...args) {
-        console.log(
-            `${colors.gray}[${this.timestamp()}]${colors.reset} ${colors.yellow}WARN${colors.reset}  ${message}`,
-            ...args
-        );
-    }
-    
-    static error(message, ...args) {
-        console.error(
-            `${colors.gray}[${this.timestamp()}]${colors.reset} ${colors.red}ERROR${colors.reset} ${message}`,
-            ...args
-        );
-    }
-    
-    static verbose(message, ...args) {
-        if (VERBOSE_LOGGING) {
-            console.log(
-                `${colors.gray}[${this.timestamp()}] DEBUG ${colors.dim}${message}${colors.reset}`,
-                ...args
-            );
+
+    static logToFile(level, message, ...args) {
+        if (level === 'ERROR' || level === 'WARN') {
+            const errorLog = `[${this.timestamp()}] ${level} ${message} ${args.length > 0 ? JSON.stringify(args) : ''}\n`;
+            fs.appendFileSync('errors.txt', errorLog, 'utf8');
         }
     }
-    
+
+    static addToBuffer(formattedMessage) {
+        this.logBuffer.push({ time: new Date(), message: formattedMessage });
+        if (this.logBuffer.length > this.maxBufferSize) {
+            this.logBuffer.shift();
+        }
+        // Don't render immediately - let periodic interval handle it
+    }
+
+    static info(message, ...args) {
+        const formatted = `${colors.blue}INFO${colors.reset}  ${message}`;
+        this.addToBuffer(formatted);
+    }
+
+    static success(message, ...args) {
+        const formatted = `${colors.green}OK${colors.reset}    ${message}`;
+        this.addToBuffer(formatted);
+    }
+
+    static warn(message, ...args) {
+        const formatted = `${colors.yellow}WARN${colors.reset}  ${message}`;
+        this.addToBuffer(formatted);
+        this.logToFile('WARN', message, ...args);
+    }
+
+    static error(message, ...args) {
+        const formatted = `${colors.red}ERROR${colors.reset} ${message}`;
+        this.addToBuffer(formatted);
+        this.logToFile('ERROR', message, ...args);
+    }
+
+    static verbose(message, ...args) {
+        if (VERBOSE_LOGGING) {
+            const formatted = `${colors.dim}DEBUG${colors.reset} ${message}`;
+            this.addToBuffer(formatted);
+        }
+    }
+
     static api(method, path, status, duration) {
-        const statusColor = status < 300 ? colors.green : status < 400 ? colors.yellow : colors.red;
-        const durationColor = duration < 100 ? colors.green : duration < 500 ? colors.yellow : colors.red;
-        
-        console.log(
-            `${colors.gray}[${this.timestamp()}]${colors.reset} ` +
-            `${colors.cyan}API${colors.reset}   ` +
-            `${colors.bright}${method.padEnd(6)}${colors.reset} ` +
-            `${path.padEnd(30)} ` +
-            `${statusColor}${status}${colors.reset} ` +
-            `${durationColor}${duration}ms${colors.reset}`
-        );
+        // Don't log API calls to keep terminal clean
     }
-    
+
     static header(text) {
-        const width = 60;
-        const padding = Math.max(0, Math.floor((width - text.length - 2) / 2));
-        const line = '─'.repeat(width);
-        
-        console.log('\n' + colors.cyan + '┌' + line + '┐' + colors.reset);
-        console.log(colors.cyan + '│' + colors.reset + ' '.repeat(padding) + colors.bright + text + colors.reset + ' '.repeat(width - padding - text.length - 2) + colors.cyan + '│' + colors.reset);
-        console.log(colors.cyan + '└' + line + '┘' + colors.reset);
+        // Headers are now part of the status board, not standalone
+        this.info(text);
     }
-    
+
     static table(data) {
-        console.table(data);
+        // Tables are logged as formatted text in the buffer
+        data.forEach(row => {
+            const line = Object.entries(row).map(([k, v]) => `${k}: ${v}`).join(' | ');
+            this.info(line);
+        });
     }
 }
 
@@ -125,6 +129,7 @@ class StatusManager {
         this.serverInfo = { endpoints: [] };
         this.lastSnapshot = '';
         this.lastRender = 0;
+        this.rendering = false;  // Lock to prevent overlapping renders
     }
 
     setServerInfo(info = {}) {
@@ -146,7 +151,7 @@ class StatusManager {
             this.components[name].lastUpdate = new Date();
         }
 
-        this.renderBoard();
+        // Don't render immediately - let periodic interval handle it
     }
 
     formatTime(date) {
@@ -154,6 +159,11 @@ class StatusManager {
     }
 
     renderBoard(force = false) {
+        // Prevent overlapping renders
+        if (this.rendering) {
+            return;
+        }
+
         const now = Date.now();
         const snapshot = JSON.stringify(this.components, (key, value) => {
             if (value instanceof Date) {
@@ -166,10 +176,12 @@ class StatusManager {
             return;
         }
 
+        this.rendering = true;
         this.lastSnapshot = snapshot;
         this.lastRender = now;
 
-        process.stdout.write('\x1b[2J\x1b[0f');
+        // Clear screen - Windows compatible
+        process.stdout.write('\x1Bc');  // Full terminal reset
 
         const headerLine = colors.cyan + '═'.repeat(80) + colors.reset;
         const dividerLine = colors.cyan + '─'.repeat(80) + colors.reset;
@@ -225,15 +237,36 @@ class StatusManager {
         });
 
         console.log(headerLine);
+
+        // Display recent logs
+        if (Logger.logBuffer.length > 0) {
+            console.log('');
+            console.log(colors.cyan + 'Recent Activity:' + colors.reset);
+            Logger.logBuffer.forEach(log => {
+                const timeStr = this.formatTime(log.time);
+                console.log(`${colors.gray}[${timeStr}]${colors.reset} ${log.message}`);
+            });
+            console.log(headerLine);
+        }
+
+        // Release lock
+        this.rendering = false;
     }
 }
 
 const statusManager = new StatusManager();
+Logger.setStatusManager(statusManager);
 
-// Start periodic status reporting
+// Expose Logger globally for weatherChaserService
+global.Logger = Logger;
+
+// Initial render
+statusManager.renderBoard();
+
+// Start periodic status reporting - clear and re-render terminal every 2 seconds
 setInterval(() => {
     statusManager.renderBoard();
-}, 30000); // Every 30 seconds
+}, 2000); // Every 2 seconds
 
 app.use(cors());
 app.use(express.static(path.join(__dirname, 'public')));
@@ -253,13 +286,24 @@ app.use((req, res, next) => {
         );
 
         // Only log errors or very slow requests
-        if (res.statusCode >= 400 && !isExpected404) {
+        // Skip radar image requests - they're expected to be slow when Weather Chaser is down
+        const isRadarImageReq = req.path.includes('/api/radar/weatherchaser/image/');
+
+        if (res.statusCode >= 400 && !isExpected404 && !isRadarImageReq) {
             Logger.error(`${req.method} ${req.path} ${res.statusCode} ${duration}ms`);
-        } else if (duration > 2000) {
+        } else if (duration > 2000 && !isRadarImageReq) {
             Logger.warn(`Slow request: ${req.method} ${req.path} ${duration}ms`);
         }
 
         // Update status manager based on endpoint
+        // IMPORTANT: Skip radar image requests to prevent status spam (67 radars × 12 frames = 804 requests)
+        const isRadarImageRequest = req.path.includes('/api/radar/weatherchaser/image/');
+
+        if (isRadarImageRequest) {
+            // Don't update status on individual image requests - too spammy
+            return;
+        }
+
         const httpDetail = `HTTP ${res.statusCode}`;
 
         if (req.path.includes('/proxy/webcam')) {
@@ -468,26 +512,51 @@ class DateUtils {
 }
 
 class OutageService {
-    static async fetchKML(url, retries = 3) {
+    static async fetchKML(url, retries = 5) {
+        let lastError = null;
+
         for (let attempt = 1; attempt <= retries; attempt++) {
             try {
+                Logger.verbose(`Fetching KML (attempt ${attempt}/${retries}): ${url}`);
+
                 const response = await axios.get(url, {
-                    headers: { 'User-Agent': 'Mozilla/5.0' },
-                    timeout: 10000
+                    headers: {
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                        'Accept': 'application/vnd.google-earth.kml+xml,application/xml,text/xml,*/*'
+                    },
+                    timeout: 30000,  // Increased to 30 seconds
+                    validateStatus: (status) => status === 200
                 });
-                
-                if (response.status !== 200) {
-                    throw new Error(`HTTP ${response.status}`);
+
+                if (!response.data) {
+                    throw new Error('Empty response from KML endpoint');
                 }
-                
+
+                Logger.verbose(`Successfully fetched KML from ${url}`);
                 return response.data;
+
             } catch (error) {
+                lastError = error;
+                const errorMsg = error.code === 'ECONNABORTED'
+                    ? 'Request timeout'
+                    : error.response?.status
+                        ? `HTTP ${error.response.status}`
+                        : error.message;
+
+                Logger.warn(`KML fetch attempt ${attempt}/${retries} failed: ${errorMsg}`);
+
                 if (attempt === retries) {
-                    throw error;
+                    throw new Error(`Failed to fetch KML after ${retries} attempts: ${errorMsg}`);
                 }
-                await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+
+                // Exponential backoff: 2s, 4s, 8s, 16s
+                const delay = Math.min(2000 * Math.pow(2, attempt - 1), 16000);
+                Logger.verbose(`Retrying in ${delay}ms...`);
+                await new Promise(resolve => setTimeout(resolve, delay));
             }
         }
+
+        throw lastError || new Error('Failed to fetch KML');
     }
     
     static extractCoordinates(point) {
@@ -656,26 +725,33 @@ class OutageService {
     static async fetchCategory(category) {
         const cacheKey = `outage:${category}`;
         const cached = outageCache.get(cacheKey);
-        
+
         if (cached) {
-            Logger.verbose(`Using cached data for ${category} outages`);
+            Logger.verbose(`Using cached data for ${category} outages (${cached.length} items)`);
             return cached;
         }
-        
+
         const url = Config.urls.KML[category];
         if (!url) {
             throw new Error(`Unknown outage category: ${category}`);
         }
-        
+
         try {
+            Logger.info(`Fetching ${category} outages from Essential Energy...`);
             const kmlText = await this.fetchKML(url);
+
+            if (!kmlText || kmlText.length === 0) {
+                throw new Error('Received empty KML data');
+            }
+
             const outages = this.parseKML(kmlText, category);
             outageCache.set(cacheKey, outages);
-            Logger.verbose(`Fetched ${outages.length} ${category} outages`);
+            Logger.success(`Fetched ${outages.length} ${category} outages`);
             return outages;
         } catch (error) {
-            Logger.error(`Failed to fetch ${category} outages:`, error.message);
-            throw error;
+            const errorMsg = `Failed to fetch ${category} outages: ${error.message}`;
+            Logger.error(errorMsg);
+            throw new Error(errorMsg);
         }
     }
 }
@@ -1024,6 +1100,8 @@ app.get('/api/outages', async (req, res) => {
             Logger.info('Outage cache cleared by user request');
         }
 
+        Logger.info('Fetching outage data from Essential Energy...');
+
         const results = await Promise.allSettled([
             OutageService.fetchCategory('current'),
             OutageService.fetchCategory('future'),
@@ -1036,16 +1114,23 @@ app.get('/api/outages', async (req, res) => {
 
         const errors = [];
         if (results[0].status === 'rejected') {
-            Logger.error('Failed to fetch current outages:', results[0].reason.message);
-            errors.push({ category: 'current', error: results[0].reason.message });
+            const error = results[0].reason.message;
+            Logger.error(`Current outages failed: ${error}`);
+            errors.push({ category: 'current', error });
         }
-        if (results[1].status === 'rejected') {
-            Logger.error('Failed to fetch future outages:', results[1].reason.message);
-            errors.push({ category: 'future', error: results[1].reason.message });
+        if (results[1].status === 'fulfilled') {
+            Logger.success(`Future outages: ${future.length} loaded`);
+        } else {
+            const error = results[1].reason.message;
+            Logger.error(`Future outages failed: ${error}`);
+            errors.push({ category: 'future', error });
         }
-        if (results[2].status === 'rejected') {
-            Logger.error('Failed to fetch cancelled outages:', results[2].reason.message);
-            errors.push({ category: 'cancelled', error: results[2].reason.message });
+        if (results[2].status === 'fulfilled') {
+            Logger.success(`Cancelled outages: ${cancelled.length} loaded`);
+        } else {
+            const error = results[2].reason.message;
+            Logger.error(`Cancelled outages failed: ${error}`);
+            errors.push({ category: 'cancelled', error });
         }
 
         const allOutages = [...current, ...future, ...cancelled];
@@ -1062,7 +1147,19 @@ app.get('/api/outages', async (req, res) => {
             };
         }
 
-        res.json({
+        // If all three categories failed, return error status
+        if (errors.length === 3) {
+            Logger.error('All outage categories failed to fetch');
+            return res.status(503).json({
+                success: false,
+                error: 'Essential Energy outage service is currently unavailable',
+                hint: 'The Essential Energy KML feeds are not responding. Please try again later.',
+                errors: errors,
+                timestamp: new Date().toISOString()
+            });
+        }
+
+        const responseData = {
             success: true,
             timestamp: new Date().toISOString(),
             counts: {
@@ -1074,13 +1171,22 @@ app.get('/api/outages', async (req, res) => {
             bounds: bounds,
             features: allOutages,
             errors: errors.length > 0 ? errors : undefined
-        });
+        };
+
+        if (allOutages.length > 0) {
+            Logger.success(`Outage data loaded: ${allOutages.length} total outages`);
+        } else if (errors.length > 0) {
+            Logger.warn(`Outage data partially loaded with ${errors.length} errors`);
+        }
+
+        res.json(responseData);
 
     } catch (error) {
         Logger.error('Error in /api/outages:', error.message);
         res.status(500).json({
             success: false,
-            error: error.message
+            error: 'Internal server error while fetching outages',
+            detail: error.message
         });
     }
 });
@@ -1095,37 +1201,37 @@ app.get('/api/outages/clear-cache', (req, res) => {
     });
 });
 
-// RainViewer Radar endpoints
+// Legacy Radar endpoints - redirected to Weather Chaser
 app.get('/api/radar/frames', async (req, res) => {
     try {
         const shouldRefresh = req.query.refresh === '1' || req.query.refresh === 'true';
         if (shouldRefresh) {
-            await rainViewerService.updateFrames();
+            await weatherChaserService.updateFrames();
         }
 
-        const frames = rainViewerService.getFrames();
-        const status = rainViewerService.getStatus();
-        const config = rainViewerService.getConfig();
+        const radarIds = req.query.radars ? req.query.radars.split(',').map(id => parseInt(id)) : null;
+        const data = weatherChaserService.getFrames(radarIds);
+        const status = weatherChaserService.getStatus();
 
         const detailParts = [];
         if (status.frameCount) {
             detailParts.push(`Frames: ${status.frameCount}`);
         }
-        if (status.mode === 'fallback') {
-            detailParts.push('Fallback data');
+        if (status.radarCount) {
+            detailParts.push(`Radars: ${data.radars.length}`);
         }
 
         statusManager.updateComponent(
             'Radar Map',
-            status.available ? (status.mode === 'fallback' ? 'Fallback' : 'Online') : 'Offline',
+            status.active ? 'Online' : 'Offline',
             detailParts.join(' · ')
         );
 
         res.json({
             success: true,
-            frames,
-            status,
-            config,
+            frames: data.frames,
+            radars: data.radars,
+            status: status,
             timestamp: new Date().toISOString()
         });
     } catch (error) {
@@ -1140,7 +1246,7 @@ app.get('/api/radar/frames', async (req, res) => {
 
 app.get('/api/radar/status', (req, res) => {
     try {
-        const status = rainViewerService.getStatus();
+        const status = weatherChaserService.getStatus();
         const detailParts = [];
         if (status.frameCount) {
             detailParts.push(`Frames: ${status.frameCount}`);
@@ -1148,22 +1254,24 @@ app.get('/api/radar/status', (req, res) => {
         if (status.lastUpdate) {
             detailParts.push(`Updated ${new Date(status.lastUpdate).toLocaleTimeString('en-AU')}`);
         }
-        if (status.mode === 'fallback') {
-            detailParts.push('Fallback data');
+        if (status.totalRadars) {
+            detailParts.push(`${status.totalRadars} radars`);
         }
 
         statusManager.updateComponent(
             'Radar Map',
-            status.available ? (status.mode === 'fallback' ? 'Fallback' : 'Online') : 'Offline',
+            status.active ? 'Online' : 'Offline',
             detailParts.join(' · ')
         );
 
         res.json({
             success: true,
+            available: status.active && status.frameCount > 0,
             ...status,
             timestamp: new Date().toISOString()
         });
     } catch (error) {
+        Logger.error('Error getting radar status:', error.message);
         statusManager.updateComponent('Radar Map', 'Offline', error.message);
         res.status(500).json({
             success: false,
@@ -1358,6 +1466,589 @@ app.get('/api/radar/tile/:timestamp/:z/:x/:y', async (req, res) => {
     res.status(200);
     res.send(TRANSPARENT_PNG_1x1);
 });
+
+// Weather Chaser Radar endpoints (NEW SYSTEM)
+// In-memory radar image cache for Weather Chaser
+const weatherChaserImageCache = new Map();
+const weatherChaserFailedCache = new Map(); // Track failed requests to avoid hammering API
+const weatherChaserHealthStats = new Map(); // Track per-radar health statistics
+const MAX_WEATHERCHASER_CACHE_SIZE = 500; // Cache up to 500 radar images
+const WEATHERCHASER_CACHE_DURATION = 21600000; // 6 hours in milliseconds
+const WEATHERCHASER_FAILED_CACHE_DURATION = 300000; // 5 minutes for failed requests
+const WEATHERCHASER_HEALTH_RESET_INTERVAL = 3600000; // Reset health stats every hour
+
+// Weather Chaser service health tracking
+let weatherChaserServiceDown = false;
+let weatherChaserLastCheck = 0;
+const WEATHERCHASER_SERVICE_CHECK_INTERVAL = 60000; // Check service status every minute
+
+function getWeatherChaserCacheKey(radarId, timestamp) {
+    return `${radarId}_${timestamp}`;
+}
+
+function addToWeatherChaserCache(key, data) {
+    // Implement LRU cache - remove oldest if cache is full
+    if (weatherChaserImageCache.size >= MAX_WEATHERCHASER_CACHE_SIZE) {
+        const firstKey = weatherChaserImageCache.keys().next().value;
+        weatherChaserImageCache.delete(firstKey);
+    }
+    weatherChaserImageCache.set(key, {
+        data: data,
+        timestamp: Date.now()
+    });
+}
+
+function getFromWeatherChaserCache(key) {
+    const cached = weatherChaserImageCache.get(key);
+    if (!cached) return null;
+
+    // Check if cache is still valid
+    if (Date.now() - cached.timestamp > WEATHERCHASER_CACHE_DURATION) {
+        weatherChaserImageCache.delete(key);
+        return null;
+    }
+
+    return cached.data;
+}
+
+function markWeatherChaserFailed(key, errorType) {
+    weatherChaserFailedCache.set(key, {
+        errorType: errorType,
+        timestamp: Date.now()
+    });
+}
+
+function isWeatherChaserFailed(key) {
+    const failed = weatherChaserFailedCache.get(key);
+    if (!failed) return false;
+
+    // Check if failure is still recent
+    if (Date.now() - failed.timestamp > WEATHERCHASER_FAILED_CACHE_DURATION) {
+        weatherChaserFailedCache.delete(key);
+        return false;
+    }
+
+    return true;
+}
+
+function updateRadarHealth(radarId, success) {
+    if (!weatherChaserHealthStats.has(radarId)) {
+        weatherChaserHealthStats.set(radarId, {
+            successCount: 0,
+            failCount: 0,
+            lastSuccess: null,
+            lastFail: null,
+            lastReset: Date.now()
+        });
+    }
+
+    const stats = weatherChaserHealthStats.get(radarId);
+
+    // Reset stats if they're too old
+    if (Date.now() - stats.lastReset > WEATHERCHASER_HEALTH_RESET_INTERVAL) {
+        stats.successCount = 0;
+        stats.failCount = 0;
+        stats.lastReset = Date.now();
+    }
+
+    if (success) {
+        stats.successCount++;
+        stats.lastSuccess = Date.now();
+    } else {
+        stats.failCount++;
+        stats.lastFail = Date.now();
+    }
+
+    weatherChaserHealthStats.set(radarId, stats);
+}
+
+function getRadarHealthRate(radarId) {
+    const stats = weatherChaserHealthStats.get(radarId);
+    if (!stats || (stats.successCount + stats.failCount) === 0) {
+        return null;
+    }
+
+    const total = stats.successCount + stats.failCount;
+    return (stats.successCount / total) * 100;
+}
+
+function checkWeatherChaserServiceHealth() {
+    // Count how many radars are failing
+    let totalRadars = 0;
+    let failingRadars = 0;
+
+    weatherChaserHealthStats.forEach((stats, radarId) => {
+        totalRadars++;
+        const healthRate = getRadarHealthRate(radarId);
+        // Only count as failing if health rate is below 5% (very low)
+        if (healthRate !== null && healthRate < 5) {
+            failingRadars++;
+        }
+    });
+
+    // If more than 80% of radars are failing, mark service as down
+    // This is more lenient - some radars being slow is normal
+    const previousState = weatherChaserServiceDown;
+    weatherChaserServiceDown = totalRadars > 10 && (failingRadars / totalRadars) > 0.8;
+
+    if (previousState !== weatherChaserServiceDown) {
+        if (weatherChaserServiceDown) {
+            Logger.error('[WEATHER CHASER] Service appears to be DOWN - most radars failing');
+        } else {
+            Logger.success('[WEATHER CHASER] Service RECOVERED');
+        }
+    }
+
+    return weatherChaserServiceDown;
+}
+
+// Get radar frames for Weather Chaser system
+app.get('/api/radar/weatherchaser/frames', async (req, res) => {
+    try {
+        const shouldRefresh = req.query.refresh === '1' || req.query.refresh === 'true';
+        if (shouldRefresh) {
+            Logger.info('[WEATHER CHASER] Manual refresh requested - clearing failed cache and regenerating frames');
+            weatherChaserFailedCache.clear(); // Clear failed requests on manual refresh
+            await weatherChaserService.updateFrames();
+        }
+
+        const radarIds = req.query.radars ? req.query.radars.split(',').map(id => parseInt(id)) : null;
+        const data = weatherChaserService.getFrames(radarIds);
+        const status = weatherChaserService.getStatus();
+
+        const detailParts = [];
+        if (status.frameCount) {
+            detailParts.push(`Frames: ${status.frameCount}`);
+        }
+        if (status.radarCount) {
+            detailParts.push(`Radars: ${data.radars.length}`);
+        }
+
+        statusManager.updateComponent(
+            'Radar Map',
+            status.active ? 'Online' : 'Offline',
+            detailParts.join(' · ')
+        );
+
+        res.json({
+            success: true,
+            frames: data.frames,
+            radars: data.radars,
+            status: status,
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        Logger.error('Error getting Weather Chaser radar frames:', error.message);
+        statusManager.updateComponent('Radar Map', 'Offline', error.message);
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
+// Get Weather Chaser radar status
+app.get('/api/radar/weatherchaser/status', (req, res) => {
+    try {
+        const status = weatherChaserService.getStatus();
+        const detailParts = [];
+        if (status.frameCount) {
+            detailParts.push(`Frames: ${status.frameCount}`);
+        }
+        if (status.lastUpdate) {
+            detailParts.push(`Updated ${new Date(status.lastUpdate).toLocaleTimeString('en-AU')}`);
+        }
+        if (status.totalRadars) {
+            detailParts.push(`${status.totalRadars} radars`);
+        }
+
+        statusManager.updateComponent(
+            'Radar Map',
+            status.active ? 'Online' : 'Offline',
+            detailParts.join(' · ')
+        );
+
+        res.json({
+            success: true,
+            ...status,
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        statusManager.updateComponent('Radar Map', 'Offline', error.message);
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
+// Get Weather Chaser health statistics
+app.get('/api/radar/weatherchaser/health', (req, res) => {
+    try {
+        const healthData = [];
+        const serviceDown = checkWeatherChaserServiceHealth();
+
+        weatherChaserHealthStats.forEach((stats, radarId) => {
+            const radarInfo = weatherChaserService.getRadar(radarId);
+            const healthRate = getRadarHealthRate(radarId);
+
+            healthData.push({
+                radarId: radarId,
+                radarName: radarInfo ? radarInfo.fullName : `Radar ${radarId}`,
+                successCount: stats.successCount,
+                failCount: stats.failCount,
+                healthRate: healthRate,
+                lastSuccess: stats.lastSuccess,
+                lastFail: stats.lastFail,
+                status: healthRate === null ? 'unknown' : healthRate > 50 ? 'healthy' : healthRate > 10 ? 'degraded' : 'failing'
+            });
+        });
+
+        // Sort by health rate (worst first)
+        healthData.sort((a, b) => (a.healthRate || 100) - (b.healthRate || 100));
+
+        res.json({
+            success: true,
+            serviceDown: serviceDown,
+            totalRadars: healthData.length,
+            healthyRadars: healthData.filter(r => r.status === 'healthy').length,
+            degradedRadars: healthData.filter(r => r.status === 'degraded').length,
+            failingRadars: healthData.filter(r => r.status === 'failing').length,
+            radars: healthData,
+            queueLength: weatherChaserRequestQueue.length,
+            activeRequests: weatherChaserActiveRequests,
+            cacheStats: {
+                imagesCached: weatherChaserImageCache.size,
+                failedCached: weatherChaserFailedCache.size
+            },
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
+// Diagnostic endpoint - check timestamp generation
+app.get('/api/radar/weatherchaser/diagnostic', (req, res) => {
+    try {
+        const now = new Date();
+        const service = weatherChaserService;
+        const frames = service.frames;
+
+        const diagnostic = {
+            serverTime: {
+                iso: now.toISOString(),
+                timestamp: service.formatTimestamp(now),
+                utc: now.toUTCString()
+            },
+            frameGeneration: {
+                latestFrame: frames.length > 0 ? frames[frames.length - 1].timestamp : 'none',
+                oldestFrame: frames.length > 0 ? frames[0].timestamp : 'none',
+                totalFrames: frames.length,
+                frames: frames.map(f => ({
+                    timestamp: f.timestamp,
+                    age: `${Math.floor((now - new Date(f.time)) / 60000)} min ago`,
+                    iso: f.dateStr
+                }))
+            },
+            validation: {
+                minAgeRequired: '15 minutes',
+                buffer: '20 minutes',
+                explanation: 'Weather Chaser uses UTC timestamps - some radars publish slower than others, 15 min minimum age required'
+            },
+            recommendations: frames.length > 0 ? frames.map(f => {
+                const frameTime = new Date(f.time);
+                const ageMs = now - frameTime;
+                const ageMin = Math.floor(ageMs / 60000);
+                const shouldWork = ageMin >= 15;
+
+                return {
+                    timestamp: f.timestamp,
+                    ageMinutes: ageMin,
+                    shouldWork: shouldWork,
+                    status: shouldWork ? 'SAFE' : 'TOO RECENT - WILL FAIL'
+                };
+            }) : []
+        };
+
+        res.json({
+            success: true,
+            ...diagnostic
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
+    }
+});
+
+// Request queue for Weather Chaser to prevent overwhelming the API
+const weatherChaserRequestQueue = [];
+let weatherChaserActiveRequests = 0;
+const MAX_CONCURRENT_WEATHERCHASER_REQUESTS = 5; // Only 5 concurrent requests
+const WEATHERCHASER_REQUEST_DELAY = 100; // 100ms between requests
+
+async function processWeatherChaserQueue() {
+    if (weatherChaserActiveRequests >= MAX_CONCURRENT_WEATHERCHASER_REQUESTS || weatherChaserRequestQueue.length === 0) {
+        return;
+    }
+
+    const request = weatherChaserRequestQueue.shift();
+    if (!request) return;
+
+    weatherChaserActiveRequests++;
+
+    try {
+        await request.execute();
+    } catch (error) {
+        // Error already handled in request.execute
+    } finally {
+        weatherChaserActiveRequests--;
+
+        // Process next request after delay
+        setTimeout(() => {
+            processWeatherChaserQueue();
+        }, WEATHERCHASER_REQUEST_DELAY);
+    }
+}
+
+// Proxy radar images from theweatherchaser.com
+app.get('/api/radar/weatherchaser/image/:radarId/:timestamp', async (req, res) => {
+    const { radarId, timestamp } = req.params;
+    const cacheKey = getWeatherChaserCacheKey(radarId, timestamp);
+
+    try {
+        // Check cache first
+        const cachedImage = getFromWeatherChaserCache(cacheKey);
+
+        if (cachedImage) {
+            Logger.verbose(`[WEATHER CHASER] Cache HIT - Radar ${radarId} @ ${timestamp}`);
+            res.setHeader('Content-Type', 'image/png');
+            res.setHeader('Cache-Control', 'public, max-age=21600, immutable');
+            res.setHeader('Access-Control-Allow-Origin', '*');
+            res.setHeader('X-Cache', 'HIT');
+            updateRadarHealth(parseInt(radarId), true);
+            return res.send(cachedImage);
+        }
+
+        // Check if this request recently failed
+        if (isWeatherChaserFailed(cacheKey)) {
+            Logger.verbose(`[WEATHER CHASER] Recently failed - Returning transparent for Radar ${radarId} @ ${timestamp}`);
+            res.setHeader('Content-Type', 'image/png');
+            res.setHeader('Cache-Control', 'public, max-age=60');
+            res.setHeader('Access-Control-Allow-Origin', '*');
+            res.setHeader('X-Radar-Status', 'recently-failed');
+            res.status(200);
+            return res.send(TRANSPARENT_PNG_1x1);
+        }
+
+        // Validate timestamp - don't request future frames or frames that are too recent
+        const requestTime = parseWeatherChaserTimestamp(timestamp);
+        const now = new Date();
+        const timeDiff = requestTime - now;
+
+        // Reject if frame is in the future OR less than 8 minutes old OR more than 90 minutes old
+        const ageMinutes = Math.floor(-timeDiff / 60000);
+
+        if (timeDiff > -480000) { // Less than 8 minutes in the past (or in the future)
+            Logger.verbose(`[WEATHER CHASER] Timestamp ${timestamp} is too recent (${ageMinutes} min old) - skipping`);
+            markWeatherChaserFailed(cacheKey, 'too-recent');
+            res.setHeader('Content-Type', 'image/png');
+            res.setHeader('Cache-Control', 'public, max-age=60');
+            res.setHeader('Access-Control-Allow-Origin', '*');
+            res.setHeader('X-Radar-Status', 'too-recent');
+            res.status(200);
+            return res.send(TRANSPARENT_PNG_1x1);
+        }
+
+        if (ageMinutes > 90) { // More than 90 minutes old - likely expired
+            Logger.verbose(`[WEATHER CHASER] Timestamp ${timestamp} is too old (${ageMinutes} min old) - likely expired`);
+            markWeatherChaserFailed(cacheKey, 'too-old');
+            res.setHeader('Content-Type', 'image/png');
+            res.setHeader('Cache-Control', 'public, max-age=300');
+            res.setHeader('Access-Control-Allow-Origin', '*');
+            res.setHeader('X-Radar-Status', 'too-old');
+            res.status(200);
+            return res.send(TRANSPARENT_PNG_1x1);
+        }
+
+        // Circuit breaker: If service is known to be down, fail immediately
+        if (weatherChaserServiceDown) {
+            Logger.verbose(`[WEATHER CHASER] Service marked as DOWN - returning fallback for ${radarId} @ ${timestamp}`);
+            markWeatherChaserFailed(cacheKey, 'service-down');
+            res.setHeader('Content-Type', 'image/png');
+            res.setHeader('Cache-Control', 'public, max-age=60');
+            res.setHeader('Access-Control-Allow-Origin', '*');
+            res.setHeader('X-Radar-Status', 'service-down');
+            res.status(200);
+            return res.send(TRANSPARENT_PNG_1x1);
+        }
+
+        // Add to queue and wait for execution
+        const requestPromise = new Promise((resolve, reject) => {
+            weatherChaserRequestQueue.push({
+                radarId,
+                timestamp,
+                execute: async () => {
+                    try {
+                        const imageUrl = weatherChaserService.buildImageUrl(radarId, timestamp);
+                        const radarInfo = weatherChaserService.getRadar(parseInt(radarId));
+                        const radarName = radarInfo ? radarInfo.fullName : `Radar ${radarId}`;
+
+                        Logger.verbose(`[WEATHER CHASER] Queue processing - Fetching ${radarName} (ID:${radarId}) @ ${timestamp}`);
+
+                        // Only 1 retry - if it fails, the service is down
+                        let lastError = null;
+                        const maxRetries = 1; // Reduced from 2 - no point retrying when service is down
+
+                        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+                            try {
+                                const response = await axios.get(imageUrl, {
+                                    responseType: 'arraybuffer',
+                                    timeout: 5000, // Reduced from 8000 to 5000 - fail faster
+                                    headers: {
+                                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                                        'Accept': 'image/png,image/*',
+                                        'Accept-Encoding': 'gzip, deflate',
+                                        'Connection': 'keep-alive',
+                                        'Cache-Control': 'no-cache'
+                                    },
+                                    validateStatus: (status) => status === 200,
+                                    decompress: true
+                                });
+
+                                const sizeKB = (response.data.length / 1024).toFixed(2);
+                                addToWeatherChaserCache(cacheKey, response.data);
+                                updateRadarHealth(parseInt(radarId), true);
+
+                                if (attempt > 1) {
+                                    Logger.success(`[WEATHER CHASER] ✓ ${radarName} @ ${timestamp} fetched on retry ${attempt} (${sizeKB} KB)`);
+                                } else {
+                                    Logger.verbose(`[WEATHER CHASER] ✓ ${radarName} @ ${timestamp} fetched (${sizeKB} KB)`);
+                                }
+
+                                resolve(response.data);
+                                return;
+                            } catch (retryError) {
+                                lastError = retryError;
+
+                                // No retry delays - removed since maxRetries is now 1
+                            }
+                        }
+
+                        // All retries failed
+                        throw lastError;
+
+                    } catch (error) {
+                        const radarInfo = weatherChaserService.getRadar(parseInt(radarId));
+                        const radarName = radarInfo ? radarInfo.fullName : `Radar ${radarId}`;
+                        const imageUrl = weatherChaserService.buildImageUrl(radarId, timestamp);
+
+                        let errorType = 'unknown';
+
+                        if (error.response) {
+                            errorType = `http-${error.response.status}`;
+
+                            if (error.response.status === 404) {
+                                Logger.verbose(`[WEATHER CHASER] Image not found: ${radarName} @ ${timestamp}`);
+                                markWeatherChaserFailed(cacheKey, 'not-found');
+                                updateRadarHealth(parseInt(radarId), false);
+                            } else if (error.response.status === 500 || error.response.status === 503) {
+                                const now = new Date();
+                                const requestTime = parseWeatherChaserTimestamp(timestamp);
+                                const ageMinutes = Math.floor((now - requestTime) / 60000);
+
+                                // Only log as ERROR if frame is old (30+ min) - otherwise it's just a slow radar
+                                if (ageMinutes >= 30) {
+                                    Logger.error(`[WEATHER CHASER] HTTP ${error.response.status} for ${radarName} @ ${timestamp} (${ageMinutes} min old) - radar may be offline`);
+                                } else {
+                                    Logger.verbose(`[WEATHER CHASER] HTTP ${error.response.status} for ${radarName} @ ${timestamp} (${ageMinutes} min old) - not published yet`);
+                                }
+
+                                markWeatherChaserFailed(cacheKey, errorType);
+                                updateRadarHealth(parseInt(radarId), false);
+
+                                // Only check service health occasionally, not on every failure
+                                if (Math.random() < 0.1) { // 10% chance
+                                    checkWeatherChaserServiceHealth();
+                                }
+                            } else {
+                                Logger.error(`[WEATHER CHASER] HTTP ${error.response.status} for ${radarName} @ ${timestamp}`);
+                                Logger.error(`[WEATHER CHASER] URL was: ${imageUrl}`);
+                                markWeatherChaserFailed(cacheKey, errorType);
+                                updateRadarHealth(parseInt(radarId), false);
+                            }
+                        } else if (error.code === 'ECONNREFUSED') {
+                            Logger.error(`[WEATHER CHASER] Connection refused for ${radarName}`);
+                            errorType = 'connection-refused';
+                            markWeatherChaserFailed(cacheKey, errorType);
+                            updateRadarHealth(parseInt(radarId), false);
+                            weatherChaserServiceDown = true;
+                        } else if (error.code === 'ETIMEDOUT' || error.message.includes('timeout')) {
+                            Logger.warn(`[WEATHER CHASER] Timeout fetching ${radarName} @ ${timestamp}`);
+                            errorType = 'timeout';
+                            markWeatherChaserFailed(cacheKey, errorType);
+                            updateRadarHealth(parseInt(radarId), false);
+                        } else {
+                            Logger.error(`[WEATHER CHASER] Error fetching ${radarName} @ ${timestamp}: ${error.message}`);
+                            markWeatherChaserFailed(cacheKey, errorType);
+                            updateRadarHealth(parseInt(radarId), false);
+                        }
+
+                        reject(error);
+                    }
+                }
+            });
+
+            // Start processing queue
+            processWeatherChaserQueue();
+        });
+
+        // Wait for the queued request to complete
+        try {
+            const imageData = await requestPromise;
+
+            res.setHeader('Content-Type', 'image/png');
+            res.setHeader('Cache-Control', 'public, max-age=21600, immutable');
+            res.setHeader('Access-Control-Allow-Origin', '*');
+            res.setHeader('X-Cache', 'MISS');
+            res.setHeader('X-Radar-Health', getRadarHealthRate(parseInt(radarId))?.toFixed(1) || 'N/A');
+            res.send(imageData);
+        } catch (error) {
+            // Return transparent image on error
+            res.setHeader('Content-Type', 'image/png');
+            res.setHeader('Cache-Control', 'public, max-age=60');
+            res.setHeader('Access-Control-Allow-Origin', '*');
+            res.setHeader('X-Radar-Status', 'error');
+            res.setHeader('X-Radar-Health', getRadarHealthRate(parseInt(radarId))?.toFixed(1) || 'N/A');
+            res.status(200);
+            res.send(TRANSPARENT_PNG_1x1);
+        }
+
+    } catch (error) {
+        Logger.error(`[WEATHER CHASER] Unexpected error: ${error.message}`);
+        res.setHeader('Content-Type', 'image/png');
+        res.setHeader('Cache-Control', 'public, max-age=60');
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('X-Radar-Status', 'error');
+        res.status(200);
+        res.send(TRANSPARENT_PNG_1x1);
+    }
+});
+
+function parseWeatherChaserTimestamp(timestamp) {
+    const year = parseInt(timestamp.substring(0, 4));
+    const month = parseInt(timestamp.substring(4, 6)) - 1;
+    const day = parseInt(timestamp.substring(6, 8));
+    const hours = parseInt(timestamp.substring(8, 10));
+    const minutes = parseInt(timestamp.substring(10, 12));
+    // CRITICAL: Weather Chaser uses UTC timestamps!
+    return new Date(Date.UTC(year, month, day, hours, minutes));
+}
 
 // Old radar endpoint (keep for backwards compatibility, will be deprecated)
 app.get('/api/radar/:radarId', async (req, res) => {
@@ -1818,12 +2509,147 @@ app.get('/proxy/bom/*', async (req, res) => {
     }
 });
 
+/**
+ * Prefetch all radar images and store in cache
+ * This ensures images are ready immediately when frontend requests them
+ */
+async function prefetchAllRadarImages() {
+    try {
+        const status = weatherChaserService.getStatus();
+        if (!status.active || !status.frameCount) {
+            Logger.warn('[PREFETCH] Weather Chaser service not active, skipping prefetch');
+            return;
+        }
+
+        const allRadars = weatherChaserService.getAllRadars();
+        const { frames } = weatherChaserService.getFrames();
+
+        if (!frames || frames.length === 0) {
+            Logger.warn('[PREFETCH] No frames available, skipping prefetch');
+            return;
+        }
+
+        const totalImages = allRadars.length * frames.length;
+        Logger.info(`[PREFETCH] Starting prefetch of ${totalImages} images (${allRadars.length} radars × ${frames.length} frames)`);
+
+        let successCount = 0;
+        let failCount = 0;
+        let cachedCount = 0;
+
+        // Prefetch with concurrency limit to avoid overwhelming the server
+        const CONCURRENT_PREFETCH = 10;
+        const chunks = [];
+
+        for (let i = 0; i < allRadars.length; i += CONCURRENT_PREFETCH) {
+            chunks.push(allRadars.slice(i, i + CONCURRENT_PREFETCH));
+        }
+
+        for (const radarChunk of chunks) {
+            const promises = radarChunk.flatMap(radar =>
+                frames.map(async frame => {
+                    const cacheKey = getWeatherChaserCacheKey(radar.id, frame.timestamp);
+
+                    // Skip if already cached
+                    if (getFromWeatherChaserCache(cacheKey)) {
+                        cachedCount++;
+                        return { success: true, cached: true };
+                    }
+
+                    // Skip if recently failed
+                    if (isWeatherChaserFailed(cacheKey)) {
+                        failCount++;
+                        return { success: false, reason: 'recently-failed' };
+                    }
+
+                    // Skip if service is down
+                    if (weatherChaserServiceDown) {
+                        failCount++;
+                        return { success: false, reason: 'service-down' };
+                    }
+
+                    try {
+                        const imageUrl = weatherChaserService.buildImageUrl(radar.id, frame.timestamp);
+                        const response = await axios.get(imageUrl, {
+                            responseType: 'arraybuffer',
+                            timeout: 5000,
+                            headers: {
+                                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                                'Accept': 'image/png,image/*',
+                                'Accept-Encoding': 'gzip, deflate'
+                            },
+                            validateStatus: (status) => status === 200
+                        });
+
+                        addToWeatherChaserCache(cacheKey, response.data);
+                        updateRadarHealth(radar.id, true);
+                        successCount++;
+                        return { success: true, cached: false };
+                    } catch (error) {
+                        markWeatherChaserFailed(cacheKey, error.response?.status || 'error');
+                        updateRadarHealth(radar.id, false);
+                        failCount++;
+                        return { success: false, reason: error.message };
+                    }
+                })
+            );
+
+            await Promise.all(promises);
+
+            // Small delay between chunks
+            await new Promise(resolve => setTimeout(resolve, 100));
+        }
+
+        const total = successCount + failCount + cachedCount;
+        Logger.success(`[PREFETCH] Complete: ${successCount} fetched, ${cachedCount} cached, ${failCount} failed (${total} total)`);
+    } catch (error) {
+        Logger.error('[PREFETCH] Error during prefetch:', error.message);
+    }
+}
+
 async function initializeServer() {
     Logger.header('LISMORE FLOOD DASHBOARD SERVER');
 
     try {
         await FileUtils.ensureDirectory(Config.paths.RESOURCES_DIR);
         Logger.success('Directory structure verified');
+
+        // Initialize Weather Chaser radar service
+        await weatherChaserService.initialize();
+        Logger.success('Weather Chaser radar service initialized');
+
+        // Prefetch all radar images on startup
+        Logger.info('Prefetching all radar images...');
+        await prefetchAllRadarImages();
+        Logger.success('All radar images prefetched and cached');
+
+        // Periodic health check, cleanup, and image refresh (every 5 minutes)
+        setInterval(async () => {
+            checkWeatherChaserServiceHealth();
+
+            // Refresh radar images periodically
+            Logger.info('[PERIODIC] Refreshing radar images...');
+            await prefetchAllRadarImages();
+
+            // Log health summary
+            let healthyCount = 0;
+            let degradedCount = 0;
+            let failingCount = 0;
+
+            weatherChaserHealthStats.forEach((stats, radarId) => {
+                const healthRate = getRadarHealthRate(radarId);
+                if (healthRate !== null) {
+                    if (healthRate > 50) healthyCount++;
+                    else if (healthRate > 10) degradedCount++;
+                    else failingCount++;
+                }
+            });
+
+            if (weatherChaserHealthStats.size > 0) {
+                Logger.verbose(`[WEATHER CHASER] Health: ${healthyCount} healthy, ${degradedCount} degraded, ${failingCount} failing radars`);
+                Logger.verbose(`[WEATHER CHASER] Queue: ${weatherChaserRequestQueue.length} pending, ${weatherChaserActiveRequests} active requests`);
+                Logger.verbose(`[WEATHER CHASER] Cache: ${weatherChaserImageCache.size} images, ${weatherChaserFailedCache.size} failed`);
+            }
+        }, 5 * 60 * 1000);
 
         await RadarService.downloadLegend();
 
@@ -1839,26 +2665,8 @@ async function initializeServer() {
         Logger.info('Periodic cleanup scheduled (every 5 minutes)');
 
         const server = app.listen(PORT, () => {
-            console.log('');
             Logger.success(`Server running on port ${PORT}`);
-            Logger.info(`Dashboard: http://localhost:${PORT}`);
-            Logger.info(`API Base: http://localhost:${PORT}/api`);
-            console.log('');
-            Logger.success(`✓ IMPORTANT: Open http://localhost:${PORT} in your browser`);
-            Logger.warn(`  Do NOT open the HTML files directly from the file system`);
-            console.log('');
-            Logger.table([
-                { Endpoint: '/api/outages', Description: 'Power outage data' },
-                { Endpoint: '/api/radar/frames', Description: 'Radar animation frames' },
-                { Endpoint: '/api/radar/tile/...', Description: 'Radar tile proxy' },
-                { Endpoint: '/flood-data', Description: 'Current flood levels' },
-                { Endpoint: '/river-data', Description: 'River height history' },
-                { Endpoint: '/status', Description: 'Server health check' }
-            ]);
-            console.log('');
             Logger.info('Server initialization complete');
-            Logger.info('Press Ctrl+C to stop the server');
-            console.log(`${colors.gray}${'─'.repeat(60)}${colors.reset}\n`);
 
             statusManager.setServerInfo({
                 port: PORT,
@@ -1868,8 +2676,10 @@ async function initializeServer() {
                 warning: 'Do NOT open the HTML files directly from the file system',
                 endpoints: [
                     { path: '/api/outages', description: 'Power outage data' },
-                    { path: '/api/radar/frames', description: 'Radar animation frames' },
-                    { path: '/api/radar/tile/...', description: 'Radar tile proxy' },
+                    { path: '/api/radar/weatherchaser/frames', description: 'Weather Chaser radar frames' },
+                    { path: '/api/radar/weatherchaser/image/...', description: 'Weather Chaser image proxy' },
+                    { path: '/api/radar/weatherchaser/health', description: 'Radar health statistics' },
+                    { path: '/api/radar/weatherchaser/diagnostic', description: 'Timestamp diagnostics' },
                     { path: '/flood-data', description: 'Current flood levels' },
                     { path: '/river-data', description: 'River height history' },
                     { path: '/status', description: 'Server health check' }
@@ -1884,7 +2694,6 @@ async function initializeServer() {
                 Logger.info('Solutions:');
                 Logger.info(`  1. Stop the process using port ${PORT}`);
                 Logger.info('  2. Or use a different port: set PORT=3001 && node server.js');
-                console.log('');
                 Logger.info('To find what\'s using the port:');
                 Logger.info(`  Windows: netstat -ano | findstr :${PORT}`);
                 Logger.info('  Then use Task Manager to stop that process');
@@ -1896,7 +2705,6 @@ async function initializeServer() {
 
         // Graceful shutdown
         process.on('SIGINT', () => {
-            console.log('');
             Logger.info('Shutting down server...');
             server.close(() => {
                 Logger.success('Server stopped');
