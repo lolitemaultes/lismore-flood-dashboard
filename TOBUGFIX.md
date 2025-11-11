@@ -13,15 +13,15 @@
 
 **Code Restructure / Cleaner Architecture**
 - ~~Separation of css to maintain clean directory~~
-- Separation of js to maintain clean directory
+- ~~Separation of js to maintain clean directory~~
 
 **LOLITEMAULTES Original Weather Radar Map**
 - ~~Implement original (old BoM radar style) interactive rain radar map~~
-- Improve BoM-ish styling of radar
+- ~~Improve BoM-ish styling of radar~~
 
 **Improve SEO Information for Official Site**
-- Add more alt text
-- Create logo from svg
+- ~~Add more alt text~~
+- ~~Create logo from svg~~
 
 **Reset Maps on Tab Switch**
 - ~~Resetting map view and element when the tab is unfocused~~
