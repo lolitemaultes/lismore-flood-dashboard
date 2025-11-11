@@ -32,10 +32,12 @@ The dashboard consists of two primary components and multiple backend scripts:
 ```
 lismore-flood-proxy/
 ├── server.js
+├── weatherChaserService.js
 ├── package.json
 └── public/
     ├── index.html
-    ├── flood-data.json
+    ├── icon.png
+    ├── floodmap-data.json
     ├── css/
     │   ├── main.css
     │   ├── buttons.css
@@ -45,7 +47,7 @@ lismore-flood-proxy/
     │   ├── header.css
     │   ├── layout.css
     │   ├── modals.css
-    │   ├── notifications
+    │   ├── notifications.css
     │   ├── outagemap.css
     │   ├── panels.css
     │   ├── radar.css
@@ -54,11 +56,13 @@ lismore-flood-proxy/
     │   ├── stats.css
     │   ├── tables.css
     │   ├── tabs.css
+    │   ├── theme-toggle.css
     │   ├── utilities.css
     │   └── webcam.css
     ├── js/
     │   ├── floodmap.js
     │   ├── outagemap.js
+    │   ├── radarImageOverlay.js
     │   ├── radarmap.js
     │   └── theme-switcher.js
     ├── temporary/
