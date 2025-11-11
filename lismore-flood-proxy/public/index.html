@@ -1,6 +1,4 @@
 <!DOCTYPE html>
-<html lang="en">
-<!DOCTYPE html>
 <html lang="en-AU">
 <head>
     <meta charset="UTF-8">
@@ -19,18 +17,17 @@
     <meta property="og:url" content="https://flood.lolitemaultes.online/">
     <meta property="og:title" content="Lismore Flood Dashboard">
     <meta property="og:description" content="Live flood monitoring for Lismore, NSW. Track water levels, view radar, traffic cameras, and access emergency information.">
-    <!-- Change Icon -->
-    <meta property="og:image" content="https://yourwebsite.com/og-image.jpg">
+    <meta property="og:image" content="https://flood.lolitemaultes.online/icon.png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta property="og:locale" content="en_AU">
     <meta property="og:site_name" content="Lismore Flood Dashboard">
     
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:url" content="https://yourwebsite.com/">
+    <meta name="twitter:url" content="https://flood.lolitemaultes.online/">
     <meta name="twitter:title" content="Lismore Flood Dashboard - Real-time Flood Monitoring">
     <meta name="twitter:description" content="Live flood monitoring for Lismore and the Northern Rivers. Track water levels, view radar, traffic cameras, and access emergency information.">
-    <meta name="twitter:image" content="https://yourwebsite.com/twitter-image.jpg">
+    <meta name="twitter:image" content="https://flood.lolitemaultes.online/icon.png">
     
     <meta name="geo.region" content="AU-NSW">
     <meta name="geo.placename" content="Lismore">
@@ -41,12 +38,14 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Lismore Floods">
-    
+
     <!-- Favicon -->
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    
+    <link rel="icon" type="image/png" sizes="32x32" href="/icon.png?v=1">
+    <link rel="icon" type="image/png" sizes="16x16" href="/icon.png?v=1">
+    <link rel="icon" type="image/x-icon" href="/icon.png?v=1">
+    <link rel="shortcut icon" href="/icon.png?v=1">
+    <link rel="apple-touch-icon" href="/icon.png?v=1">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://www.bom.gov.au">
@@ -89,7 +88,7 @@
         "priceCurrency": "AUD"
       },
       "description": "Real-time flood monitoring dashboard for Lismore and the Northern Rivers region, providing live water levels from Wilsons River, weather radar, traffic cameras, and emergency information.",
-      "url": "https://yourwebsite.com",
+      "url": "https://flood.lolitemaultes.online",
       "aggregateRating": {
         "@type": "AggregateRating",
         "ratingValue": "4.8",
@@ -146,6 +145,21 @@
     </script>
 </head>
 <body>
+    <!-- Mobile Not Supported Overlay -->
+    <div id="mobile-not-supported" class="mobile-not-supported-overlay">
+        <div class="mobile-not-supported-content">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                <line x1="12" y1="18" x2="12.01" y2="18"></line>
+                <line x1="2" y1="2" x2="22" y2="22"></line>
+            </svg>
+            <h1>Mobile Support Not Yet Available</h1>
+            <p>The Lismore Flood Dashboard is currently optimized for desktop viewing only.</p>
+            <p>Mobile and tablet support is under development and will be available soon.</p>
+            <p class="desktop-message">Please visit this site on a desktop or laptop computer for the full experience.</p>
+        </div>
+    </div>
+
     <noscript>
         <div style="padding: 2rem; max-width: 1200px; margin: 0 auto; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6;">
             <header style="border-bottom: 3px solid #1976d2; padding-bottom: 1rem; margin-bottom: 2rem;">
@@ -439,7 +453,7 @@
                             </div>
                         </div>
 
-                        <!-- BoM dBZ Color Mapping now handled by radarColorMapper.js -->
+                        <!-- Weather Chaser radar images from theweatherchaser.com -->
 
                         <div class="radar-map-wrapper">
                             <div id="radar-map" class="radar-map"></div>
@@ -591,19 +605,20 @@
                                     <button id="radar-speed-slow" class="radar-speed-btn">0.5x</button>
                                     <button id="radar-speed-normal" class="radar-speed-btn active">1x</button>
                                     <button id="radar-speed-fast" class="radar-speed-btn">2x</button>
+                                    <button id="radar-speed-veryfast" class="radar-speed-btn">4x</button>
                                 </div>
                             </div>
                         </div>
 
                         <div class="tab-footer">
-                            <span>Radar data: RainViewer | Color-mapped to BoM dBZ scale</span>
-                            <a href="https://www.rainviewer.com" target="_blank" rel="noopener noreferrer" class="tab-link">
+                            <span>Radar data: Bureau of Meteorology (BoM)</span>
+                            <a href="https://www.bom.gov.au/weather-and-climate/rain-radar-and-weather-maps" target="_blank" rel="noopener noreferrer" class="tab-link">
                                 <svg xmlns="https://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
                                     <polyline points="15 3 21 3 21 9"></polyline>
                                     <line x1="10" y1="14" x2="21" y2="3"></line>
                                 </svg>
-                                RainViewer
+                                BoM Radar Maps
                             </a>
                         </div>
                     </div>
@@ -905,12 +920,28 @@
                         <span class="status-value" id="proxy-status-value">Checking...</span>
                     </div>
                     <div id="bom-status" class="status-item">
-                        <span class="status-label">BOM Data:</span>
+                        <span class="status-label">River Data:</span>
                         <span class="status-value" id="bom-status-value">Checking...</span>
                     </div>
                     <div id="webcam-status" class="status-item">
                         <span class="status-label">Traffic Camera:</span>
                         <span class="status-value" id="webcam-status-value">Checking...</span>
+                    </div>
+                    <div id="radar-status" class="status-item">
+                        <span class="status-label">Radar Map:</span>
+                        <span class="status-value" id="radar-status-value">Checking...</span>
+                    </div>
+                    <div id="cyclone-status" class="status-item">
+                        <span class="status-label">Cyclone Map:</span>
+                        <span class="status-value" id="cyclone-status-value">Checking...</span>
+                    </div>
+                    <div id="floodmap-status" class="status-item">
+                        <span class="status-label">Flood Map:</span>
+                        <span class="status-value" id="floodmap-status-value">Checking...</span>
+                    </div>
+                    <div id="outagemap-status" class="status-item">
+                        <span class="status-label">Outage Map:</span>
+                        <span class="status-value" id="outagemap-status-value">Checking...</span>
                     </div>
                     <div class="status-actions">
                         <button id="check-status" class="button">
@@ -1100,7 +1131,7 @@
 
     <script src="js/floodmap.js"></script>
     <script src="js/outagemap.js"></script>
-    <script src="js/radarColorMapper.js"></script>
+    <script src="js/radarImageOverlay.js"></script>
     <script src="js/radarmap.js"></script>
 
     <script>
@@ -1206,6 +1237,12 @@
         initializeDashboard();
 
         function initializeDashboard() {
+            // Disable right-click context menu for security
+            document.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+                return false;
+            }, false);
+
             updateClock();
             setInterval(updateClock, 1000);
             
@@ -2673,7 +2710,7 @@
             }
 
             const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 8000);
+            const timeoutId = setTimeout(() => controller.abort(), 15000); // Increased from 8000 to 15000
 
             const setOffline = (detail) => {
                 updateRadarStatusRow('Offline', detail);
