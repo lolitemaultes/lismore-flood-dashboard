@@ -1,0 +1,781 @@
+/* Radar Map Wrapper */
+.radar-map-wrapper {
+    position: relative;
+    width: 100%;
+    height: 600px;
+    background-color: var(--bg-secondary);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+}
+
+/* Radar Map Container */
+.radar-map {
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+/* Loading Overlay */
+.radar-loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    color: white;
+}
+
+.radar-loading-overlay .spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.radar-loading-overlay p {
+    margin-top: 1rem;
+    font-size: 1rem;
+}
+
+/* Error State */
+.radar-error {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--bg-secondary);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    color: var(--text-secondary);
+    padding: 2rem;
+    text-align: center;
+}
+
+.radar-error svg {
+    margin-bottom: 1rem;
+    color: var(--error-color);
+}
+
+.radar-error p {
+    font-size: 1rem;
+    margin: 0;
+    line-height: 1.6;
+    max-width: 600px;
+}
+
+/* Radar Controls Panel */
+.radar-controls {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-primary);
+    border-radius: var(--border-radius);
+    padding: 0.75rem;
+    box-shadow: var(--shadow-lg);
+    z-index: 1001;
+    min-width: 350px;
+    max-width: 90%;
+}
+
+:root[data-theme="dark"] .radar-controls {
+    background: rgba(30, 41, 59, 0.95);
+    backdrop-filter: blur(10px);
+}
+
+.radar-controls-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.radar-timestamp {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.radar-frame-info {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    background: var(--bg-tertiary);
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+}
+
+/* Slider */
+.radar-slider-container {
+    margin-bottom: 0.75rem;
+}
+
+.radar-slider {
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--bg-tertiary);
+    outline: none;
+    -webkit-appearance: none;
+}
+
+.radar-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s;
+}
+
+.radar-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+    background: var(--primary-dark);
+}
+
+.radar-slider::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--primary-color);
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s;
+}
+
+.radar-slider::-moz-range-thumb:hover {
+    transform: scale(1.1);
+    background: var(--primary-dark);
+}
+
+/* Control Buttons */
+.radar-control-buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.radar-btn {
+    background: var(--bg-tertiary);
+    border: none;
+    border-radius: var(--border-radius);
+    padding: 0.5rem;
+    cursor: pointer;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.radar-btn:hover {
+    background: var(--primary-color);
+    color: white;
+    transform: translateY(-2px);
+}
+
+.radar-btn:active {
+    transform: translateY(0);
+}
+
+.radar-btn svg {
+    display: block;
+}
+
+/* Play/Pause buttons - larger */
+#radar-btn-play,
+#radar-btn-pause {
+    width: 42px;
+    height: 42px;
+}
+
+/* Other control buttons */
+.radar-btn:not(#radar-btn-play):not(#radar-btn-pause) {
+    width: 36px;
+    height: 36px;
+}
+
+/* Speed Control */
+.radar-speed-control {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.radar-speed-control label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-right: 0.25rem;
+}
+
+.radar-speed-btn {
+    background: var(--bg-tertiary);
+    border: 2px solid transparent;
+    border-radius: var(--border-radius);
+    padding: 0.375rem 0.75rem;
+    cursor: pointer;
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+
+.radar-speed-btn:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.radar-speed-btn.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+/* Leaflet Overrides for Dark Mode */
+:root[data-theme="dark"] .leaflet-tile-pane {
+    filter: brightness(0.8) contrast(1.1);
+}
+
+:root[data-theme="dark"] .leaflet-control-zoom a {
+    background-color: rgba(30, 41, 59, 0.9);
+    color: var(--text-primary);
+}
+
+:root[data-theme="dark"] .leaflet-control-zoom a:hover {
+    background-color: var(--primary-color);
+}
+
+:root[data-theme="dark"] .leaflet-control-attribution {
+    background-color: rgba(30, 41, 59, 0.8);
+    color: var(--text-secondary);
+}
+
+:root[data-theme="dark"] .leaflet-control-attribution a {
+    color: var(--primary-color);
+}
+
+/* Weather Chaser Radar Overlay Styling - immediate frame swaps (no fade) */
+.radar-overlay {
+    pointer-events: none !important;
+    transition: none !important;
+    -webkit-transition: none !important;
+    -moz-transition: none !important;
+    -o-transition: none !important;
+}
+
+/* Hide broken/failed radar images */
+.radar-overlay img[src*="data:image"],
+.radar-overlay img[width="1"],
+.radar-overlay img[height="1"] {
+    display: none !important;
+    opacity: 0 !important;
+}
+
+.radar-overlay.leaflet-image-layer {
+    transition: none !important;
+    -webkit-transition: none !important;
+    -moz-transition: none !important;
+    -o-transition: none !important;
+}
+
+.radar-overlay img {
+    transition: none !important;
+    -webkit-transition: none !important;
+    -moz-transition: none !important;
+    -o-transition: none !important;
+    image-rendering: -moz-crisp-edges;          /* Firefox */
+    image-rendering: -webkit-optimize-contrast; /* Webkit */
+    image-rendering: pixelated;                 /* Chrome, Safari */
+    image-rendering: crisp-edges;               /* Standard */
+    -ms-interpolation-mode: nearest-neighbor;   /* IE */
+}
+
+/* Legacy RainViewer Layer Styling (deprecated but kept for compatibility) */
+.rainviewer-layer {
+    pointer-events: none;
+    transition: none !important;
+}
+
+.rainviewer-layer img {
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+}
+
+/* Z-Index Layering - STRICT ENFORCEMENT (bottom to top):
+   100 - Base map tiles (.leaflet-tile-pane)
+   200 - Map overlays
+   300 - Radar imagery (.leaflet-radar-pane / radarPane)
+   400 - City/town/state labels and markers (.leaflet-overlay-pane, .leaflet-shadow-pane)
+   500+ - Controls and UI elements
+*/
+
+/* Base map tiles at bottom */
+.leaflet-tile-pane,
+#radar-map .leaflet-tile-pane {
+    z-index: 100 !important;
+}
+
+/* Custom radar pane - BELOW labels */
+.leaflet-radar-pane,
+#radar-map .leaflet-radar-pane,
+#radar-map .leaflet-pane[style*="z-index: 300"] {
+    z-index: 300 !important;
+    pointer-events: none !important;
+}
+
+.rainviewer-layer,
+.rainviewer-layer.leaflet-layer {
+    z-index: 300 !important;
+}
+
+/* LABELS ON TOP - City/town/state names ABOVE radar */
+.leaflet-overlay-pane,
+#radar-map .leaflet-overlay-pane,
+.leaflet-overlay-pane * {
+    z-index: 400 !important;
+    pointer-events: auto !important;
+}
+
+.leaflet-shadow-pane,
+#radar-map .leaflet-shadow-pane {
+    z-index: 500 !important;
+}
+
+.leaflet-marker-pane,
+#radar-map .leaflet-marker-pane {
+    z-index: 600 !important;
+}
+
+.leaflet-tooltip-pane,
+#radar-map .leaflet-tooltip-pane {
+    z-index: 650 !important;
+}
+
+.leaflet-popup-pane,
+#radar-map .leaflet-popup-pane {
+    z-index: 700 !important;
+}
+
+/* Control pane for map controls */
+.leaflet-control-container,
+.leaflet-top,
+.leaflet-bottom {
+    z-index: 800 !important;
+}
+
+/* Remove any Leaflet default image smoothing */
+.leaflet-tile-container img {
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+    image-rendering: pixelated;
+}
+
+/* Ensure canvas elements are also crisp */
+.radar-map canvas,
+.leaflet-zoom-animated {
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+    image-rendering: pixelated;
+}
+
+/* Force crisp rendering on all radar map images */
+#radar-map img {
+    image-rendering: -moz-crisp-edges !important;
+    image-rendering: crisp-edges !important;
+    image-rendering: pixelated !important;
+}
+
+/* BoM-style crisp radar rendering - blocky pixels, no smoothing */
+.bom-radar-crisp,
+.bom-radar-crisp canvas,
+.bom-radar-crisp img {
+    image-rendering: -moz-crisp-edges !important;
+    image-rendering: -webkit-optimize-contrast !important;
+    image-rendering: crisp-edges !important;
+    image-rendering: pixelated !important;
+    -ms-interpolation-mode: nearest-neighbor !important;
+}
+
+/* Radar Legend Toggle Button */
+.radar-legend-toggle {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 36px;
+    height: 36px;
+    background: rgba(255, 255, 255, 0.95);
+    border: none;
+    border-radius: 4px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1001;
+    transition: all 0.2s ease;
+}
+
+.radar-legend-toggle:hover {
+    background: rgba(255, 255, 255, 1);
+    transform: scale(1.05);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
+}
+
+.radar-legend-toggle:active {
+    transform: scale(0.95);
+}
+
+.radar-legend-toggle svg {
+    color: #333;
+}
+
+:root[data-theme="dark"] .radar-legend-toggle {
+    background: rgba(30, 41, 59, 0.95);
+}
+
+:root[data-theme="dark"] .radar-legend-toggle:hover {
+    background: rgba(30, 41, 59, 1);
+}
+
+:root[data-theme="dark"] .radar-legend-toggle svg {
+    color: var(--text-primary);
+}
+
+/* Radar Base Layer Toggle Button (Map/Satellite) */
+.radar-baselayer-toggle {
+    position: absolute;
+    top: 56px;
+    right: 10px;
+    width: 36px;
+    height: 36px;
+    background: rgba(255, 255, 255, 0.95);
+    border: none;
+    border-radius: 4px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1001;
+    transition: all 0.2s ease;
+}
+
+/* Radar Location Toggle Button (Brisbane/Grafton) */
+.radar-location-toggle {
+    position: absolute;
+    top: 102px;
+    right: 10px;
+    width: 36px;
+    height: 36px;
+    background: rgba(255, 255, 255, 0.95);
+    border: none;
+    border-radius: 4px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1001;
+    transition: all 0.2s ease;
+}
+
+.radar-location-toggle:hover {
+    background: rgba(255, 255, 255, 1);
+    transform: scale(1.05);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
+}
+
+.radar-location-toggle:active {
+    transform: scale(0.95);
+}
+
+.radar-location-toggle svg {
+    color: #333;
+}
+
+.radar-location-toggle.active {
+    background: var(--primary-color);
+}
+
+.radar-location-toggle.active svg {
+    color: white;
+}
+
+:root[data-theme="dark"] .radar-location-toggle {
+    background: rgba(30, 41, 59, 0.95);
+}
+
+:root[data-theme="dark"] .radar-location-toggle:hover {
+    background: rgba(30, 41, 59, 1);
+}
+
+:root[data-theme="dark"] .radar-location-toggle svg {
+    color: var(--text-primary);
+}
+
+:root[data-theme="dark"] .radar-location-toggle.active {
+    background: var(--primary-color);
+}
+
+:root[data-theme="dark"] .radar-location-toggle.active svg {
+    color: white;
+}
+
+.radar-baselayer-toggle:hover {
+    background: rgba(255, 255, 255, 1);
+    transform: scale(1.05);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.4);
+}
+
+.radar-baselayer-toggle:active {
+    transform: scale(0.95);
+}
+
+.radar-baselayer-toggle svg {
+    color: #333;
+}
+
+.radar-baselayer-toggle.active {
+    background: var(--primary-color);
+}
+
+.radar-baselayer-toggle.active svg {
+    color: white;
+}
+
+.radar-baselayer-toggle.satellite {
+    background: var(--primary-color);
+}
+
+.radar-baselayer-toggle.satellite svg {
+    color: white;
+}
+
+:root[data-theme="dark"] .radar-baselayer-toggle {
+    background: rgba(30, 41, 59, 0.95);
+}
+
+:root[data-theme="dark"] .radar-baselayer-toggle:hover {
+    background: rgba(30, 41, 59, 1);
+}
+
+:root[data-theme="dark"] .radar-baselayer-toggle svg {
+    color: var(--text-primary);
+}
+
+:root[data-theme="dark"] .radar-baselayer-toggle.active {
+    background: var(--primary-color);
+}
+
+:root[data-theme="dark"] .radar-baselayer-toggle.active svg {
+    color: white;
+}
+
+:root[data-theme="dark"] .radar-baselayer-toggle.satellite {
+    background: var(--primary-color);
+}
+
+:root[data-theme="dark"] .radar-baselayer-toggle.satellite svg {
+    color: white;
+}
+
+/* BoM-Style Radar Legend */
+.radar-legend {
+    position: absolute;
+    top: 10px;
+    right: 56px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 6px;
+    padding: 8px 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    font-size: 11px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+    min-width: 140px;
+}
+
+:root[data-theme="dark"] .radar-legend {
+    background: rgba(30, 41, 59, 0.95);
+    color: var(--text-primary);
+}
+
+.radar-legend-header {
+    font-weight: 600;
+    font-size: 12px;
+    margin-bottom: 6px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    color: #333;
+}
+
+:root[data-theme="dark"] .radar-legend-header {
+    color: var(--text-primary);
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+.radar-legend-items {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.radar-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 1px 0;
+}
+
+.radar-legend-color {
+    width: 24px;
+    height: 14px;
+    border-radius: 2px;
+    flex-shrink: 0;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.radar-legend-label {
+    font-size: 11px;
+    color: #333;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+:root[data-theme="dark"] .radar-legend-label {
+    color: var(--text-primary);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .radar-map-wrapper {
+        height: 400px;
+    }
+
+    .radar-legend-toggle {
+        top: 5px;
+        right: 5px;
+        width: 32px;
+        height: 32px;
+    }
+
+    .radar-legend-toggle svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    .radar-baselayer-toggle {
+        top: 47px;
+        right: 5px;
+        width: 32px;
+        height: 32px;
+    }
+
+    .radar-baselayer-toggle svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    .radar-location-toggle {
+        top: 89px;
+        right: 5px;
+        width: 32px;
+        height: 32px;
+    }
+
+    .radar-location-toggle svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    .radar-legend {
+        top: 5px;
+        right: 42px;
+        padding: 6px 8px;
+        font-size: 10px;
+        min-width: 120px;
+    }
+
+    .radar-legend-header {
+        font-size: 11px;
+    }
+
+    .radar-legend-color {
+        width: 20px;
+        height: 12px;
+    }
+
+    .radar-legend-label {
+        font-size: 10px;
+    }
+
+    .radar-controls {
+        min-width: 280px;
+        padding: 0.65rem;
+        bottom: 10px;
+    }
+
+    .radar-control-buttons {
+        gap: 0.35rem;
+    }
+
+    .radar-btn:not(#radar-btn-play):not(#radar-btn-pause) {
+        width: 34px;
+        height: 34px;
+    }
+
+    #radar-btn-play,
+    #radar-btn-pause {
+        width: 40px;
+        height: 40px;
+    }
+
+    .radar-speed-control {
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 480px) {
+    .radar-map-wrapper {
+        height: 300px;
+    }
+
+    .radar-controls {
+        min-width: 260px;
+        padding: 0.5rem;
+    }
+
+    .radar-controls-header {
+        flex-direction: column;
+        gap: 0.25rem;
+        align-items: flex-start;
+    }
+
+    .radar-timestamp {
+        font-size: 0.75rem;
+    }
+}
+
+/* Animation */
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}

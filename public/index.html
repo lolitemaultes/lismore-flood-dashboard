@@ -1,0 +1,3394 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Lismore Flood Dashboard</title>
+    <meta name="title" content="Lismore Flood Dashboard">
+    <meta name="description" content="Live flood monitoring for Lismore, NSW. Real-time Wilsons River water levels, BOM radar imagery, traffic cameras, power outages, and emergency contacts for Northern Rivers region.">
+    <meta name="keywords" content="Lismore floods, Wilsons River, flood monitoring, NSW floods, Northern Rivers floods, BOM flood data, emergency information, SES, flood warnings, real-time water levels, Lismore weather">
+    <meta name="author" content="lolitemaultes">
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+    
+    <link rel="canonical" href="https://flood.lolitemaultes.online/">
+    
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://flood.lolitemaultes.online/">
+    <meta property="og:title" content="Lismore Flood Dashboard">
+    <meta property="og:description" content="Live flood monitoring for Lismore, NSW. Track water levels, view radar, traffic cameras, and access emergency information.">
+    <meta property="og:image" content="https://flood.lolitemaultes.online/icon.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:locale" content="en_AU">
+    <meta property="og:site_name" content="Lismore Flood Dashboard">
+    
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="https://flood.lolitemaultes.online/">
+    <meta name="twitter:title" content="Lismore Flood Dashboard - Real-time Flood Monitoring">
+    <meta name="twitter:description" content="Live flood monitoring for Lismore and the Northern Rivers. Track water levels, view radar, traffic cameras, and access emergency information.">
+    <meta name="twitter:image" content="https://flood.lolitemaultes.online/icon.png">
+    
+    <meta name="geo.region" content="AU-NSW">
+    <meta name="geo.placename" content="Lismore">
+    <meta name="geo.position" content="-28.8142;153.2778">
+    <meta name="ICBM" content="-28.8142, 153.2778">
+    
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Lismore Floods">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/icon.png?v=1">
+    <link rel="icon" type="image/png" sizes="16x16" href="/icon.png?v=1">
+    <link rel="icon" type="image/x-icon" href="/icon.png?v=1">
+    <link rel="shortcut icon" href="/icon.png?v=1">
+    <link rel="apple-touch-icon" href="/icon.png?v=1">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://www.bom.gov.au">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/header.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/panels.css">
+    <link rel="stylesheet" href="css/buttons.css">
+    <link rel="stylesheet" href="css/tables.css">
+    <link rel="stylesheet" href="css/tabs.css">
+    <link rel="stylesheet" href="css/webcam.css">
+    <link rel="stylesheet" href="css/cyclone.css">
+    <link rel="stylesheet" href="css/outagemap.css">
+    <link rel="stylesheet" href="css/radar.css">
+    <link rel="stylesheet" href="css/river.css">
+    <link rel="stylesheet" href="css/emergency.css">
+    <link rel="stylesheet" href="css/stats.css">
+    <link rel="stylesheet" href="css/modals.css">
+    <link rel="stylesheet" href="css/notifications.css">
+    <link rel="stylesheet" href="css/floodmap.css">
+    <link rel="stylesheet" href="css/utilities.css">
+    <link rel="stylesheet" href="css/theme-toggle.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="temporary/maintenance.css">
+    
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Lismore Flood Dashboard",
+      "applicationCategory": "UtilityApplication",
+      "operatingSystem": "Web Browser",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "AUD"
+      },
+      "description": "Real-time flood monitoring dashboard for Lismore and the Northern Rivers region, providing live water levels from Wilsons River, weather radar, traffic cameras, and emergency information.",
+      "url": "https://flood.lolitemaultes.online",
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "ratingCount": "127"
+      },
+      "featureList": [
+        "Real-time Wilsons River water level monitoring",
+        "BOM weather radar imagery",
+        "Live traffic cameras",
+        "Power outage tracking",
+        "Flood impact mapping",
+        "Emergency contact information",
+        "Historical flood data"
+      ]
+    }
+    </script>
+    
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "EmergencyService",
+      "name": "NSW State Emergency Service (SES)",
+      "telephone": "132500",
+      "url": "https://www.ses.nsw.gov.au",
+      "areaServed": {
+        "@type": "State",
+        "name": "New South Wales",
+        "containsPlace": {
+          "@type": "City",
+          "name": "Lismore"
+        }
+      }
+    }
+    </script>
+    
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Place",
+      "name": "Lismore",
+      "geo": {
+        "@type": "GeoCoordinates",
+        "latitude": "-28.8142",
+        "longitude": "153.2778"
+      },
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Lismore",
+        "addressRegion": "NSW",
+        "postalCode": "2480",
+        "addressCountry": "AU"
+      }
+    }
+    </script>
+</head>
+<body>
+    <!-- Mobile Not Supported Overlay -->
+    <div id="mobile-not-supported" class="mobile-not-supported-overlay">
+        <div class="mobile-not-supported-content">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                <line x1="12" y1="18" x2="12.01" y2="18"></line>
+                <line x1="2" y1="2" x2="22" y2="22"></line>
+            </svg>
+            <h1>Mobile Support Not Yet Available</h1>
+            <p>The Lismore Flood Dashboard is currently optimized for desktop viewing only.</p>
+            <p>Mobile and tablet support is under development and will be available soon.</p>
+            <p class="desktop-message">Please visit this site on a desktop or laptop computer for the full experience.</p>
+        </div>
+    </div>
+
+    <noscript>
+        <div style="padding: 2rem; max-width: 1200px; margin: 0 auto; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6;">
+            <header style="border-bottom: 3px solid #1976d2; padding-bottom: 1rem; margin-bottom: 2rem;">
+                <h1 style="color: #1976d2; margin: 0 0 0.5rem 0;">Lismore Flood Dashboard</h1>
+                <p style="color: #666; margin: 0;">Real-time Flood Monitoring & Emergency Information</p>
+            </header>
+            
+            <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 1rem; margin-bottom: 2rem;">
+                <strong>JavaScript Required:</strong> This dashboard requires JavaScript to display real-time data. Please enable JavaScript in your browser or use the direct links below to access emergency information.
+            </div>
+
+            <section style="margin-bottom: 2rem;">
+                <h2 style="color: #333; border-bottom: 2px solid #eee; padding-bottom: 0.5rem;">About This Dashboard</h2>
+                <p>The Lismore Flood Dashboard provides real-time flood monitoring and emergency information for Lismore and the Northern Rivers region of New South Wales, Australia. This tool displays live data from Essential Energy and the Bureau of Meteorology, including water levels from the Wilsons River, weather radar, traffic cameras, and power outage information.</p>
+            </section>
+
+            <section style="margin-bottom: 2rem; background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px; padding: 1.5rem;">
+                <h2 style="color: #721c24; margin-top: 0;">Emergency Contacts</h2>
+                <ul style="list-style: none; padding: 0; margin: 0;">
+                    <li style="margin-bottom: 1rem; padding: 0.75rem; background: white; border-radius: 4px;">
+                        <strong style="font-size: 1.1em; color: #c82333;">Life Threatening Emergency:</strong><br>
+                        <span style="font-size: 1.5em; font-weight: bold;">📞 000</span>
+                    </li>
+                    <li style="margin-bottom: 1rem; padding: 0.75rem; background: white; border-radius: 4px;">
+                        <strong style="font-size: 1.1em; color: #c82333;">NSW SES Emergency Assistance:</strong><br>
+                        <span style="font-size: 1.5em; font-weight: bold;">📞 132 500</span>
+                    </li>
+                </ul>
+            </section>
+
+            <section style="margin-bottom: 2rem;">
+                <h2 style="color: #333; border-bottom: 2px solid #eee; padding-bottom: 0.5rem;">Direct Links to Live Data</h2>
+                <ul style="line-height: 2;">
+                    <li><strong>Flood Warnings:</strong> <a href="https://www.bom.gov.au/nsw/flood/northern.shtml" style="color: #1976d2;">BOM Northern Rivers Flood Watch</a></li>
+                    <li><strong>Weather Radar:</strong> <a href="https://www.bom.gov.au/products/IDR282.loop.shtml" style="color: #1976d2;">Grafton 256km Radar Loop</a></li>
+                    <li><strong>Wilsons River Levels:</strong> <a href="http://www.bom.gov.au/fwo/IDN60233/IDN60233.560560.tbl.shtml" style="color: #1976d2;">Current River Heights</a></li>
+                    <li><strong>Power Outages:</strong> <a href="https://www.essentialenergy.com.au/outages-and-faults/power-outages" style="color: #1976d2;">Essential Energy Outage Map</a></li>
+                    <li><strong>Traffic Conditions:</strong> <a href="https://www.livetraffic.com/desktop.html" style="color: #1976d2;">Live Traffic NSW</a></li>
+                </ul>
+            </section>
+
+            <section style="margin-bottom: 2rem;">
+                <h2 style="color: #333; border-bottom: 2px solid #eee; padding-bottom: 0.5rem;">Flood Level Categories for Lismore</h2>
+                <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
+                    <thead>
+                        <tr style="background: #f5f5f5;">
+                            <th style="padding: 0.75rem; text-align: left; border: 1px solid #ddd;">Category</th>
+                            <th style="padding: 0.75rem; text-align: left; border: 1px solid #ddd;">Height</th>
+                            <th style="padding: 0.75rem; text-align: left; border: 1px solid #ddd;">Impact</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;"><strong>Minor Flood</strong></td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">4.20m</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">Low-lying areas affected, some road closures</td>
+                        </tr>
+                        <tr style="background: #f9f9f9;">
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;"><strong>Moderate Flood</strong></td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">7.20m</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">Properties begin to be affected, evacuations may be required</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;"><strong>Major Flood</strong></td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">9.70m</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">Extensive flooding, major evacuations required</td>
+                        </tr>
+                        <tr style="background: #fff3cd;">
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;"><strong>Levee Protection</strong></td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">10.6m</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">Height at which Lismore CBD levee provides protection</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section style="margin-bottom: 2rem;">
+                <h2 style="color: #333; border-bottom: 2px solid #eee; padding-bottom: 0.5rem;">Key Monitoring Locations</h2>
+                <ul style="columns: 2; -webkit-columns: 2; -moz-columns: 2;">
+                    <li>Wilsons River at Lismore (mAHD)</li>
+                    <li>Wilsons River at Eltham</li>
+                    <li>Leycester Creek at Leycester</li>
+                    <li>Wilsons River at Boat Harbour</li>
+                    <li>Richmond River at Casino</li>
+                    <li>Terania Creek at The Channon</li>
+                    <li>Coopers Creek at Rosebank</li>
+                    <li>Brunswick River at Brunswick Heads</li>
+                </ul>
+            </section>
+
+            <section style="margin-bottom: 2rem;">
+                <h2 style="color: #333; border-bottom: 2px solid #eee; padding-bottom: 0.5rem;">Evacuation Centers</h2>
+                <ul>
+                    <li><strong>Southern Cross University</strong> - Military Rd, East Lismore</li>
+                    <li><strong>Lismore City Hall</strong> - 1 Bounty St, Lismore</li>
+                    <li><strong>Goonellabah Sports & Aquatic Centre</strong> - 50 Oliver Ave, Goonellabah</li>
+                </ul>
+                <p><em>Note: Check with local authorities for current evacuation center status during flood events.</em></p>
+            </section>
+
+            <section style="margin-bottom: 2rem;">
+                <h2 style="color: #333; border-bottom: 2px solid #eee; padding-bottom: 0.5rem;">Additional Resources</h2>
+                <ul>
+                    <li><a href="https://www.ses.nsw.gov.au" style="color: #1976d2;">NSW SES Website</a></li>
+                    <li><a href="https://www.bom.gov.au" style="color: #1976d2;">Bureau of Meteorology</a></li>
+                    <li><a href="https://www.lismore.nsw.gov.au" style="color: #1976d2;">Lismore City Council</a></li>
+                    <li><a href="https://australiasevereweather.com/floods/" style="color: #1976d2;">Australian Severe Weather - Flood History</a></li>
+                </ul>
+            </section>
+
+            <section style="margin-bottom: 2rem; background: #e8f4fd; border: 1px solid #b3d9f2; border-radius: 4px; padding: 1.5rem;">
+                <h2 style="color: #0c5460; margin-top: 0;">Live Status Information</h2>
+                <p style="margin: 0.5rem 0;">This dashboard provides real-time monitoring of:</p>
+                <ul style="margin: 0.5rem 0;">
+                    <li><strong>Flood Levels:</strong> Current water levels and trends from Bureau of Meteorology river gauges</li>
+                    <li><strong>Weather Radar:</strong> Live radar imagery showing precipitation patterns</li>
+                    <li><strong>Power Outages:</strong> Essential Energy outage map showing current and planned power interruptions</li>
+                    <li><strong>Traffic Cameras:</strong> Live traffic camera feeds from Transport for NSW</li>
+                </ul>
+            </section>
+
+            <footer style="border-top: 2px solid #eee; padding-top: 1rem; margin-top: 3rem; color: #666; font-size: 0.9em;">
+                <p>Data sources: Bureau of Meteorology, Transport for NSW, Essential Energy</p>
+                <p><strong>Always follow directions from emergency services during flood events.</strong></p>
+            </footer>
+        </div>
+    </noscript>
+    
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="spinner"></div>
+        <p>Loading flood data...</p>
+    </div>
+
+    <div id="notification" class="notification">
+        <span class="notification-icon">
+            <svg xmlns="https://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="10" cy="10" r="8"></circle>
+                <line x1="10" y1="6" x2="10" y2="10"></line>
+                <line x1="10" y1="14" x2="10.01" y2="14"></line>
+            </svg>
+        </span>
+        <div id="notification-message" class="notification-content"></div>
+        <button class="notification-close" onclick="document.getElementById('notification').classList.remove('show')">
+            <svg xmlns="https://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        </button>
+    </div>
+
+    <header role="banner">
+        <div class="header-content">
+            <div class="header-main">
+                <div class="header-title">
+                    <div class="header-icon" role="img" aria-label="Flood monitoring icon">
+                      <svg width="32" height="32" viewBox="0 0 32 32" fill="none"
+                           xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <path
+                          d="M26.885 13.116c-0.226-0.226-0.539-0.366-0.884-0.366-0.445 0-0.836 0.233-1.058 0.583l-0.003 0.005c-1.395 2.232-2.758 3.413-3.939 3.413s-2.545-1.181-3.94-3.413c-0.238-0.334-0.624-0.549-1.060-0.549s-0.822 0.215-1.057 0.545l-0.003 0.004c-1.395 2.232-2.757 3.413-3.939 3.413s-2.545-1.181-3.939-3.413c-0.224-0.355-0.615-0.588-1.060-0.588-0.345 0-0.658 0.14-0.884 0.366l-4 4c-0.226 0.226-0.366 0.539-0.366 0.884 0 0.69 0.56 1.25 1.25 1.25 0.345 0 0.658-0.14 0.884-0.366l2.933-2.934c3.248 4.354 6.93 4.428 10.184 0.24 1.073 1.714 2.884 2.881 4.976 3.057l0.024 0.002c2.218-0.205 4.103-1.465 5.167-3.268l0.017-0.031 2.932 2.934c0.227 0.228 0.541 0.37 0.888 0.37 0.691 0 1.251-0.56 1.251-1.251 0-0.347-0.141-0.661-0.369-0.887l-0-0zM2.884 8.884l2.933-2.933c3.246 4.352 6.929 4.429 10.184 0.24 3.256 4.187 6.936 4.111 10.184-0.24l2.932 2.933c0.226 0.227 0.539 0.367 0.885 0.367 0.691 0 1.251-0.56 1.251-1.251 0-0.345-0.14-0.658-0.366-0.884v0l-4-4c-0.226-0.226-0.539-0.366-0.885-0.366-0.445 0-0.836 0.232-1.058 0.582l-0.003 0.005c-1.395 2.232-2.758 3.413-3.939 3.413s-2.545-1.181-3.94-3.413c-0.238-0.333-0.624-0.548-1.059-0.548s-0.822 0.215-1.057 0.545l-0.003 0.004c-1.396 2.231-2.758 3.412-3.94 3.412s-2.545-1.181-3.94-3.412c-0.199-0.316-0.529-0.534-0.912-0.579l-0.006-0.001c-0.040-0.005-0.087-0.007-0.135-0.007-0.347 0-0.662 0.14-0.891 0.366l-4 4c-0.225 0.226-0.363 0.537-0.363 0.881 0 0.69 0.56 1.25 1.25 1.25 0.344 0 0.655-0.139 0.881-0.363l-0 0zM26.885 23.115c-0.226-0.226-0.539-0.365-0.884-0.365-0.445 0-0.836 0.233-1.058 0.583l-0.003 0.005c-1.395 2.232-2.758 3.412-3.939 3.412s-2.545-1.18-3.94-3.412c-0.238-0.333-0.624-0.548-1.060-0.548s-0.822 0.215-1.057 0.544l-0.003 0.004c-1.395 2.232-2.757 3.412-3.939 3.412s-2.545-1.18-3.939-3.412c-0.225-0.355-0.616-0.588-1.061-0.588-0.345 0-0.657 0.14-0.884 0.366l-4 4c-0.227 0.226-0.367 0.539-0.367 0.885 0 0.691 0.56 1.251 1.251 1.251 0.345 0 0.658-0.14 0.884-0.366v0l2.933-2.934c3.248 4.352 6.93 4.426 10.184 0.24 1.073 1.714 2.884 2.881 4.976 3.057l0.024 0.002c2.218-0.205 4.103-1.465 5.167-3.268l0.017-0.031 2.932 2.934c0.226 0.226 0.539 0.366 0.884 0.366 0.691 0 1.251-0.56 1.251-1.251 0-0.345-0.14-0.658-0.366-0.884l0 0z"
+                          fill="currentColor" opacity="0.8" />
+                      </svg>
+                    </div>
+                    <div class="header-text">
+                        <h1 itemprop="name">Lismore Flood Dashboard</h1>
+                        <p class="header-subtitle" itemprop="description">Real-time Flood Monitoring & Emergency Information for Lismore NSW</p>
+                    </div>
+                </div>
+                <div class="header-info">
+                    <div class="info-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <polyline points="12 6 12 12 16 14"></polyline>
+                        </svg>
+                        <span id="clock">Loading time...</span>
+                    </div>
+                    <div class="info-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="23 4 23 10 17 10"></polyline>
+                            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                        </svg>
+                        <span>Updated: <span id="last-update-time">Never</span></span>
+                    </div>
+                    <button id="theme-toggle" onclick="toggleTheme()" aria-label="Toggle dark mode" title="Toggle dark/light mode">
+                        <svg class="theme-icon-sun" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="5"></circle>
+                            <line x1="12" y1="1" x2="12" y2="3"></line>
+                            <line x1="12" y1="21" x2="12" y2="23"></line>
+                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                            <line x1="1" y1="12" x2="3" y2="12"></line>
+                            <line x1="21" y1="12" x2="23" y2="12"></line>
+                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                        </svg>
+                        <svg class="theme-icon-moon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="dashboard-container">
+        <main role="main" aria-label="Dashboard content">
+            <div class="panel">
+                <div class="tabs-container">
+                    <div class="tabs">
+                        <button id="tab-webcam" class="tab-button active">
+                            <svg xmlns="https://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M23 7l-7 5 7 5V7z"></path>
+                                <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+                            </svg>
+                            Traffic Camera
+                        </button>
+                        <button id="tab-radar" class="tab-button">
+                            <svg xmlns="https://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <circle cx="12" cy="12" r="6"></circle>
+                                <circle cx="12" cy="12" r="2"></circle>
+                            </svg>
+                            Rainfall Radar
+                        </button>
+                        <button id="tab-cyclone" class="tab-button">
+                            <svg xmlns="https://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 32 32" fill="currentColor" style="transform: scaleX(-1);">
+                                <path d="M16,21a5,5,0,1,1,5-5A5.0057,5.0057,0,0,1,16,21Zm0-8a3,3,0,1,0,3,3A3.0033,3.0033,0,0,0,16,13Z"></path>
+                                <path d="M22.6521,4.1821l-2.177,2.5142L19.0713,8.3174,20.7864,9.605A7.9361,7.9361,0,0,1,23.9963,16l.0008.0576.0017.0415c.018.4317.2412,10.1113-14.6538,11.7222l2.18-2.5176,1.4039-1.6211L11.2139,22.395A7.9361,7.9361,0,0,1,8.0037,16l-.0008-.0576-.0017-.0415C7.9832,15.47,7.7605,5.8071,22.6521,4.1821M24.9978,2c-.0164,0-.0327,0-.0493.001C5.2532,2.9146,6.0037,16,6.0037,16a9.975,9.975,0,0,0,4.0095,7.9946L6.2368,28.3555A1.0044,1.0044,0,0,0,7.0022,30c.0164,0,.0327,0,.0493-.001C26.7468,29.0854,25.9963,16,25.9963,16a9.9756,9.9756,0,0,0-4.0092-7.9946l3.7761-4.3609A1.0044,1.0044,0,0,0,24.9978,2Z"></path>
+                            </svg>
+                            Cyclone Map
+                        </button>
+                        <button id="tab-floodmap" class="tab-button">
+                            <svg width="16px" height="16px" viewBox="0 0 32 32" version="1.1" xmlns="https://www.w3.org/2000/svg" fill="currentColor">
+                            <title>flood</title>
+                            <path d="M26.885 13.116c-0.226-0.226-0.539-0.366-0.884-0.366-0.445 0-0.836 0.233-1.058 0.583l-0.003 0.005c-1.395 2.232-2.758 3.413-3.939 3.413s-2.545-1.181-3.94-3.413c-0.238-0.334-0.624-0.549-1.060-0.549s-0.822 0.215-1.057 0.545l-0.003 0.004c-1.395 2.232-2.757 3.413-3.939 3.413s-2.545-1.181-3.939-3.413c-0.224-0.355-0.615-0.588-1.060-0.588-0.345 0-0.658 0.14-0.884 0.366l-4 4c-0.226 0.226-0.366 0.539-0.366 0.884 0 0.69 0.56 1.25 1.25 1.25 0.345 0 0.658-0.14 0.884-0.366l2.933-2.934c3.248 4.354 6.93 4.428 10.184 0.24 1.073 1.714 2.884 2.881 4.976 3.057l0.024 0.002c2.218-0.205 4.103-1.465 5.167-3.268l0.017-0.031 2.932 2.934c0.227 0.228 0.541 0.37 0.888 0.37 0.691 0 1.251-0.56 1.251-1.251 0-0.347-0.141-0.661-0.369-0.887l-0-0zM2.884 8.884l2.933-2.933c3.246 4.352 6.929 4.429 10.184 0.24 3.256 4.187 6.936 4.111 10.184-0.24l2.932 2.933c0.226 0.227 0.539 0.367 0.885 0.367 0.691 0 1.251-0.56 1.251-1.251 0-0.345-0.14-0.658-0.366-0.884v0l-4-4c-0.226-0.226-0.539-0.366-0.885-0.366-0.445 0-0.836 0.232-1.058 0.582l-0.003 0.005c-1.395 2.232-2.758 3.413-3.939 3.413s-2.545-1.181-3.94-3.413c-0.238-0.333-0.624-0.548-1.059-0.548s-0.822 0.215-1.057 0.545l-0.003 0.004c-1.396 2.231-2.758 3.412-3.94 3.412s-2.545-1.181-3.94-3.412c-0.199-0.316-0.529-0.534-0.912-0.579l-0.006-0.001c-0.040-0.005-0.087-0.007-0.135-0.007-0.347 0-0.662 0.14-0.891 0.366l-4 4c-0.225 0.226-0.363 0.537-0.363 0.881 0 0.69 0.56 1.25 1.25 1.25 0.344 0 0.655-0.139 0.881-0.363l-0 0zM26.885 23.115c-0.226-0.226-0.539-0.365-0.884-0.365-0.445 0-0.836 0.233-1.058 0.583l-0.003 0.005c-1.395 2.232-2.758 3.412-3.939 3.412s-2.545-1.18-3.94-3.412c-0.238-0.333-0.624-0.548-1.060-0.548s-0.822 0.215-1.057 0.544l-0.003 0.004c-1.395 2.232-2.757 3.412-3.939 3.412s-2.545-1.18-3.939-3.412c-0.225-0.355-0.616-0.588-1.061-0.588-0.345 0-0.657 0.14-0.884 0.366l-4 4c-0.227 0.226-0.367 0.539-0.367 0.885 0 0.691 0.56 1.251 1.251 1.251 0.345 0 0.658-0.14 0.884-0.366v0l2.933-2.934c3.248 4.352 6.93 4.426 10.184 0.24 1.073 1.714 2.884 2.881 4.976 3.057l0.024 0.002c2.218-0.205 4.103-1.465 5.167-3.268l0.017-0.031 2.932 2.934c0.226 0.226 0.539 0.366 0.884 0.366 0.691 0 1.251-0.56 1.251-1.251 0-0.345-0.14-0.658-0.366-0.884l0 0z"></path>
+                            </svg>
+                            Flood Map
+                        </button>
+                        <button id="tab-outage" class="tab-button">
+                            <svg xmlns="https://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M13 2L3 14h8l-1 8 10-12h-8l1-8z"></path>
+                            </svg>
+                            Power Outages
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="tab-content-container">
+                    <div id="content-webcam" class="tab-content active">
+                        <div class="tab-header">
+                            <h2>Bruxner Highway Lismore - Live Traffic Camera</h2>
+                            <div>
+                                <button id="refresh-webcam" class="button">
+                                    <svg xmlns="https://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M23 4v6h-6"></path>
+                                        <path d="M1 20v-6h6"></path>
+                                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                                    </svg>
+                                    Refresh
+                                </button>
+                            </div>
+                        </div>
+                        <div class="webcam-image-container">
+                            <img id="webcam" src="/proxy/webcam" alt="Bruxner Highway Lismore Traffic Camera" class="webcam-image">
+                            <div id="webcam-error" class="webcam-error">
+                                <svg xmlns="https://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                </svg>
+                                Unable to load webcam image
+                            </div>
+                        </div>
+                        <div class="tab-footer">
+                            <span>Image auto-updates every few seconds</span>
+                            <span id="webcam-timestamp">Loading...</span>
+                        </div>
+                    </div>
+                    
+                    <div id="content-radar" class="tab-content">
+                        <div class="tab-header">
+                            <h2>Australian Rain Radar</h2>
+                            <div>
+                                <button id="radar-refresh" class="button">
+                                    <svg xmlns="https://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M23 4v6h-6"></path>
+                                        <path d="M1 20v-6h6"></path>
+                                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                                    </svg>
+                                    Refresh
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Weather Chaser radar images from theweatherchaser.com -->
+
+                        <div class="radar-map-wrapper">
+                            <div id="radar-map" class="radar-map"></div>
+
+                            <!-- Radar Legend Toggle Button -->
+                            <button id="radar-legend-toggle" class="radar-legend-toggle" title="Show/hide rainfall intensity legend" aria-label="Toggle legend">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="12" y1="16" x2="12" y2="12"></line>
+                                    <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                                </svg>
+                            </button>
+
+                            <!-- Map/Satellite Toggle Button -->
+                            <button id="radar-baselayer-toggle" class="radar-baselayer-toggle" title="Switch to satellite view" aria-label="Toggle base layer">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M17.4 10L21 12L17.4 14M17.4 10L12 13L6.6 10M17.4 10L21 8L12 3L3 8L6.6 10M6.6 10L3 12L6.6 14M17.4 14L21 16L12 21L3 16L6.6 14M17.4 14L12 17L6.6 14"></path>
+                                </svg>
+                            </button>
+
+                            <!-- Location Toggle Button (Brisbane/Grafton) -->
+                            <button id="radar-location-toggle" class="radar-location-toggle" title="Switch to Grafton Radar" aria-label="Toggle radar location">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M7.41849,3.97302 L12.2656,8.82015 L12.3529,8.73283 C12.7434,8.34231 13.3766,8.34231 13.7671,8.73283 C14.1576,9.12336 14.1576,9.75652 13.7671,10.147 L13.6798,10.2344 L18.0269,14.5816 C18.5991,15.1537 18.6413,16.1389 17.9741,16.7314 C16.6596,17.8988 14.9991,18.6876 13.1667,18.925 L14.1476,20.2434 C14.6875,20.9691 14.1696,22 13.265,22 L6.68506,22 C5.90253,22 5.37025,21.206 5.66753,20.4821 L6.92068,17.4307 C4.55327,15.8094 3,13.0861 3,10 C3,7.70818 3.85794,5.61433 5.26864,4.02585 C5.86115,3.35867 6.84631,3.40084 7.41849,3.97302 Z M8.69541,18.3739 L8.02762,20 L11.4737,20 L10.6554,18.9002 C9.9741,18.7982 9.31777,18.6197 8.69541,18.3739 Z M14.1077,5.05316 C14.8356,5.1815 15.5042,5.537 16.0177,6.06868 C16.5311,6.60036 16.863,7.28094 16.9659,8.01288 C17.0428,8.55979 16.6617,9.06546 16.1148,9.14232 C15.6069643,9.21369 15.1346531,8.89022944 15.0082806,8.40576989 L14.9854,8.29122 C14.9413,7.97754 14.799,7.68586 14.579,7.458 C14.3955833,7.26810833 14.1660556,7.13066111 13.9140856,7.05828565 L13.7604,7.02277 C13.2165,6.92687 12.8534,6.40821 12.9493,5.86432 C13.0452,5.32042 13.5638,4.95725 14.1077,5.05316 Z M14,2 C14.7879,2 15.5681,2.15519 16.2961,2.45672 C17.0241,2.75825 17.6855,3.20021 18.2426,3.75736 C18.7998,4.31451 19.2417,4.97595 19.5433,5.7039 C19.8448,6.43185 20,7.21207 20,8 C20,8.55228 19.5523,9 19,9 C18.48715,9 18.0644908,8.61395571 18.0067275,8.11662025 L18,8 C18,7.47471 17.8965,6.95457 17.6955,6.46927 C17.4945,5.98396 17.1999,5.54301 16.8284,5.17157 C16.457,4.80014 16.016,4.5055 15.5307,4.30448 C15.0454,4.10346 14.5253,4 14,4 C13.4477,4 13,3.55228 13,3 C13,2.44772 13.4477,2 14,2 Z"></path>
+                                </svg>
+                            </button>
+
+                            <!-- BoM-style Radar Legend (initially hidden) -->
+                            <div id="radar-legend" class="radar-legend" style="display: none;">
+                                <div class="radar-legend-header">Rainfall Intensity (dBZ)</div>
+                                <div class="radar-legend-items">
+                                    <div class="radar-legend-item">
+                                        <span class="radar-legend-color" style="background: #f5f5fe; border: 1px solid #ccc;"></span>
+                                        <span class="radar-legend-label">12–23</span>
+                                    </div>
+                                    <div class="radar-legend-item">
+                                        <span class="radar-legend-color" style="background: #b4b5ff;"></span>
+                                        <span class="radar-legend-label">23–28</span>
+                                    </div>
+                                    <div class="radar-legend-item">
+                                        <span class="radar-legend-color" style="background: #7979fe;"></span>
+                                        <span class="radar-legend-label">28–31</span>
+                                    </div>
+                                    <div class="radar-legend-item">
+                                        <span class="radar-legend-color" style="background: #1415fe;"></span>
+                                        <span class="radar-legend-label">31–34</span>
+                                    </div>
+                                    <div class="radar-legend-item">
+                                        <span class="radar-legend-color" style="background: #00d8c2;"></span>
+                                        <span class="radar-legend-label">34–37</span>
+                                    </div>
+                                    <div class="radar-legend-item">
+                                        <span class="radar-legend-color" style="background: #019791;"></span>
+                                        <span class="radar-legend-label">37–40</span>
+                                    </div>
+                                    <div class="radar-legend-item">
+                                        <span class="radar-legend-color" style="background: #006766;"></span>
+                                        <span class="radar-legend-label">40–43</span>
+                                    </div>
+                                    <div class="radar-legend-item">
+                                        <span class="radar-legend-color" style="background: #ffff00;"></span>
+                                        <span class="radar-legend-label">43–46</span>
+                                    </div>
+                                    <div class="radar-legend-item">
+                                        <span class="radar-legend-color" style="background: #ffc800;"></span>
+                                        <span class="radar-legend-label">46–49</span>
+                                    </div>
+                                    <div class="radar-legend-item">
+                                        <span class="radar-legend-color" style="background: #ff9601;"></span>
+                                        <span class="radar-legend-label">49–52</span>
+                                    </div>
+                                    <div class="radar-legend-item">
+                                        <span class="radar-legend-color" style="background: #fe6500;"></span>
+                                        <span class="radar-legend-label">52–55</span>
+                                    </div>
+                                    <div class="radar-legend-item">
+                                        <span class="radar-legend-color" style="background: #ff0001;"></span>
+                                        <span class="radar-legend-label">55–58</span>
+                                    </div>
+                                    <div class="radar-legend-item">
+                                        <span class="radar-legend-color" style="background: #c90000;"></span>
+                                        <span class="radar-legend-label">58–61</span>
+                                    </div>
+                                    <div class="radar-legend-item">
+                                        <span class="radar-legend-color" style="background: #780101;"></span>
+                                        <span class="radar-legend-label">61–64</span>
+                                    </div>
+                                    <div class="radar-legend-item">
+                                        <span class="radar-legend-color" style="background: #280000;"></span>
+                                        <span class="radar-legend-label">≥64</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="radar-loading-overlay" id="radar-loading" style="display: none;">
+                                <div class="spinner"></div>
+                                <p>Loading radar data...</p>
+                            </div>
+
+                            <div class="radar-error" id="radar-error" style="display: none;">
+                                <svg xmlns="https://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                </svg>
+                                <p id="radar-error-message">Unable to load radar data</p>
+                            </div>
+
+                            <div class="radar-controls" id="radar-controls" style="display: none;">
+                                <div class="radar-controls-header">
+                                    <span id="radar-timestamp" class="radar-timestamp">--:--</span>
+                                    <div class="radar-frame-info">
+                                        <span id="radar-frame-current">0</span>/<span id="radar-frame-total">0</span>
+                                    </div>
+                                </div>
+
+                                <div class="radar-slider-container">
+                                    <input type="range" id="radar-frame-slider" class="radar-slider" min="0" max="11" value="11" step="1">
+                                </div>
+
+                                <div class="radar-control-buttons">
+                                    <button id="radar-btn-first" class="radar-btn" title="First frame">
+                                        <svg xmlns="https://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M18.41 16.59L13.82 12l4.59-4.59L17 6l-6 6 6 6zM6 6h2v12H6z"></path>
+                                        </svg>
+                                    </button>
+                                    <button id="radar-btn-prev" class="radar-btn" title="Previous frame">
+                                        <svg xmlns="https://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"></path>
+                                        </svg>
+                                    </button>
+                                    <button id="radar-btn-play" class="radar-btn" title="Play">
+                                        <svg xmlns="https://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M8 5v14l11-7z"></path>
+                                        </svg>
+                                    </button>
+                                    <button id="radar-btn-pause" class="radar-btn" title="Pause" style="display: none;">
+                                        <svg xmlns="https://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"></path>
+                                        </svg>
+                                    </button>
+                                    <button id="radar-btn-next" class="radar-btn" title="Next frame">
+                                        <svg xmlns="https://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"></path>
+                                        </svg>
+                                    </button>
+                                    <button id="radar-btn-last" class="radar-btn" title="Last frame">
+                                        <svg xmlns="https://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M5.59 7.41L10.18 12l-4.59 4.59L7 18l6-6-6-6zM16 6h2v12h-2z"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+
+                                <div class="radar-speed-control">
+                                    <label for="radar-speed">Speed:</label>
+                                    <button id="radar-speed-slow" class="radar-speed-btn">0.5x</button>
+                                    <button id="radar-speed-normal" class="radar-speed-btn active">1x</button>
+                                    <button id="radar-speed-fast" class="radar-speed-btn">2x</button>
+                                    <button id="radar-speed-veryfast" class="radar-speed-btn">4x</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tab-footer">
+                            <span>Radar data: Bureau of Meteorology (BoM)</span>
+                            <a href="https://www.bom.gov.au/weather-and-climate/rain-radar-and-weather-maps" target="_blank" rel="noopener noreferrer" class="tab-link">
+                                <svg xmlns="https://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                    <polyline points="15 3 21 3 21 9"></polyline>
+                                    <line x1="10" y1="14" x2="21" y2="3"></line>
+                                </svg>
+                                BoM Radar Maps
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div id="content-cyclone" class="tab-content">
+                        <div class="tab-header">
+                            <h2>Tropical Cyclone Forecast Track Map</h2>
+                            <div>
+                                <button id="refresh-cyclone" class="button">
+                                    <svg xmlns="https://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M23 4v6h-6"></path>
+                                        <path d="M1 20v-6h6"></path>
+                                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                                    </svg>
+                                    Refresh
+                                </button>
+                            </div>
+                        </div>
+                        <div class="cyclone-container">
+                            <img id="cyclone-image" src="/proxy/cyclone-image" alt="Tropical Cyclone Forecast Track Map" class="cyclone-image">
+                            <div id="cyclone-error" class="cyclone-error">
+                                <svg xmlns="https://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                                </svg>
+                                Unable to load cyclone map
+                            </div>
+                        </div>
+                        <div class="tab-footer">
+                            <a href="https://www.bom.gov.au/cyclone/" target="_blank" rel="noopener noreferrer" class="tab-link">
+                                <svg xmlns="https://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                    <polyline points="15 3 21 3 21 9"></polyline>
+                                    <line x1="10" y1="14" x2="21" y2="3"></line>
+                                </svg>
+                                View detailed cyclone information
+                            </a>
+                            <span id="cyclone-timestamp">Loading...</span>
+                        </div>
+                    </div>
+
+                    <div id="content-floodmap" class="tab-content">
+                        <div class="tab-header">
+                            <h2>Lismore Flood Impact Map</h2>
+                            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                <button id="use-current-level" class="button">
+                                    <svg xmlns="https://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M12 2v6"></path>
+                                        <path d="M12 22v-6"></path>
+                                        <path d="M4.93 4.93L9 9"></path>
+                                        <path d="M14.36 14.36L18.07 18.07"></path>
+                                        <path d="M2 12h6"></path>
+                                        <path d="M22 12h-6"></path>
+                                        <path d="M4.93 19.07L9 15"></path>
+                                        <path d="M14.36 9.64L18.07 5.93"></path>
+                                    </svg>
+                                    Use Current Level
+                                </button>
+                                <button id="flood-show-markers" class="button toggle-button active">
+                                    <svg xmlns="https://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                        <circle cx="12" cy="10" r="3"></circle>
+                                    </svg>
+                                    Toggle Property Markers
+                                </button>
+                                <button id="refresh-floodmap" class="button">
+                                    <svg xmlns="https://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M23 4v6h-6"></path>
+                                        <path d="M1 20v-6h6"></path>
+                                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                                    </svg>
+                                    Refresh
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="flood-map-container">
+                            <div id="flood-map"></div>
+                            
+                            <div class="flood-map-legend">
+                                <div class="legend-title">Impact Legend</div>
+                                <div class="legend-item">
+                                    <div class="legend-color" style="background-color: #e74c3c;"></div>
+                                    <div class="legend-label">Floor Level Affected (Critical)</div>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-color" style="background-color: #f39c12;"></div>
+                                    <div class="legend-label">Gate Level Affected (Warning)</div>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-color" style="background-color: #f1c40f;"></div>
+                                    <div class="legend-label">Road Centre Affected (Alert)</div>
+                                </div>
+                                <div class="legend-item">
+                                    <div class="legend-color" style="background-color: #2ecc71;"></div>
+                                    <div class="legend-label">Not Affected (Safe)</div>
+                                </div>
+                            </div>
+                            
+                            <div id="flood-loading-overlay" class="loading-overlay">
+                                <div class="spinner"></div>
+                                <p id="flood-loading-status">Processing flood data...</p>
+                                <div class="progress-container">
+                                    <div class="progress-bar" id="flood-processing-progress"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flood-controls">
+                            <div class="flood-slider-container">
+                                <div class="flood-height-label">
+                                    <span>Flood Water Height:</span>
+                                    <span class="flood-height-value" id="flood-height-display">12.0m</span>
+                                </div>
+                                <input type="range" id="flood-height-slider" class="flood-slider" min="1.55" max="40.44" step="0.1" value="12.0">
+                            </div>
+                            
+                            <div id="flood-stats-container" class="flood-stats-container">
+                                <div class="flood-stat-title">Impact Summary at <span id="flood-stats-height">12.0m</span></div>
+                                <div class="flood-stat-grid">
+                                    <div class="flood-stat-item">
+                                        <div class="flood-stat-label">Floor Level Affected</div>
+                                        <div class="flood-stat-value" id="flood-stat-critical">0 <span class="category-badge category-critical">Critical</span></div>
+                                    </div>
+                                    <div class="flood-stat-item">
+                                        <div class="flood-stat-label">Gate Level Affected</div>
+                                        <div class="flood-stat-value" id="flood-stat-warning">0 <span class="category-badge category-warning">Warning</span></div>
+                                    </div>
+                                    <div class="flood-stat-item">
+                                        <div class="flood-stat-label">Road Level Affected</div>
+                                        <div class="flood-stat-value" id="flood-stat-alert">0 <span class="category-badge category-alert">Alert</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="content-outage" class="tab-content">
+                        <div class="tab-header">
+                            <h2>Essential Energy Power Outages</h2>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button class="button" id="outage-fit-bounds" title="Fit all outages in view">
+                                    <svg xmlns="https://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+                                    </svg>
+                                    Fit to View
+                                </button>
+                                <button class="button" id="outage-locate-me" title="Center on your location">
+                                    <svg xmlns="https://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <circle cx="12" cy="12" r="3"></circle>
+                                    </svg>
+                                    My Location
+                                </button>
+                                <button id="refresh-outages" class="button">
+                                    <svg xmlns="https://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M23 4v6h-6"></path>
+                                        <path d="M1 20v-6h6"></path>
+                                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                                    </svg>
+                                    Refresh
+                                </button>
+                            </div>
+                        </div>
+                        <div class="outage-map-wrapper">
+                            <div id="outage-map"></div>
+                            
+                            <div class="outage-legend">
+                                <div class="legend-title">Outage Categories</div>
+                                <label>
+                                    <input type="radio" name="outage-category" id="radio-current-outage" value="current" checked />
+                                    <div class="legend-content">
+                                        <span class="outage-dot cur"></span>
+                                        <span>Current Outages</span>
+                                    </div>
+                                </label>
+                                <label>
+                                    <input type="radio" name="outage-category" id="radio-future-outage" value="future" />
+                                    <div class="legend-content">
+                                        <span class="outage-dot fut"></span>
+                                        <span>Planned Outages</span>
+                                    </div>
+                                </label>
+                                <label>
+                                    <input type="radio" name="outage-category" id="radio-cancelled-outage" value="cancelled" />
+                                    <div class="legend-content">
+                                        <span class="outage-dot can"></span>
+                                        <span>Cancelled</span>
+                                    </div>
+                                </label>
+                                <div class="legend-note">
+                                    Select a category to view on map
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="outage-stats-container">
+                            <div class="outage-stats-title">Network Status Overview</div>
+                            <div class="outage-stats-grid">
+                                <div class="outage-stat-card">
+                                    <div class="stat-label">Current Outages</div>
+                                    <div class="stat-value">
+                                        <span id="outage-stat-current">0</span>
+                                        <span class="outage-stat-badge current">Active</span>
+                                    </div>
+                                </div>
+                                <div class="outage-stat-card">
+                                    <div class="stat-label">Planned Outages</div>
+                                    <div class="stat-value">
+                                        <span id="outage-stat-future">0</span>
+                                        <span class="outage-stat-badge future">Scheduled</span>
+                                    </div>
+                                </div>
+                                <div class="outage-stat-card">
+                                    <div class="stat-label">Cancelled</div>
+                                    <div class="stat-value">
+                                        <span id="outage-stat-cancelled">0</span>
+                                        <span class="outage-stat-badge cancelled">Resolved</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="tab-footer">
+                            <span>Last updated: <span id="outage-last-update">Never</span></span>
+                            <a href="https://www.essentialenergy.com.au/outages-and-faults/power-outages" target="_blank" rel="noopener noreferrer" class="tab-link">
+                                <svg xmlns="https://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                    <polyline points="15 3 21 3 21 9"></polyline>
+                                    <line x1="10" y1="14" x2="21" y2="3"></line>
+                                </svg>
+                                View on Essential Energy
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <h2>Wilsons River Flood Data</h2>
+                    <div class="refresh-controls">
+                        <select id="refresh-interval" class="button secondary">
+                            <option value="300000">Refresh: 5 min</option>
+                            <option value="60000">Refresh: 1 min</option>
+                            <option value="600000">Refresh: 10 min</option>
+                            <option value="1800000">Refresh: 30 min</option>
+                        </select>
+                        <button id="refresh-now" class="button">
+                            <svg xmlns="https://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 2v6h-6"></path>
+                                <path d="M3 12a9 9 0 0 1 15-6.7l3-3"></path>
+                                <path d="M3 22v-6h6"></path>
+                                <path d="M21 12a9 9 0 0 1-15 6.7l-3 3"></path>
+                            </svg>
+                            Refresh Now
+                        </button>
+                    </div>
+                </div>
+                <div class="panel-content">
+                    <div class="panel-alert">
+                        <svg xmlns="https://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                            <line x1="12" y1="9" x2="12" y2="13"></line>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                        </svg>
+                        <span>EMERGENCY USE: This dashboard fetches LIVE data from the Bureau of Meteorology. Always follow directions from emergency services during flood events.</span>
+                    </div>
+
+                    <div class="table-container">
+                        <table id="flood-data">
+                            <thead>
+                                <tr>
+                                    <th>Location</th>
+                                    <th>Time</th>
+                                    <th>Water Level (m)</th>
+                                    <th>Status</th>
+                                    <th>Flood Category</th>
+                                </tr>
+                            </thead>
+                            <tbody id="flood-data-body">
+                                <tr>
+                                    <td colspan="5" style="text-align: center;">Loading data...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <h2>Data Sources & Status</h2>
+                </div>
+                <div class="status-panel">
+                    <div id="proxy-status" class="status-item">
+                        <span class="status-label">Proxy Server:</span>
+                        <span class="status-value" id="proxy-status-value">Checking...</span>
+                    </div>
+                    <div id="bom-status" class="status-item">
+                        <span class="status-label">River Data:</span>
+                        <span class="status-value" id="bom-status-value">Checking...</span>
+                    </div>
+                    <div id="webcam-status" class="status-item">
+                        <span class="status-label">Traffic Camera:</span>
+                        <span class="status-value" id="webcam-status-value">Checking...</span>
+                    </div>
+                    <div id="radar-status" class="status-item">
+                        <span class="status-label">Radar Map:</span>
+                        <span class="status-value" id="radar-status-value">Checking...</span>
+                    </div>
+                    <div id="cyclone-status" class="status-item">
+                        <span class="status-label">Cyclone Map:</span>
+                        <span class="status-value" id="cyclone-status-value">Checking...</span>
+                    </div>
+                    <div id="floodmap-status" class="status-item">
+                        <span class="status-label">Flood Map:</span>
+                        <span class="status-value" id="floodmap-status-value">Checking...</span>
+                    </div>
+                    <div id="outagemap-status" class="status-item">
+                        <span class="status-label">Outage Map:</span>
+                        <span class="status-value" id="outagemap-status-value">Checking...</span>
+                    </div>
+                    <div class="status-actions">
+                        <button id="check-status" class="button">
+                            <svg xmlns="https://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 2v6h-6"></path>
+                                <path d="M3 12a9 9 0 0 1 15-6.7l3-3"></path>
+                                <path d="M3 22v-6h6"></path>
+                                <path d="M21 12a9 9 0 0 1-15 6.7l-3 3"></path>
+                            </svg>
+                            Check Status
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <aside>
+            <div class="panel">
+                <div class="panel-header">
+                    <h2>Flood Statistics</h2>
+                </div>
+                <div class="panel-content">
+                    <div class="stats-container" id="stats-container">
+                        <div class="stat-item">
+                            <div class="stat-label">Wilsons R at Lismore (mAHD)</div>
+                            <div id="lismore-level" class="stat-value">-</div>
+                            <div id="lismore-status" class="stat-footer">Loading...</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Highest Reading</div>
+                            <div id="highest-reading" class="stat-value">-</div>
+                            <div id="highest-location" class="stat-footer">Loading...</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Rising Locations</div>
+                            <div id="rising-count" class="stat-value">-</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Falling Locations</div>
+                            <div id="falling-count" class="stat-value">-</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="emergency-contacts">
+                <div class="emergency-header">
+                    <svg xmlns="https://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M15.05 5A5 5 0 0 1 19 8.95M15.05 1A9 9 0 0 1 23 8.94m-1 7.98v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                    </svg>
+                    Emergency Contacts
+                </div>
+                <div class="emergency-content">
+                    <h3>SES Emergency</h3>
+                    <div class="emergency-number">
+                        <svg xmlns="https://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                        </svg>
+                        132 500
+                    </div>
+                    
+                    <h3>Life Threatening Emergencies</h3>
+                    <div class="emergency-number">
+                        <svg xmlns="https://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M15.05 5A5 5 0 0 1 19 8.95M15.05 1A9 9 0 0 1 23 8.94m-1 7.98v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                        </svg>
+                        000
+                    </div>
+                    
+                    <div class="evacuation-centers">
+                        <h3>Evacuation Centers</h3>
+                        <ul class="center-list">
+                            <li>
+                                <strong>Southern Cross University</strong>
+                                Military Rd, East Lismore
+                            </li>
+                            <li>
+                                <strong>Lismore City Hall</strong>
+                                1 Bounty St, Lismore
+                            </li>
+                            <li>
+                                <strong>Goonellabah Sports & Aquatic Centre</strong>
+                                50 Oliver Ave, Goonellabah
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="resources-panel">
+                <div class="resources-header">
+                    <svg xmlns="https://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                    </svg>
+                    Useful Resources
+                </div>
+                <div class="resources-content">
+                    <ul class="resources-list">
+                        <li>
+                            <svg xmlns="https://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <line x1="2" y1="12" x2="22" y2="12"></line>
+                                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                            </svg>
+                            <div class="resource-item-content">
+                                <strong>Lismore Flood History</strong>
+                                <p>Comprehensive historical flood data for Lismore</p>
+                                <a href="https://australiasevereweather.com/floods/index.html" target="_blank" rel="noopener noreferrer" class="resource-link">
+                                    Visit Website
+                                    <svg xmlns="https://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                        <polyline points="15 3 21 3 21 9"></polyline>
+                                        <line x1="10" y1="14" x2="21" y2="3"></line>
+                                    </svg>
+                                </a>
+                            </div>
+                        </li>
+                        <li>
+                            <svg xmlns="https://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+                                <line x1="8" y1="2" x2="8" y2="18"></line>
+                                <line x1="16" y1="6" x2="16" y2="22"></line>
+                            </svg>
+                            <div class="resource-item-content">
+                                <strong>Flood Map Tool</strong>
+                                <p>Interactive flood mapping tool showing affected areas by height</p>
+                                <a href="https://www.floodmap.net/" target="_blank" rel="noopener noreferrer" class="resource-link">
+                                    Open Map Tool
+                                    <svg xmlns="https://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                        <polyline points="15 3 21 3 21 9"></polyline>
+                                        <line x1="10" y1="14" x2="21" y2="3"></line>
+                                    </svg>
+                                </a>
+                            </div>
+                        </li>
+                        <li>
+                            <svg xmlns="https://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
+                            </svg>
+                            <div class="resource-item-content">
+                                <strong>BOM Lismore</strong>
+                                <p>Bureau of Meteorology's new beta site for Lismore</p>
+                                <a href="https://beta.bom.gov.au/poi-location/australia/new-south-wales/northern-rivers/nsw_pt079-lismore" target="_blank" rel="noopener noreferrer" class="resource-link">
+                                    View BOM Site
+                                    <svg xmlns="https://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                        <polyline points="15 3 21 3 21 9"></polyline>
+                                        <line x1="10" y1="14" x2="21" y2="3"></line>
+                                    </svg>
+                                </a>
+                            </div>
+                        </li>
+                        <li>
+                            <svg xmlns="https://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+                            </svg>
+                            <div class="resource-item-content">
+                                <strong>NSW SES - Flood Safety</strong>
+                                <p>Official resources and safety information</p>
+                                <a href="https://www.ses.nsw.gov.au/disaster-tabs-header/flood/" target="_blank" rel="noopener noreferrer" class="resource-link">
+                                    Safety Information
+                                    <svg xmlns="https://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                                        <polyline points="15 3 21 3 21 9"></polyline>
+                                        <line x1="10" y1="14" x2="21" y2="3"></line>
+                                    </svg>
+                                </a>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <footer class="data-attribution">
+        <p>Data sourced from <a href="https://www.bom.gov.au" target="_blank" rel="noopener noreferrer">Bureau of Meteorology</a>, <a href="https://www.transport.nsw.gov.au" target="_blank" rel="noopener noreferrer">Transport for NSW</a>, and <a href="https://www.essentialenergy.com.au" target="_blank" rel="noopener noreferrer">Essential Energy</a>.</p>
+        <p>This dashboard is for emergency use during flood events in the Lismore area.</p>
+    </footer>
+
+    <script src="js/theme-switcher.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.0/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
+    <script src="js/floodmap.js"></script>
+    <script src="js/outagemap.js"></script>
+    <script src="js/radarImageOverlay.js"></script>
+    <script src="js/radarmap.js"></script>
+
+    <script>
+        async function loadFloodData() {
+            try {
+                const response = await fetch('/api/flood-properties');
+                if (!response.ok) {
+                    throw new Error('Failed to load flood data');
+                }
+                embeddedCSVData = await response.json();
+
+                if (floodMapInitialized && embeddedCSVData && embeddedCSVData.length > 0) {
+                    processFloodData(embeddedCSVData);
+                }
+            } catch (error) {
+                console.error('Error loading flood data:', error);
+                embeddedCSVData = [];
+            }
+        }
+        
+        loadFloodData();
+
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const notification = document.getElementById('notification');
+        const notificationMessage = document.getElementById('notification-message');
+        const webcamImage = document.getElementById('webcam');
+        const webcamError = document.getElementById('webcam-error');
+        const webcamTimestamp = document.getElementById('webcam-timestamp');
+        const floodDataBody = document.getElementById('flood-data-body');
+        const lastUpdateTime = document.getElementById('last-update-time');
+        const refreshIntervalSelect = document.getElementById('refresh-interval');
+        const refreshNowButton = document.getElementById('refresh-now');
+        const clockElement = document.getElementById('clock');
+        const checkStatusButton = document.getElementById('check-status');
+        
+        const lismoreLevel = document.getElementById('lismore-level');
+        const lismoreStatus = document.getElementById('lismore-status');
+        const highestReading = document.getElementById('highest-reading');
+        const highestLocation = document.getElementById('highest-location');
+        const risingCount = document.getElementById('rising-count');
+        const fallingCount = document.getElementById('falling-count');
+        
+        const proxyStatusValue = document.getElementById('proxy-status-value');
+        const bomStatusValue = document.getElementById('bom-status-value');
+        const webcamStatusValue = document.getElementById('webcam-status-value');
+
+        const MINOR_FLOOD_LEVEL = 4.20;
+        const MODERATE_FLOOD_LEVEL = 7.20;
+        const MAJOR_FLOOD_LEVEL = 9.70;
+        const WEBCAM_REFRESH_INTERVAL = 5000; // Increased to 5 seconds to prevent 429 errors
+        const DEFAULT_REFRESH_INTERVAL = 300000;
+        const CRITICAL_THRESHOLD = 3.00;
+
+        const BOM_URL = 'https://www.bom.gov.au/nsw/flood/northern.shtml';
+
+        let floodData = [];
+        let refreshTimer = null;
+        let webcamRefreshTimer = null;
+        let lastFetchTime = null;
+
+        function resetStatusValue(element) {
+            if (!element) return;
+            element.className = 'status-value';
+            element.textContent = 'Checking...';
+            element.title = 'Checking...';
+            element.removeAttribute('data-detail');
+        }
+
+        function setStatusValue(element, { text, state = '', detail = '' } = {}) {
+            if (!element || !text) return;
+            const classes = ['status-value'];
+            if (state) {
+                classes.push(state);
+            }
+            element.className = classes.join(' ');
+            element.textContent = text;
+
+            if (detail) {
+                element.title = `${text} — ${detail}`;
+                element.setAttribute('data-detail', detail);
+            } else {
+                element.title = text;
+                element.removeAttribute('data-detail');
+            }
+        }
+
+        function formatStatusTimestamp(value) {
+            if (!value) return '';
+            const parsed = value instanceof Date ? value : new Date(value);
+            if (Number.isNaN(parsed.getTime())) {
+                return '';
+            }
+
+            return parsed.toLocaleString('en-AU', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true,
+                timeZoneName: 'short'
+            });
+        }
+
+        initializeDashboard();
+
+        function initializeDashboard() {
+            // Disable right-click context menu for security
+            document.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+                return false;
+            }, false);
+
+            updateClock();
+            setInterval(updateClock, 1000);
+            
+            document.getElementById('refresh-cyclone').addEventListener('click', refreshCycloneMap);
+
+            setupTabs();
+
+            refreshWebcam();
+            webcamRefreshTimer = setInterval(() => {
+                // Only refresh if tab is visible to save bandwidth and prevent 429s
+                if (!document.hidden) {
+                    refreshWebcam();
+                }
+            }, WEBCAM_REFRESH_INTERVAL);
+            
+            document.getElementById('refresh-webcam').addEventListener('click', refreshWebcam);
+
+            const refreshRadarBtn = document.getElementById('refresh-radar') || document.getElementById('refresh-btn');
+            if (refreshRadarBtn) {
+                refreshRadarBtn.addEventListener('click', refreshRadar);
+            }
+
+            refreshCycloneMap();
+
+            refreshIntervalSelect.value = DEFAULT_REFRESH_INTERVAL;
+            refreshIntervalSelect.addEventListener('change', updateRefreshInterval);
+
+            refreshNowButton.addEventListener('click', fetchFloodData);
+
+            checkDataSources();
+            checkStatusButton.addEventListener('click', checkDataSources);
+
+            setupStatusAutoRefresh();
+            
+            loadCachedData();
+            
+            fetchFloodData();
+            
+            updateRefreshInterval();
+            
+            initFloodMapWithLevee();
+        }
+        
+        function setupStatusAutoRefresh() {
+            
+            checkDataSources();
+            
+            const statusCheckInterval = setInterval(checkDataSources, 60000);
+            
+            window.statusCheckIntervalId = statusCheckInterval;
+            
+            const statusPanel = document.querySelector('.status-panel');
+            
+            if (!document.getElementById('status-last-checked')) {
+                const lastCheckedElement = document.createElement('div');
+                lastCheckedElement.className = 'status-item';
+                lastCheckedElement.innerHTML = `
+                    <span class="status-label">Last Auto-Check:</span>
+                    <span id="status-last-checked" class="status-value">Just now</span>
+                `;
+                
+                const statusActions = document.querySelector('.status-actions');
+                if (statusActions) {
+                    statusPanel.insertBefore(lastCheckedElement, statusActions);
+                } else {
+                    statusPanel.appendChild(lastCheckedElement);
+                }
+            }
+            
+            const updateLastCheckedTime = () => {
+                const lastCheckedElement = document.getElementById('status-last-checked');
+                if (lastCheckedElement) {
+                    lastCheckedElement.textContent = new Date().toLocaleTimeString('en-AU');
+                }
+            };
+            
+            const originalCheckDataSources = checkDataSources;
+            window.checkDataSources = function() {
+                originalCheckDataSources();
+                updateLastCheckedTime();
+            };
+            
+            updateLastCheckedTime();
+        }
+        
+        setupStatusAutoRefresh();
+
+        function setupTabs() {
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+            let previousTabId = null;
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    if (button.classList.contains('tab-unavailable')) {
+                        const reason = button.getAttribute('data-unavailable-reason');
+                        showUnavailableContentPopup(button.id, reason);
+                        return false;
+                    }
+
+                    const currentActiveTab = document.querySelector('.tab-button.active');
+                    const currentTabId = currentActiveTab ? currentActiveTab.id : null;
+
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.remove('active'));
+
+                    button.classList.add('active');
+
+                    const contentId = button.id.replace('tab-', 'content-');
+                    const contentElement = document.getElementById(contentId);
+
+                    if (contentElement) {
+                        contentElement.classList.add('active');
+                    } else {
+                        console.error(`Tab content element with ID "${contentId}" not found`);
+                    }
+
+                    if (currentTabId && currentTabId !== button.id) {
+                        setTimeout(() => {
+                            switch(currentTabId) {
+                                case 'tab-radar':
+                                    if (typeof resetRadarMap === 'function') {
+                                        resetRadarMap();
+                                        console.log('Radar map reset');
+                                    }
+                                    break;
+                                case 'tab-floodmap':
+                                    if (typeof resetFloodMap === 'function') {
+                                        resetFloodMap();
+                                        console.log('Flood map reset');
+                                    }
+                                    break;
+                                case 'tab-outage':
+                                    if (typeof resetOutageMap === 'function') {
+                                        resetOutageMap();
+                                        console.log('Outage map reset');
+                                    }
+                                    break;
+                            }
+                        }, 150);
+                    }
+
+                    if (button.id === 'tab-floodmap') {
+                        setTimeout(() => {
+                            window.dispatchEvent(new Event('resize'));
+                            if (typeof floodMap !== 'undefined' && floodMap) {
+                                floodMap.invalidateSize();
+                            }
+                        }, 100);
+                    }
+
+                    previousTabId = button.id;
+                });
+            });
+        }
+        
+        function updateClock() {
+            const now = new Date();
+            const options = { 
+                weekday: 'short',
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric',
+                hour: '2-digit', 
+                minute: '2-digit',
+                second: '2-digit'
+            };
+            clockElement.textContent = now.toLocaleTimeString('en-AU', options);
+        }
+
+        function refreshWebcam() {
+            const timestamp = new Date().getTime();
+            webcamImage.src = `/proxy/webcam?t=${timestamp}`;
+            webcamTimestamp.textContent = new Date().toLocaleTimeString('en-AU');
+        }
+
+        function checkDataSources() {
+            resetStatusValue(proxyStatusValue);
+            resetStatusValue(bomStatusValue);
+            resetStatusValue(webcamStatusValue);
+
+            // Radar status is handled independently by checkRadarAvailability
+            // We do NOT reset it here to prevent flickering "Checking..." or "Offline"
+            // const radarStatusValue = document.getElementById('radar-status-value'); 
+
+            const cycloneStatusValue = document.getElementById('cyclone-status-value') ||
+                                      createStatusElement('cyclone-status', 'Cyclone Map');
+
+            const floodMapStatusValue = document.getElementById('floodmap-status-value') ||
+                                      createStatusElement('floodmap-status', 'Flood Map');
+
+            const outageMapStatusValue = document.getElementById('outagemap-status-value') ||
+                                        createStatusElement('outagemap-status', 'Outage Map');
+
+            // resetStatusValue(radarStatusValue); // DISABLED
+            resetStatusValue(cycloneStatusValue);
+
+            fetch(PROXY_URL, { method: 'HEAD' })
+                .then(response => {
+                    if (response.ok) {
+                        setStatusValue(proxyStatusValue, {
+                            text: 'Online',
+                            state: 'online'
+                        });
+                    } else {
+                        setStatusValue(proxyStatusValue, {
+                            text: 'Offline',
+                            state: 'offline',
+                            detail: `HTTP ${response.status}`
+                        });
+                    }
+                })
+                .catch(error => {
+                    setStatusValue(proxyStatusValue, {
+                        text: 'Offline',
+                        state: 'offline',
+                        detail: error.message || 'Connection error'
+                    });
+                    console.error('Proxy server check failed:', error);
+                });
+
+            fetch(PROXY_URL)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.data && data.data.length > 0) {
+                        const formatted = formatStatusTimestamp(data.timestamp);
+                        setStatusValue(bomStatusValue, {
+                            text: 'Online',
+                            state: 'online',
+                            detail: formatted ? `Last updated ${formatted}` : ''
+                        });
+                    } else {
+                        setStatusValue(bomStatusValue, {
+                            text: 'Offline',
+                            state: 'offline',
+                            detail: 'No BOM data available'
+                        });
+                    }
+                })
+                .catch(error => {
+                    setStatusValue(bomStatusValue, {
+                        text: 'Offline',
+                        state: 'offline',
+                        detail: error.message || 'Connection error'
+                    });
+                    console.error('BOM data check failed:', error);
+                });
+
+            const img = new Image();
+            img.onload = function() {
+                setStatusValue(webcamStatusValue, {
+                    text: 'Online',
+                    state: 'online'
+                });
+            };
+            img.onerror = function() {
+                setStatusValue(webcamStatusValue, {
+                    text: 'Offline',
+                    state: 'offline',
+                    detail: 'Unable to load traffic camera feed'
+                });
+            };
+            img.src = '/proxy/webcam?' + new Date().getTime();
+
+            if (typeof checkRadarAvailability === 'function') {
+                checkRadarAvailability();
+            }
+            if (typeof checkCycloneAvailability === 'function') {
+                checkCycloneAvailability();
+            }
+
+            window.radarGlobalState = window.radarGlobalState || {
+                currentAnimationSessionId: 0,
+                lastRefreshTime: 0,
+                isRefreshing: false,
+                isPlaying: false,
+                animationLock: false,
+                allTimeoutIds: new Set(),
+                forceClearInterval: null,
+                animationInterval: null,
+                radarInitialized: false
+            };
+
+            function initializeRadar() {
+                // OLD RADAR CODE - DISABLED (using radarmap.js instead)
+                return;
+
+                if (window.radarGlobalState.radarInitialized) {
+                    console.warn('Radar already initialized');
+                    return;
+                }
+                window.radarGlobalState.radarInitialized = true;
+
+                const radarImage = document.getElementById('radar-image');
+                const backgroundLayer = document.getElementById('background-layer');
+                const topographyLayer = document.getElementById('topography-layer');
+                const locationsLayer = document.getElementById('locations-layer');
+                const loading = document.getElementById('loading');
+                const timestamp = document.getElementById('timestamp');
+                const frameCounter = document.getElementById('frame-counter');
+                const progressBar = document.getElementById('progress-bar');
+                const btnFirst = document.getElementById('btn-first');
+                const btnLast = document.getElementById('btn-last');
+                const btnPlay = document.getElementById('btn-play');
+                const btnPause = document.getElementById('btn-pause');
+                const btnPrev = document.getElementById('btn-prev');
+                const btnNext = document.getElementById('btn-next');
+                const refreshBtn = document.getElementById('refresh-btn');
+                const speedSlider = document.getElementById('speed');
+                const speedValue = document.getElementById('speed-value');
+                const errorElement = document.getElementById('error');
+                const lastUpdate = document.getElementById('last-update');
+
+                const topographyToggle = document.getElementById('topography-toggle');
+                const locationsToggle = document.getElementById('locations-toggle');
+
+                const RADAR_ID = 'IDR282';
+                let radarImages = [];
+                let currentFrame = 0;
+                let animationDelay = 500;
+                let animationRequestId = null;
+                let mapLayersLoaded = false;
+                let preloadedImages = new Map();
+                const ANIMATION_LOCKOUT_MS = 0;
+                
+                function formatDate(dateString) {
+                    try {
+                        const date = new Date(dateString);
+                        return date.toLocaleString(undefined, {
+                            weekday: 'short',
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            timeZoneName: 'short'
+                        });
+                    } catch (e) {
+                        console.error("Error formatting date:", e);
+                        return dateString || "Unknown date";
+                    }
+                }
+            
+                function preloadImage(url) {
+                    if (preloadedImages.has(url)) {
+                        return Promise.resolve(url);
+                    }
+                    
+                    return new Promise((resolve, reject) => {
+                        const img = new Image();
+                        img.onload = () => {
+                            preloadedImages.set(url, img);
+                            resolve(url);
+                        };
+                        img.onerror = () => reject(new Error(`Failed to load image: ${url}`));
+                        img.src = url;
+                    });
+                }
+            
+                async function loadMapLayers() {
+                    if (!radarImage) {
+                        console.error("Radar container elements not found. Aborting map layer loading.");
+                        return;
+                    }
+                    
+                    showLoading(true);
+                    
+                    try {
+                        
+                        const container = document.querySelector('.radar-container');
+                        if (container) {
+                            container.style.backgroundColor = '#99ccff';
+                        }
+                        
+                        const bgUrl = `/map-proxy/${RADAR_ID}.background.png`;
+                        const topoUrl = `/map-proxy/${RADAR_ID}.topography.png`;
+                        const locUrl = `/map-proxy/${RADAR_ID}.locations.png`;
+
+                        const safeLoadImage = async (url, element, name) => {
+                            if (!element) {
+                                console.error(`${name} element not found.`);
+                                return false;
+                            }
+
+                            try {
+                                await preloadImage(url);
+                                element.src = url;
+                                return true;
+                            } catch (err) {
+                                console.error(`Failed to preload ${name}:`, err);
+                                return false;
+                            }
+                        };
+
+                        const results = await Promise.allSettled([
+                            safeLoadImage(bgUrl, backgroundLayer, 'Background'),
+                            safeLoadImage(topoUrl, topographyLayer, 'Topography'),
+                            safeLoadImage(locUrl, locationsLayer, 'Locations')
+                        ]);
+                        
+                        const backgroundLoaded = results[0].status === 'fulfilled' && results[0].value;
+                        
+                        if (backgroundLoaded) {
+                            mapLayersLoaded = true;
+                        } else {
+                            showError('Failed to load essential map layers. Using simplified display.');
+                        }
+                        
+                    } catch (error) {
+                        console.error('Error loading map layers:', error);
+                        showError('Failed to load map layers. Using simplified display.');
+                    } finally {
+                        showLoading(false);
+                    }
+                }
+            
+                async function fetchRadarData() {
+                    try {
+                        showLoading(true);
+                        hideError();
+                        
+                        const response = await fetch(`/api/radar/${RADAR_ID}`);
+                        if (!response.ok) {
+                            throw new Error(`Failed to fetch radar data: ${response.statusText}`);
+                        }
+                        
+                        const data = await response.json();
+                        
+                        if (!data.images || data.images.length === 0) {
+                            throw new Error('No radar images available');
+                        }
+                        
+                        radarImages = data.images;
+                        currentFrame = 0;
+                        
+                        if (lastUpdate) {
+                            lastUpdate.textContent = `Last updated: ${formatDate(data.lastUpdated)}`;
+                        }
+                        
+                        preloadAllImages();
+                        
+                        updateRadarImage(0);
+                        enableControls(true);
+                        
+                    } catch (error) {
+                        console.error('Error loading radar data:', error);
+                        showError(error.message);
+                        enableControls(false);
+                    } finally {
+                        showLoading(false);
+                    }
+                }
+                
+                async function preloadAllImages() {
+                  if (!radarImages || radarImages.length === 0) return;
+                  
+                  const preloadPromises = radarImages.map(image => 
+                    new Promise((resolve, reject) => {
+                      const img = new Image();
+                      img.onload = () => {
+                        preloadedImages.set(image.url, img);
+                        resolve(image.url);
+                      };
+                      img.onerror = () => {
+                        resolve(null);
+                      };
+                      img.src = image.url;
+                    })
+                  );
+                  
+                  try {
+                    await Promise.all(preloadPromises);
+                    return true;
+                  } catch (err) {
+                    console.error('Error during image preloading:', err);
+                    return false;
+                  }
+                }
+            
+                function updateRadarImage(frameIndex) {
+                    if (window.radarGlobalState.isRefreshing) {
+                        return;
+                    }
+
+                    const timeSinceRefresh = Date.now() - window.radarGlobalState.lastRefreshTime;
+                    if (window.radarGlobalState.lastRefreshTime > 0 && timeSinceRefresh < ANIMATION_LOCKOUT_MS) {
+                        return;
+                    }
+
+                    if (!radarImages || radarImages.length === 0 || !radarImage) return;
+
+                    if (frameIndex >= 0 && frameIndex < radarImages.length) {
+                        currentFrame = frameIndex;
+
+                        if (radarImages[frameIndex] && radarImages[frameIndex].url) {
+                            radarImage.src = radarImages[frameIndex].url;
+
+                            if (timestamp) {
+                                timestamp.textContent = formatDate(radarImages[frameIndex].timestamp);
+                            }
+
+                            if (frameCounter) {
+                                frameCounter.textContent = `Frame ${currentFrame + 1} of ${radarImages.length}`;
+                            }
+
+                            if (progressBar) {
+                                const progress = ((currentFrame + 1) / radarImages.length) * 100;
+                                progressBar.style.width = `${progress}%`;
+                            }
+                        } else {
+                            console.error(`Invalid image data at index ${frameIndex}`);
+                        }
+                    }
+                }
+            
+                function playAnimation() {
+                  if (!radarImages || radarImages.length === 0) return;
+                  if (window.radarGlobalState.animationLock) return;
+                  if (window.radarGlobalState.isRefreshing) return;
+
+                  const timeSinceRefresh = Date.now() - window.radarGlobalState.lastRefreshTime;
+                  if (window.radarGlobalState.lastRefreshTime > 0 && timeSinceRefresh < ANIMATION_LOCKOUT_MS) {
+                      return;
+                  }
+
+                  pauseAnimation();
+
+                  window.radarGlobalState.isPlaying = true;
+                  window.radarGlobalState.animationLock = true;
+                  if (btnPlay) btnPlay.disabled = true;
+                  if (btnPause) btnPause.disabled = false;
+
+                  window.radarGlobalState.currentAnimationSessionId++;
+                  const mySessionId = window.radarGlobalState.currentAnimationSessionId;
+
+                  const advanceFrame = () => {
+
+                    if (mySessionId !== window.radarGlobalState.currentAnimationSessionId) {
+                        return;
+                    }
+
+                    if (!window.radarGlobalState.isPlaying) {
+                        return;
+                    }
+                    if (window.radarGlobalState.isRefreshing) {
+                        return;
+                    }
+
+                    const timeSinceRefresh = Date.now() - window.radarGlobalState.lastRefreshTime;
+                    if (window.radarGlobalState.lastRefreshTime > 0 && timeSinceRefresh < ANIMATION_LOCKOUT_MS) {
+                        return;
+                    }
+
+                    currentFrame = (currentFrame + 1) % radarImages.length;
+                    updateRadarImage(currentFrame);
+
+                    window.radarGlobalState.animationInterval = setTimeout(advanceFrame, animationDelay);
+                    window.radarGlobalState.allTimeoutIds.add(window.radarGlobalState.animationInterval);
+                  };
+
+                  advanceFrame();
+                }
+            
+                function pauseAnimation() {
+                  window.radarGlobalState.isPlaying = false;
+                  window.radarGlobalState.animationLock = false;
+                  if (btnPlay) btnPlay.disabled = false;
+                  if (btnPause) btnPause.disabled = true;
+
+                  if (window.radarGlobalState.animationInterval) {
+                    clearTimeout(window.radarGlobalState.animationInterval);
+                    window.radarGlobalState.animationInterval = null;
+                  }
+                  if (animationRequestId) {
+                    cancelAnimationFrame(animationRequestId);
+                    animationRequestId = null;
+                  }
+
+                  window.radarGlobalState.allTimeoutIds.forEach(id => clearTimeout(id));
+                  window.radarGlobalState.allTimeoutIds.clear();
+                }
+            
+                function prevFrame() {
+                    if (!radarImages || radarImages.length === 0) return;
+                    
+                    pauseAnimation();
+                    currentFrame = (currentFrame - 1 + radarImages.length) % radarImages.length;
+                    updateRadarImage(currentFrame);
+                }
+            
+                function nextFrame() {
+                    if (!radarImages || radarImages.length === 0) return;
+                    
+                    pauseAnimation();
+                    currentFrame = (currentFrame + 1) % radarImages.length;
+                    updateRadarImage(currentFrame);
+                }
+                
+                function firstFrame() {
+                    if (!radarImages || radarImages.length === 0) return;
+                    
+                    pauseAnimation();
+                    currentFrame = 0;
+                    updateRadarImage(currentFrame);
+                }
+                
+                function lastFrame() {
+                    if (!radarImages || radarImages.length === 0) return;
+                    
+                    pauseAnimation();
+                    currentFrame = radarImages.length - 1;
+                    updateRadarImage(currentFrame);
+                }
+            
+                function showLoading(show) {
+                    if (loading) {
+                        loading.style.display = show ? 'flex' : 'none';
+                    }
+                }
+            
+                function showError(message) {
+                    if (errorElement) {
+                        errorElement.textContent = message;
+                        errorElement.style.display = 'block';
+                    }
+                }
+            
+                function hideError() {
+                    if (errorElement) {
+                        errorElement.style.display = 'none';
+                    }
+                }
+            
+                function enableControls(enable) {
+                    const safeDisable = (button, isDisabled) => {
+                        if (button) button.disabled = isDisabled;
+                    };
+
+                    safeDisable(btnPlay, !enable || window.radarGlobalState.isPlaying);
+                    safeDisable(btnPause, !enable || !window.radarGlobalState.isPlaying);
+                    safeDisable(btnPrev, !enable);
+                    safeDisable(btnNext, !enable);
+                    safeDisable(btnFirst, !enable);
+                    safeDisable(btnLast, !enable);
+
+                    if (speedSlider) speedSlider.disabled = !enable;
+                }
+            
+                function updateLayerVisibility() {
+                    if (topographyLayer && topographyToggle) {
+                        topographyLayer.style.display = topographyToggle.checked ? 'block' : 'none';
+                    }
+
+                    if (locationsLayer && locationsToggle) {
+                        locationsLayer.style.display = locationsToggle.checked ? 'block' : 'none';
+                    }
+                }
+                
+                async function checkBOMConnectivity() {
+                    try {
+                        const controller = new AbortController();
+                        const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+                        const response = await fetch('/api/bom-connectivity', {
+                            signal: controller.signal
+                        });
+
+                        clearTimeout(timeoutId);
+
+                        if (response.ok) {
+                            const data = await response.json();
+                            return data.success;
+                        }
+                        return false;
+                    } catch (error) {
+                        console.warn('BOM connectivity check failed:', error.message);
+                        return false;
+                    }
+                }
+
+                async function refreshData() {
+
+                    window.radarGlobalState.currentAnimationSessionId++;
+
+                    const oldRadarImages = radarImages;
+                    radarImages = [];
+                    currentFrame = 0;
+                    window.radarGlobalState.isRefreshing = true;
+
+                    window.radarGlobalState.lastRefreshTime = Date.now();
+
+                    const BLANK_IMAGE = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+
+                    if (radarImage) {
+                        radarImage.src = BLANK_IMAGE;
+                    }
+                    if (timestamp) timestamp.textContent = 'Refreshing data...';
+                    if (frameCounter) frameCounter.textContent = '';
+                    if (progressBar) progressBar.style.width = '0%';
+
+                    if (window.radarGlobalState.forceClearInterval) clearInterval(window.radarGlobalState.forceClearInterval);
+                    window.radarGlobalState.forceClearInterval = setInterval(() => {
+                        if (radarImage && window.radarGlobalState.isRefreshing) {
+                            radarImage.src = BLANK_IMAGE;
+                        }
+                    }, 50);
+
+                    pauseAnimation();
+                    window.radarGlobalState.animationLock = false;
+                    window.radarGlobalState.isPlaying = false;
+
+                    window.radarGlobalState.allTimeoutIds.forEach(id => clearTimeout(id));
+                    window.radarGlobalState.allTimeoutIds.clear();
+                    if (window.radarGlobalState.animationInterval) {
+                        clearTimeout(window.radarGlobalState.animationInterval);
+                        window.radarGlobalState.animationInterval = null;
+                    }
+                    setTimeout(() => {
+                        window.radarGlobalState.allTimeoutIds.forEach(id => clearTimeout(id));
+                        window.radarGlobalState.allTimeoutIds.clear();
+                        if (window.radarGlobalState.animationInterval) {
+                            clearTimeout(window.radarGlobalState.animationInterval);
+                            window.radarGlobalState.animationInterval = null;
+                        }
+                    }, 0);
+
+                    enableControls(false);
+
+                    preloadedImages.clear();
+
+                    try {
+                        await fetchRadarData();
+                    } catch (error) {
+                        if (window.radarGlobalState.forceClearInterval) {
+                            clearInterval(window.radarGlobalState.forceClearInterval);
+                            window.radarGlobalState.forceClearInterval = null;
+                        }
+                        radarImages = oldRadarImages;
+                        window.radarGlobalState.isRefreshing = false;
+                        showError('Unable to refresh radar data. Keeping current data.');
+                        if (timestamp && radarImages.length > 0) {
+                            timestamp.textContent = formatDate(radarImages[currentFrame].timestamp) + ' (Offline)';
+                        }
+                        enableControls(true);
+                        return;
+                    }
+
+                    const safetyDelay = Math.max(animationDelay * 2, 1000);
+                    setTimeout(() => {
+
+                        window.radarGlobalState.currentAnimationSessionId++;
+
+                        window.radarGlobalState.isPlaying = false;
+                        window.radarGlobalState.animationLock = false;
+
+                        window.radarGlobalState.allTimeoutIds.forEach(id => clearTimeout(id));
+                        window.radarGlobalState.allTimeoutIds.clear();
+                        if (window.radarGlobalState.animationInterval) {
+                            clearTimeout(window.radarGlobalState.animationInterval);
+                            window.radarGlobalState.animationInterval = null;
+                        }
+
+                        if (window.radarGlobalState.forceClearInterval) {
+                            clearInterval(window.radarGlobalState.forceClearInterval);
+                            window.radarGlobalState.forceClearInterval = null;
+                        }
+
+                        window.radarGlobalState.isRefreshing = false;
+
+                        const remainingLockout = ANIMATION_LOCKOUT_MS - (Date.now() - window.radarGlobalState.lastRefreshTime);
+                        if (remainingLockout > 0) {
+                            setTimeout(() => {
+                                if (radarImages && radarImages.length > 0 && !window.radarGlobalState.isPlaying) {
+                                    updateRadarImage(0);
+                                }
+                            }, remainingLockout + 100);
+                        } else {
+                            if (radarImages && radarImages.length > 0 && !window.radarGlobalState.isPlaying) {
+                                updateRadarImage(0);
+                            }
+                        }
+                    }, safetyDelay);
+                }
+
+                window.refreshData = refreshData;
+
+                function setupEventListeners() {
+                    if (btnPlay) btnPlay.addEventListener('click', playAnimation);
+                    if (btnPause) btnPause.addEventListener('click', pauseAnimation);
+                    if (btnPrev) btnPrev.addEventListener('click', prevFrame);
+                    if (btnNext) btnNext.addEventListener('click', nextFrame);
+                    if (btnFirst) btnFirst.addEventListener('click', firstFrame);
+                    if (btnLast) btnLast.addEventListener('click', lastFrame);
+                    if (refreshBtn) refreshBtn.addEventListener('click', refreshData);
+                    
+                    document.addEventListener('keydown', function(e) {
+                        const radarTab = document.getElementById('content-radar');
+                        if (!radarTab || !radarTab.classList.contains('active')) return;
+                        
+                        if (!radarImages || radarImages.length === 0) return;
+                        
+                        switch(e.key) {
+                            case ' ':
+                                if (window.radarGlobalState.isPlaying) {
+                                    pauseAnimation();
+                                } else {
+                                    playAnimation();
+                                }
+                                break;
+                            case 'ArrowLeft':
+                                prevFrame();
+                                break;
+                            case 'ArrowRight':
+                                nextFrame();
+                                break;
+                            case 'Home':
+                                firstFrame();
+                                break;
+                            case 'End':
+                                lastFrame();
+                                break;
+                        }
+                    });
+                    
+                    if (speedSlider) {
+                        speedSlider.addEventListener('input', function() {
+                            const speed = parseInt(this.value);
+                            animationDelay = 1100 - (speed * 100);
+
+                            if (speedValue) {
+                                speedValue.textContent = `${animationDelay}ms`;
+                            }
+
+                            if (window.radarGlobalState.isPlaying) {
+                                pauseAnimation();
+                                playAnimation();
+                            }
+                        });
+                    }
+                    
+                    if (topographyToggle) {
+                        topographyToggle.addEventListener('change', updateLayerVisibility);
+                    }
+                    
+                    if (locationsToggle) {
+                        locationsToggle.addEventListener('change', updateLayerVisibility);
+                    }
+
+                    if (radarImage) {
+                        radarImage.addEventListener('error', function(e) {
+                            if (this.src && this.src !== 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7') {
+                                console.error(`Failed to load radar image: ${this.src}`);
+                                showError('Failed to load radar image. Using cached version if available.');
+                            }
+                        });
+                    }
+                }
+            
+                function initialize() {
+                    if (!radarImage) {
+                        console.error("Radar elements not found. Cannot initialize radar.");
+                        return;
+                    }
+                    
+                    setupEventListeners();
+                    
+                    loadMapLayers().then(() => {
+                        fetchRadarData();
+                        
+                        updateLayerVisibility();
+                    }).catch(err => {
+                        console.error("Error initializing radar:", err);
+                        showError("Failed to initialize radar. Try refreshing the page.");
+                    });
+                }
+                
+                function handleTabChange() {
+                    const tabButtons = document.querySelectorAll('.tab-button');
+                    
+                    if (!tabButtons || tabButtons.length === 0) {
+                        initialize();
+                        return;
+                    }
+                    
+                    tabButtons.forEach(button => {
+                        if (button) {
+                            button.addEventListener('click', function() {
+                                if (this.id === 'tab-radar' && !mapLayersLoaded) {
+                                    initialize();
+                                }
+                            });
+                        }
+                    });
+                    
+                    const radarTab = document.getElementById('tab-radar');
+                    const radarContent = document.getElementById('content-radar');
+                    
+                    if (radarTab && radarContent && radarContent.classList.contains('active')) {
+                        initialize();
+                    }
+                }
+                
+                handleTabChange();
+                
+                if (document.getElementById('content-radar')) {
+                    setInterval(() => {
+                        const radarContent = document.getElementById('content-radar');
+                        if (radarContent && radarContent.classList.contains('active')) {
+                            refreshData();
+                        }
+                    }, 5 * 60 * 1000);
+                }
+            }
+            
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', () => {
+                    if (document.getElementById('content-radar')) {
+                        if (window.radarGlobalState && window.radarGlobalState.radarInitialized) {
+                            if (window.refreshData) {
+                                window.refreshData();
+                            }
+                        } else {
+                            initializeRadar();
+                        }
+                    }
+                });
+            } else {
+                if (document.getElementById('content-radar')) {
+                    if (window.radarGlobalState && window.radarGlobalState.radarInitialized) {
+                        if (window.refreshData) {
+                            window.refreshData();
+                        }
+                    } else {
+                        initializeRadar();
+                    }
+                }
+            }
+            
+            const cycloneTab = document.getElementById('tab-cyclone');
+            if (cycloneTab && cycloneTab.classList.contains('tab-unavailable')) {
+                setStatusValue(cycloneStatusValue, {
+                    text: 'No Cyclone',
+                    state: 'offline',
+                    detail: 'No active cyclone bulletins'
+                });
+            } else {
+                const cycloneImage = document.getElementById('cyclone-image');
+                if (cycloneImage && cycloneImage.complete && cycloneImage.naturalHeight !== 0) {
+                    setStatusValue(cycloneStatusValue, {
+                        text: 'Online',
+                        state: 'online',
+                        detail: 'Cyclone imagery loaded'
+                    });
+                } else {
+                    resetStatusValue(cycloneStatusValue);
+                }
+            }
+            
+            if (floodMapInitialized) {
+                setStatusValue(floodMapStatusValue, {
+                    text: 'Online',
+                    state: 'online',
+                    detail: 'Flood layers ready'
+                });
+            } else {
+                setStatusValue(floodMapStatusValue, {
+                    text: 'Initializing...',
+                    state: 'unknown'
+                });
+            }
+
+            // Outage Map status is managed by loadOutageData() in outagemap.js
+            // Don't override it here - it reflects actual API data availability
+
+            // Radar Map status - check API availability
+            // Removed legacy fetch call to avoid conflict with checkRadarAvailability()
+            /*
+            fetch('/api/radar/status')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.available) {
+                        const formatted = formatStatusTimestamp(data.lastUpdate);
+                        updateRadarStatusRow(
+                            data.mode === 'fallback' ? 'Fallback' : 'Online',
+                            formatted ? `Updated ${formatted}` : ''
+                        );
+                    } else {
+                        updateRadarStatusRow('Offline', 'No radar frames');
+                    }
+                })
+                .catch(error => {
+                    updateRadarStatusRow('Offline', 'Connection error');
+                    console.error('Radar status check failed:', error);
+                });
+            */
+        }
+
+        function updateRefreshInterval() {
+            const interval = parseInt(refreshIntervalSelect.value);
+            
+            if (refreshTimer) {
+                clearInterval(refreshTimer);
+            }
+            
+            refreshTimer = setInterval(fetchFloodData, interval);
+            
+            const minutes = interval / 60000;
+            showNotification(`Data will refresh every ${minutes} ${minutes === 1 ? 'minute' : 'minutes'}`, 'info');
+        }
+
+        async function fetchFloodData() {
+            showLoading(true);
+            
+            const previousLismoreLevel = currentLismoreLevel;
+            
+            try {
+                const response = await fetch(PROXY_URL);
+                
+                if (!response.ok) {
+                    throw new Error(`Proxy server error: ${response.status}`);
+                }
+                
+                const jsonData = await response.json();
+                
+                if (jsonData.success && jsonData.data && jsonData.data.length > 0) {
+                    floodData = jsonData.data;
+                    
+                    lastFetchTime = new Date();
+                    lastUpdateTime.textContent = lastFetchTime.toLocaleTimeString('en-AU') + ' (live data)';
+                    
+                    showNotification('Live flood data updated successfully', 'success');
+                } else {
+                    throw new Error('No flood data returned from proxy');
+                }
+                
+                cacheFloodData();
+                
+                renderFloodData();
+                
+                updateStatistics();
+                
+                const levelChanged = (
+                    previousLismoreLevel !== null && 
+                    currentLismoreLevel !== null && 
+                    Math.abs(previousLismoreLevel - currentLismoreLevel) > 0.1
+                );
+                
+                if (levelChanged && userSelectedFloodHeight === null) {
+                    showNotification(`Flood level has changed to ${currentLismoreLevel.toFixed(2)}m. Map updated.`, 'info');
+                }
+                
+                updateFloodMapWithCurrentLevelRespectingUserChoice();
+                
+            } catch (error) {
+                console.error('Error fetching flood data:', error);
+                
+                showNotification('Error fetching live data. Using cached data if available.', 'error');
+                
+                if (floodData.length === 0) {
+                    const loaded = loadCachedData();
+                    if (!loaded) {
+                        showNotification('CRITICAL: No flood data available. Please contact emergency services.', 'error');
+                    }
+                }
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function renderFloodData() {
+            if (!floodData || floodData.length === 0) {
+                floodDataBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No data available</td></tr>';
+                return;
+            }
+            
+            const uniqueLocations = {};
+            floodData.forEach(item => {
+                if (!uniqueLocations[item.location] || 
+                    new Date(item.time) > new Date(uniqueLocations[item.location].time)) {
+                    uniqueLocations[item.location] = item;
+                }
+            });
+            
+            const uniqueData = Object.values(uniqueLocations);
+
+            const groupedData = {};
+
+            uniqueData.forEach(item => {
+                let riverSystem = 'Other';
+                
+                if (item.location.includes('Wilsons')) {
+                    riverSystem = 'Wilsons River';
+                } else if (item.location.includes('Richmond')) {
+                    riverSystem = 'Richmond River';
+                } else if (item.location.includes('Tweed')) {
+                    riverSystem = 'Tweed River';
+                } else if (item.location.includes('Brunswick')) {
+                    riverSystem = 'Brunswick River';
+                } else if (item.location.includes('Clarence')) {
+                    riverSystem = 'Clarence River';
+                } else if (item.location.includes('Evans')) {
+                    riverSystem = 'Evans River';
+                } else if (item.location.includes('Leycester')) {
+                    riverSystem = 'Wilsons River Tributaries';
+                } else if (item.location.includes('Terania') || 
+                          item.location.includes('Coopers') || 
+                          item.location.includes('Goolmangar') ||
+                          item.location.includes('Mulgum') ||
+                          item.location.includes('Back Ck')) {
+                    riverSystem = 'Wilsons River Tributaries';
+                } else if (item.location.includes('Lismore') ||
+                          item.location.includes('Browns Ck')) {
+                    riverSystem = 'Wilsons River';
+                }
+                
+                if (!groupedData[riverSystem]) {
+                    groupedData[riverSystem] = [];
+                }
+                
+                groupedData[riverSystem].push(item);
+            });
+            
+            const sortedRiverSystems = Object.keys(groupedData).sort((a, b) => {
+                if (a.includes('Wilsons') && !b.includes('Wilsons')) return -1;
+                if (!a.includes('Wilsons') && b.includes('Wilsons')) return 1;
+                return a.localeCompare(b);
+            });
+            
+            let html = '';
+            
+            sortedRiverSystems.forEach(riverSystem => {
+                html += `
+                    <tr class="river-system-header">
+                        <td colspan="5">${riverSystem}</td>
+                    </tr>
+                `;
+                
+                groupedData[riverSystem].forEach(item => {
+                    let rowClass = '';
+                    if (item.floodCategory === 'Minor') {
+                        rowClass = 'minor-flood';
+                    } else if (item.floodCategory === 'Moderate') {
+                        rowClass = 'moderate-flood';
+                    } else if (item.floodCategory === 'Major') {
+                        rowClass = 'major-flood';
+                    }
+                    
+                    let statusClass = '';
+                    if (item.status === 'rising') {
+                        statusClass = 'rising';
+                    } else if (item.status === 'falling') {
+                        statusClass = 'falling';
+                    } else if (item.status === 'steady') {
+                        statusClass = 'steady';
+                    }
+                    
+                    html += `
+                      <tr class="${rowClass}" style="cursor: pointer;" title="Click to view height history">
+                        <td>${item.location}</td>
+                        <td>${item.time}</td>
+                        <td>${item.waterLevel !== null ? item.waterLevel.toFixed(2) + 'm' : 'N/A'}</td>
+                        <td class="${statusClass}">${item.status}</td>
+                        <td>${item.floodCategory === 'N/A' ? '-' : item.floodCategory}</td>
+                      </tr>
+                    `;
+                });
+            });
+            
+            if (html === '') {
+                html = '<tr><td colspan="5" style="text-align: center;">No locations found</td></tr>';
+            }
+            
+            floodDataBody.innerHTML = html;
+        }
+
+            function updateStatistics() {
+                if (!floodData || floodData.length === 0) return;
+                
+                const lismoreData = floodData.find(item => 
+                    item.location === 'Wilsons R at Lismore (mAHD)') ||
+                    floodData.find(item => 
+                    item.location.toLowerCase().includes('lismore'));
+                
+                if (lismoreData) {
+                    currentLismoreLevel = lismoreData.waterLevel;
+                    
+                    lismoreLevel.textContent = lismoreData.waterLevel !== null 
+                        ? lismoreData.waterLevel.toFixed(2) + 'm' 
+                        : 'N/A';
+                    
+                    lismoreStatus.textContent = capitalizeFirstLetter(lismoreData.status);
+                    
+                    lismoreStatus.className = 'stat-footer';
+                    if (lismoreData.status === 'rising') {
+                        lismoreStatus.classList.add('rising');
+                    } else if (lismoreData.status === 'falling') {
+                        lismoreStatus.classList.add('falling');
+                    } else if (lismoreData.status === 'steady') {
+                        lismoreStatus.classList.add('steady');
+                    }
+                    
+                    const LEVEE_APPROACH_WARNING = 9.5;
+                    const statsPanel = document.getElementById('stats-container').closest('.panel');
+                    
+                    const existingWarning = document.getElementById('levee-warning-panel');
+                    if (existingWarning) {
+                        existingWarning.remove();
+                    }
+                    
+                    if (lismoreData.waterLevel >= LEVEE_APPROACH_WARNING) {
+                        const warningPanel = document.createElement('div');
+                        warningPanel.id = 'levee-warning-panel';
+                        warningPanel.className = 'panel-alert';
+                        warningPanel.style.backgroundColor = '#fff3cd';
+                        warningPanel.style.color = '#856404';
+                        warningPanel.style.border = '1px solid #ffeeba';
+                        warningPanel.style.marginBottom = '1rem';
+                        warningPanel.style.display = 'flex';
+                        warningPanel.style.alignItems = 'center';
+                        warningPanel.style.gap = '0.5rem';
+                        warningPanel.style.padding = '0.75rem 1rem';
+                        warningPanel.style.borderRadius = 'var(--border-radius)';
+                        warningPanel.style.fontWeight = '500';
+                        
+                        warningPanel.innerHTML = `
+                            <svg xmlns="https://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                                <line x1="12" y1="9" x2="12" y2="13"></line>
+                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                            </svg>
+                            <span>WARNING: Wilsons River at Lismore (${lismoreData.waterLevel.toFixed(2)}m) is approaching levee protection height (10.6m)</span>
+                        `;
+                        
+                        statsPanel.parentNode.insertBefore(warningPanel, statsPanel);
+                    }
+                }
+                
+                let highest = null;
+                floodData.forEach(item => {
+                        if (item.waterLevel !== null && (highest === null || item.waterLevel > highest.waterLevel)) {
+                            highest = item;
+                        }
+                    });
+                
+                if (highest) {
+                    highestReading.textContent = highest.waterLevel.toFixed(2) + 'm';
+                    highestLocation.textContent = highest.location;
+                }
+                
+                const rising = floodData.filter(item => item.status === 'rising').length;
+                const falling = floodData.filter(item => item.status === 'falling').length;
+                
+                risingCount.textContent = rising;
+                fallingCount.textContent = falling;
+                
+                if (rising > 0 && rising > falling) {
+                    risingCount.parentElement.classList.add('critical');
+                } else {
+                    risingCount.parentElement.classList.remove('critical');
+                }
+            }
+
+            function forceWarningPanel() {
+                const statsPanel = document.getElementById('stats-container').closest('.panel');
+                
+                const existingWarning = document.getElementById('levee-warning-panel');
+                if (existingWarning) {
+                    existingWarning.remove();
+                }
+                
+                const warningPanel = document.createElement('div');
+                warningPanel.id = 'levee-warning-panel';
+                warningPanel.className = 'panel-alert';
+                warningPanel.style.backgroundColor = '#fff3cd';
+                warningPanel.style.color = '#856404';
+                warningPanel.style.border = '1px solid #ffeeba';
+                warningPanel.style.marginBottom = '1rem';
+                warningPanel.style.display = 'flex';
+                warningPanel.style.alignItems = 'center';
+                warningPanel.style.gap = '0.5rem';
+                warningPanel.style.padding = '0.75rem 1rem';
+                warningPanel.style.borderRadius = '8px';
+                warningPanel.style.fontWeight = '500';
+                
+                warningPanel.innerHTML = `
+                    <svg xmlns="https://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                        <line x1="12" y1="9" x2="12" y2="13"></line>
+                        <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                    </svg>
+                    <span>WARNING: Wilsons River at Lismore (9.50m) is approaching levee protection height (10.6m)</span>
+                `;
+                
+                if (statsPanel && statsPanel.parentNode) {
+                    statsPanel.parentNode.insertBefore(warningPanel, statsPanel);
+                } else {
+                    console.error('Could not find stats panel to add warning');
+                }
+            }
+
+        function cacheFloodData() {
+            try {
+                const cacheData = {
+                    timestamp: new Date().getTime(),
+                    data: floodData
+                };
+                
+                localStorage.setItem('lismoreFloodData', JSON.stringify(cacheData));
+            } catch (error) {
+                console.error('Error caching flood data:', error);
+            }
+        }
+
+        function loadCachedData() {
+            try {
+                const cachedData = localStorage.getItem('lismoreFloodData');
+                
+                if (cachedData) {
+                    const parsed = JSON.parse(cachedData);
+                    
+                    if (parsed && parsed.data && parsed.data.length > 0) {
+                        floodData = parsed.data;
+                        
+                        lastFetchTime = new Date(parsed.timestamp);
+                        lastUpdateTime.textContent = lastFetchTime.toLocaleTimeString('en-AU') + ' (cached)';
+                        
+                        renderFloodData();
+                        
+                        updateStatistics();
+                        
+                        return true;
+                    }
+                }
+                
+                return false;
+            } catch (error) {
+                console.error('Error loading cached data:', error);
+                return false;
+            }
+        }
+        
+        function createStatusElement(id, label) {
+            const existingItem = document.getElementById(id);
+            if (existingItem) {
+                const existingLabel = existingItem.querySelector('.status-label');
+                if (existingLabel) {
+                    existingLabel.textContent = `${label}:`;
+                }
+                const existingValue = document.getElementById(`${id}-value`);
+                if (existingValue) {
+                    return existingValue;
+                }
+            }
+
+            const statusPanel = document.querySelector('.status-panel');
+
+            if (!statusPanel) {
+                return null;
+            }
+
+            const statusItem = document.createElement('div');
+            statusItem.id = id;
+            statusItem.className = 'status-item';
+            
+            const statusLabel = document.createElement('span');
+            statusLabel.className = 'status-label';
+            statusLabel.textContent = label + ':';
+            
+            const statusValue = document.createElement('span');
+            statusValue.id = id + '-value';
+            statusValue.className = 'status-value';
+            statusValue.textContent = 'Checking...';
+            
+            statusItem.appendChild(statusLabel);
+            statusItem.appendChild(statusValue);
+            
+            const statusActions = document.querySelector('.status-actions');
+            statusPanel.insertBefore(statusItem, statusActions);
+            
+            return statusValue;
+        }
+
+        function showLoading(show) {
+            if (show) {
+                loadingOverlay.style.display = 'flex';
+            } else {
+                loadingOverlay.style.display = 'none';
+            }
+        }
+
+        function showNotification(message, type) {
+            notificationMessage.textContent = message;
+            
+            notification.className = 'notification';
+            notification.classList.add(type);
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 5000);
+        }
+
+        function capitalizeFirstLetter(string) {
+            return string.charAt(0).toUpperCase() + string.slice(1);
+        }
+
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                clearInterval(webcamRefreshTimer);
+            } else {
+                refreshWebcam();
+                webcamRefreshTimer = setInterval(refreshWebcam, WEBCAM_REFRESH_INTERVAL);
+            }
+        });
+
+        webcamImage.addEventListener('error', function() {
+            webcamError.style.display = 'block';
+        });
+
+        webcamImage.addEventListener('load', function() {
+            webcamError.style.display = 'none';
+        });
+        
+        function refreshRadar() {
+            if (typeof window.triggerRadarRefresh === 'function') {
+                window.triggerRadarRefresh();
+                return;
+            }
+
+            if (typeof window.resetRadarMap === 'function') {
+                window.resetRadarMap();
+            }
+        }
+
+        function updateRadarStatusRow(status, detail) {
+            if (typeof window.setRadarStatusIndicator === 'function') {
+                window.setRadarStatusIndicator(status, detail);
+                return;
+            }
+
+            const statusValue = document.getElementById('radar-status-value') ||
+                                 createStatusElement('radar-status', 'Radar Map');
+
+            if (!statusValue) {
+                return;
+            }
+
+            let displayText = status;
+            let detailText = detail || '';
+            let state = '';
+
+            if (status === 'Online') {
+                state = 'online';
+            } else if (status === 'Fallback') {
+                displayText = 'Online';
+                state = 'online';
+                detailText = detail ? `${detail} · Fallback mode` : 'Fallback mode';
+            } else if (status === 'Offline') {
+                state = 'offline';
+            } else {
+                state = 'unknown';
+            }
+
+            setStatusValue(statusValue, {
+                text: displayText,
+                state,
+                detail: detailText
+            });
+        }
+
+        async function checkRadarAvailability() {
+            const statusValue = document.getElementById('radar-status-value') ||
+                                 createStatusElement('radar-status', 'Radar Map');
+
+            if (!statusValue) {
+                return;
+            }
+
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 15000);
+
+            const setOffline = (detail) => {
+                setStatusValue(statusValue, { text: 'Offline', state: 'offline', detail });
+            };
+
+            try {
+                const response = await fetch('/api/radar/weatherchaser/status', {
+                    cache: 'no-store',
+                    signal: controller.signal
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                if (!data.success) {
+                    throw new Error(data.error || 'Status request failed');
+                }
+
+                // Check frames count specifically for Weather Chaser status
+                if (!data.active) {
+                    const msg = data.frameCount === 0 ? 'No radar frames' : 'Service unavailable';
+                    console.warn(`[Radar Check] Offline: ${msg} (Active: ${data.active}, Frames: ${data.frameCount})`);
+                    setOffline(msg);
+                    return;
+                }
+
+                if (!data.frameCount) {
+                    console.warn(`[Radar Check] Offline: Frames count is ${data.frameCount} despite Active=true`);
+                    setOffline('No radar frames');
+                    return;
+                }
+
+                const detailParts = [];
+                if (data.lastUpdate) {
+                    const formatted = new Date(data.lastUpdate).toLocaleString('en-AU', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        timeZoneName: 'short'
+                    });
+                    detailParts.push(`Updated ${formatted}`);
+                }
+
+                setStatusValue(statusValue, {
+                    text: 'Online',
+                    state: 'online',
+                    detail: detailParts.join(' · ')
+                });
+            } catch (error) {
+                const message = error.name === 'AbortError'
+                    ? 'Request timed out'
+                    : 'Connection error';
+                console.error('Radar status check failed:', error);
+                setOffline(message);
+            } finally {
+                clearTimeout(timeoutId);
+            }
+        }
+
+        window.checkRadarAvailability = checkRadarAvailability;
+
+        async function refreshCycloneMap() {
+            const cycloneImage = document.getElementById('cyclone-image');
+            const cycloneError = document.getElementById('cyclone-error');
+            const cycloneTimestamp = document.getElementById('cyclone-timestamp');
+            const cycloneStatusValue = document.getElementById('cyclone-status-value') ||
+                createStatusElement('cyclone-status', 'Cyclone Map');
+
+            try {
+                const checkResponse = await fetch('/api/check-cyclone');
+                const checkData = await checkResponse.json();
+
+                if (checkData.available) {
+                    const timestamp = new Date().getTime();
+                    cycloneImage.src = `/proxy/cyclone-image?t=${timestamp}`;
+                    cycloneTimestamp.textContent = `Last updated: ${new Date().toLocaleTimeString('en-AU')}`;
+
+                    setStatusValue(cycloneStatusValue, {
+                        text: 'Online',
+                        state: 'online',
+                        detail: 'Cyclone imagery updating'
+                    });
+
+                    cycloneImage.onload = function() {
+                        markTabAvailable('tab-cyclone');
+                        cycloneError.style.display = 'none';
+                        const detail = formatStatusTimestamp(new Date());
+                        setStatusValue(cycloneStatusValue, {
+                            text: 'Online',
+                            state: 'online',
+                            detail: detail ? `Last updated ${detail}` : ''
+                        });
+                    };
+
+                    cycloneImage.onerror = function() {
+                        setStatusValue(cycloneStatusValue, {
+                            text: 'Offline',
+                            state: 'offline',
+                            detail: 'Cyclone imagery failed to load'
+                        });
+                    };
+                } else {
+                    markTabUnavailable('tab-cyclone', 'No current cyclone warnings or bulletins for this area.');
+                    cycloneError.style.display = 'block';
+                    cycloneError.textContent = 'No current cyclone warnings for this area';
+                    setStatusValue(cycloneStatusValue, {
+                        text: 'No Cyclone',
+                        state: 'offline',
+                        detail: 'No active cyclone bulletins'
+                    });
+                }
+            } catch (error) {
+                markTabUnavailable('tab-cyclone', 'Unable to check cyclone status.');
+                cycloneError.style.display = 'block';
+                cycloneError.textContent = 'Unable to check cyclone status';
+                setStatusValue(cycloneStatusValue, {
+                    text: 'Offline',
+                    state: 'offline',
+                    detail: error.message || 'Unable to check cyclone status'
+                });
+            }
+        }
+
+        window.addEventListener('error', function(event) {
+            console.error('Global error:', event.error);
+            showNotification('An error occurred. Please refresh the page if issues persist.', 'error');
+        });
+
+        function markTabUnavailable(tabId, reason) {
+            const tab = document.getElementById(tabId);
+            if (tab) {
+                tab.classList.add('tab-unavailable');
+                tab.setAttribute('data-unavailable-reason', reason);
+                
+                tab.classList.remove('active');
+                
+                const contentId = tabId.replace('tab-', 'content-');
+                const contentElement = document.getElementById(contentId);
+                if (contentElement) {
+                    contentElement.classList.remove('active');
+                }
+                
+                if (tab.classList.contains('active')) {
+                    const firstAvailableTab = document.querySelector('.tab-button:not(.tab-unavailable)');
+                    if (firstAvailableTab) {
+                        firstAvailableTab.classList.add('active');
+                        const firstAvailableContent = document.getElementById(
+                            firstAvailableTab.id.replace('tab-', 'content-')
+                        );
+                        if (firstAvailableContent) {
+                            firstAvailableContent.classList.add('active');
+                        }
+                    }
+                }
+                
+                tab.onclick = function(event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    
+                    const reason = this.getAttribute('data-unavailable-reason');
+                    showUnavailableContentPopup(tabId, reason);
+                    
+                    return false;
+                };
+            }
+        }
+        
+        function markTabAvailable(tabId) {
+            const tab = document.getElementById(tabId);
+            if (tab) {
+                tab.classList.remove('tab-unavailable');
+                tab.removeAttribute('data-unavailable-reason');
+                
+                tab.onclick = function() {
+                    activateTab(tabId);
+                };
+            }
+        }
+        
+        function showUnavailableContentPopup(tabId, reason) {
+            let title, message, linkText, linkUrl;
+            
+            if (tabId === 'tab-cyclone') {
+                title = "Cyclone Information Unavailable";
+                message = "No current warnings and bulletins for cyclones in this area.";
+                linkText = "View BOM cyclone information";
+                linkUrl = "https://www.bom.gov.au/cyclone/";
+            } 
+            else if (tabId === 'tab-radar') {
+                title = "Radar Map Unavailable";
+                message = "The live radar map could not be fetched.";
+                linkText = "View latest forecast for Lismore";
+                linkUrl = "https://beta.bom.gov.au/poi-location/australia/new-south-wales/northern-rivers/nsw_pt079-lismore";
+            }
+            else {
+                title = "Content Unavailable";
+                message = "This content is currently unavailable. Please try again later.";
+            }
+            
+            const notificationElement = document.getElementById('notification');
+            const notificationMessage = document.getElementById('notification-message');
+            
+            let messageHTML = `
+                <div style="text-align:left;">
+                    <strong>${title}</strong><br>
+                    ${message}
+                    ${linkUrl ? `<br><br><a href="${linkUrl}" target="_blank" style="color:white;text-decoration:underline;">${linkText}</a>` : ''}
+                </div>
+            `;
+            
+            notificationMessage.innerHTML = messageHTML;
+            notification.className = 'notification info';
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 7000);
+        }
+        
+        async function checkCycloneAvailability() {
+            try {
+                const checkResponse = await fetch('/api/check-cyclone');
+                const checkData = await checkResponse.json();
+
+                const cycloneStatusValue = document.getElementById('cyclone-status-value') ||
+                    createStatusElement('cyclone-status', 'Cyclone Map');
+
+                if (checkData.available) {
+                    markTabAvailable('tab-cyclone');
+                    const errorEl = document.getElementById('cyclone-error');
+                    if (errorEl) errorEl.style.display = 'none';
+
+                    const cycloneImage = document.getElementById('cyclone-image');
+                    const cycloneTimestamp = document.getElementById('cyclone-timestamp');
+                    if (cycloneImage) {
+                        const timestamp = new Date().getTime();
+                        cycloneImage.src = `/proxy/cyclone-image?t=${timestamp}`;
+                        if (cycloneTimestamp) {
+                            cycloneTimestamp.textContent = `Last updated: ${new Date().toLocaleTimeString('en-AU')}`;
+                        }
+                    }
+
+                    const detail = formatStatusTimestamp(checkData.timestamp);
+                    setStatusValue(cycloneStatusValue, {
+                        text: 'Online',
+                        state: 'online',
+                        detail: detail ? `Checked ${detail}` : ''
+                    });
+                } else {
+                    markTabUnavailable('tab-cyclone', 'No current cyclone warnings or bulletins for this area.');
+                    const errorEl = document.getElementById('cyclone-error');
+                    if (errorEl) {
+                        errorEl.style.display = 'block';
+                        errorEl.textContent = 'No current cyclone warnings for this area';
+                    }
+
+                    setStatusValue(cycloneStatusValue, {
+                        text: 'No Cyclone',
+                        state: 'offline',
+                        detail: 'No active cyclone bulletins'
+                    });
+                }
+            } catch (error) {
+                const cycloneStatusValue = document.getElementById('cyclone-status-value') ||
+                    createStatusElement('cyclone-status', 'Cyclone Map');
+                setStatusValue(cycloneStatusValue, {
+                    text: 'Offline',
+                    state: 'offline',
+                    detail: error.message || 'Cyclone status check failed'
+                });
+            }
+        }
+        
+        function addUnavailableTabStyles() {
+            const styleElement = document.createElement('style');
+            styleElement.textContent = `
+                .tab-button.tab-unavailable {
+                    opacity: 0.6;
+                    cursor: not-allowed !important;
+                    position: relative;
+                    pointer-events: all !important; /* Ensure our custom handler still works */
+                }
+                
+                .tab-button.tab-unavailable:hover {
+                    background-color: transparent !important;
+                    color: var(--gray-700) !important;
+                    transform: none !important;
+                }
+                
+                .tab-button.tab-unavailable::after {
+                    content: "";
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background-image: linear-gradient(45deg, rgba(180, 180, 180, 0.1) 25%, transparent 25%, transparent 50%, rgba(180, 180, 180, 0.1) 50%, rgba(180, 180, 180, 0.1) 75%, transparent 75%, transparent);
+                    background-size: 8px 8px;
+                    pointer-events: none;
+                    border-radius: var(--border-radius);
+                }
+                
+                .tab-button.tab-unavailable svg {
+                    opacity: 0.7;
+                }
+            `;
+            document.head.appendChild(styleElement);
+        }
+        
+        function initializeAvailabilityChecks() {
+            addUnavailableTabStyles();
+
+            checkCycloneAvailability();
+            checkRadarAvailability();
+
+            setInterval(checkCycloneAvailability, 60000);
+            setInterval(checkRadarAvailability, 60000);
+        }
+        
+        function activateTab(tabId) {
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.add('active');
+            const contentId = tabId.replace('tab-', 'content-');
+            document.getElementById(contentId).classList.add('active');
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeAvailabilityChecks();
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            let riverChartInstance = null;
+            const riverHeightModal = document.getElementById('river-height-modal');
+            const riverName = document.getElementById('river-name');
+            const riverChartCanvas = document.getElementById('river-chart');
+            const riverLoading = document.getElementById('river-loading');
+            const riverDataError = document.getElementById('river-data-error');
+            const closeRiverChart = document.getElementById('close-river-chart');
+            const modalCloseBtn = document.querySelector('.modal-close');
+        
+            function openRiverHeightModal(location) {
+                let cleanLocation = location;
+                
+                if (location.includes("Wilsons") && location.includes("Lismore")) {
+                    cleanLocation = "Wilsons R at Lismore (mAHD)";
+                } else {
+                    cleanLocation = location.split(/\s+\d/)[0];
+                    cleanLocation = cleanLocation.replace(/\s*\<span.*\<\/span\>/i, "");
+                    cleanLocation = cleanLocation.trim();
+                }
+                
+                riverName.textContent = cleanLocation + ' - Height History';
+                
+                riverLoading.style.display = 'flex';
+                riverDataError.style.display = 'none';
+                riverHeightModal.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+                
+                fetchRiverHeightData(location, cleanLocation);
+            }
+        
+            function closeRiverHeightModal() {
+                riverHeightModal.style.display = 'none';
+                document.body.style.overflow = '';
+                
+                if (riverChartInstance) {
+                    riverChartInstance.destroy();
+                    riverChartInstance = null;
+                }
+            }
+        
+            closeRiverChart.addEventListener('click', closeRiverHeightModal);
+            modalCloseBtn.addEventListener('click', closeRiverHeightModal);
+            riverHeightModal.addEventListener('click', function(event) {
+                if (event.target === riverHeightModal) {
+                    closeRiverHeightModal();
+                }
+            });
+        
+            function handleRowClick(event) {
+                const row = event.target.closest('tr');
+                
+                if (!row || row.closest('thead') || row.classList.contains('river-system-header')) {
+                    return;
+                }
+                
+                const location = row.cells[0].textContent.trim();
+                
+                openRiverHeightModal(location);
+            }
+        
+            document.getElementById('flood-data-body').addEventListener('click', handleRowClick);
+
+        function showRiverDataError(message) {
+          const riverLoading = document.getElementById('river-loading');
+          const riverDataError = document.getElementById('river-data-error');
+          const riverDataErrorMessage = riverDataError.querySelector('p');
+
+          riverLoading.style.display = 'none';
+          riverDataError.style.display = 'flex';
+
+          if (riverDataErrorMessage) {
+            riverDataErrorMessage.textContent = message || 'Failed to load river height data';
+          }
+        }
+
+        async function fetchRiverHeightData(location, cleanLocation) {
+          try {
+            const riverLoading = document.getElementById('river-loading');
+            const riverDataError = document.getElementById('river-data-error');
+            riverLoading.style.display = 'flex';
+            riverDataError.style.display = 'none';
+
+            const locationToUse = cleanLocation || location.replace(/\s*\<span.*\<\/span\>/i, "");
+
+            const encodedLocation = encodeURIComponent(locationToUse);
+            
+            const response = await fetch(`${BASE_URL}/river-data?location=${encodedLocation}`);
+            
+            if (!response.ok) {
+              let errorDetail = `HTTP error! status: ${response.status}`;
+              try {
+                const errorData = await response.json();
+                if (errorData && errorData.message) {
+                  errorDetail += ` - ${errorData.message}`;
+                }
+              } catch (e) {
+              }
+              
+              throw new Error(errorDetail);
+            }
+            
+            const data = await response.json();
+
+            if (data.success && data.data && data.data.length > 0) {
+
+              renderRiverHeightChart(data.data, locationToUse);
+            } else {
+              showRiverDataError("No data available for this location");
+            }
+          } catch (error) {
+            console.error('Error fetching river height data:', error);
+            showRiverDataError(`Could not load river height data: ${error.message}`);
+          }
+        }
+        
+        function renderRiverHeightChart(heightData, location) {
+          let processedData = heightData;
+          if (heightData.length > 100) {
+            processedData = reduceDataPoints(heightData, 50);
+          }
+          
+          const dates = processedData.map(item => item.time);
+          const heights = processedData.map(item => item.height);
+          
+          const ctx = document.getElementById('river-chart').getContext('2d');
+          
+          if (riverChartInstance) {
+            riverChartInstance.destroy();
+          }
+          
+          const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+          gradient.addColorStop(0, 'rgba(30, 136, 229, 0.2)');
+          gradient.addColorStop(1, 'rgba(30, 136, 229, 0)');
+
+          const isDarkMode = document.documentElement.getAttribute('data-theme') === 'dark';
+          const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.03)';
+          const tickColor = isDarkMode ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)';
+
+          riverChartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+              labels: dates,
+              datasets: [{
+                label: 'Water Level (m)',
+                data: heights,
+                borderColor: 'rgba(30, 136, 229, 1)',
+                backgroundColor: gradient,
+                fill: true,
+                tension: 0.5,
+                pointRadius: 0,
+                pointHoverRadius: 6,
+                pointBackgroundColor: 'white',
+                pointBorderColor: 'rgba(30, 136, 229, 1)',
+                pointBorderWidth: 2,
+                pointHitRadius: 20,
+                borderWidth: 3,
+                cubicInterpolationMode: 'monotone',
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: {
+                title: {
+                  display: false,
+                },
+                legend: {
+                  display: false
+                },
+                tooltip: {
+                  mode: 'index',
+                  intersect: false,
+                  backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                  titleColor: 'rgba(255, 255, 255, 1)',
+                  bodyColor: 'rgba(255, 255, 255, 1)',
+                  borderColor: 'rgba(30, 136, 229, 0.5)',
+                  borderWidth: 1,
+                  padding: 10,
+                  cornerRadius: 4,
+                  displayColors: false,
+                  callbacks: {
+                    title: function(tooltipItems) {
+                      return tooltipItems[0].label;
+                    },
+                    label: function(context) {
+                      return `Water Level: ${context.parsed.y.toFixed(2)}m`;
+                    }
+                  }
+                }
+              },
+              scales: {
+                x: {
+                  grid: {
+                    display: false,
+                  },
+                  ticks: {
+                    maxRotation: 45,
+                    minRotation: 45,
+                    autoSkip: true,
+                    maxTicksLimit: 8,
+                    color: tickColor
+                  }
+                },
+                y: {
+                  beginAtZero: true,
+                  suggestedMin: 0,
+                  suggestedMax: function() {
+                    const maxHeight = Math.max(...heights);
+                    return maxHeight * 1.2;
+                  }(),
+                  grid: {
+                    color: gridColor,
+                  },
+                  ticks: {
+                    color: tickColor,
+                    callback: function(value) {
+                      return value.toFixed(2) + 'm';
+                    }
+                  }
+                }
+              },
+              interaction: {
+                mode: 'index',
+                intersect: false
+              },
+              elements: {
+                line: {
+                  tension: 0.5
+                }
+              },
+              hover: {
+                mode: 'index',
+                intersect: false
+              }
+            }
+          });
+          
+          document.getElementById('river-loading').style.display = 'none';
+          
+          const dataRange = document.getElementById('river-data-range');
+          if (dataRange && dates.length > 0) {
+            const firstDate = dates[0];
+            const lastDate = dates[dates.length - 1];
+            dataRange.textContent = `Data from ${firstDate} to ${lastDate}`;
+          }
+        }
+        
+        function reduceDataPoints(data, targetPoints) {
+          const originalLength = data.length;
+          
+          if (originalLength <= targetPoints) {
+            return data;
+          }
+          
+          const result = [];
+          result.push(data[0]);
+          
+          const step = Math.floor(originalLength / (targetPoints - 2));
+          
+          for (let i = step; i < originalLength - step; i += step) {
+            result.push(data[i]);
+          }
+          
+          result.push(data[originalLength - 1]);
+          
+          return result;
+        }
+        });
+        </script>
+    
+    <div id="maintenance-container"></div>
+    <script>
+        fetch('temporary/maintenance.html')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Maintenance HTML not found');
+                }
+                return response.text();
+            })
+            .then(html => {
+                document.getElementById('maintenance-container').innerHTML = html;
+                
+                const script = document.createElement('script');
+                script.src = 'temporary/maintenance.js';
+                document.body.appendChild(script);
+            })
+            .catch(error => {
+                console.log('Maintenance notice not available:', error);
+            });
+    </script>
+
+    <div id="river-height-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="river-name">River Height History</h2>
+                <button class="modal-close">
+                    <svg xmlns="https://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="river-loading" class="river-loading">
+                    <div class="spinner"></div>
+                    <p>Loading river height data...</p>
+                </div>
+                <div class="river-chart-container">
+                    <canvas id="river-chart"></canvas>
+                </div>
+                <div id="river-data-error" class="river-data-error" style="display: none;">
+                    <svg xmlns="https://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    <p>Could not load river height data. Please try again later.</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <span id="river-data-range">Last 4 days of readings</span>
+                <button id="close-river-chart" class="button">Close</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

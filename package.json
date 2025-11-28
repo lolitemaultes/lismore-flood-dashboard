@@ -1,0 +1,38 @@
+{
+  "name": "Lismore Flood Dashboard",
+  "version": "3.0.0",
+  "main": "server.js",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "test": "mocha tests/**/*.test.js",
+    "start": "node server.js"
+  },
+  "keywords": [
+    "flood",
+    "monitoring",
+    "dashboard",
+    "lismore",
+    "emergency",
+    "weather"
+  ],
+  "author": "lolitemaultes",
+  "license": "ISC",
+  "description": "Live Flood Information Aggregator - Real-time flood monitoring dashboard for Lismore, NSW",
+  "dependencies": {
+    "axios": "^1.8.2",
+    "cheerio": "^1.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^4.21.2",
+    "express-rate-limit": "^8.2.1",
+    "fast-xml-parser": "^4.5.0",
+    "joi": "^18.0.2",
+    "node-cache": "^5.1.2"
+  },
+  "devDependencies": {
+    "mocha": "^11.7.5",
+    "supertest": "^7.1.4"
+  }
+}

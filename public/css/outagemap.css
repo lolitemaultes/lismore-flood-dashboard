@@ -1,0 +1,467 @@
+/* ============================================
+   OUTAGE MAP - Clean & Modern Design
+   ============================================ */
+
+/* --- Container & Layout --- */
+.outage-map-wrapper {
+    position: relative;
+    height: 600px;
+    background-color: var(--bg-secondary);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+    transition: all 0.3s ease;
+}
+
+#outage-map {
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+/* --- Map Legend --- */
+.outage-legend {
+    position: absolute;
+    right: 12px;
+    bottom: 40px;
+    z-index: 1000;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 14px 16px;
+    box-shadow: var(--shadow-lg);
+    min-width: 220px;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+.outage-legend:hover {
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+.legend-title {
+    font-weight: 700;
+    font-size: 0.9375rem;
+    margin-bottom: 12px;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.legend-title::before {
+    content: '';
+    width: 3px;
+    height: 16px;
+    background: var(--primary-color);
+    border-radius: 2px;
+}
+
+.outage-legend label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    margin: 8px 0;
+    padding: 10px 12px;
+    border-radius: 8px;
+    transition: all 0.25s ease;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    border: 2px solid transparent;
+    background: var(--bg-tertiary);
+    color: var(--text-secondary);
+}
+
+.outage-legend label:hover {
+    background: var(--border-color);
+    transform: translateX(3px);
+}
+
+.outage-legend input[type="radio"] {
+    display: none;
+}
+
+.outage-legend input[type="radio"]:checked + .legend-content {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.outage-legend input[type="radio"]:checked ~ .outage-dot {
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+    transform: scale(1.25);
+}
+
+.outage-legend label:has(input:checked) {
+    background: var(--bg-secondary);
+    border-color: var(--primary-color);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+}
+
+.legend-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+}
+
+.outage-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    display: inline-block;
+    border: 2px solid var(--border-color);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    flex-shrink: 0;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.outage-dot.cur {
+    background: #ff4d4f;
+    border-color: #ff4d4f;
+}
+
+.outage-dot.fut {
+    background: #f7ba1e;
+    border-color: #f7ba1e;
+}
+
+.outage-dot.can {
+    background: #7aa2f7;
+    border-color: #7aa2f7;
+}
+
+.legend-note {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-color);
+    font-size: 0.6875rem;
+    color: var(--text-tertiary);
+    line-height: 1.5;
+    font-style: italic;
+}
+
+/* --- Controls Panel --- */
+.outage-controls-panel {
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border-color);
+    padding: 1.25rem 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.outage-controls-inner {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.outage-control-group {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+/* --- Statistics Container --- */
+.outage-stats-container {
+    margin-top: 0.75rem;
+    padding: 2rem;
+    background: transparent;
+    border: none;
+}
+
+.outage-stats-title {
+    font-weight: 700;
+    font-size: 1.0625rem;
+    margin-bottom: 1.25rem;
+    padding: 0 0.25rem;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+}
+
+.outage-stats-title::before {
+    content: '';
+    width: 4px;
+    height: 20px;
+    background: var(--primary-color);
+    border-radius: 2px;
+}
+
+.outage-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.25rem;
+}
+
+/* --- Stat Cards --- */
+.outage-stat-card {
+    background: var(--bg-secondary);
+    padding: 1.25rem;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.outage-stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: var(--primary-color);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.outage-stat-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-3px);
+    border-color: var(--primary-color);
+}
+
+.outage-stat-card:hover::before {
+    opacity: 1;
+}
+
+.stat-label {
+    font-size: 0.6875rem;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 0.625rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+.stat-value {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.625rem;
+    line-height: 1;
+}
+
+/* --- Outage Badges --- */
+.outage-stat-badge,
+.outage-popup-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.375rem 0.625rem;
+    border-radius: 6px;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: 1px solid currentColor;
+    transition: all 0.2s ease;
+}
+
+.outage-stat-badge.current,
+.outage-popup-badge.current {
+    background: rgba(255, 77, 79, 0.15);
+    color: #ff4d4f;
+    border-color: #ff4d4f;
+}
+
+.outage-stat-badge.future,
+.outage-popup-badge.future {
+    background: rgba(247, 186, 30, 0.15);
+    color: #f7ba1e;
+    border-color: #f7ba1e;
+}
+
+.outage-stat-badge.cancelled,
+.outage-popup-badge.cancelled {
+    background: rgba(122, 162, 247, 0.15);
+    color: #7aa2f7;
+    border-color: #7aa2f7;
+}
+
+/* --- Popup Styling --- */
+.outage-popup-title {
+    font-weight: 700;
+    font-size: 1.0625rem;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+    padding-bottom: 0.875rem;
+    border-bottom: 2px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.outage-popup-row {
+    margin: 0.75rem 0;
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 0.75rem;
+    align-items: start;
+}
+
+.outage-popup-label {
+    font-weight: 600;
+    color: var(--text-tertiary);
+    font-size: 0.8125rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.outage-popup-value {
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.outage-popup-footer {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+    font-size: 0.75rem;
+    color: var(--text-tertiary);
+    line-height: 1.5;
+}
+
+/* --- Leaflet Popup Overrides --- */
+.leaflet-popup-content-wrapper {
+    background: var(--bg-secondary);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border-color);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+.leaflet-popup-content {
+    margin: 1.25rem;
+    margin-right: 3rem;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    max-width: 380px;
+    color: var(--text-primary);
+}
+
+.leaflet-popup-tip {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-top: none;
+    border-right: none;
+}
+
+.leaflet-popup-close-button {
+    color: var(--text-secondary) !important;
+    font-size: 24px !important;
+    font-weight: 300 !important;
+    line-height: 1 !important;
+    padding: 0 !important;
+    width: 32px !important;
+    height: 32px !important;
+    position: absolute !important;
+    top: 8px !important;
+    right: 8px !important;
+    border-radius: 6px !important;
+    transition: all 0.2s ease !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: transparent !important;
+    border: 1px solid transparent !important;
+}
+
+.leaflet-popup-close-button:hover {
+    background: var(--bg-tertiary) !important;
+    color: var(--text-primary) !important;
+    border-color: var(--border-color) !important;
+}
+
+/* --- Responsive Design --- */
+@media (max-width: 768px) {
+    .outage-map-wrapper {
+        height: 500px;
+    }
+
+    .outage-legend {
+        font-size: 0.75rem;
+        min-width: 200px;
+        right: 10px;
+        bottom: 30px;
+        padding: 12px 14px;
+    }
+
+    .outage-dot {
+        width: 12px;
+        height: 12px;
+    }
+
+    .outage-controls-panel {
+        padding: 1rem;
+    }
+
+    .outage-controls-inner {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+
+    .outage-control-group {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .outage-stats-container {
+        padding: 1.5rem 1.25rem;
+    }
+
+    .outage-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+    }
+
+    .outage-stat-card {
+        padding: 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .outage-map-wrapper {
+        height: 420px;
+    }
+
+    .outage-legend {
+        right: 8px;
+        bottom: 24px;
+        padding: 10px 12px;
+        min-width: 180px;
+    }
+
+    .outage-stats-container {
+        margin-top: 0.5rem;
+        padding: 1rem;
+    }
+
+    .outage-stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .leaflet-popup-content {
+        max-width: 280px;
+        margin: 1rem;
+    }
+
+    .outage-popup-row {
+        grid-template-columns: 1fr;
+        gap: 0.375rem;
+    }
+
+    .outage-popup-label {
+        font-size: 0.75rem;
+    }
+}

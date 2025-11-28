@@ -1,0 +1,1872 @@
+/* ================================================================
+   LISMORE FLOOD DASHBOARD - COMPREHENSIVE RESPONSIVE STYLING
+   Compatible with both Light and Dark modes
+   ================================================================ */
+
+/* ================================================================
+   MOBILE NOT SUPPORTED OVERLAY
+   ================================================================ */
+.mobile-not-supported-overlay {
+    display: none; /* Hidden on desktop by default */
+}
+
+@media (max-width: 1024px) {
+    .mobile-not-supported-overlay {
+        display: flex;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: var(--bg-primary, #ffffff);
+        z-index: 10000;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+    }
+
+    :root[data-theme="dark"] .mobile-not-supported-overlay {
+        background: var(--bg-primary, #0f172a);
+    }
+
+    .mobile-not-supported-content {
+        text-align: center;
+        max-width: 500px;
+        padding: 2rem;
+        background: var(--bg-secondary, #f8fafc);
+        border-radius: 16px;
+        box-shadow: var(--shadow-lg);
+        color: var(--text-primary, #1e293b);
+    }
+
+    :root[data-theme="dark"] .mobile-not-supported-content {
+        background: var(--bg-secondary, #1e293b);
+        color: var(--text-primary, #f1f5f9);
+    }
+
+    .mobile-not-supported-content svg {
+        color: var(--primary-color, #1976d2);
+        margin-bottom: 1.5rem;
+        opacity: 0.9;
+    }
+
+    .mobile-not-supported-content h1 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 0 0 1rem 0;
+        color: var(--text-primary, #1e293b);
+        line-height: 1.3;
+    }
+
+    :root[data-theme="dark"] .mobile-not-supported-content h1 {
+        color: var(--text-primary, #f1f5f9);
+    }
+
+    .mobile-not-supported-content p {
+        font-size: 1rem;
+        line-height: 1.6;
+        margin: 0 0 0.875rem 0;
+        color: var(--text-secondary, #64748b);
+    }
+
+    :root[data-theme="dark"] .mobile-not-supported-content p {
+        color: var(--text-secondary, #94a3b8);
+    }
+
+    .mobile-not-supported-content .desktop-message {
+        font-weight: 600;
+        color: var(--primary-color, #1976d2);
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--border-color, #e2e8f0);
+    }
+
+    :root[data-theme="dark"] .mobile-not-supported-content .desktop-message {
+        border-top-color: var(--border-color, #334155);
+    }
+
+    @media (max-width: 480px) {
+        .mobile-not-supported-content {
+            padding: 1.5rem;
+        }
+
+        .mobile-not-supported-content h1 {
+            font-size: 1.25rem;
+        }
+
+        .mobile-not-supported-content p {
+            font-size: 0.9375rem;
+        }
+
+        .mobile-not-supported-content svg {
+            width: 48px;
+            height: 48px;
+        }
+    }
+}
+
+/* ================================================================
+   TABLET LARGE (1025px - 1200px)
+   ================================================================ */
+@media (max-width: 1200px) {
+    .dashboard-container {
+        max-width: 100%;
+        padding: 0 1.5rem;
+    }
+
+    .header-content {
+        max-width: 100%;
+    }
+}
+
+/* ================================================================
+   TABLET (769px - 1024px)
+   ================================================================ */
+@media (min-width: 769px) and (max-width: 1024px) {
+    /* Layout */
+    .dashboard-container {
+        grid-template-columns: 1fr;
+        padding: 0 1.5rem;
+        gap: 1.5rem;
+    }
+
+    .maps-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+
+    /* Header */
+    header {
+        padding: 1.25rem 1.5rem;
+    }
+
+    .header-text h1 {
+        font-size: 1.5rem;
+    }
+
+    .header-subtitle {
+        font-size: 0.8125rem;
+    }
+
+    .info-item {
+        padding: 0.5rem 0.875rem;
+        font-size: 0.8125rem;
+    }
+
+    /* Panels */
+    .panel,
+    .webcam-container {
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+    }
+
+    .panel-header,
+    .webcam-header {
+        padding: 1.125rem;
+    }
+
+    .panel-header h2,
+    .webcam-header h2 {
+        font-size: 1.125rem;
+    }
+
+    .panel-content {
+        padding: 1.125rem;
+    }
+
+    /* Stats */
+    .stats-container {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+
+    .stat-item {
+        padding: 1rem;
+    }
+
+    .stat-value {
+        font-size: 1.75rem;
+    }
+
+    .flood-stat-grid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    }
+
+    /* Maps */
+    .radar-map-wrapper,
+    #radar-map,
+    #flood-map,
+    #outage-map,
+    .cyclone-map-container {
+        height: 450px;
+    }
+
+    /* Radar Controls */
+    .radar-controls {
+        min-width: 420px;
+        max-width: 85%;
+    }
+
+    .control-buttons button {
+        width: 46px;
+        height: 46px;
+    }
+
+    #btn-play, #btn-pause {
+        width: 58px;
+        height: 58px;
+    }
+
+    /* Tables */
+    table {
+        font-size: 0.9375rem;
+    }
+
+    th {
+        padding: 0.875rem;
+        font-size: 0.875rem;
+    }
+
+    td {
+        padding: 0.875rem;
+    }
+
+    /* Buttons */
+    .button {
+        padding: 0.625rem 1.125rem;
+        font-size: 0.875rem;
+    }
+
+    .filter-buttons {
+        flex-wrap: wrap;
+        gap: 0.625rem;
+    }
+
+    .filter-buttons button {
+        flex: 1 1 calc(33.333% - 0.5rem);
+        min-width: 120px;
+    }
+
+    /* Emergency Contacts */
+    .emergency-item {
+        padding: 0.875rem;
+    }
+
+    .emergency-number {
+        font-size: 1.25rem;
+    }
+
+    /* Modals */
+    .modal-content {
+        max-width: 90%;
+        margin: 2rem auto;
+    }
+
+    .modal-body {
+        max-height: calc(100vh - 160px);
+    }
+
+    /* River Chart */
+    #river-chart-container {
+        height: 350px;
+    }
+
+    /* Webcam */
+    .webcam-image-container {
+        min-height: 300px;
+    }
+
+    /* Theme Toggle */
+    .theme-toggle {
+        padding: 0.5rem 0.875rem;
+    }
+
+    /* Tabs */
+    .tabs {
+        gap: 0.25rem;
+    }
+
+    .tab-button {
+        padding: 0.875rem 1.125rem;
+        font-size: 0.875rem;
+    }
+
+    .tab {
+        padding: 0.875rem 1.125rem;
+        font-size: 0.875rem;
+    }
+
+    .tab-header {
+        padding: 0.875rem 1.125rem 0.5rem;
+    }
+}
+
+/* ================================================================
+   MOBILE LARGE & SMALL TABLET (max-width: 768px)
+   ================================================================ */
+@media (max-width: 768px) {
+    /* Global Touch Optimizations */
+    * {
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+    }
+
+    html {
+        scroll-behavior: smooth;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    body {
+        font-size: 16px;
+        line-height: 1.6;
+        overflow-x: hidden;
+    }
+
+    /* ===== LAYOUT ===== */
+    .dashboard-container {
+        display: block;
+        margin: 0;
+        padding: 1rem;
+        gap: 0;
+    }
+
+    .maps-grid {
+        display: block;
+        margin-bottom: 1rem;
+        gap: 0;
+    }
+
+    /* ===== HEADER ===== */
+    header {
+        padding: 0.875rem 1rem;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        box-shadow: var(--shadow-header);
+    }
+
+    .header-content {
+        max-width: 100%;
+    }
+
+    .header-main {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+    }
+
+    .header-title {
+        gap: 0.625rem;
+        flex: 1;
+        min-width: 0;
+    }
+
+    .header-icon {
+        width: 40px;
+        height: 40px;
+        flex-shrink: 0;
+    }
+
+    .header-icon svg {
+        width: 24px;
+        height: 24px;
+    }
+
+    .header-text {
+        min-width: 0;
+        flex: 1;
+    }
+
+    .header-text h1 {
+        font-size: 1.125rem;
+        font-weight: 700;
+        letter-spacing: -0.4px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .header-subtitle {
+        font-size: 0.6875rem;
+        margin-top: 0.125rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .header-info {
+        display: none;
+    }
+
+    /* ===== PANELS ===== */
+    .panel,
+    .webcam-container {
+        border-radius: 16px;
+        margin-bottom: 1.25rem;
+        box-shadow: var(--shadow-md);
+        background-color: var(--bg-secondary);
+        overflow: hidden;
+    }
+
+    .panel-header,
+    .webcam-header {
+        padding: 1.125rem;
+        background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+        border-bottom: 1px solid var(--border-color);
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+
+    .panel-header h2,
+    .webcam-header h2 {
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        letter-spacing: -0.3px;
+        width: 100%;
+    }
+
+    .panel-content {
+        padding: 1.125rem;
+    }
+
+    .panel-alert {
+        padding: 0.875rem;
+        font-size: 0.875rem;
+        margin-bottom: 0.875rem;
+    }
+
+    /* ===== REFRESH CONTROLS ===== */
+    .refresh-controls {
+        width: 100%;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.625rem;
+    }
+
+    .refresh-controls button,
+    .refresh-controls select {
+        flex: 1;
+        min-width: 120px;
+    }
+
+    .tab-header .button {
+        height: 40px;
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+    }
+
+    /* ===== STATS ===== */
+    .stats-container {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+    }
+
+    .stat-item {
+        padding: 1rem;
+        border-radius: 10px;
+        background-color: var(--bg-tertiary);
+        box-shadow: var(--shadow-sm);
+    }
+
+    .stat-label {
+        font-size: 0.8125rem;
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+        margin: 0.5rem 0;
+        color: var(--text-primary);
+        font-weight: 700;
+    }
+
+    .stat-footer {
+        font-size: 0.75rem;
+        color: var(--text-tertiary);
+    }
+
+    .flood-stat-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 0.625rem;
+    }
+
+    .flood-stat-item {
+        padding: 0.875rem;
+        background-color: var(--bg-tertiary);
+    }
+
+    .flood-stat-label {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+    }
+
+    .flood-stat-value {
+        font-size: 1.125rem;
+        gap: 0.375rem;
+        color: var(--text-primary);
+    }
+
+    /* ===== TABLES ===== */
+    .table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+        margin: 0 -1.125rem;
+        background-color: var(--bg-secondary);
+    }
+
+    table {
+        min-width: 650px;
+        font-size: 0.875rem;
+        background-color: var(--bg-secondary);
+    }
+
+    th {
+        font-size: 0.8125rem;
+        padding: 0.75rem 0.625rem;
+        position: sticky;
+        top: 0;
+        background-color: var(--bg-tertiary);
+        color: var(--text-primary);
+        font-weight: 600;
+        z-index: 10;
+        border-bottom: 2px solid var(--border-color);
+    }
+
+    td {
+        padding: 0.875rem 0.625rem;
+        color: var(--text-primary);
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .table-footer {
+        padding: 0.75rem 1rem;
+        font-size: 0.8125rem;
+        background-color: var(--bg-tertiary);
+        color: var(--text-secondary);
+        border-top: 1px solid var(--border-color);
+    }
+
+    /* ===== TABS ===== */
+    .tabs-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+        border-radius: 0;
+        margin: 0 -1.125rem;
+        background-color: var(--bg-secondary);
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .tabs-container::-webkit-scrollbar {
+        display: none;
+    }
+
+    .tabs {
+        display: flex;
+        gap: 0.25rem;
+        padding: 0 0.875rem;
+    }
+
+    .tab-button {
+        padding: 0.875rem 0.875rem;
+        font-size: 0.8125rem;
+        min-width: fit-content;
+        white-space: nowrap;
+        flex-shrink: 0;
+        background-color: transparent;
+        color: var(--text-secondary);
+        border: none;
+        border-bottom: 3px solid transparent;
+        transition: all 0.2s ease;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+        border-radius: 4px 4px 0 0;
+    }
+
+    .tab-button svg {
+        width: 16px;
+        height: 16px;
+        flex-shrink: 0;
+    }
+
+    .tab-button.active {
+        background-color: var(--bg-tertiary);
+        color: var(--primary-color);
+        border-bottom-color: var(--primary-color);
+    }
+
+    .tab-button:hover {
+        background-color: var(--bg-tertiary);
+        color: var(--text-primary);
+    }
+
+    /* Legacy support */
+    .tab {
+        padding: 0.875rem 0.875rem;
+        font-size: 0.8125rem;
+        min-width: fit-content;
+        white-space: nowrap;
+        flex-shrink: 0;
+        background-color: transparent;
+        color: var(--text-secondary);
+        border-bottom: 3px solid transparent;
+        transition: all 0.2s ease;
+        border-radius: 4px 4px 0 0;
+    }
+
+    .tab.active {
+        background-color: var(--bg-tertiary);
+        color: var(--primary-color);
+        border-bottom-color: var(--primary-color);
+    }
+
+    .tab:hover {
+        background-color: var(--bg-tertiary);
+        color: var(--text-primary);
+    }
+
+    /* Tab header */
+    .tab-header {
+        padding: 0.875rem 1rem 0.5rem;
+    }
+
+    .tab-header h2 {
+        font-size: 1.125rem;
+    }
+
+    .tab-footer {
+        padding: 0.5rem 1rem 0.875rem;
+        font-size: 0.8125rem;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    /* ===== BUTTONS ===== */
+    .button {
+        padding: 0.75rem 1.125rem;
+        font-size: 0.9375rem;
+        min-height: 44px;
+        border-radius: 8px;
+        background-color: var(--primary-color);
+        color: white;
+        transition: all 0.2s ease;
+    }
+
+    .button:hover {
+        background-color: var(--primary-dark);
+    }
+
+    .button.secondary {
+        background-color: var(--gray-500);
+    }
+
+    .button.secondary:hover {
+        background-color: var(--gray-600);
+    }
+
+    .filter-buttons {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .filter-buttons button {
+        flex: 1 1 calc(50% - 0.25rem);
+        min-width: 100px;
+        background-color: var(--bg-tertiary);
+        color: var(--text-primary);
+        border: 2px solid var(--border-color);
+    }
+
+    .filter-buttons button.active {
+        background-color: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+    }
+
+    select.button {
+        min-width: 140px;
+        padding: 0.625rem 2rem 0.625rem 0.875rem;
+        height: 44px;
+        font-size: 0.875rem;
+    }
+
+    /* ===== MAPS ===== */
+    .radar-map-wrapper {
+        height: 350px;
+        border-radius: 12px;
+        background-color: var(--bg-tertiary);
+    }
+
+    #radar-map,
+    #flood-map,
+    #outage-map,
+    .cyclone-map-container {
+        height: 350px;
+        border-radius: 12px;
+    }
+
+    /* ===== RADAR CONTROLS ===== */
+    .radar-controls {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        bottom: 8px;
+        min-width: auto;
+        width: calc(100% - 16px);
+        max-width: 480px;
+        padding: 0.5rem;
+        background: rgba(var(--bg-secondary-rgb, 255, 255, 255), 0.95);
+        backdrop-filter: blur(10px);
+        box-shadow: var(--shadow-lg);
+        border-radius: 12px;
+    }
+
+    :root[data-theme="dark"] .radar-controls {
+        background: rgba(30, 41, 59, 0.95);
+    }
+
+    .radar-controls-header {
+        display: none;
+    }
+
+    .control-buttons {
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+        justify-content: center;
+    }
+
+    .control-buttons button {
+        width: 40px;
+        height: 40px;
+        font-size: 0.875rem;
+        background-color: var(--control-btn-bg);
+        color: var(--control-btn-color);
+    }
+
+    .control-buttons button:hover {
+        background-color: var(--primary-color);
+        color: white;
+    }
+
+    .control-buttons button:disabled {
+        background-color: var(--control-btn-disabled-bg);
+        color: var(--control-btn-disabled-color);
+    }
+
+    #btn-play, #btn-pause {
+        width: 48px;
+        height: 48px;
+        font-size: 1rem;
+    }
+
+    #btn-first, #btn-last {
+        font-size: 0.75rem;
+    }
+
+    .radar-speed-controls {
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 0.25rem;
+        margin-bottom: 0.5rem;
+        overflow-x: auto;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+
+    .radar-speed-controls::-webkit-scrollbar {
+        display: none;
+    }
+
+    .radar-speed-btn {
+        flex: 1;
+        min-width: 48px;
+        padding: 0.375rem 0.5rem;
+        font-size: 0.75rem;
+        background-color: var(--bg-tertiary);
+        color: var(--text-primary);
+        border: 2px solid var(--border-color);
+        white-space: nowrap;
+    }
+
+    .radar-speed-btn.active {
+        background-color: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+    }
+
+    .radar-timeline {
+        padding: 0.5rem;
+        background-color: var(--bg-tertiary);
+        border-radius: 8px;
+    }
+
+    .timeline-progress {
+        height: 5px;
+        background-color: var(--bg-primary);
+        border-radius: 3px;
+        margin-bottom: 0.375rem;
+    }
+
+    .timeline-progress-bar {
+        background-color: var(--primary-color);
+        border-radius: 3px;
+    }
+
+    .timeline-labels {
+        font-size: 0.6875rem;
+        color: var(--text-tertiary);
+    }
+
+    .radar-view-toggle {
+        gap: 0.375rem;
+        margin-top: 0.5rem;
+    }
+
+    .radar-view-toggle button {
+        flex: 1;
+        padding: 0.375rem 0.5rem;
+        font-size: 0.75rem;
+    }
+
+    /* ===== LEGEND ===== */
+    .legend-container {
+        padding: 1rem;
+        background-color: var(--bg-secondary);
+    }
+
+    .legend-image {
+        max-width: 90%;
+        margin: 0 auto;
+    }
+
+    /* ===== WEBCAM ===== */
+    .webcam-image-container {
+        padding: 0.625rem;
+        min-height: 250px;
+        background-color: var(--bg-primary);
+    }
+
+    .webcam-image {
+        border-radius: 8px;
+    }
+
+    .webcam-footer {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.625rem;
+        font-size: 0.8125rem;
+        padding: 1rem 1.125rem;
+        background-color: var(--bg-tertiary);
+        color: var(--text-secondary);
+        border-top: 1px solid var(--border-color);
+    }
+
+    .webcam-timestamp {
+        color: var(--text-primary);
+        font-weight: 500;
+    }
+
+    /* ===== EMERGENCY CONTACTS ===== */
+    .emergency-contacts {
+        background-color: var(--alert-danger-bg);
+        border: 1px solid var(--alert-danger-border);
+    }
+
+    .emergency-header {
+        background-color: var(--danger-color);
+        padding: 0.875rem 1rem;
+    }
+
+    .emergency-content {
+        padding: 1rem;
+    }
+
+    .emergency-item {
+        flex-direction: column;
+        gap: 0.625rem;
+        padding: 0.875rem;
+        background-color: var(--bg-secondary);
+        margin-bottom: 0.75rem;
+    }
+
+    .emergency-number {
+        font-size: 1.375rem;
+        color: var(--text-primary);
+    }
+
+    .emergency-number svg {
+        color: var(--danger-color);
+    }
+
+    .emergency-text {
+        width: 100%;
+    }
+
+    .emergency-label {
+        font-size: 0.8125rem;
+        color: var(--text-secondary);
+    }
+
+    .resources-panel {
+        background-color: var(--alert-info-bg);
+        border: 1px solid var(--alert-info-border);
+    }
+
+    .resources-header {
+        background-color: var(--primary-color);
+    }
+
+    .resources-content {
+        padding: 1rem;
+    }
+
+    .resources-list li {
+        padding: 0.875rem;
+        background-color: var(--bg-secondary);
+        margin-bottom: 0.75rem;
+    }
+
+    .resource-link {
+        color: var(--primary-color);
+    }
+
+    /* ===== STATUS PANEL ===== */
+    .status-panel {
+        padding: 1rem;
+        display: block;
+        background-color: var(--bg-secondary);
+    }
+
+    .status-item {
+        padding: 0.75rem 0;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .status-item:last-child {
+        border-bottom: none;
+    }
+
+    .status-label {
+        font-size: 0.9375rem;
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
+
+    .status-value {
+        font-size: 0.9375rem;
+        color: var(--text-primary);
+    }
+
+    .status-value.online {
+        background-color: var(--status-online-bg);
+        color: var(--success-color);
+    }
+
+    .status-value.offline {
+        background-color: var(--status-offline-bg);
+        color: var(--danger-color);
+    }
+
+    /* ===== MODALS ===== */
+    .modal {
+        padding: 0;
+        background-color: rgba(0, 0, 0, 0.75);
+    }
+
+    .modal-content {
+        width: 100%;
+        max-width: 100%;
+        height: 100vh;
+        margin: 0;
+        border-radius: 0;
+        max-height: 100vh;
+        background-color: var(--bg-secondary);
+    }
+
+    .modal-header {
+        padding: 1rem;
+        border-bottom: 2px solid var(--border-color);
+        background-color: var(--bg-tertiary);
+    }
+
+    .modal-header h2 {
+        font-size: 1.125rem;
+        color: var(--text-primary);
+    }
+
+    .modal-close {
+        width: 44px;
+        height: 44px;
+        font-size: 1.5rem;
+        background-color: var(--bg-primary);
+        color: var(--text-primary);
+        border-radius: 50%;
+    }
+
+    .modal-close:hover {
+        background-color: var(--danger-color);
+        color: white;
+    }
+
+    .modal-body {
+        padding: 1rem;
+        max-height: calc(100vh - 80px);
+        overflow-y: auto;
+        background-color: var(--bg-secondary);
+    }
+
+    /* ===== CHARTS ===== */
+    #river-chart-container {
+        height: 280px;
+        background-color: var(--bg-secondary);
+    }
+
+    /* ===== FLOOD MAP ===== */
+    .flood-map-legend {
+        right: 8px;
+        bottom: 24px;
+        padding: 0.5rem;
+        font-size: 0.75rem;
+        background: rgba(var(--bg-secondary-rgb, 255, 255, 255), 0.95);
+        backdrop-filter: blur(10px);
+        color: var(--text-primary);
+        box-shadow: var(--shadow-md);
+    }
+
+    :root[data-theme="dark"] .flood-map-legend {
+        background: rgba(30, 41, 59, 0.95);
+    }
+
+    .flood-controls {
+        flex-direction: column;
+        gap: 0.75rem;
+        padding: 1rem;
+    }
+
+    .water-level-input {
+        width: 100%;
+        padding: 0.625rem;
+        font-size: 0.875rem;
+        background-color: var(--bg-tertiary);
+        color: var(--text-primary);
+        border: 2px solid var(--border-color);
+    }
+
+    /* ===== OUTAGE MAP ===== */
+    .outage-filters {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .outage-filter-btn {
+        flex: 1 1 calc(50% - 0.25rem);
+        min-width: 120px;
+        padding: 0.625rem 0.875rem;
+        font-size: 0.875rem;
+    }
+
+    /* ===== CYCLONE MAP ===== */
+    .cyclone-info {
+        padding: 1rem;
+        background-color: var(--alert-warning-bg);
+        border: 1px solid var(--alert-warning-border);
+        color: var(--alert-warning-text);
+    }
+
+    /* ===== NOTIFICATIONS ===== */
+    .notification {
+        width: 100%;
+        margin: 0;
+        border-radius: 0;
+        padding: 1rem;
+        font-size: 0.9375rem;
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
+        border-left: 4px solid var(--primary-color);
+        box-shadow: var(--shadow-md);
+    }
+
+    .notification.success {
+        border-left-color: var(--success-color);
+        background-color: var(--alert-success-bg);
+        color: var(--alert-success-text);
+    }
+
+    .notification.error {
+        border-left-color: var(--danger-color);
+        background-color: var(--alert-danger-bg);
+        color: var(--alert-danger-text);
+    }
+
+    .notification.warning {
+        border-left-color: var(--warning-color);
+        background-color: var(--alert-warning-bg);
+        color: var(--alert-warning-text);
+    }
+
+    /* ===== THEME TOGGLE ===== */
+    .theme-toggle {
+        padding: 0.5rem 0.875rem;
+        background: var(--header-glass-bg);
+        border-radius: 8px;
+        color: var(--header-text-color);
+        min-height: 44px;
+    }
+
+    .theme-toggle:hover {
+        background: var(--header-glass-bg-hover);
+    }
+
+    .theme-toggle svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    /* ===== RIVER DATA ===== */
+    .river-level-indicator {
+        padding: 0.875rem;
+        background-color: var(--bg-tertiary);
+        border-radius: 8px;
+        margin-bottom: 0.75rem;
+    }
+
+    .river-level-value {
+        font-size: 1.5rem;
+        color: var(--text-primary);
+        font-weight: 700;
+    }
+}
+
+/* ================================================================
+   MOBILE MEDIUM (max-width: 576px)
+   ================================================================ */
+@media (max-width: 576px) {
+    /* Header */
+    header {
+        padding: 0.75rem 0.875rem;
+    }
+
+    .header-main {
+        gap: 0.625rem;
+    }
+
+    .header-title {
+        gap: 0.5rem;
+    }
+
+    .header-icon {
+        width: 36px;
+        height: 36px;
+    }
+
+    .header-icon svg {
+        width: 22px;
+        height: 22px;
+    }
+
+    .header-text h1 {
+        font-size: 1rem;
+    }
+
+    .header-subtitle {
+        font-size: 0.625rem;
+    }
+
+    /* Stats - go single column */
+    .stats-container {
+        grid-template-columns: 1fr;
+        gap: 0.625rem;
+    }
+
+    .flood-stat-grid {
+        grid-template-columns: 1fr;
+    }
+
+    /* Filter buttons full width */
+    .filter-buttons button {
+        flex: 1 1 100%;
+        width: 100%;
+    }
+
+    /* Outage filters */
+    .outage-filter-btn {
+        flex: 1 1 100%;
+        width: 100%;
+    }
+}
+
+/* ================================================================
+   MOBILE SMALL (max-width: 480px)
+   ================================================================ */
+@media (max-width: 480px) {
+    body {
+        font-size: 14px;
+    }
+
+    /* ===== HEADER ===== */
+    header {
+        padding: 0.75rem 0.875rem;
+    }
+
+    .header-main {
+        gap: 0.5rem;
+    }
+
+    .header-title {
+        gap: 0.5rem;
+    }
+
+    .header-icon {
+        width: 34px;
+        height: 34px;
+    }
+
+    .header-icon svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .header-text h1 {
+        font-size: 0.9375rem;
+        letter-spacing: -0.3px;
+    }
+
+    .header-subtitle {
+        font-size: 0.625rem;
+    }
+
+    /* ===== DASHBOARD ===== */
+    .dashboard-container {
+        padding: 0.75rem;
+    }
+
+    /* ===== PANELS ===== */
+    .panel,
+    .webcam-container {
+        margin-bottom: 1rem;
+        border-radius: 12px;
+    }
+
+    .panel-header,
+    .webcam-header {
+        padding: 1rem;
+    }
+
+    .panel-header h2,
+    .webcam-header h2 {
+        font-size: 1rem;
+    }
+
+    .panel-content {
+        padding: 1rem;
+    }
+
+    /* ===== STATS ===== */
+    .stats-container {
+        grid-template-columns: 1fr;
+        gap: 0.625rem;
+    }
+
+    .stat-item {
+        padding: 0.875rem;
+    }
+
+    .stat-value {
+        font-size: 1.375rem;
+    }
+
+    .stat-label {
+        font-size: 0.75rem;
+    }
+
+    .stat-footer {
+        font-size: 0.6875rem;
+    }
+
+    /* ===== TABLES ===== */
+    table {
+        min-width: 550px;
+        font-size: 0.8125rem;
+    }
+
+    th, td {
+        padding: 0.625rem 0.5rem;
+    }
+
+    th {
+        font-size: 0.75rem;
+    }
+
+    /* ===== TABS ===== */
+    .tab-button {
+        padding: 0.75rem 0.875rem;
+        font-size: 0.8125rem;
+    }
+
+    .tab-button svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    .tab {
+        padding: 0.75rem 0.875rem;
+        font-size: 0.8125rem;
+    }
+
+    .tab-header {
+        padding: 0.75rem 1rem 0.5rem;
+    }
+
+    .tab-header h2 {
+        font-size: 1rem;
+    }
+
+    /* ===== BUTTONS ===== */
+    .button {
+        font-size: 0.875rem;
+        padding: 0.625rem 1rem;
+        min-height: 42px;
+    }
+
+    .tab-header .button {
+        height: 38px;
+        padding: 0.5rem 0.875rem;
+        font-size: 0.8125rem;
+    }
+
+    select.button {
+        min-width: 130px;
+        padding: 0.5rem 1.875rem 0.5rem 0.75rem;
+        height: 42px;
+        font-size: 0.8125rem;
+    }
+
+    /* ===== MAPS ===== */
+    .radar-map-wrapper,
+    #radar-map,
+    #flood-map,
+    #outage-map,
+    .cyclone-map-container {
+        height: 280px;
+        border-radius: 8px;
+    }
+
+    /* ===== RADAR CONTROLS ===== */
+    .radar-controls {
+        width: calc(100% - 12px);
+        max-width: 420px;
+        padding: 0.375rem;
+        bottom: 6px;
+    }
+
+    .radar-controls-header {
+        display: none;
+    }
+
+    .control-buttons {
+        gap: 0.375rem;
+        margin-bottom: 0.375rem;
+    }
+
+    .control-buttons button {
+        width: 38px;
+        height: 38px;
+        font-size: 0.8125rem;
+    }
+
+    #btn-play, #btn-pause {
+        width: 44px;
+        height: 44px;
+        font-size: 0.9375rem;
+    }
+
+    #btn-first, #btn-last {
+        font-size: 0.6875rem;
+    }
+
+    .radar-speed-controls {
+        gap: 0.25rem;
+        margin-bottom: 0.375rem;
+    }
+
+    .radar-speed-btn {
+        padding: 0.25rem 0.375rem;
+        font-size: 0.6875rem;
+        min-width: 44px;
+    }
+
+    .radar-timeline {
+        padding: 0.375rem;
+    }
+
+    .timeline-progress {
+        height: 4px;
+        margin-bottom: 0.25rem;
+    }
+
+    .timeline-labels {
+        font-size: 0.625rem;
+    }
+
+    .radar-view-toggle {
+        gap: 0.25rem;
+        margin-top: 0.375rem;
+    }
+
+    .radar-view-toggle button {
+        padding: 0.25rem 0.375rem;
+        font-size: 0.6875rem;
+    }
+
+    /* ===== WEBCAM ===== */
+    .webcam-image-container {
+        min-height: 200px;
+        padding: 0.5rem;
+    }
+
+    .webcam-footer {
+        padding: 0.875rem 1rem;
+        font-size: 0.75rem;
+    }
+
+    /* ===== EMERGENCY ===== */
+    .emergency-header {
+        padding: 0.75rem 0.875rem;
+        font-size: 0.9375rem;
+    }
+
+    .emergency-content {
+        padding: 0.875rem;
+    }
+
+    .emergency-item {
+        padding: 0.75rem;
+        margin-bottom: 0.625rem;
+    }
+
+    .emergency-number {
+        font-size: 1.25rem;
+    }
+
+    .emergency-label {
+        font-size: 0.75rem;
+    }
+
+    .resources-header {
+        padding: 0.75rem 0.875rem;
+        font-size: 0.9375rem;
+    }
+
+    .resources-content {
+        padding: 0.875rem;
+    }
+
+    .resources-list li {
+        padding: 0.75rem;
+        margin-bottom: 0.625rem;
+    }
+
+    /* ===== CHARTS ===== */
+    #river-chart-container {
+        height: 240px;
+    }
+
+    /* ===== MODALS ===== */
+    .modal-header {
+        padding: 0.875rem;
+    }
+
+    .modal-header h2 {
+        font-size: 1rem;
+    }
+
+    .modal-close {
+        width: 40px;
+        height: 40px;
+        font-size: 1.375rem;
+    }
+
+    .modal-body {
+        padding: 0.875rem;
+    }
+
+    /* ===== FLOOD CONTROLS ===== */
+    .water-level-input {
+        width: 100%;
+        padding: 0.5rem;
+        font-size: 0.8125rem;
+    }
+
+    /* ===== STATUS PANEL ===== */
+    .status-item {
+        padding: 0.625rem 0;
+    }
+
+    .status-label,
+    .status-value {
+        font-size: 0.875rem;
+    }
+}
+
+/* ================================================================
+   MOBILE EXTRA SMALL (max-width: 360px)
+   ================================================================ */
+@media (max-width: 360px) {
+    body {
+        font-size: 13px;
+    }
+
+    header {
+        padding: 0.625rem 0.75rem;
+    }
+
+    .header-main {
+        gap: 0.5rem;
+    }
+
+    .header-title {
+        gap: 0.5rem;
+    }
+
+    .header-icon {
+        width: 32px;
+        height: 32px;
+    }
+
+    .header-icon svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    .header-text h1 {
+        font-size: 0.875rem;
+    }
+
+    .header-subtitle {
+        font-size: 0.5625rem;
+    }
+
+    .tab-button {
+        padding: 0.625rem 0.75rem;
+        font-size: 0.75rem;
+    }
+
+    .tab-button svg {
+        width: 14px;
+        height: 14px;
+    }
+
+    .tab {
+        padding: 0.625rem 0.75rem;
+        font-size: 0.75rem;
+    }
+
+    .panel-header h2,
+    .webcam-header h2 {
+        font-size: 0.9375rem;
+    }
+
+    .stat-value {
+        font-size: 1.25rem;
+    }
+
+    .button {
+        font-size: 0.8125rem;
+        padding: 0.5rem 0.875rem;
+        min-height: 40px;
+    }
+
+    .control-buttons button {
+        width: 40px;
+        height: 40px;
+        font-size: 0.8125rem;
+    }
+
+    #btn-play, #btn-pause {
+        width: 46px;
+        height: 46px;
+    }
+
+    table {
+        min-width: 500px;
+        font-size: 0.75rem;
+    }
+
+    th, td {
+        padding: 0.5rem 0.375rem;
+    }
+
+    th {
+        font-size: 0.6875rem;
+    }
+
+    .radar-map-wrapper,
+    #radar-map,
+    #flood-map,
+    #outage-map,
+    .cyclone-map-container {
+        height: 250px;
+    }
+
+    #river-chart-container {
+        height: 220px;
+    }
+}
+
+/* ================================================================
+   LANDSCAPE MOBILE (max-height: 500px)
+   ================================================================ */
+@media (max-height: 500px) and (orientation: landscape) {
+    header {
+        position: relative;
+        padding: 0.5rem 0.875rem;
+    }
+
+    .header-main {
+        gap: 0.5rem;
+    }
+
+    .header-icon {
+        width: 32px;
+        height: 32px;
+    }
+
+    .header-icon svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    .header-text h1 {
+        font-size: 0.875rem;
+    }
+
+    .header-subtitle {
+        display: none;
+    }
+
+    .header-info {
+        display: none;
+    }
+
+    .tab-button {
+        padding: 0.625rem 0.75rem;
+        font-size: 0.75rem;
+    }
+
+    .tab {
+        padding: 0.625rem 0.75rem;
+        font-size: 0.75rem;
+    }
+
+    .modal-content {
+        height: 100vh;
+    }
+
+    .modal-header {
+        padding: 0.5rem 0.75rem;
+    }
+
+    .modal-header h2 {
+        font-size: 0.9375rem;
+    }
+
+    .modal-close {
+        width: 36px;
+        height: 36px;
+    }
+
+    .modal-body {
+        max-height: calc(100vh - 60px);
+        padding: 0.75rem;
+    }
+
+    #river-chart-container,
+    .radar-map-wrapper,
+    #radar-map,
+    #flood-map,
+    #outage-map,
+    .cyclone-map-container {
+        height: 200px;
+    }
+
+    .radar-controls {
+        bottom: 5px;
+        padding: 0.375rem;
+    }
+
+    .control-buttons button {
+        width: 36px;
+        height: 36px;
+    }
+
+    #btn-play, #btn-pause {
+        width: 44px;
+        height: 44px;
+    }
+
+    .panel-header,
+    .webcam-header {
+        padding: 0.625rem;
+    }
+
+    .panel-content {
+        padding: 0.75rem;
+    }
+
+    .stats-container {
+        gap: 0.5rem;
+    }
+
+    .stat-item {
+        padding: 0.625rem;
+    }
+}
+
+/* ================================================================
+   PRINT STYLES
+   ================================================================ */
+@media print {
+    header,
+    .radar-controls,
+    .refresh-controls,
+    .filter-buttons,
+    .button,
+    .modal-close,
+    .notification,
+    .theme-toggle,
+    .tab {
+        display: none !important;
+    }
+
+    body {
+        background: white !important;
+        color: black !important;
+    }
+
+    .panel,
+    .webcam-container {
+        page-break-inside: avoid;
+        box-shadow: none;
+        border: 1px solid #ddd;
+        background: white !important;
+    }
+
+    #radar-map,
+    #flood-map,
+    #outage-map {
+        height: 400px;
+    }
+
+    * {
+        -webkit-user-select: text !important;
+        -moz-user-select: text !important;
+        -ms-user-select: text !important;
+        user-select: text !important;
+    }
+}
+
+/* ================================================================
+   TOUCH DEVICE OPTIMIZATIONS
+   ================================================================ */
+@media (hover: none) and (pointer: coarse) {
+    /* Better touch targets */
+    button,
+    a,
+    .tab,
+    .filter-btn,
+    input,
+    select {
+        min-height: 48px;
+        min-width: 48px;
+    }
+
+    .button {
+        padding: 0.75rem 1.25rem;
+    }
+
+    /* Remove hover effects on touch devices */
+    .button:hover,
+    .tab:hover,
+    button:hover,
+    .info-item:hover {
+        transform: none;
+    }
+
+    /* Add active/pressed state instead */
+    .button:active,
+    .tab:active,
+    button:active {
+        transform: scale(0.97);
+        opacity: 0.9;
+    }
+
+    /* Increase map control sizes for touch */
+    .leaflet-control-zoom a {
+        width: 48px !important;
+        height: 48px !important;
+        line-height: 48px !important;
+        font-size: 1.375rem !important;
+    }
+
+    .leaflet-control-layers-toggle {
+        width: 48px !important;
+        height: 48px !important;
+    }
+
+    /* Better scrollable areas */
+    .table-container,
+    .tabs-container {
+        scrollbar-width: thin;
+    }
+
+    /* Larger tap targets for checkboxes and radios */
+    input[type="checkbox"],
+    input[type="radio"] {
+        min-width: 24px;
+        min-height: 24px;
+    }
+}
+
+/* ================================================================
+   HIGH CONTRAST MODE
+   ================================================================ */
+@media (prefers-contrast: high) {
+    .button {
+        border: 2px solid currentColor;
+    }
+
+    .tab {
+        border: 2px solid var(--border-color);
+    }
+
+    .panel,
+    .modal-content {
+        border: 2px solid var(--border-color);
+    }
+}
+
+/* ================================================================
+   REDUCED MOTION
+   ================================================================ */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
