@@ -29,49 +29,6 @@ The dashboard consists of two primary components and multiple backend scripts:
 1. **Frontend (index.html)**: Browser-based dashboard with responsive UI
 2. **Backend (server.js)**: Node.js proxy server to fetch and parse flood data from multiple sources
 
-```
-lismore-flood-proxy/
-├── server.js
-├── weatherChaserService.js
-├── package.json
-└── public/
-    ├── index.html
-    ├── icon.png
-    ├── floodmap-data.json
-    ├── css/
-    │   ├── main.css
-    │   ├── buttons.css
-    │   ├── cyclone.css
-    │   ├── emergency.css
-    │   ├── floodmap.css
-    │   ├── header.css
-    │   ├── layout.css
-    │   ├── modals.css
-    │   ├── notifications.css
-    │   ├── outagemap.css
-    │   ├── panels.css
-    │   ├── radar.css
-    │   ├── responsive.css
-    │   ├── river.css
-    │   ├── stats.css
-    │   ├── tables.css
-    │   ├── tabs.css
-    │   ├── theme-toggle.css
-    │   ├── utilities.css
-    │   └── webcam.css
-    ├── js/
-    │   ├── floodmap.js
-    │   ├── outagemap.js
-    │   ├── radarImageOverlay.js
-    │   ├── radarmap.js
-    │   └── theme-switcher.js
-    ├── temporary/
-    │   ├── maintenance.html
-    │   ├── maintenance.css
-    │   └── maintenance.js
-    └── resources/
-```
-
 ## Installation & Setup
 
 ### Prerequisites
@@ -84,7 +41,7 @@ lismore-flood-proxy/
 1. Clone the repository:
    ```bash
    git clone https://github.com/lolitemaultes/lismore-flood-dashboard.git
-   cd lismore-flood-dashboard/lismore-flood-proxy
+   cd lismore-flood-dashboard
    ```
 
 2. Install dependencies:
@@ -148,7 +105,7 @@ To add new data sources, modify the `server.js` file to include additional endpo
 The dashboard aggregates data from multiple authoritative sources:
 
 - **Bureau of Meteorology (BoM)**: Real-time river gauge data
-- **BoM**: Rainfall radar data
+- **BoM & The Weather Chaser**: Rainfall radar data
 - **Transport for NSW**: Live traffic camera feeds from Bruxner Highway
 - **Essential Energy**: Power outage information for the region
 - **Lismore City Council**: Floor height data for flood impact mapping
@@ -168,7 +125,6 @@ The dashboard aggregates data from multiple authoritative sources:
 ### Radar images not displaying
 - The server automatically fetches and caches radar images
 - If images fail to load, check the `/cleanup-radar` endpoint to clear cached images
-- Verify access to `reg.bom.gov.au` and `bom.gov.au`
 
 ## Development
 
@@ -190,7 +146,8 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Acknowledgements
 
-- [Bureau of Meteorology](http://www.bom.gov.au) for providing river height data
+- [Bureau of Meteorology](https://www.bom.gov.au) for providing river height data
+- [The Weather Chaser](https://theweatherchaser.com) for providing radar imagery via BoM
 - [Transport for NSW](https://www.transport.nsw.gov.au) for traffic camera feeds
 - [Essential Energy](https://www.essentialenergy.com.au) for power outage information
 
