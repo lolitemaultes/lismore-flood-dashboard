@@ -45,7 +45,7 @@ The dashboard consists of a modular backend and a responsive frontend:
 
 ### Prerequisites
 
-- Node.js (v16+ recommended)
+- Node.js (v22+ recommended)
 - npm
 
 ### Installation Steps
