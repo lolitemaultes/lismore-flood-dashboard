@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /proxy/
+
+Sitemap: https://flood.lolitemaultes.online/sitemap.xml
