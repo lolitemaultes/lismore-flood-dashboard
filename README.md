@@ -20,20 +20,32 @@ A real-time emergency dashboard for monitoring flood conditions in the Lismore, 
 - **Live Power Outage Map**
 - **Emergency Information**
 - **Basic Flood Statistics**
-- **Responsive Design**
+- **Desktop Optimized (Mobile support in development)**
 
 ## Technical Architecture
 
-The dashboard consists of two primary components and multiple backend scripts:
+The dashboard consists of a modular backend and a responsive frontend:
 
-1. **Frontend (index.html)**: Browser-based dashboard with responsive UI
-2. **Backend (server.js)**: Node.js proxy server to fetch and parse flood data from multiple sources
+1. **Frontend**: 
+   - Located in `public/`.
+   - Built with Vanilla JavaScript, HTML5, and CSS3.
+   - Uses **Leaflet.js** for all mapping features (Flood, Radar, Outages).
+   - Implements a responsive design with a dark/light mode theme switcher.
+
+2. **Backend**: 
+   - **Node.js & Express**: Acts as a proxy server and data aggregator.
+   - **Modular Structure**:
+     - `routes/`: API route definitions.
+     - `services/`: Business logic and external API interactions (BOM, Essential Energy, etc.).
+     - `config/`: Centralized configuration.
+     - `middleware/`: Rate limiting, validation, and error handling.
+     - `utils/`: Shared utilities (logging, date formatting).
 
 ## Installation & Setup
 
 ### Prerequisites
 
-- Node.js
+- Node.js (v16+ recommended)
 - npm
 
 ### Installation Steps
@@ -51,7 +63,7 @@ The dashboard consists of two primary components and multiple backend scripts:
 
 3. Start the server:
    ```bash
-   node server.js
+   npm start
    ```
 
 4. Access the dashboard:
@@ -61,54 +73,48 @@ The dashboard consists of two primary components and multiple backend scripts:
 
 ### Configuration
 
-The server supports the following environment variables:
+The server is configured via environment variables and configuration files:
 
-- `PORT`: Server port (default: 3000)
-- `VERBOSE_LOGGING`: Enable detailed logging (default: false)
+- **Environment Variables** (`.env`):
+  - `PORT`: Server port (default: 3000).
+  - `VERBOSE_LOGGING`: Enable detailed logging (default: false).
 
-Example:
-```bash
-PORT=8080 VERBOSE_LOGGING=true node server.js
-```
+- **Project Configuration**:
+  - `config/config.js`: Centralizes URLs, headers, and application constants.
+  - `config/radarStations.json`: Defines available radar stations.
 
 ## API Endpoints
 
-The server exposes the following API endpoints:
+The server exposes a RESTful API:
 
-- **GET /flood-data**: Returns parsed flood data from the BoM website
-  ```json
-  {
-    "success": true,
-    "timestamp": "2023-03-08T12:34:56.789Z",
-    "data": [
-      {
-        "location": "Wilsons R at Lismore (mAHD)",
-        "time": "12:30PM 08/03/2023",
-        "waterLevel": 4.35,
-        "status": "rising",
-        "floodCategory": "Minor"
-      },
-      ...
-    ],
-    "source": "http://www.bom.gov.au/nsw/flood/northern.shtml"
-  }
-  ```
+- **General**
+  - `GET /status`: System health check.
+  - `GET /api`: API index.
 
-- **GET /status**: Health check endpoint for server status
+- **Flood Data**
+  - `GET /flood-data`: Parsed river height data from BoM.
+  - `GET /api/flood-properties`: Static property data for flood mapping.
 
-### Adding New Data Sources
+- **Radar**
+  - `GET /api/radar/frames`: Radar animation frames (timestamp metadata).
+  - `GET /api/radar/weatherchaser/image/:radarId/:timestamp`: Proxy for radar overlay images.
 
-To add new data sources, modify the `server.js` file to include additional endpoints or modify the existing flood data parsing logic.
+- **Utilities & Services**
+  - `GET /api/outages`: Essential Energy power outage data (GeoJSON).
+  - `GET /proxy/webcam`: Live traffic camera image proxy.
+  - `GET /api/check-cyclone`: Status of cyclone tracking map.
+  - `GET /elevation`: Elevation data lookup (for flood simulation).
 
 ## Data Sources
 
 The dashboard aggregates data from multiple authoritative sources:
 
-- **Bureau of Meteorology (BoM)**: Real-time river gauge data
-- **BoM & The Weather Chaser**: Rainfall radar data
-- **Transport for NSW**: Live traffic camera feeds from Bruxner Highway
-- **Essential Energy**: Power outage information for the region
-- **Lismore City Council**: Floor height data for flood impact mapping
+- **Bureau of Meteorology (BoM)**: Real-time river gauge data and cyclone maps.
+- **The Weather Chaser**: Rainfall radar imagery.
+- **Transport for NSW**: Live traffic camera feeds (Bruxner Highway).
+- **Essential Energy**: Power outage information (KML/GeoJSON).
+- **Mapzen / AWS S3**: Global elevation tiles for flood impact visualization.
+- **Lismore City Council**: Floor height data for property-level flood impact mapping.
 
 ## Troubleshooting
 
